@@ -1,4 +1,4 @@
-# `unit-derive`
+# `unit-derives`
 
 Procedural macro implementation used by `unit-core`.
 

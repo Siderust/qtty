@@ -343,7 +343,7 @@ dependencies = [
  "proptest",
  "serde_json",
  "unit-core",
- "unit-derive",
+ "unit-derives",
 ]
 
 [[package]]
@@ -355,11 +355,11 @@ dependencies = [
  "proptest",
  "serde",
  "serde_json",
- "unit-derive",
+ "unit-derives",
 ]
 
 [[package]]
-name = "unit-derive"
+name = "unit-derives"
 version = "0.1.0"
 dependencies = [
  "proc-macro2",

@@ -1,6 +1,6 @@
 //! Derive macro implementation used by `unit-core`.
 //!
-//! `unit-derive` is an implementation detail of this workspace. The `Unit` derive expands in terms of `crate::Unit`
+//! `unit-derives` is an implementation detail of this workspace. The `Unit` derive expands in terms of `crate::Unit`
 //! and `crate::Quantity`, so it is intended to be used by `unit-core` (or by crates that expose an identical
 //! crate-root API).
 //!

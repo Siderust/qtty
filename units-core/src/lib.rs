@@ -571,7 +571,7 @@ impl<'de, U: Unit> Deserialize<'de> for Quantity<U> {
 /// Generate a **unit type** and its [`Display`] implementation.
 ///
 /// This macro is provided for backward compatibility. New code should prefer
-/// using the `#[derive(Unit)]` procedural macro from `unit-derive`.
+/// using the `#[derive(Unit)]` procedural macro from `unit-derives`.
 ///
 /// Note: This macro is intended for use *inside* `unit-core`. The expansion
 /// includes an `impl Display for unit_core::Quantity<...>`, which downstream
