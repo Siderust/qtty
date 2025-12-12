@@ -6,7 +6,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Sem
 ## [Unreleased]
 
 ### Added
-- Workspace split into crates: `unit` (facade), `unit-core` (types + units), `unit-derive` (proc-macro).
+- Workspace split into crates: `unit` (facade), `unit-core` (types + units), `unit-derives` (proc-macro).
 - Feature flags: `std` (default) and optional `serde` for `Quantity<U>`.
 - `no_std` support in `unit-core` (uses `libm` for floating-point math not in `core`).
 - Predefined unit modules under `unit-core::units` (angular, time, length, mass, power, velocity, frequency, unitless).

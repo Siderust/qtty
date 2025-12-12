@@ -1,5 +1,5 @@
 [package]
-name = "unit-derive"
+name = "unit-derives"
 description = "Procedural macro derives for unit-core."
 version.workspace = true
 edition.workspace = true
@@ -9,7 +9,7 @@ repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
 readme = "README.md"
-documentation = "https://docs.rs/unit-derive"
+documentation = "https://docs.rs/unit-derives"
 
 [lib]
 proc-macro = true

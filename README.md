@@ -6,7 +6,7 @@ This repository is a Cargo workspace containing three crates:
 
 - `unit` — the user-facing crate that re-exports the full API and a set of predefined units.
 - `unit-core` — the type system (`Quantity`, `Unit`, `Per`, …) and the predefined unit modules.
-- `unit-derive` — an internal proc-macro used by `unit-core` to define units.
+- `unit-derives` — an internal proc-macro used by `unit-core` to define units.
 
 ## Install
 
