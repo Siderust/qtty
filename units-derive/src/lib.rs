@@ -1,17 +1,20 @@
-//! # Units Derive
+//! # Unit Derive
 //!
-//! Procedural macro derives for creating unit types in the `units-core` system.
+//! Procedural macro derives for creating unit types in the `unit-core` system.
 //!
 //! ## Usage
 //!
+//! This derive is primarily intended to be used by `unit-core` itself.
+//! The expansion references `crate::Unit` and `crate::Quantity`, so it only works in
+//! crates that define those items in their crate root.
+//!
 //! ```rust,ignore
-//! use units_core::{Dimension, Quantity};
-//! use units_derive::Unit;
+//! use unit_core::{Dimension, Quantity};
 //!
 //! pub enum Length {}
 //! impl Dimension for Length {}
 //!
-//! #[derive(Unit)]
+//! #[derive(units_derive::Unit)]
 //! #[unit(symbol = "m", dimension = Length, ratio = 1.0)]
 //! pub struct Meter;
 //!
@@ -53,9 +56,16 @@ use syn::{
 /// # Example
 ///
 /// ```rust,ignore
-/// #[derive(Unit)]
+/// use unit_core::{Dimension, Quantity};
+///
+/// pub enum Length {}
+/// impl Dimension for Length {}
+///
+/// #[derive(units_derive::Unit)]
 /// #[unit(symbol = "m", dimension = Length, ratio = 1.0)]
 /// pub struct Meter;
+///
+/// pub type Meters = Quantity<Meter>;
 /// ```
 ///
 /// Expands to:
@@ -102,7 +112,7 @@ fn derive_unit_impl(input: DeriveInput) -> syn::Result<TokenStream2> {
     //
     // We use `crate::` path because all unit definitions live in units-core,
     // which re-exports this derive macro. External users should use the
-    // `siderust-units` crate which re-exports everything.
+    // `unit` crate which re-exports everything.
     let expanded = quote! {
         impl crate::Unit for #name {
             const RATIO: f64 = #ratio;

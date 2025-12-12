@@ -1,16 +1,8 @@
-//! # Mass Units Module
+//! Mass units and conversions.
 //!
-//! This module provides types and utilities for handling mass-related calculations
-//! in astronomical and scientific contexts. It includes representations for various
-//! mass units and conversions between them.
-//!
-//! ## Features
-//! - **Kilograms (kg)**: The SI base unit of mass, with arithmetic operations.
-//! - **Solar Masses (M☉)**: The mass of the Sun, commonly used in astronomy.
-//!
-//! ## Example Usage
-//! ```rust,ignore
-//! use crate::{Kilograms, SolarMasses};
+//! ## Example
+//! ```rust
+//! use unit_core::mass::{Kilograms, SolarMasses};
 //!
 //! let m_kg = Kilograms::new(5.0);
 //! assert_eq!(m_kg.value(), 5.0);
@@ -20,7 +12,7 @@
 //! ```
 
 use crate::{Dimension, Quantity, Unit};
-use units_derive::Unit;
+use unit_derive::Unit;
 
 pub enum Mass {}
 impl Dimension for Mass {}

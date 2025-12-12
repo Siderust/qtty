@@ -1,25 +1,18 @@
-//! # Length Units Module
+//! Length units and conversions.
 //!
-//! This module provides types and utilities for handling length-related calculations
-//! in astronomical and scientific contexts. It includes representations for various
-//! length units and conversions between them.
+//! This module defines common SI and astronomy-friendly length units.
 //!
-//! ## Features
-//! - **Astronomical Unit (AstronomicalUnits)**: The mean distance between the Earth and the Sun.
-//! - **Light Year (LightYears)**: The distance light travels in one Julian year in vacuum.
-//! - Conversion between AstronomicalUnits and LightYears.
+//! ## Example
+//! ```rust
+//! use unit_core::length::{AU, LightYears};
 //!
-//! ## Example Usage
-//! ```rust,ignore
-//! use crate::{AU, LightYears};
-//!
-//! let au = 1.0*AU;
+//! let au = 1.0 * AU;
 //! let ly = LightYears::from(au);
-//! assert!((ly.value() - 1.582e-5).abs() < 1e-8);
+//! assert!((ly.value() - 1.581_250_74e-5).abs() < 1e-8);
 //! ```
 
 use crate::{Dimension, Quantity, Unit};
-use units_derive::Unit;
+use unit_derive::Unit;
 
 pub enum Length {}
 impl Dimension for Length {}

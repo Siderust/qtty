@@ -11,7 +11,7 @@
 //! - **Years**: Representation of time intervals in years.
 
 use crate::{Dimension, Quantity, Unit};
-use units_derive::Unit;
+use unit_derive::Unit;
 
 pub enum Time {}
 impl Dimension for Time {}

@@ -1,6 +1,6 @@
 [package]
-name = "units-derive"
-description = "Procedural macro derives for units-core."
+name = "unit-derive"
+description = "Procedural macro derives for unit-core."
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -18,4 +18,4 @@ quote = "1.0"
 proc-macro2 = "1.0"
 
 [dev-dependencies]
-units-core = { path = "../units-core" }
+unit-core = { path = "../units-core" }
