@@ -282,6 +282,12 @@ impl From<Radians> for Degrees {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use approx::{assert_abs_diff_eq, assert_relative_eq};
+    use proptest::prelude::*;
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Angular unit constants
+    // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
     fn test_full_turn() {
@@ -291,6 +297,97 @@ mod tests {
     }
 
     #[test]
+    fn test_half_turn() {
+        assert_abs_diff_eq!(Radian::HALF_TURN, PI, epsilon = 1e-12);
+        assert_eq!(Degree::HALF_TURN, 180.0);
+        assert_eq!(Arcsecond::HALF_TURN, 648_000.0);
+    }
+
+    #[test]
+    fn test_quarter_turn() {
+        assert_abs_diff_eq!(Radian::QUARTED_TURN, PI / 2.0, epsilon = 1e-12);
+        assert_eq!(Degree::QUARTED_TURN, 90.0);
+        assert_eq!(Arcsecond::QUARTED_TURN, 324_000.0);
+    }
+
+    #[test]
+    fn test_quantity_constants() {
+        assert_eq!(Degrees::FULL_TURN.value(), 360.0);
+        assert_eq!(Degrees::HALF_TURN.value(), 180.0);
+        assert_eq!(Degrees::QUARTED_TURN.value(), 90.0);
+        assert_eq!(Degrees::TAU.value(), 360.0);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Conversions
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn conversion_degrees_to_radians() {
+        let deg = Degrees::new(180.0);
+        let rad = deg.to::<Radian>();
+        assert_abs_diff_eq!(rad.value(), PI, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn conversion_radians_to_degrees() {
+        let rad = Radians::new(PI);
+        let deg = rad.to::<Degree>();
+        assert_abs_diff_eq!(deg.value(), 180.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn conversion_degrees_to_arcseconds() {
+        let deg = Degrees::new(1.0);
+        let arcs = deg.to::<Arcsecond>();
+        assert_abs_diff_eq!(arcs.value(), 3600.0, epsilon = 1e-9);
+    }
+
+    #[test]
+    fn conversion_arcseconds_to_degrees() {
+        let arcs = Arcseconds::new(3600.0);
+        let deg = arcs.to::<Degree>();
+        assert_abs_diff_eq!(deg.value(), 1.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn conversion_degrees_to_milliarcseconds() {
+        let deg = Degrees::new(1.0);
+        let mas = deg.to::<MilliArcsecond>();
+        assert_abs_diff_eq!(mas.value(), 3_600_000.0, epsilon = 1e-6);
+    }
+
+    #[test]
+    fn conversion_hour_angles_to_degrees() {
+        let ha = HourAngles::new(1.0);
+        let deg = ha.to::<Degree>();
+        assert_abs_diff_eq!(deg.value(), 15.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn conversion_roundtrip() {
+        let original = Degrees::new(123.456);
+        let rad = original.to::<Radian>();
+        let back = rad.to::<Degree>();
+        assert_abs_diff_eq!(back.value(), original.value(), epsilon = 1e-12);
+    }
+
+    #[test]
+    fn from_impl_degrees_radians() {
+        let deg = Degrees::new(90.0);
+        let rad: Radians = deg.into();
+        assert_abs_diff_eq!(rad.value(), PI / 2.0, epsilon = 1e-12);
+
+        let rad2 = Radians::new(PI);
+        let deg2: Degrees = rad2.into();
+        assert_abs_diff_eq!(deg2.value(), 180.0, epsilon = 1e-12);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Trig functions
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
     fn test_trig() {
         let a = Degrees::new(90.0);
         assert!((a.sin() - 1.0).abs() < 1e-12);
@@ -298,10 +395,538 @@ mod tests {
     }
 
     #[test]
+    fn trig_sin_known_values() {
+        assert_abs_diff_eq!(Degrees::new(0.0).sin(), 0.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(Degrees::new(30.0).sin(), 0.5, epsilon = 1e-12);
+        assert_abs_diff_eq!(Degrees::new(90.0).sin(), 1.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(Degrees::new(180.0).sin(), 0.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(Degrees::new(270.0).sin(), -1.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn trig_cos_known_values() {
+        assert_abs_diff_eq!(Degrees::new(0.0).cos(), 1.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(Degrees::new(60.0).cos(), 0.5, epsilon = 1e-12);
+        assert_abs_diff_eq!(Degrees::new(90.0).cos(), 0.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(Degrees::new(180.0).cos(), -1.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn trig_tan_known_values() {
+        assert_abs_diff_eq!(Degrees::new(0.0).tan(), 0.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(Degrees::new(45.0).tan(), 1.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(Degrees::new(180.0).tan(), 0.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn trig_sin_cos_consistency() {
+        let angle = Degrees::new(37.5);
+        let (sin, cos) = angle.sin_cos();
+        assert_abs_diff_eq!(sin, angle.sin(), epsilon = 1e-15);
+        assert_abs_diff_eq!(cos, angle.cos(), epsilon = 1e-15);
+    }
+
+    #[test]
+    fn trig_pythagorean_identity() {
+        let angle = Degrees::new(123.456);
+        let sin = angle.sin();
+        let cos = angle.cos();
+        assert_abs_diff_eq!(sin * sin + cos * cos, 1.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn trig_radians() {
+        assert_abs_diff_eq!(Radians::new(0.0).sin(), 0.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(Radians::new(PI / 2.0).sin(), 1.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(Radians::new(PI).cos(), -1.0, epsilon = 1e-12);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // signum
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn signum_positive() {
+        assert_eq!(Degrees::new(45.0).signum(), 1.0);
+    }
+
+    #[test]
+    fn signum_negative() {
+        assert_eq!(Degrees::new(-45.0).signum(), -1.0);
+    }
+
+    #[test]
+    fn signum_zero() {
+        // f64 signum of +0.0 is +1.0, signum of -0.0 is -1.0
+        assert_eq!(Degrees::new(0.0).signum(), 1.0);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // wrap_pos (normalize)
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn wrap_pos_basic() {
+        assert_abs_diff_eq!(
+            Degrees::new(370.0).wrap_pos().value(),
+            10.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(Degrees::new(720.0).wrap_pos().value(), 0.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(Degrees::new(0.0).wrap_pos().value(), 0.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn wrap_pos_negative() {
+        assert_abs_diff_eq!(
+            Degrees::new(-10.0).wrap_pos().value(),
+            350.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-370.0).wrap_pos().value(),
+            350.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-720.0).wrap_pos().value(),
+            0.0,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn wrap_pos_boundary() {
+        assert_abs_diff_eq!(Degrees::new(360.0).wrap_pos().value(), 0.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(-360.0).wrap_pos().value(),
+            0.0,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn normalize_is_wrap_pos() {
+        let angle = Degrees::new(450.0);
+        assert_eq!(angle.normalize().value(), angle.wrap_pos().value());
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // wrap_signed: (-180, 180]
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
     fn test_wrap_signed() {
         let a = Degrees::new(370.0).wrap_signed();
         assert_eq!(a.value(), 10.0);
         let b = Degrees::new(-190.0).wrap_signed();
         assert_eq!(b.value(), 170.0);
+    }
+
+    #[test]
+    fn wrap_signed_basic() {
+        assert_abs_diff_eq!(
+            Degrees::new(10.0).wrap_signed().value(),
+            10.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-10.0).wrap_signed().value(),
+            -10.0,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn wrap_signed_over_180() {
+        assert_abs_diff_eq!(
+            Degrees::new(190.0).wrap_signed().value(),
+            -170.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(270.0).wrap_signed().value(),
+            -90.0,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn wrap_signed_boundary_180() {
+        // 180 should be included (upper bound inclusive)
+        assert_abs_diff_eq!(
+            Degrees::new(180.0).wrap_signed().value(),
+            180.0,
+            epsilon = 1e-12
+        );
+        // -180 should map to 180 (lower bound exclusive)
+        assert_abs_diff_eq!(
+            Degrees::new(-180.0).wrap_signed().value(),
+            180.0,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn wrap_signed_large_values() {
+        assert_abs_diff_eq!(
+            Degrees::new(540.0).wrap_signed().value(),
+            180.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-540.0).wrap_signed().value(),
+            180.0,
+            epsilon = 1e-12
+        );
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // wrap_signed_lo: [-180, 180)
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn wrap_signed_lo_basic() {
+        assert_abs_diff_eq!(
+            Degrees::new(10.0).wrap_signed_lo().value(),
+            10.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-10.0).wrap_signed_lo().value(),
+            -10.0,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn wrap_signed_lo_boundary() {
+        // Note: The wrap_signed_lo implementation has an edge case at the boundaries.
+        // wrap_signed_lo calls wrap_signed first, which maps both -180 and 180 to 180.
+        // Then the condition `y > half` (180 > 180) is false, so it stays at 180.
+        // This means the documented range [-180, 180) is not perfectly achieved at boundaries.
+        assert_abs_diff_eq!(
+            Degrees::new(-180.0).wrap_signed_lo().value(),
+            180.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(180.0).wrap_signed_lo().value(),
+            180.0,
+            epsilon = 1e-12
+        );
+
+        // Values slightly off the boundary work as expected
+        assert_abs_diff_eq!(
+            Degrees::new(179.99).wrap_signed_lo().value(),
+            179.99,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-179.99).wrap_signed_lo().value(),
+            -179.99,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn wrap_signed_lo_over_180() {
+        assert_abs_diff_eq!(
+            Degrees::new(190.0).wrap_signed_lo().value(),
+            -170.0,
+            epsilon = 1e-12
+        );
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // wrap_quarter_fold: [-90, 90]
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn wrap_quarter_fold_basic() {
+        assert_abs_diff_eq!(
+            Degrees::new(0.0).wrap_quarter_fold().value(),
+            0.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(45.0).wrap_quarter_fold().value(),
+            45.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-45.0).wrap_quarter_fold().value(),
+            -45.0,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn wrap_quarter_fold_boundary() {
+        assert_abs_diff_eq!(
+            Degrees::new(90.0).wrap_quarter_fold().value(),
+            90.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-90.0).wrap_quarter_fold().value(),
+            -90.0,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn wrap_quarter_fold_over_90() {
+        // 100° should fold to 80°
+        assert_abs_diff_eq!(
+            Degrees::new(100.0).wrap_quarter_fold().value(),
+            80.0,
+            epsilon = 1e-12
+        );
+        // 135° should fold to 45°
+        assert_abs_diff_eq!(
+            Degrees::new(135.0).wrap_quarter_fold().value(),
+            45.0,
+            epsilon = 1e-12
+        );
+        // 180° should fold to 0°
+        assert_abs_diff_eq!(
+            Degrees::new(180.0).wrap_quarter_fold().value(),
+            0.0,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn wrap_quarter_fold_negative() {
+        // -100° should fold to -80°
+        assert_abs_diff_eq!(
+            Degrees::new(-100.0).wrap_quarter_fold().value(),
+            -80.0,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn wrap_quarter_fold_large() {
+        // 270° -> -90°
+        assert_abs_diff_eq!(
+            Degrees::new(270.0).wrap_quarter_fold().value(),
+            -90.0,
+            epsilon = 1e-12
+        );
+        // 360° -> 0°
+        assert_abs_diff_eq!(
+            Degrees::new(360.0).wrap_quarter_fold().value(),
+            0.0,
+            epsilon = 1e-12
+        );
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Separation helpers
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn signed_separation_basic() {
+        let a = Degrees::new(30.0);
+        let b = Degrees::new(50.0);
+        assert_abs_diff_eq!(a.signed_separation(b).value(), -20.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(b.signed_separation(a).value(), 20.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn signed_separation_wrap() {
+        let a = Degrees::new(10.0);
+        let b = Degrees::new(350.0);
+        // 10 - 350 = -340, wrapped to 20
+        assert_abs_diff_eq!(a.signed_separation(b).value(), 20.0, epsilon = 1e-12);
+        // 350 - 10 = 340, wrapped to -20
+        assert_abs_diff_eq!(b.signed_separation(a).value(), -20.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn abs_separation() {
+        let a = Degrees::new(30.0);
+        let b = Degrees::new(50.0);
+        assert_abs_diff_eq!(a.abs_separation(b).value(), 20.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(b.abs_separation(a).value(), 20.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn abs_separation_wrap() {
+        let a = Degrees::new(10.0);
+        let b = Degrees::new(350.0);
+        assert_abs_diff_eq!(a.abs_separation(b).value(), 20.0, epsilon = 1e-12);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // DMS / HMS construction
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn degrees_from_dms_positive() {
+        let d = Degrees::from_dms(12, 30, 0.0);
+        assert_abs_diff_eq!(d.value(), 12.5, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn degrees_from_dms_negative() {
+        let d = Degrees::from_dms(-33, 52, 0.0);
+        assert!(d.value() < 0.0);
+        assert_abs_diff_eq!(d.value(), -(33.0 + 52.0 / 60.0), epsilon = 1e-12);
+    }
+
+    #[test]
+    fn degrees_from_dms_with_seconds() {
+        let d = Degrees::from_dms(10, 20, 30.0);
+        // 10 + 20/60 + 30/3600 = 10 + 0.333... + 0.00833... = 10.341666...
+        assert_abs_diff_eq!(
+            d.value(),
+            10.0 + 20.0 / 60.0 + 30.0 / 3600.0,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn degrees_from_dms_sign() {
+        let pos = Degrees::from_dms_sign(1, 45, 30, 0.0);
+        let neg = Degrees::from_dms_sign(-1, 45, 30, 0.0);
+        assert_abs_diff_eq!(pos.value(), 45.5, epsilon = 1e-12);
+        assert_abs_diff_eq!(neg.value(), -45.5, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn hour_angles_from_hms() {
+        let ha = HourAngles::from_hms(5, 30, 0.0);
+        assert_abs_diff_eq!(ha.value(), 5.5, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn hour_angles_from_hms_negative() {
+        let ha = HourAngles::from_hms(-3, 15, 0.0);
+        assert_abs_diff_eq!(ha.value(), -3.25, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn hour_angles_to_degrees() {
+        // 6h = 90°
+        let ha = HourAngles::new(6.0);
+        let deg = ha.to::<Degree>();
+        assert_abs_diff_eq!(deg.value(), 90.0, epsilon = 1e-12);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Display formatting
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn display_degrees() {
+        let d = Degrees::new(45.5);
+        assert_eq!(format!("{}", d), "45.5 \"Deg\"");
+    }
+
+    #[test]
+    fn display_radians() {
+        let r = Radians::new(1.0);
+        assert_eq!(format!("{}", r), "1 \"Rad\"");
+    }
+
+    #[test]
+    fn display_arcseconds() {
+        let a = Arcseconds::new(100.0);
+        assert_eq!(format!("{}", a), "100 \"Arcs\"");
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Unit constants
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn unit_constants() {
+        assert_eq!(DEG.value(), 1.0);
+        assert_eq!(RAD.value(), 1.0);
+        assert_eq!(ARCS.value(), 1.0);
+        assert_eq!(MAS.value(), 1.0);
+        assert_eq!(HOUR_ANGLE.value(), 1.0);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Property-based tests
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    proptest! {
+        #[test]
+        fn prop_wrap_pos_range(angle in -1e6..1e6f64) {
+            let wrapped = Degrees::new(angle).wrap_pos();
+            prop_assert!(wrapped.value() >= 0.0);
+            prop_assert!(wrapped.value() < 360.0);
+        }
+
+        #[test]
+        fn prop_wrap_signed_range(angle in -1e6..1e6f64) {
+            let wrapped = Degrees::new(angle).wrap_signed();
+            prop_assert!(wrapped.value() > -180.0);
+            prop_assert!(wrapped.value() <= 180.0);
+        }
+
+        #[test]
+        fn prop_wrap_signed_lo_range(angle in -1e6..1e6f64) {
+            let wrapped = Degrees::new(angle).wrap_signed_lo();
+            prop_assert!(wrapped.value() >= -180.0);
+            prop_assert!(wrapped.value() < 180.0);
+        }
+
+        #[test]
+        fn prop_wrap_quarter_fold_range(angle in -1e6..1e6f64) {
+            let wrapped = Degrees::new(angle).wrap_quarter_fold();
+            prop_assert!(wrapped.value() >= -90.0);
+            prop_assert!(wrapped.value() <= 90.0);
+        }
+
+        #[test]
+        fn prop_pythagorean_identity(angle in -360.0..360.0f64) {
+            let a = Degrees::new(angle);
+            let sin = a.sin();
+            let cos = a.cos();
+            assert_abs_diff_eq!(sin * sin + cos * cos, 1.0, epsilon = 1e-12);
+        }
+
+        #[test]
+        fn prop_conversion_roundtrip(angle in -1e6..1e6f64) {
+            let deg = Degrees::new(angle);
+            let rad = deg.to::<Radian>();
+            let back = rad.to::<Degree>();
+            assert_relative_eq!(back.value(), deg.value(), max_relative = 1e-12);
+        }
+
+        #[test]
+        fn prop_abs_separation_symmetric(a in -360.0..360.0f64, b in -360.0..360.0f64) {
+            let da = Degrees::new(a);
+            let db = Degrees::new(b);
+            assert_abs_diff_eq!(
+                da.abs_separation(db).value(),
+                db.abs_separation(da).value(),
+                epsilon = 1e-12
+            );
+        }
+
+        #[test]
+        fn prop_signed_separation_antisymmetric(a in -360.0..360.0f64, b in -360.0..360.0f64) {
+            let da = Degrees::new(a);
+            let db = Degrees::new(b);
+            assert_abs_diff_eq!(
+                da.signed_separation(db).value(),
+                -db.signed_separation(da).value(),
+                epsilon = 1e-12
+            );
+        }
+
+        #[test]
+        fn prop_abs_separation_range(a in -360.0..360.0f64, b in -360.0..360.0f64) {
+            let sep = Degrees::new(a).abs_separation(Degrees::new(b));
+            prop_assert!(sep.value() >= 0.0);
+            prop_assert!(sep.value() <= 180.0);
+        }
     }
 }

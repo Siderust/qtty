@@ -3,10 +3,14 @@ name = "siderust-units"
 version = "0.1.0"
 edition = "2021"
 authors = ["VPRamon <vallespuigramon@gmail.com>"]
-description = "Strongly typed physical and astronomical units extracted from siderust."
+description = "Strongly typed physical and astronomical units."
 license = "AGPL-3.0"
 repository = "https://github.com/Siderust/units"
 keywords = ["astronomy", "units", "science"]
 categories = ["science", "aerospace"]
 
 [dependencies]
+
+[dev-dependencies]
+approx = "0.5"
+proptest = "1.4"

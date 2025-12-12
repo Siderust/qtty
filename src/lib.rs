@@ -342,3 +342,433 @@ macro_rules! define_unit {
         }
     };
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use approx::{assert_abs_diff_eq, assert_relative_eq};
+    use proptest::prelude::*;
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Test dimension and unit for lib.rs tests
+    // ─────────────────────────────────────────────────────────────────────────────
+    #[derive(Debug)]
+    pub enum TestDim {}
+    impl Dimension for TestDim {}
+
+    define_unit!("tu", TestUnit, TestDim, 1.0);
+    define_unit!("dtu", DoubleTestUnit, TestDim, 2.0);
+    define_unit!("htu", HalfTestUnit, TestDim, 0.5);
+
+    type TU = Quantity<TestUnit>;
+    type Dtu = Quantity<DoubleTestUnit>;
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Quantity core behavior
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn quantity_new_and_value() {
+        let q = TU::new(42.0);
+        assert_eq!(q.value(), 42.0);
+    }
+
+    #[test]
+    fn quantity_nan_constant() {
+        assert!(TU::NAN.value().is_nan());
+    }
+
+    #[test]
+    fn quantity_abs() {
+        assert_eq!(TU::new(-5.0).abs().value(), 5.0);
+        assert_eq!(TU::new(5.0).abs().value(), 5.0);
+        assert_eq!(TU::new(0.0).abs().value(), 0.0);
+    }
+
+    #[test]
+    fn quantity_from_f64() {
+        let q: TU = 123.456.into();
+        assert_eq!(q.value(), 123.456);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Conversion via `to`
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn quantity_conversion_to_same_unit() {
+        let q = TU::new(10.0);
+        let converted = q.to::<TestUnit>();
+        assert_eq!(converted.value(), 10.0);
+    }
+
+    #[test]
+    fn quantity_conversion_to_different_unit() {
+        // 1 DoubleTestUnit = 2 TestUnit (in canonical terms)
+        // So 10 TU -> 10 * (1.0 / 2.0) = 5 DTU
+        let q = TU::new(10.0);
+        let converted = q.to::<DoubleTestUnit>();
+        assert_abs_diff_eq!(converted.value(), 5.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn quantity_conversion_roundtrip() {
+        let original = TU::new(100.0);
+        let converted = original.to::<DoubleTestUnit>();
+        let back = converted.to::<TestUnit>();
+        assert_abs_diff_eq!(back.value(), original.value(), epsilon = 1e-12);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Const helper methods: add/sub/mul/div/min
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn const_add() {
+        let a = TU::new(3.0);
+        let b = TU::new(7.0);
+        assert_eq!(a.add(b).value(), 10.0);
+    }
+
+    #[test]
+    fn const_sub() {
+        let a = TU::new(10.0);
+        let b = TU::new(3.0);
+        assert_eq!(a.sub(b).value(), 7.0);
+    }
+
+    #[test]
+    fn const_mul() {
+        let a = TU::new(4.0);
+        let b = TU::new(5.0);
+        // Use explicit method call to avoid trait method resolution
+        assert_eq!(Quantity::mul(&a, b).value(), 20.0);
+    }
+
+    #[test]
+    fn const_div() {
+        let a = TU::new(20.0);
+        let b = TU::new(4.0);
+        // Use explicit method call to avoid trait method resolution
+        assert_eq!(Quantity::div(&a, b).value(), 5.0);
+    }
+
+    #[test]
+    fn const_min() {
+        let a = TU::new(5.0);
+        let b = TU::new(3.0);
+        assert_eq!(a.min(b).value(), 3.0);
+        assert_eq!(b.min(a).value(), 3.0);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Operator traits: Add, Sub, Mul, Div, Neg, Rem
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn operator_add() {
+        let a = TU::new(3.0);
+        let b = TU::new(7.0);
+        assert_eq!((a + b).value(), 10.0);
+    }
+
+    #[test]
+    fn operator_sub() {
+        let a = TU::new(10.0);
+        let b = TU::new(3.0);
+        assert_eq!((a - b).value(), 7.0);
+    }
+
+    #[test]
+    fn operator_mul_by_f64() {
+        let q = TU::new(5.0);
+        assert_eq!((q * 3.0).value(), 15.0);
+        assert_eq!((3.0 * q).value(), 15.0);
+    }
+
+    #[test]
+    fn operator_div_by_f64() {
+        let q = TU::new(15.0);
+        assert_eq!((q / 3.0).value(), 5.0);
+    }
+
+    #[test]
+    fn operator_neg() {
+        let q = TU::new(5.0);
+        assert_eq!((-q).value(), -5.0);
+        assert_eq!((-(-q)).value(), 5.0);
+    }
+
+    #[test]
+    fn operator_rem() {
+        let q = TU::new(10.0);
+        assert_eq!((q % 3.0).value(), 1.0);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Assignment operators: AddAssign, SubAssign, DivAssign
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn operator_add_assign() {
+        let mut q = TU::new(5.0);
+        q += TU::new(3.0);
+        assert_eq!(q.value(), 8.0);
+    }
+
+    #[test]
+    fn operator_sub_assign() {
+        let mut q = TU::new(10.0);
+        q -= TU::new(3.0);
+        assert_eq!(q.value(), 7.0);
+    }
+
+    #[test]
+    fn operator_div_assign() {
+        let mut q = TU::new(20.0);
+        q /= TU::new(4.0);
+        assert_eq!(q.value(), 5.0);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // PartialEq<f64>
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn partial_eq_f64() {
+        let q = TU::new(5.0);
+        assert!(q == 5.0);
+        assert!(!(q == 4.0));
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Division yielding Per<N, D>
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn division_creates_per_type() {
+        let num = TU::new(100.0);
+        let den = Dtu::new(20.0);
+        let ratio: Quantity<Per<TestUnit, DoubleTestUnit>> = num / den;
+        assert_abs_diff_eq!(ratio.value(), 5.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn per_ratio_conversion() {
+        // Create km/s equivalent using our test units
+        let v1: Quantity<Per<DoubleTestUnit, TestUnit>> = Quantity::new(10.0);
+        // Convert to base units: ratio = 2.0 / 1.0 = 2.0
+        let v2: Quantity<Per<TestUnit, TestUnit>> = v1.to();
+        // 10 * (2.0 / 1.0) = 20
+        assert_abs_diff_eq!(v2.value(), 20.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn per_multiplication_recovers_numerator() {
+        // (N/D) * D = N
+        let rate: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(5.0);
+        let time = Dtu::new(4.0);
+        let result: TU = rate * time;
+        assert_abs_diff_eq!(result.value(), 20.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn per_multiplication_commutative() {
+        let rate: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(5.0);
+        let time = Dtu::new(4.0);
+        let result1: TU = rate * time;
+        let result2: TU = time * rate;
+        assert_abs_diff_eq!(result1.value(), result2.value(), epsilon = 1e-12);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Simplify trait
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn simplify_per_u_u_to_unitless() {
+        let ratio: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(1.23456);
+        let unitless: Quantity<Unitless> = ratio.simplify();
+        assert_abs_diff_eq!(unitless.value(), 1.23456, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn simplify_per_n_per_n_d_to_d() {
+        // N / (N/D) -> D
+        // Construct explicitly since division impl is not available
+        let q: Quantity<Per<TestUnit, Per<TestUnit, DoubleTestUnit>>> = Quantity::new(7.5);
+        let simplified: Dtu = q.simplify();
+        assert_abs_diff_eq!(simplified.value(), 7.5, epsilon = 1e-12);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Quantity<Per<U,U>>::asin()
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn per_u_u_asin() {
+        let ratio: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(0.5);
+        let result = ratio.asin();
+        assert_abs_diff_eq!(result, 0.5_f64.asin(), epsilon = 1e-12);
+    }
+
+    #[test]
+    fn per_u_u_asin_boundary_values() {
+        // asin(1) = π/2
+        let one: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(1.0);
+        assert_abs_diff_eq!(one.asin(), std::f64::consts::FRAC_PI_2, epsilon = 1e-12);
+
+        // asin(-1) = -π/2
+        let neg_one: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(-1.0);
+        assert_abs_diff_eq!(
+            neg_one.asin(),
+            -std::f64::consts::FRAC_PI_2,
+            epsilon = 1e-12
+        );
+
+        // asin(0) = 0
+        let zero: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(0.0);
+        assert_abs_diff_eq!(zero.asin(), 0.0, epsilon = 1e-12);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Display formatting
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn display_simple_quantity() {
+        let q = TU::new(42.5);
+        let s = format!("{}", q);
+        // Note: stringify! in define_unit! macro includes quotes around the symbol
+        assert_eq!(s, "42.5 \"tu\"");
+    }
+
+    #[test]
+    fn display_per_quantity() {
+        let q: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(2.5);
+        let s = format!("{}", q);
+        // Note: stringify! in define_unit! macro includes quotes around symbols
+        assert_eq!(s, "2.5 \"tu\"/\"dtu\"");
+    }
+
+    #[test]
+    fn display_negative_value() {
+        let q = TU::new(-99.9);
+        let s = format!("{}", q);
+        // Note: stringify! in define_unit! macro includes quotes around the symbol
+        assert_eq!(s, "-99.9 \"tu\"");
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Edge cases
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn edge_case_zero() {
+        let zero = TU::new(0.0);
+        assert_eq!(zero.value(), 0.0);
+        assert_eq!((-zero).value(), 0.0);
+        assert_eq!(zero.abs().value(), 0.0);
+    }
+
+    #[test]
+    fn edge_case_negative_values() {
+        let neg = TU::new(-10.0);
+        let pos = TU::new(5.0);
+
+        assert_eq!((neg + pos).value(), -5.0);
+        assert_eq!((neg - pos).value(), -15.0);
+        assert_eq!((neg * 2.0).value(), -20.0);
+        assert_eq!(neg.abs().value(), 10.0);
+    }
+
+    #[test]
+    fn edge_case_large_values() {
+        let large = TU::new(1e100);
+        let small = TU::new(1e-100);
+        assert_eq!(large.value(), 1e100);
+        assert_eq!(small.value(), 1e-100);
+    }
+
+    #[test]
+    fn edge_case_infinity() {
+        let inf = TU::new(f64::INFINITY);
+        let neg_inf = TU::new(f64::NEG_INFINITY);
+
+        assert!(inf.value().is_infinite());
+        assert!(neg_inf.value().is_infinite());
+        assert_eq!(inf.value().signum(), 1.0);
+        assert_eq!(neg_inf.value().signum(), -1.0);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Property-based tests
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    proptest! {
+        #[test]
+        fn prop_add_commutative(a in -1e10..1e10f64, b in -1e10..1e10f64) {
+            let qa = TU::new(a);
+            let qb = TU::new(b);
+            assert_abs_diff_eq!((qa + qb).value(), (qb + qa).value(), epsilon = 1e-9);
+        }
+
+        #[test]
+        fn prop_sub_anticommutative(a in -1e10..1e10f64, b in -1e10..1e10f64) {
+            let qa = TU::new(a);
+            let qb = TU::new(b);
+            assert_abs_diff_eq!((qa - qb).value(), -(qb - qa).value(), epsilon = 1e-9);
+        }
+
+        #[test]
+        fn prop_mul_f64_associative(v in -1e5..1e5f64, s1 in -1e5..1e5f64, s2 in -1e5..1e5f64) {
+            let q = TU::new(v);
+            let r1 = (q * s1) * s2;
+            let r2 = q * (s1 * s2);
+            assert_relative_eq!(r1.value(), r2.value(), max_relative = 1e-10);
+        }
+
+        #[test]
+        fn prop_neg_involution(v in -1e10..1e10f64) {
+            let q = TU::new(v);
+            assert_abs_diff_eq!((-(-q)).value(), q.value(), epsilon = 1e-12);
+        }
+
+        #[test]
+        fn prop_abs_non_negative(v in -1e10..1e10f64) {
+            let q = TU::new(v);
+            assert!(q.abs().value() >= 0.0);
+        }
+
+        #[test]
+        fn prop_conversion_roundtrip(v in -1e10..1e10f64) {
+            let original = TU::new(v);
+            let converted = original.to::<DoubleTestUnit>();
+            let back = converted.to::<TestUnit>();
+            assert_relative_eq!(back.value(), original.value(), max_relative = 1e-12);
+        }
+
+        #[test]
+        fn prop_division_yields_correct_ratio(
+            num in 1e-10..1e10f64,
+            den in 1e-10..1e10f64
+        ) {
+            let n = TU::new(num);
+            let d = Dtu::new(den);
+            let ratio: Quantity<Per<TestUnit, DoubleTestUnit>> = n / d;
+            assert_relative_eq!(ratio.value(), num / den, max_relative = 1e-12);
+        }
+
+        #[test]
+        fn prop_per_mul_inverse(
+            rate_val in 1e-5..1e5f64,
+            time_val in 1e-5..1e5f64
+        ) {
+            // (N/D) * D = N, value should be rate * time
+            let rate: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(rate_val);
+            let time = Dtu::new(time_val);
+            let result: TU = rate * time;
+            assert_relative_eq!(result.value(), rate_val * time_val, max_relative = 1e-12);
+        }
+    }
+}
