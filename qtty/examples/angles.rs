@@ -1,4 +1,4 @@
-use unit::{Arcseconds, Degrees};
+use qtty::{Arcseconds, Degrees};
 
 fn main() {
     let a = Degrees::new(370.0).wrap_signed();

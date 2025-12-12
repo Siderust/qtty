@@ -6,8 +6,8 @@
 //! performing any normalization. The numeric value is preserved as-is.
 //!
 //! ```rust
-//! use unit_core::length::Kilometers;
-//! use unit_core::{Quantity, Unitless};
+//! use qtty_core::length::Kilometers;
+//! use qtty_core::{Quantity, Unitless};
 //!
 //! let km = Kilometers::new(3.0);
 //! let u: Quantity<Unitless> = km.into();
