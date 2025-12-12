@@ -1,0 +1,25 @@
+[package]
+name = "units-core"
+description = "Core types for zero-cost strongly-typed physical units."
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[features]
+default = ["std"]
+std = []
+serde = ["dep:serde"]
+
+[dependencies]
+serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
+libm = "0.2"
+units-derive = { path = "../units-derive" }
+
+[dev-dependencies]
+approx = "0.5"
+proptest = "1.4"
+serde_json = "1.0"
