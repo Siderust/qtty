@@ -6,16 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Sem
 ## [Unreleased]
 
 ### Added
-- Workspace split into crates: `unit` (facade), `unit-core` (types + units), `unit-derives` (proc-macro).
+- Workspace split into crates: `qtty` (facade), `qtty-core` (types + units), `qtty-derive` (proc-macro).
 - Feature flags: `std` (default) and optional `serde` for `Quantity<U>`.
-- `no_std` support in `unit-core` (uses `libm` for floating-point math not in `core`).
-- Predefined unit modules under `unit-core::units` (angular, time, length, mass, power, velocity, frequency, unitless).
+- `no_std` support in `qtty-core` (uses `libm` for floating-point math not in `core`).
+- Predefined unit modules under `qtty-core::units` (angular, time, length, mass, power, velocity, frequency, unitless).
 
 ### Changed
 - Documentation rewrite for docs.rs (crate docs, READMEs, examples).
 
 ### Deprecated
-- `define_unit!` is retained for internal use and backward compatibility; new units in `unit-core` use `#[derive(Unit)]`.
+- `define_unit!` is retained for internal use and backward compatibility; new units in `qtty-core` use `#[derive(Unit)]`.
 
 ### Fixed
-- `unit` feature flags now correctly control `unit-core` defaults (including `no_std` builds).
+- `qtty` feature flags now correctly control `qtty-core` defaults (including `no_std` builds).

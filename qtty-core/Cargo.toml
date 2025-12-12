@@ -1,6 +1,6 @@
 [package]
-name = "unit-core"
-description = "Core types for zero-cost strongly-typed physical units."
+name = "qtty-core"
+description = "Core types for zero-cost strongly-typed physical quantities."
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -9,7 +9,7 @@ repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
 readme = "README.md"
-documentation = "https://docs.rs/unit-core"
+documentation = "https://docs.rs/qtty-core"
 
 [features]
 default = ["std"]
@@ -19,7 +19,7 @@ serde = ["dep:serde"]
 [dependencies]
 serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
 libm = "0.2"
-unit-derives = { version = "0.1.0", path = "../units-derive" }
+qtty-derive = { version = "0.1.0", path = "../qtty-derive" }
 
 [dev-dependencies]
 approx = "0.5"

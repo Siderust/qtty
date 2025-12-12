@@ -3,7 +3,7 @@
 //! The canonical scaling unit for this dimension is [`Gram`] (`Gram::RATIO == 1.0`).
 //!
 //! ```rust
-//! use unit_core::mass::{Kilograms, SolarMass};
+//! use qtty_core::mass::{Kilograms, SolarMass};
 //!
 //! let m = Kilograms::new(1.0);
 //! let sm = m.to::<SolarMass>();
@@ -11,7 +11,7 @@
 //! ```
 
 use crate::{Dimension, Quantity, Unit};
-use unit_derive::Unit;
+use qtty_derive::Unit;
 
 /// Dimension tag for mass.
 pub enum Mass {}

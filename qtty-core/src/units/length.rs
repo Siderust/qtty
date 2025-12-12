@@ -3,7 +3,7 @@
 //! The canonical scaling unit for this dimension is [`Meter`] (`Meter::RATIO == 1.0`).
 //!
 //! ```rust
-//! use unit_core::length::{AstronomicalUnits, Kilometer};
+//! use qtty_core::length::{AstronomicalUnits, Kilometer};
 //!
 //! let au = AstronomicalUnits::new(1.0);
 //! let km = au.to::<Kilometer>();
@@ -11,7 +11,7 @@
 //! ```
 
 use crate::{Dimension, Quantity, Unit};
-use unit_derive::Unit;
+use qtty_derive::Unit;
 
 /// Dimension tag for length.
 pub enum Length {}

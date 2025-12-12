@@ -1,24 +1,24 @@
-# `unit-core`
+# `qtty-core`
 
 Core, zero-cost building blocks for strongly typed physical units.
 
-Most users should depend on `unit` instead of this crate. Use `unit-core` directly if you want the minimal type
+Most users should depend on `qtty` instead of this crate. Use `qtty-core` directly if you want the minimal type
 system (`Quantity`, `Unit`, `Per`, …) without the facade re-exports.
 
 ## Install
 
 ```toml
 [dependencies]
-unit-core = "0.1.0"
+qtty-core = "0.1.0"
 ```
 
 ## `no_std`
 
-`unit-core` supports `no_std` with `libm` used for required floating-point math.
+`qtty-core` supports `no_std` with `libm` used for required floating-point math.
 
 ```toml
 [dependencies]
-unit-core = { version = "0.1.0", default-features = false }
+qtty-core = { version = "0.1.0", default-features = false }
 ```
 
 ## Features

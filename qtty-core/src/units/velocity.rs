@@ -3,9 +3,9 @@
 //! This module is mostly type aliases over [`Per`] plus a dimension alias ([`Velocity`]).
 //!
 //! ```rust
-//! use unit_core::length::Kilometers;
-//! use unit_core::time::Seconds;
-//! use unit_core::velocity::KilometersPerSecond;
+//! use qtty_core::length::Kilometers;
+//! use qtty_core::time::Seconds;
+//! use qtty_core::velocity::KilometersPerSecond;
 //!
 //! let d = Kilometers::new(42.0);
 //! let t = Seconds::new(2.0);

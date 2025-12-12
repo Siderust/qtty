@@ -21,7 +21,7 @@
 //! Convert between degrees and radians and evaluate a trig function:
 //!
 //! ```rust
-//! use unit_core::angular::{Degrees, Radians};
+//! use qtty_core::angular::{Degrees, Radians};
 //!
 //! let angle: Degrees = Degrees::new(90.0);
 //! let r: Radians = angle.to();
@@ -32,14 +32,14 @@
 //! Wrap into the conventional signed range:
 //!
 //! ```rust
-//! use unit_core::angular::Degrees;
+//! use qtty_core::angular::Degrees;
 //! let a = Degrees::new(370.0).wrap_signed();
 //! assert_eq!(a.value(), 10.0);
 //! ```
 
 use crate::{Dimension, Quantity, Unit};
 use core::f64::consts::TAU;
-use unit_derive::Unit;
+use qtty_derive::Unit;
 
 #[inline]
 fn rem_euclid(x: f64, modulus: f64) -> f64 {
@@ -287,7 +287,7 @@ impl HourAngles {
     /// Sign is taken from `hours`; the `minutes` and `seconds` parameters are treated as magnitudes.
     ///
     /// ```rust
-    /// use unit_core::angular::HourAngles;
+    /// use qtty_core::angular::HourAngles;
     /// let ra = HourAngles::from_hms(5, 30, 0.0); // 5h30m == 5.5h
     /// assert_eq!(ra.value(), 5.5);
     /// ```
@@ -308,7 +308,7 @@ impl Degrees {
     /// No range checking is performed. Use one of the wrapping helpers if you need a canonical range.
     ///
     /// ```rust
-    /// use unit_core::angular::Degrees;
+    /// use qtty_core::angular::Degrees;
     /// let lat = Degrees::from_dms(-33, 52, 0.0); // −33°52′00″
     /// assert!(lat.value() < 0.0);
     /// ```

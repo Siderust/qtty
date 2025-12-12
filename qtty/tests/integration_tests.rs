@@ -1,4 +1,4 @@
-use unit::*;
+use qtty::*;
 
 use approx::{assert_abs_diff_eq, assert_relative_eq};
 

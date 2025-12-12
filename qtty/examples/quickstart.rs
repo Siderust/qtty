@@ -1,4 +1,4 @@
-use unit::{Degrees, Kilometers, KilometersPerSecond, Radian, Seconds};
+use qtty::{Degrees, Kilometers, KilometersPerSecond, Radian, Seconds};
 
 fn main() {
     let a = Degrees::new(180.0);
