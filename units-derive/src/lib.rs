@@ -79,7 +79,7 @@ use syn::{
 #[proc_macro_derive(Unit, attributes(unit))]
 pub fn derive_unit(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
-    
+
     match derive_unit_impl(input) {
         Ok(tokens) => tokens.into(),
         Err(err) => err.to_compile_error().into(),
@@ -88,14 +88,14 @@ pub fn derive_unit(input: TokenStream) -> TokenStream {
 
 fn derive_unit_impl(input: DeriveInput) -> syn::Result<TokenStream2> {
     let name = &input.ident;
-    
+
     // Parse the #[unit(...)] attribute
     let unit_attr = parse_unit_attribute(&input.attrs)?;
-    
+
     let symbol = &unit_attr.symbol;
     let dimension = &unit_attr.dimension;
     let ratio = &unit_attr.ratio;
-    
+
     // Generate the output - Note: we don't generate the type itself since derive macros
     // are additive. The struct/enum is already defined by the user.
     // We only implement the Unit trait and Display for Quantity<T>.
@@ -109,14 +109,14 @@ fn derive_unit_impl(input: DeriveInput) -> syn::Result<TokenStream2> {
             type Dim = #dimension;
             const SYMBOL: &'static str = #symbol;
         }
-        
+
         impl ::core::fmt::Display for crate::Quantity<#name> {
             fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                 write!(f, "{} {}", self.value(), <#name as crate::Unit>::SYMBOL)
             }
         }
     };
-    
+
     Ok(expanded)
 }
 
@@ -138,11 +138,11 @@ impl Parse for UnitAttribute {
         let mut symbol: Option<LitStr> = None;
         let mut dimension: Option<Expr> = None;
         let mut ratio: Option<Expr> = None;
-        
+
         while !input.is_empty() {
             let ident: Ident = input.parse()?;
             input.parse::<Token![=]>()?;
-            
+
             match ident.to_string().as_str() {
                 "symbol" => {
                     symbol = Some(input.parse()?);
@@ -166,23 +166,21 @@ impl Parse for UnitAttribute {
                     ));
                 }
             }
-            
+
             // Consume trailing comma if present
             if input.peek(Token![,]) {
                 input.parse::<Token![,]>()?;
             }
         }
-        
-        let symbol = symbol.ok_or_else(|| {
-            syn::Error::new(input.span(), "missing required attribute `symbol`")
-        })?;
+
+        let symbol = symbol
+            .ok_or_else(|| syn::Error::new(input.span(), "missing required attribute `symbol`"))?;
         let dimension = dimension.ok_or_else(|| {
             syn::Error::new(input.span(), "missing required attribute `dimension`")
         })?;
-        let ratio = ratio.ok_or_else(|| {
-            syn::Error::new(input.span(), "missing required attribute `ratio`")
-        })?;
-        
+        let ratio = ratio
+            .ok_or_else(|| syn::Error::new(input.span(), "missing required attribute `ratio`"))?;
+
         Ok(UnitAttribute {
             symbol,
             dimension,
@@ -197,7 +195,7 @@ fn parse_unit_attribute(attrs: &[Attribute]) -> syn::Result<UnitAttribute> {
             return attr.parse_args::<UnitAttribute>();
         }
     }
-    
+
     Err(syn::Error::new(
         proc_macro2::Span::call_site(),
         "missing #[unit(...)] attribute",

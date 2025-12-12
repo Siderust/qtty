@@ -41,12 +41,12 @@
 extern crate libm;
 
 use core::cmp::*;
+use core::fmt::{Debug, Display, Formatter, Result};
 use core::marker::PhantomData;
 use core::ops::*;
-use core::fmt::{Display, Formatter, Result, Debug};
 
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize, Deserializer, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 // Unit modules - defined in this crate to satisfy orphan rules
 pub mod units;
@@ -425,9 +425,13 @@ impl<U: Unit> Quantity<Per<U, U>> {
     #[inline]
     pub fn asin(&self) -> f64 {
         #[cfg(feature = "std")]
-        { self.value().asin() }
+        {
+            self.value().asin()
+        }
         #[cfg(not(feature = "std"))]
-        { libm::asin(self.value()) }
+        {
+            libm::asin(self.value())
+        }
     }
 }
 

@@ -39,8 +39,8 @@
 //! ```
 
 use crate::{Dimension, Quantity, Unit};
-use units_derive::Unit;
 use std::f64::consts::TAU;
+use units_derive::Unit;
 
 /// Dimension tag for angular measures (e.g., degrees, radians, arcseconds).
 pub enum Angular {}
@@ -293,9 +293,9 @@ impl From<Radians> for Degrees {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::f64::consts::{PI, TAU};
     use approx::{assert_abs_diff_eq, assert_relative_eq};
     use proptest::prelude::*;
+    use std::f64::consts::{PI, TAU};
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Angular unit constants
@@ -478,22 +478,42 @@ mod tests {
 
     #[test]
     fn wrap_pos_basic() {
-        assert_abs_diff_eq!(Degrees::new(370.0).wrap_pos().value(), 10.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(370.0).wrap_pos().value(),
+            10.0,
+            epsilon = 1e-12
+        );
         assert_abs_diff_eq!(Degrees::new(720.0).wrap_pos().value(), 0.0, epsilon = 1e-12);
         assert_abs_diff_eq!(Degrees::new(0.0).wrap_pos().value(), 0.0, epsilon = 1e-12);
     }
 
     #[test]
     fn wrap_pos_negative() {
-        assert_abs_diff_eq!(Degrees::new(-10.0).wrap_pos().value(), 350.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-370.0).wrap_pos().value(), 350.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-720.0).wrap_pos().value(), 0.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(-10.0).wrap_pos().value(),
+            350.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-370.0).wrap_pos().value(),
+            350.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-720.0).wrap_pos().value(),
+            0.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]
     fn wrap_pos_boundary() {
         assert_abs_diff_eq!(Degrees::new(360.0).wrap_pos().value(), 0.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-360.0).wrap_pos().value(), 0.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(-360.0).wrap_pos().value(),
+            0.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]
@@ -516,26 +536,58 @@ mod tests {
 
     #[test]
     fn wrap_signed_basic() {
-        assert_abs_diff_eq!(Degrees::new(10.0).wrap_signed().value(), 10.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-10.0).wrap_signed().value(), -10.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(10.0).wrap_signed().value(),
+            10.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-10.0).wrap_signed().value(),
+            -10.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]
     fn wrap_signed_over_180() {
-        assert_abs_diff_eq!(Degrees::new(190.0).wrap_signed().value(), -170.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(270.0).wrap_signed().value(), -90.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(190.0).wrap_signed().value(),
+            -170.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(270.0).wrap_signed().value(),
+            -90.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]
     fn wrap_signed_boundary_180() {
-        assert_abs_diff_eq!(Degrees::new(180.0).wrap_signed().value(), 180.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-180.0).wrap_signed().value(), 180.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(180.0).wrap_signed().value(),
+            180.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-180.0).wrap_signed().value(),
+            180.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]
     fn wrap_signed_large_values() {
-        assert_abs_diff_eq!(Degrees::new(540.0).wrap_signed().value(), 180.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-540.0).wrap_signed().value(), 180.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(540.0).wrap_signed().value(),
+            180.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-540.0).wrap_signed().value(),
+            180.0,
+            epsilon = 1e-12
+        );
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -544,22 +596,54 @@ mod tests {
 
     #[test]
     fn wrap_quarter_fold_basic() {
-        assert_abs_diff_eq!(Degrees::new(0.0).wrap_quarter_fold().value(), 0.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(45.0).wrap_quarter_fold().value(), 45.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-45.0).wrap_quarter_fold().value(), -45.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(0.0).wrap_quarter_fold().value(),
+            0.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(45.0).wrap_quarter_fold().value(),
+            45.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-45.0).wrap_quarter_fold().value(),
+            -45.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]
     fn wrap_quarter_fold_boundary() {
-        assert_abs_diff_eq!(Degrees::new(90.0).wrap_quarter_fold().value(), 90.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-90.0).wrap_quarter_fold().value(), -90.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(90.0).wrap_quarter_fold().value(),
+            90.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-90.0).wrap_quarter_fold().value(),
+            -90.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]
     fn wrap_quarter_fold_over_90() {
-        assert_abs_diff_eq!(Degrees::new(100.0).wrap_quarter_fold().value(), 80.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(135.0).wrap_quarter_fold().value(), 45.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(180.0).wrap_quarter_fold().value(), 0.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(100.0).wrap_quarter_fold().value(),
+            80.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(135.0).wrap_quarter_fold().value(),
+            45.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(180.0).wrap_quarter_fold().value(),
+            0.0,
+            epsilon = 1e-12
+        );
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -610,7 +694,11 @@ mod tests {
     #[test]
     fn degrees_from_dms_with_seconds() {
         let d = Degrees::from_dms(10, 20, 30.0);
-        assert_abs_diff_eq!(d.value(), 10.0 + 20.0 / 60.0 + 30.0 / 3600.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            d.value(),
+            10.0 + 20.0 / 60.0 + 30.0 / 3600.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]
