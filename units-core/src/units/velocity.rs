@@ -5,9 +5,9 @@
 //! phantom unit parameters. This allows the multiplication and division traits
 //! to be implemented once for all unit pairs in [`Quantity`](units_core::Quantity).
 
-use crate::{Quantity, Unit, DivDim, Per};
-use crate::units::length::{Length, Meter, Kilometer, Au};
-use crate::units::time::{Time, Second, Hour, Day};
+use crate::units::length::{Au, Kilometer, Length, Meter};
+use crate::units::time::{Day, Hour, Second, Time};
+use crate::{DivDim, Per, Quantity, Unit};
 
 /// Dimension alias for velocities (`Length / Time`).
 pub type Velocity = DivDim<Length, Time>;
@@ -31,10 +31,10 @@ pub type AusPerDay = Quantity<AuPerDay>;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::units::length::Kilometers;
+    use crate::units::time::Seconds;
     use approx::{assert_abs_diff_eq, assert_relative_eq};
     use proptest::prelude::*;
-    use crate::units::time::Seconds;
-    use crate::units::length::Kilometers;
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Basic velocity conversions

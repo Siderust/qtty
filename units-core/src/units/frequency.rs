@@ -4,9 +4,9 @@
 //! time unit using the generic [`Per<N, D>`] type. This enables automatic
 //! multiplication and division without bespoke implementations for every pair.
 
-use crate::{Quantity, Unit, DivDim, Per};
-use crate::units::angular::{Angular, Radian, Degree, MilliArcsecond};
-use crate::units::time::{Time, Day, Year};
+use crate::units::angular::{Angular, Degree, MilliArcsecond, Radian};
+use crate::units::time::{Day, Time, Year};
+use crate::{DivDim, Per, Quantity, Unit};
 
 /// Dimension alias for angular frequency (`Angular / Time`).
 pub type Frequency = DivDim<Angular, Time>;
