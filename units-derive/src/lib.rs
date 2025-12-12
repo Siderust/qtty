@@ -1,42 +1,28 @@
-//! # Unit Derive
+//! Derive macro implementation used by `unit-core`.
 //!
-//! Procedural macro derives for creating unit types in the `unit-core` system.
+//! `unit-derive` is an implementation detail of this workspace. The `Unit` derive expands in terms of `crate::Unit`
+//! and `crate::Quantity`, so it is intended to be used by `unit-core` (or by crates that expose an identical
+//! crate-root API).
 //!
-//! ## Usage
+//! Most users should depend on `unit` instead and use the predefined units.
 //!
-//! This derive is primarily intended to be used by `unit-core` itself.
-//! The expansion references `crate::Unit` and `crate::Quantity`, so it only works in
-//! crates that define those items in their crate root.
+//! # Generated impls
 //!
-//! ```rust,ignore
-//! use unit_core::{Dimension, Quantity};
+//! For a unit marker type `MyUnit`, the derive implements:
 //!
-//! pub enum Length {}
-//! impl Dimension for Length {}
+//! - `crate::Unit for MyUnit`
+//! - `core::fmt::Display for crate::Quantity<MyUnit>` (formats as `<value> <symbol>`)
 //!
-//! #[derive(units_derive::Unit)]
-//! #[unit(symbol = "m", dimension = Length, ratio = 1.0)]
-//! pub struct Meter;
+//! # Attributes
 //!
-//! pub type Meters = Quantity<Meter>;
-//! ```
+//! The derive reads a required `#[unit(...)]` attribute:
 //!
-//! ## Attributes
-//!
-//! The `#[unit(...)]` attribute supports the following fields:
-//!
-//! - `symbol` (required): The display symbol for the unit (e.g., "m", "km", "s")
-//! - `dimension` (required): The dimension type this unit belongs to
-//! - `ratio` (required): The conversion ratio to the canonical unit of this dimension
-//!
-//! ## Future Extensions
-//!
-//! The macro is designed to easily support future attributes:
-//! - `long_name`: Full name of the unit ("meter", "kilometer")
-//! - `plural`: Plural form ("meters", "kilometers")
-//! - `system`: Unit system ("SI", "Imperial")
-//! - `base_unit`: Whether this is the base unit for the dimension
-//! - `aliases`: Alternative symbols
+//! - `symbol = "m"`: displayed unit symbol
+//! - `dimension = SomeDim`: dimension marker type
+//! - `ratio = 1000.0`: conversion ratio to the canonical unit of the dimension
+
+#![deny(missing_docs)]
+#![forbid(unsafe_code)]
 
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
@@ -46,46 +32,11 @@ use syn::{
     parse_macro_input, Attribute, DeriveInput, Expr, Ident, LitStr, Token,
 };
 
-/// Derive macro for creating unit types.
+/// Derive `crate::Unit` and a `Display` impl for `crate::Quantity<ThisUnit>`.
 ///
-/// This macro generates:
-/// - A zero-sized enum type (if input is a struct, converts to enum)
-/// - `Unit` trait implementation
-/// - `Display` implementation for `Quantity<TheUnit>`
+/// The derive must be paired with a `#[unit(...)]` attribute providing `symbol`, `dimension`, and `ratio`.
 ///
-/// # Example
-///
-/// ```rust,ignore
-/// use unit_core::{Dimension, Quantity};
-///
-/// pub enum Length {}
-/// impl Dimension for Length {}
-///
-/// #[derive(units_derive::Unit)]
-/// #[unit(symbol = "m", dimension = Length, ratio = 1.0)]
-/// pub struct Meter;
-///
-/// pub type Meters = Quantity<Meter>;
-/// ```
-///
-/// Expands to:
-///
-/// ```rust,ignore
-/// #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-/// pub enum Meter {}
-///
-/// impl Unit for Meter {
-///     const RATIO: f64 = 1.0;
-///     type Dim = Length;
-///     const SYMBOL: &'static str = "m";
-/// }
-///
-/// impl core::fmt::Display for Quantity<Meter> {
-///     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-///         write!(f, "{} {}", self.value(), <Meter as Unit>::SYMBOL)
-///     }
-/// }
-/// ```
+/// This macro is intended for use by `unit-core`.
 #[proc_macro_derive(Unit, attributes(unit))]
 pub fn derive_unit(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
@@ -106,13 +57,6 @@ fn derive_unit_impl(input: DeriveInput) -> syn::Result<TokenStream2> {
     let dimension = &unit_attr.dimension;
     let ratio = &unit_attr.ratio;
 
-    // Generate the output - Note: we don't generate the type itself since derive macros
-    // are additive. The struct/enum is already defined by the user.
-    // We only implement the Unit trait and Display for Quantity<T>.
-    //
-    // We use `crate::` path because all unit definitions live in units-core,
-    // which re-exports this derive macro. External users should use the
-    // `unit` crate which re-exports everything.
     let expanded = quote! {
         impl crate::Unit for #name {
             const RATIO: f64 = #ratio;
@@ -213,8 +157,4 @@ fn parse_unit_attribute(attrs: &[Attribute]) -> syn::Result<UnitAttribute> {
 }
 
 #[cfg(test)]
-mod tests {
-    // Proc macro tests need to be in a separate test crate
-    // that depends on the macro. We'll test via integration
-    // tests in the main units crate.
-}
+mod tests {}

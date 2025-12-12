@@ -8,6 +8,8 @@ license.workspace = true
 repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
+readme = "README.md"
+documentation = "https://docs.rs/unit-core"
 
 [features]
 default = ["std"]
