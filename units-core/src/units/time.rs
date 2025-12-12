@@ -1,93 +1,121 @@
-//! # Time Units Module
+//! Time units.
 //!
-//! This module provides types and utilities for handling time-related calculations
-//! in astronomical and scientific contexts. It includes representations for various
-//! time systems and conversions between them.
+//! The canonical scaling unit for this dimension is [`Day`] (`Day::RATIO == 1.0`). All other time unit ratios are
+//! expressed in *days*.
 //!
-//! ## Features
-//! - **Days**: A simple representation of time in days, with arithmetic operations.
-//! - **Julian Year**: A standardized year of exactly 365.25 days, used in astronomy.
-//! - **Centuries**: Representation of time intervals in Julian centuries (36525 days).
-//! - **Years**: Representation of time intervals in years.
+//! ```rust
+//! use unit_core::time::{Days, Hour};
+//!
+//! let half_day = Days::new(0.5);
+//! let hours = half_day.to::<Hour>();
+//! assert!((hours.value() - 12.0).abs() < 1e-12);
+//! ```
 
 use crate::{Dimension, Quantity, Unit};
-use units_derive::Unit;
+use unit_derive::Unit;
 
+/// Dimension tag for time.
 pub enum Time {}
 impl Dimension for Time {}
 
+/// Marker trait for any [`Unit`] whose dimension is [`Time`].
 pub trait TimeUnit: Unit<Dim = Time> {}
 impl<T: Unit<Dim = Time>> TimeUnit for T {}
 
+/// Milliseconds (`1 ms = 1/1000 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "ms", dimension = Time, ratio = 1.0 / (24.0 * 3600.0 * 1_000.0))]
 pub struct Millisecond;
+/// A quantity measured in milliseconds.
 pub type Milliseconds = Quantity<Millisecond>;
+/// One millisecond.
 pub const MILLISEC: Milliseconds = Milliseconds::new(1.0);
 
+/// Seconds (`1 s = 1/86400 day`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "sec", dimension = Time, ratio = 1.0 / (24.0 * 3600.0))]
 pub struct Second;
+/// A quantity measured in seconds.
 pub type Seconds = Quantity<Second>;
+/// One second.
 pub const SEC: Seconds = Seconds::new(1.0);
 
+/// Minutes (`60 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "min", dimension = Time, ratio = 1.0 / (24.0 * 60.0))]
 pub struct Minute;
+/// A quantity measured in minutes.
 pub type Minutes = Quantity<Minute>;
+/// One minute.
 pub const MIN: Minutes = Minutes::new(1.0);
 
+/// Hours (`60 min`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "h", dimension = Time, ratio = 1.0 / 24.0)]
 pub struct Hour;
+/// A quantity measured in hours.
 pub type Hours = Quantity<Hour>;
+/// One hour.
 pub const HOUR: Hours = Hours::new(1.0);
 
-// Mean solar day
+/// Mean solar day.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "d", dimension = Time, ratio = 1.0)]
 pub struct Day;
+/// A quantity measured in days.
 pub type Days = Quantity<Day>;
+/// One day.
 pub const DAY: Days = Days::new(1.0);
 
-// Week: 7 solar days
+/// Week (`7 days`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "wk", dimension = Time, ratio = 7.0)]
 pub struct Week;
+/// A quantity measured in weeks.
 pub type Weeks = Quantity<Week>;
+/// One week.
 pub const WEEK: Weeks = Weeks::new(1.0);
 
-// Mean tropical year (IAU 2015)
+/// Mean tropical year (IAU 2015).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "yr", dimension = Time, ratio = 365.242_5)]
 pub struct Year;
+/// A quantity measured in mean tropical years.
 pub type Years = Quantity<Year>;
+/// One year.
 pub const YEAR: Years = Years::new(1.0);
 
-// Century: 100 mean tropical years
+/// Century (`100` mean tropical years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "cent", dimension = Time, ratio = 36_524.25)]
 pub struct Century;
+/// A quantity measured in centuries.
 pub type Centuries = Quantity<Century>;
+/// One century.
 pub const CENTURY: Centuries = Centuries::new(1.0);
 
+/// Julian year (`365.25` days).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "JY", dimension = Time, ratio = 365.25)]
 pub struct JulianYear;
+/// A quantity measured in Julian years.
 pub type JulianYears = Quantity<JulianYear>;
+/// One Julian year.
 pub const JULIAN_YEAR: JulianYears = JulianYears::new(1.0);
 
-// Julian century: exactly 36,525 days (365.25 × 100).
+/// Julian century (`36525` days).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "JC", dimension = Time, ratio = 36_525.0)]
 pub struct JulianCentury;
+/// A quantity measured in Julian centuries.
 pub type JulianCenturies = Quantity<JulianCentury>;
+/// One Julian century.
 pub const JULIAN_CENTURY: JulianCenturies = JulianCenturies::new(1.0);
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use approx::{assert_abs_diff_eq, assert_relative_eq};
+    use approx::assert_abs_diff_eq;
     use proptest::prelude::*;
 
     // ─────────────────────────────────────────────────────────────────────────────

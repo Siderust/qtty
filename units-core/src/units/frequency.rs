@@ -1,12 +1,18 @@
-//! # Frequency Units Module
+//! Angular frequency unit aliases (`Angular / Time`).
 //!
-//! Frequency units are represented as a ratio between an angular measure and a
-//! time unit using the generic [`Per<N, D>`] type. This enables automatic
-//! multiplication and division without bespoke implementations for every pair.
+//! This module is mostly type aliases over [`Per`] plus a dimension alias ([`Frequency`]).
+//!
+//! ```rust
+//! use unit_core::frequency::{DegreesPerDay, RadiansPerDay};
+//!
+//! let f: DegreesPerDay = unit_core::Quantity::new(180.0);
+//! let f_rad: RadiansPerDay = f.to();
+//! assert!((f_rad.value() - core::f64::consts::PI).abs() < 1e-12);
+//! ```
 
-use crate::{Quantity, Unit, DivDim, Per};
-use crate::units::angular::{Angular, Radian, Degree, MilliArcsecond};
-use crate::units::time::{Time, Day, Year};
+use crate::units::angular::{Angular, Degree, MilliArcsecond, Radian};
+use crate::units::time::{Day, Time, Year};
+use crate::{DivDim, Per, Quantity, Unit};
 
 /// Dimension alias for angular frequency (`Angular / Time`).
 pub type Frequency = DivDim<Angular, Time>;
@@ -15,16 +21,24 @@ pub type Frequency = DivDim<Angular, Time>;
 pub trait FrequencyUnit: Unit<Dim = Frequency> {}
 impl<T: Unit<Dim = Frequency>> FrequencyUnit for T {}
 
+/// Radians per day (`rad / d`).
 pub type RadianPerDay = Per<Radian, Day>;
+/// A quantity measured in radians per day.
 pub type RadiansPerDay = Quantity<RadianPerDay>;
 
+/// Degrees per day (`deg / d`).
 pub type DegreePerDay = Per<Degree, Day>;
+/// A quantity measured in degrees per day.
 pub type DegreesPerDay = Quantity<DegreePerDay>;
 
+/// Degrees per year (`deg / yr`).
 pub type DegreePerYear = Per<Degree, Year>;
+/// A quantity measured in degrees per year.
 pub type DegreesPerYear = Quantity<DegreePerYear>;
 
+/// Milliarcseconds per day (`mas / d`).
 pub type MilliArcsecondPerDay = Per<MilliArcsecond, Day>;
+/// A quantity measured in milliarcseconds per day.
 pub type MilliArcsecondsPerDay = Quantity<MilliArcsecondPerDay>;
 
 #[cfg(test)]

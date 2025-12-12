@@ -1,69 +1,81 @@
-//! # Length Units Module
+//! Length units.
 //!
-//! This module provides types and utilities for handling length-related calculations
-//! in astronomical and scientific contexts. It includes representations for various
-//! length units and conversions between them.
+//! The canonical scaling unit for this dimension is [`Meter`] (`Meter::RATIO == 1.0`).
 //!
-//! ## Features
-//! - **Astronomical Unit (AstronomicalUnits)**: The mean distance between the Earth and the Sun.
-//! - **Light Year (LightYears)**: The distance light travels in one Julian year in vacuum.
-//! - Conversion between AstronomicalUnits and LightYears.
+//! ```rust
+//! use unit_core::length::{AstronomicalUnits, Kilometer};
 //!
-//! ## Example Usage
-//! ```rust,ignore
-//! use crate::{AU, LightYears};
-//!
-//! let au = 1.0*AU;
-//! let ly = LightYears::from(au);
-//! assert!((ly.value() - 1.582e-5).abs() < 1e-8);
+//! let au = AstronomicalUnits::new(1.0);
+//! let km = au.to::<Kilometer>();
+//! assert!((km.value() - 149_597_870.000_7).abs() < 1e-6);
 //! ```
 
 use crate::{Dimension, Quantity, Unit};
-use units_derive::Unit;
+use unit_derive::Unit;
 
+/// Dimension tag for length.
 pub enum Length {}
 impl Dimension for Length {}
+/// Marker trait for any [`Unit`] whose dimension is [`Length`].
 pub trait LengthUnit: Unit<Dim = Length> {}
 impl<T: Unit<Dim = Length>> LengthUnit for T {}
 
+/// Metre (SI base unit).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "m", dimension = Length, ratio = 1.0)]
 pub struct Meter;
+/// A quantity measured in metres.
 pub type Meters = Quantity<Meter>;
 
+/// Kilometre (`1000 m`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "Km", dimension = Length, ratio = 1_000.0)]
 pub struct Kilometer;
+/// Type alias shorthand for [`Kilometer`].
 pub type Km = Kilometer;
+/// A quantity measured in kilometres.
 pub type Kilometers = Quantity<Km>;
+/// One kilometre.
 pub const KM: Kilometers = Kilometers::new(1.0);
 
+/// Astronomical unit (IAU 2012; metres per AU).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "Au", dimension = Length, ratio = 149_597_870_000.7)]
 pub struct AstronomicalUnit;
+/// Type alias shorthand for [`AstronomicalUnit`].
 pub type Au = AstronomicalUnit;
+/// A quantity measured in astronomical units.
 pub type AstronomicalUnits = Quantity<Au>;
+/// One astronomical unit.
 pub const AU: AstronomicalUnits = AstronomicalUnits::new(1.0);
 
+/// Light-year (approximate; metres per year of light travel).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "Ly", dimension = Length, ratio = 9_460_730_472_580_000.8)]
 pub struct LightYear;
+/// Type alias shorthand for [`LightYear`].
 pub type Ly = LightYear;
+/// A quantity measured in light-years.
 pub type LightYears = Quantity<Ly>;
+/// One light-year.
 pub const LY: LightYears = LightYears::new(1.0);
 
+/// Solar radius (metres per R☉).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "SR", dimension = Length, ratio = 695_700_000.0)]
 pub struct SolarRadius;
+/// A quantity measured in solar radii.
 pub type SolarRadiuses = Quantity<SolarRadius>;
+/// One solar radius.
 pub const SR: SolarRadiuses = SolarRadiuses::new(1.0);
 
-// Parsec: defined as 3.26 light years
-// Note: We use a const expression that will be evaluated at compile time
+/// Parsec (defined here as `3.26` light-years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "ps", dimension = Length, ratio = 3.26 * 9_460_730_472_580_000.8)]
 pub struct Parsec;
+/// A quantity measured in parsecs.
 pub type Parsecs = Quantity<Parsec>;
+/// One parsec.
 pub const PS: Parsecs = Parsecs::new(1.0);
 
 /// AstronomicalUnit -> LightYear.

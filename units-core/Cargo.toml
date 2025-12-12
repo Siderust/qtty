@@ -1,5 +1,5 @@
 [package]
-name = "units-core"
+name = "unit-core"
 description = "Core types for zero-cost strongly-typed physical units."
 version.workspace = true
 edition.workspace = true
@@ -8,6 +8,8 @@ license.workspace = true
 repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
+readme = "README.md"
+documentation = "https://docs.rs/unit-core"
 
 [features]
 default = ["std"]
@@ -17,7 +19,7 @@ serde = ["dep:serde"]
 [dependencies]
 serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
 libm = "0.2"
-units-derive = { path = "../units-derive" }
+unit-derive = { version = "0.1.0", path = "../units-derive" }
 
 [dev-dependencies]
 approx = "0.5"

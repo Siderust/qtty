@@ -1,9 +1,21 @@
-//! # Unitless Module
+//! Dimensionless helpers.
 //!
-//! Support for dimensionless quantities and conversions.
+//! This module contains small adapters for working with dimensionless values.
+//!
+//! The provided conversion from a length quantity to a unitless quantity is *lossy*: it drops the unit type without
+//! performing any normalization. The numeric value is preserved as-is.
+//!
+//! ```rust
+//! use unit_core::length::Kilometers;
+//! use unit_core::{Quantity, Unitless};
+//!
+//! let km = Kilometers::new(3.0);
+//! let u: Quantity<Unitless> = km.into();
+//! assert_eq!(u.value(), 3.0);
+//! ```
 
-use crate::{Quantity, Unitless};
 use crate::units::length::LengthUnit;
+use crate::{Quantity, Unitless};
 
 impl<U: LengthUnit> From<Quantity<U>> for Quantity<Unitless> {
     fn from(length: Quantity<U>) -> Self {
@@ -14,8 +26,8 @@ impl<U: LengthUnit> From<Quantity<U>> for Quantity<Unitless> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Unit;
     use crate::units::length::Meters;
+    use crate::Unit;
     use approx::assert_abs_diff_eq;
     use proptest::prelude::*;
 
@@ -117,10 +129,10 @@ mod tests {
         fn prop_unitless_arithmetic(a in -1e6..1e6f64, b in -1e6..1e6f64) {
             let qa: Quantity<Unitless> = Quantity::new(a);
             let qb: Quantity<Unitless> = Quantity::new(b);
-            
+
             // Addition is commutative
             prop_assert!((((qa + qb).value() - (qb + qa).value()).abs() < 1e-9));
-            
+
             // Value is preserved
             prop_assert!(((qa + qb).value() - (a + b)).abs() < 1e-9);
         }
