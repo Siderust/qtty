@@ -1,6 +1,6 @@
 [package]
-name = "unit"
-description = "Strongly typed physical and astronomical units."
+name = "qtty"
+description = "Strongly typed physical and astronomical quantities."
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -9,16 +9,16 @@ repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
 readme = "README.md"
-documentation = "https://docs.rs/unit"
+documentation = "https://docs.rs/qtty"
 
 [features]
 default = ["std"]
-std = ["unit-core/std"]
-serde = ["unit-core/serde"]
+std = ["qtty-core/std"]
+serde = ["qtty-core/serde"]
 
 [dependencies]
-unit-core = { version = "0.1.0", path = "../units-core", default-features = false }
-unit-derives = { version = "0.1.0", path = "../units-derive" }
+qtty-core = { version = "0.1.0", path = "../qtty-core", default-features = false }
+qtty-derive = { version = "0.1.0", path = "../qtty-derive" }
 
 [dev-dependencies]
 approx = "0.5"

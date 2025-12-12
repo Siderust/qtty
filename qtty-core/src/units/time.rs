@@ -4,7 +4,7 @@
 //! expressed in *days*.
 //!
 //! ```rust
-//! use unit_core::time::{Days, Hour};
+//! use qtty_core::time::{Days, Hour};
 //!
 //! let half_day = Days::new(0.5);
 //! let hours = half_day.to::<Hour>();
@@ -12,7 +12,7 @@
 //! ```
 
 use crate::{Dimension, Quantity, Unit};
-use unit_derive::Unit;
+use qtty_derive::Unit;
 
 /// Dimension tag for time.
 pub enum Time {}

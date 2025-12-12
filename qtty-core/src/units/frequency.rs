@@ -3,9 +3,9 @@
 //! This module is mostly type aliases over [`Per`] plus a dimension alias ([`Frequency`]).
 //!
 //! ```rust
-//! use unit_core::frequency::{DegreesPerDay, RadiansPerDay};
+//! use qtty_core::frequency::{DegreesPerDay, RadiansPerDay};
 //!
-//! let f: DegreesPerDay = unit_core::Quantity::new(180.0);
+//! let f: DegreesPerDay = qtty_core::Quantity::new(180.0);
 //! let f_rad: RadiansPerDay = f.to();
 //! assert!((f_rad.value() - core::f64::consts::PI).abs() < 1e-12);
 //! ```

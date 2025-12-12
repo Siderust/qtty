@@ -3,7 +3,7 @@
 //! The canonical scaling unit for this dimension is [`Watt`] (`Watt::RATIO == 1.0`).
 //!
 //! ```rust
-//! use unit_core::power::{SolarLuminosities, Watt};
+//! use qtty_core::power::{SolarLuminosities, Watt};
 //!
 //! let sol = SolarLuminosities::new(1.0);
 //! let w = sol.to::<Watt>();
@@ -11,7 +11,7 @@
 //! ```
 
 use crate::{Dimension, Quantity, Unit};
-use unit_derive::Unit;
+use qtty_derive::Unit;
 
 /// Fundamental dimension – power.
 pub enum Power {}
