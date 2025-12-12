@@ -1,15 +1,6 @@
-//! Integration tests for siderust-units
-//!
-//! These tests exercise the public API across modules, simulating real-world usage
-//! patterns and ensuring the prelude-style imports work correctly.
-
-use siderust_units::*;
+use unit::*;
 
 use approx::{assert_abs_diff_eq, assert_relative_eq};
-
-// ─────────────────────────────────────────────────────────────────────────────────
-// Smoke tests: basic functionality across all modules
-// ─────────────────────────────────────────────────────────────────────────────────
 
 #[test]
 fn smoke_test_angular() {
@@ -67,11 +58,6 @@ fn smoke_test_unitless() {
     assert_eq!(u.value(), 42.0);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────────
-// Real-world astronomical calculations
-// ─────────────────────────────────────────────────────────────────────────────────
-
-/// Calculate distance traveled given velocity and time
 #[test]
 fn orbital_distance_calculation() {
     // Earth's orbital velocity ≈ 29.78 km/s
@@ -88,7 +74,6 @@ fn orbital_distance_calculation() {
     assert_relative_eq!(distance.value(), 2_573_395.2, max_relative = 1e-3);
 }
 
-/// Convert astronomical distances
 #[test]
 fn proxima_centauri_distance() {
     // Proxima Centauri is about 4.24 light years away
@@ -101,7 +86,6 @@ fn proxima_centauri_distance() {
     assert_relative_eq!(distance_au.value(), 268_000.0, max_relative = 0.01);
 }
 
-/// Angular separation calculation
 #[test]
 fn angular_separation() {
     // Two stars at different positions
@@ -115,7 +99,6 @@ fn angular_separation() {
     assert_abs_diff_eq!(sep.value(), 55.0, epsilon = 1e-12);
 }
 
-/// Earth's rotation calculation
 #[test]
 fn earth_rotation() {
     // Earth rotates 360° per sidereal day (~23h 56m)
@@ -128,7 +111,6 @@ fn earth_rotation() {
     assert_abs_diff_eq!(angle.value(), 90.0, epsilon = 1e-12);
 }
 
-/// Solar mass to kg conversion
 #[test]
 fn sun_mass() {
     let sun = SolarMasses::new(1.0);
@@ -138,7 +120,6 @@ fn sun_mass() {
     assert_relative_eq!(kg.value(), 1.98847e30, max_relative = 1e-5);
 }
 
-/// Solar luminosity to watts
 #[test]
 fn sun_luminosity() {
     let sun = SolarLuminosities::new(1.0);
@@ -148,11 +129,6 @@ fn sun_luminosity() {
     assert_relative_eq!(watts.value(), 3.828e26, max_relative = 1e-9);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────────
-// Cross-module interactions
-// ─────────────────────────────────────────────────────────────────────────────────
-
-/// Velocity from distance and time
 #[test]
 fn calculate_velocity_from_distance_time() {
     // Light year to km
@@ -170,7 +146,6 @@ fn calculate_velocity_from_distance_time() {
     assert_relative_eq!(velocity.value(), 299_792.458, max_relative = 0.001);
 }
 
-/// Mean motion calculation (deg/day to deg/year)
 #[test]
 fn mean_motion_conversion() {
     // Earth's mean motion ≈ 0.9856°/day
@@ -183,7 +158,6 @@ fn mean_motion_conversion() {
     assert_relative_eq!(per_year.value(), 360.0, max_relative = 0.01);
 }
 
-/// Trigonometry on angles
 #[test]
 fn trigonometric_calculation() {
     // 30° angle
@@ -198,10 +172,6 @@ fn trigonometric_calculation() {
     // tan(30°) = 1/√3
     assert_abs_diff_eq!(angle.tan(), 1.0 / 3.0_f64.sqrt(), epsilon = 1e-12);
 }
-
-// ─────────────────────────────────────────────────────────────────────────────────
-// Derive macro verification tests
-// ─────────────────────────────────────────────────────────────────────────────────
 
 #[test]
 fn derive_macro_produces_correct_symbol() {
@@ -234,10 +204,6 @@ fn derive_macro_display_formatting() {
     let deg = Degrees::new(90.0);
     assert_eq!(format!("{}", deg), "90 Deg");
 }
-
-// ─────────────────────────────────────────────────────────────────────────────────
-// Quantity operations
-// ─────────────────────────────────────────────────────────────────────────────────
 
 #[test]
 fn quantity_basic_arithmetic() {
@@ -275,10 +241,6 @@ fn quantity_abs() {
     assert_eq!(neg.abs().value(), 45.0);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────────
-// Per<N, D> composite units
-// ─────────────────────────────────────────────────────────────────────────────────
-
 #[test]
 fn per_unit_display() {
     let v: KilometersPerSecond = Quantity::new(10.0);
@@ -301,10 +263,6 @@ fn per_unit_division_creates_composite() {
     let v: KilometersPerSecond = d / t;
     assert_abs_diff_eq!(v.value(), 10.0, epsilon = 1e-12);
 }
-
-// ─────────────────────────────────────────────────────────────────────────────────
-// Constants
-// ─────────────────────────────────────────────────────────────────────────────────
 
 #[test]
 fn unit_constants_have_value_one() {

@@ -1,64 +1,113 @@
-//! # Units Core
+//! Core type system for strongly typed physical units.
 //!
-//! This crate provides the core types and traits for zero-cost strongly-typed
-//! physical units. All type information is resolved at compile time using phantom
-//! types, ensuring no runtime overhead.
+//! `unit-core` provides a minimal, zero-cost units model:
 //!
-//! ## Core Types
+//! - A *unit* is a zero-sized marker type implementing [`Unit`].
+//! - A value tagged with a unit is a [`Quantity<U>`], backed by an `f64`.
+//! - Conversion is an explicit, type-checked scaling via [`Quantity::to`].
+//! - Derived units like velocity are expressed as [`Per<N, D>`] (e.g. `Meter/Second`).
 //!
-//! - [`Dimension`] - Marker trait for physical dimensions (Length, Time, Mass, etc.)
-//! - [`Unit`] - Trait for unit types with conversion ratio and dimension
-//! - [`Quantity<U>`] - The main wrapper type that holds a value with its unit
-//! - [`Per<N, D>`] - Generic composite unit for division (e.g., velocity = length/time)
-//! - [`DivDim<N, D>`] - Composite dimension type
+//! Most users should depend on `unit` (the facade crate) unless they need direct access to these primitives.
 //!
-//! ## Example
+//! # What this crate solves
+//!
+//! - Compile-time separation of dimensions (length vs time vs angle, …).
+//! - Zero runtime overhead for unit tags (phantom types only).
+//! - A small vocabulary to express derived units via type aliases (`Per`, `DivDim`).
+//!
+//! # What this crate does not try to solve
+//!
+//! - Exact arithmetic (`Quantity` is `f64`).
+//! - General-purpose symbolic simplification of arbitrary unit expressions.
+//! - Automatic tracking of exponent dimensions (`m^2`, `s^-1`, …); only the expression forms represented by the
+//!   provided types are modeled.
+//!
+//! # Quick start
+//!
+//! Convert between predefined units:
 //!
 //! ```rust
-//! use units_core::*;
+//! use unit_core::length::{Kilometers, Meter};
 //!
-//! // Define a dimension
-//! pub enum Length {}
-//! impl Dimension for Length {}
-//!
-//! // Define units (typically done via derive macro)
-//! #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-//! pub enum Meter {}
-//! impl Unit for Meter {
-//!     const RATIO: f64 = 1.0;
-//!     type Dim = Length;
-//!     const SYMBOL: &'static str = "m";
-//! }
-//!
-//! // Use quantities
-//! let distance: Quantity<Meter> = Quantity::new(100.0);
-//! assert_eq!(distance.value(), 100.0);
+//! let km = Kilometers::new(1.25);
+//! let m = km.to::<Meter>();
+//! assert!((m.value() - 1250.0).abs() < 1e-12);
 //! ```
+//!
+//! Compose derived units using `/`:
+//!
+//! ```rust
+//! use unit_core::length::Meters;
+//! use unit_core::time::Seconds;
+//! use unit_core::velocity::MetersPerSecond;
+//!
+//! let d = Meters::new(100.0);
+//! let t = Seconds::new(20.0);
+//! let v: MetersPerSecond = d / t;
+//! assert!((v.value() - 5.0).abs() < 1e-12);
+//! ```
+//!
+//! # `no_std`
+//!
+//! Disable default features to build `unit-core` without `std`:
+//!
+//! ```toml
+//! [dependencies]
+//! unit-core = { version = "0.1.0", default-features = false }
+//! ```
+//!
+//! When `std` is disabled, floating-point math that isn’t available in `core` is provided via `libm`.
+//!
+//! # Feature flags
+//!
+//! - `std` (default): enables `std` support.
+//! - `serde`: enables `serde` support for `Quantity<U>`; serialization is the raw `f64` value only.
+//!
+//! # Panics and errors
+//!
+//! This crate does not define an error type and does not return `Result` from its core operations. Conversions and
+//! arithmetic are pure `f64` computations; they do not panic on their own, but they follow IEEE-754 behavior (NaN and
+//! infinities propagate according to the underlying operation).
+//!
+//! # SemVer and stability
+//!
+//! This crate is currently `0.x`. Expect breaking changes between minor versions until `1.0`.
 
+#![deny(missing_docs)]
 #![cfg_attr(not(feature = "std"), no_std)]
+#![forbid(unsafe_code)]
 
 #[cfg(not(feature = "std"))]
 extern crate libm;
 
-use core::cmp::*;
+use core::fmt::{Debug, Display, Formatter, Result};
 use core::marker::PhantomData;
 use core::ops::*;
-use core::fmt::{Display, Formatter, Result, Debug};
 
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize, Deserializer, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-// Unit modules - defined in this crate to satisfy orphan rules
+/// Predefined unit modules (grouped by dimension).
+///
+/// These are defined in `unit-core` so they can implement formatting and helper traits without running into Rust’s
+/// orphan rules.
 pub mod units;
 
-// Re-export commonly used units
+/// Angular units and helpers.
 pub use units::angular;
+/// Angular frequency unit aliases (`Angular / Time`).
 pub use units::frequency;
+/// Length units.
 pub use units::length;
+/// Mass units.
 pub use units::mass;
+/// Power units.
 pub use units::power;
+/// Time units.
 pub use units::time;
+/// Dimensionless helpers.
 pub use units::unitless;
+/// Velocity unit aliases (`Length / Time`).
 pub use units::velocity;
 
 /// Marker trait for **dimensions** (Length, Time, Mass …).
@@ -67,7 +116,7 @@ pub use units::velocity;
 /// You usually model each dimension as an empty enum:
 ///
 /// ```rust
-/// use units_core::Dimension;
+/// use unit_core::Dimension;
 /// #[derive(Debug)]
 /// pub enum Length {}
 /// impl Dimension for Length {}
@@ -76,16 +125,18 @@ pub trait Dimension {}
 
 /// Trait implemented by every **unit** type.
 ///
-/// * `RATIO` expresses how many of this unit fit into the *canonical* unit
-///   of the same dimension.
-///   Example: The ratio for kilometres is `1000.0` because `1 km = 1000 m`.
+/// * `RATIO` is the conversion factor from this unit to the *canonical scaling unit* of the same dimension.
+///   Example: if metres are canonical (`Meter::RATIO == 1.0`), then kilometres use `Kilometer::RATIO == 1000.0`
+///   because `1 km = 1000 m`.
 ///
 /// * `SYMBOL` is the printable string (e.g. `"m"` or `"km"`).
 ///
 /// * `Dim` ties the unit to its underlying [`Dimension`].
 ///
-/// # Safety
-/// The trait is `Copy + 'static`, so types must be zero-sized marker enums.
+/// # Invariants
+///
+/// - Implementations should be zero-sized marker types (this crate’s built-in units are unit structs with no fields).
+/// - `RATIO` should be finite and non-zero.
 pub trait Unit: Copy + PartialEq + Debug + 'static {
     /// Unit-to-canonical conversion factor.
     const RATIO: f64;
@@ -93,7 +144,7 @@ pub trait Unit: Copy + PartialEq + Debug + 'static {
     /// Dimension to which this unit belongs.
     type Dim: Dimension;
 
-    /// Printable symbol, shown by [`Display`](core::fmt::Display).
+    /// Printable symbol, shown by [`core::fmt::Display`].
     const SYMBOL: &'static str;
 }
 
@@ -118,8 +169,6 @@ pub struct Per<N: Unit, D: Unit>(PhantomData<(N, D)>);
 impl<N: Unit, D: Unit> Unit for Per<N, D> {
     const RATIO: f64 = N::RATIO / D::RATIO;
     type Dim = DivDim<N::Dim, D::Dim>;
-    // The symbol is constructed at formatting time since generic
-    // constants cannot concatenate at compile time.
     const SYMBOL: &'static str = "";
 }
 
@@ -138,7 +187,7 @@ impl<N: Unit, D: Unit> Display for Quantity<Per<N, D>> {
 /// # Examples
 ///
 /// ```rust
-/// use units_core::{Quantity, Unit, Dimension};
+/// use unit_core::{Quantity, Unit, Dimension};
 ///
 /// pub enum Length {}
 /// impl Dimension for Length {}
@@ -161,21 +210,44 @@ pub struct Quantity<U: Unit>(f64, PhantomData<U>);
 
 impl<U: Unit + Copy> Quantity<U> {
     /// A constant representing NaN for this quantity type.
+    ///
+    /// ```rust
+    /// use unit_core::length::Meters;
+    /// assert!(Meters::NAN.value().is_nan());
+    /// ```
     pub const NAN: Self = Self::new(f64::NAN);
 
     /// Creates a new quantity with the given value.
+    ///
+    /// ```rust
+    /// use unit_core::length::Meters;
+    /// let d = Meters::new(3.0);
+    /// assert_eq!(d.value(), 3.0);
+    /// ```
     #[inline]
     pub const fn new(value: f64) -> Self {
         Self(value, PhantomData)
     }
 
     /// Returns the raw numeric value.
+    ///
+    /// ```rust
+    /// use unit_core::time::Seconds;
+    /// let t = Seconds::new(2.5);
+    /// assert_eq!(t.value(), 2.5);
+    /// ```
     #[inline]
     pub const fn value(self) -> f64 {
         self.0
     }
 
     /// Returns the absolute value.
+    ///
+    /// ```rust
+    /// use unit_core::angular::Degrees;
+    /// let a = Degrees::new(-10.0);
+    /// assert_eq!(a.abs().value(), 10.0);
+    /// ```
     #[inline]
     pub fn abs(self) -> Self {
         Self::new(self.0.abs())
@@ -186,7 +258,7 @@ impl<U: Unit + Copy> Quantity<U> {
     /// # Example
     ///
     /// ```rust
-    /// use units_core::{Quantity, Unit, Dimension};
+    /// use unit_core::{Quantity, Unit, Dimension};
     ///
     /// pub enum Length {}
     /// impl Dimension for Length {}
@@ -217,39 +289,72 @@ impl<U: Unit + Copy> Quantity<U> {
     }
 
     /// Returns the minimum of this quantity and another.
+    ///
+    /// ```rust
+    /// use unit_core::length::Meters;
+    /// let a = Meters::new(3.0);
+    /// let b = Meters::new(5.0);
+    /// assert_eq!(a.min(b).value(), 3.0);
+    /// ```
     #[inline]
     pub const fn min(&self, other: Quantity<U>) -> Quantity<U> {
         Quantity::<U>::new(self.value().min(other.value()))
     }
 
     /// Const addition of two quantities.
+    ///
+    /// ```rust
+    /// use unit_core::length::Meters;
+    /// let a = Meters::new(1.0);
+    /// let b = Meters::new(2.0);
+    /// assert_eq!(a.add(b).value(), 3.0);
+    /// ```
     #[inline]
     pub const fn add(&self, other: Quantity<U>) -> Quantity<U> {
         Quantity::<U>::new(self.value() + other.value())
     }
 
     /// Const subtraction of two quantities.
+    ///
+    /// ```rust
+    /// use unit_core::length::Meters;
+    /// let a = Meters::new(5.0);
+    /// let b = Meters::new(2.0);
+    /// assert_eq!(a.sub(b).value(), 3.0);
+    /// ```
     #[inline]
     pub const fn sub(&self, other: Quantity<U>) -> Quantity<U> {
         Quantity::<U>::new(self.value() - other.value())
     }
 
-    /// Const division of two quantities (returns same unit, useful for ratios).
+    /// Const division of two quantities (legacy behavior; returns the same unit).
+    ///
+    /// For a dimensionless ratio, prefer `/` (which yields a `Per<U, U>`) plus [`Simplify`].
+    ///
+    /// ```rust
+    /// use unit_core::length::Meters;
+    /// let a = Meters::new(6.0);
+    /// let b = Meters::new(2.0);
+    /// assert_eq!(a.div(b).value(), 3.0);
+    /// ```
     #[inline]
     pub const fn div(&self, other: Quantity<U>) -> Quantity<U> {
         Quantity::<U>::new(self.value() / other.value())
     }
 
     /// Const multiplication of two quantities (returns same unit).
+    ///
+    /// ```rust
+    /// use unit_core::length::Meters;
+    /// let a = Meters::new(3.0);
+    /// let b = Meters::new(4.0);
+    /// assert_eq!(a.mul(b).value(), 12.0);
+    /// ```
     #[inline]
     pub const fn mul(&self, other: Quantity<U>) -> Quantity<U> {
         Quantity::<U>::new(self.value() * other.value())
     }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Operator implementations
-// ─────────────────────────────────────────────────────────────────────────────
 
 impl<U: Unit> Add for Quantity<U> {
     type Output = Self;
@@ -368,22 +473,16 @@ impl<N: Unit, D: Unit> Div<Quantity<D>> for Quantity<N> {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Simplify trait for composite units
-// ─────────────────────────────────────────────────────────────────────────────
-
 /// Trait for simplifying composite unit types.
 ///
 /// This allows reducing complex unit expressions to simpler forms,
 /// such as `Per<U, U>` to `Unitless` or `Per<N, Per<N, D>>` to `D`.
 pub trait Simplify {
+    /// The simplified unit type.
     type Out: Unit;
+    /// Convert this quantity to its simplified unit.
     fn simplify(self) -> Quantity<Self::Out>;
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Unitless / Dimensionless support
-// ─────────────────────────────────────────────────────────────────────────────
 
 /// Dimension for dimensionless quantities.
 pub enum Dimensionless {}
@@ -404,15 +503,21 @@ impl Display for Quantity<Unitless> {
     }
 }
 
-// U/U → Unitless
 impl<U: Unit> Simplify for Quantity<Per<U, U>> {
     type Out = Unitless;
+    /// ```rust
+    /// use unit_core::length::Meters;
+    /// use unit_core::{Quantity, Simplify, Unitless};
+    ///
+    /// let ratio = Meters::new(1.0) / Meters::new(2.0);
+    /// let unitless: Quantity<Unitless> = ratio.simplify();
+    /// assert!((unitless.value() - 0.5).abs() < 1e-12);
+    /// ```
     fn simplify(self) -> Quantity<Unitless> {
         Quantity::new(self.value())
     }
 }
 
-// N / (N/D) → D
 impl<N: Unit, D: Unit> Simplify for Quantity<Per<N, Per<N, D>>> {
     type Out = D;
     fn simplify(self) -> Quantity<D> {
@@ -422,18 +527,25 @@ impl<N: Unit, D: Unit> Simplify for Quantity<Per<N, Per<N, D>>> {
 
 impl<U: Unit> Quantity<Per<U, U>> {
     /// Arc sine of a unitless ratio.
+    ///
+    /// ```rust
+    /// use unit_core::length::Meters;
+    /// let ratio = Meters::new(1.0) / Meters::new(2.0);
+    /// let angle_rad = ratio.asin();
+    /// assert!((angle_rad - core::f64::consts::FRAC_PI_6).abs() < 1e-12);
+    /// ```
     #[inline]
     pub fn asin(&self) -> f64 {
         #[cfg(feature = "std")]
-        { self.value().asin() }
+        {
+            self.value().asin()
+        }
         #[cfg(not(feature = "std"))]
-        { libm::asin(self.value()) }
+        {
+            libm::asin(self.value())
+        }
     }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Serde support (behind feature flag)
-// ─────────────────────────────────────────────────────────────────────────────
 
 #[cfg(feature = "serde")]
 impl<U: Unit> Serialize for Quantity<U> {
@@ -456,19 +568,19 @@ impl<'de, U: Unit> Deserialize<'de> for Quantity<U> {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Legacy macro for backward compatibility
-// ─────────────────────────────────────────────────────────────────────────────
-
 /// Generate a **unit type** and its [`Display`] implementation.
 ///
 /// This macro is provided for backward compatibility. New code should prefer
-/// using the `#[derive(Unit)]` procedural macro from `units-derive`.
+/// using the `#[derive(Unit)]` procedural macro from `unit-derive`.
+///
+/// Note: This macro is intended for use *inside* `unit-core`. The expansion
+/// includes an `impl Display for unit_core::Quantity<...>`, which downstream
+/// crates cannot compile due to Rust’s orphan rules.
 ///
 /// # Example
 ///
 /// ```rust,ignore
-/// use units_core::{define_unit, Unit, Quantity, Dimension};
+/// use unit_core::{define_unit, Unit, Quantity, Dimension};
 ///
 /// pub enum Length {}
 /// impl Dimension for Length {}

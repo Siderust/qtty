@@ -20,27 +20,43 @@
 //!
 //! Convert between degrees and radians and evaluate a trig function:
 //!
-//! ```rust,ignore
-//! use crate::angular::{Degrees, Radians};
-//! use crate::Quantity;
+//! ```rust
+//! use unit_core::angular::{Degrees, Radians};
 //!
 //! let angle: Degrees = Degrees::new(90.0);
 //! let r: Radians = angle.to();
-//! assert!((r.value() - std::f64::consts::FRAC_PI_2).abs() < 1e-12);
+//! assert!((r.value() - core::f64::consts::FRAC_PI_2).abs() < 1e-12);
 //! assert!((angle.sin() - 1.0).abs() < 1e-12);
 //! ```
 //!
 //! Wrap into the conventional signed range:
 //!
-//! ```rust,ignore
-//! use crate::angular::Degrees;
+//! ```rust
+//! use unit_core::angular::Degrees;
 //! let a = Degrees::new(370.0).wrap_signed();
 //! assert_eq!(a.value(), 10.0);
 //! ```
 
 use crate::{Dimension, Quantity, Unit};
-use units_derive::Unit;
-use std::f64::consts::TAU;
+use core::f64::consts::TAU;
+use unit_derive::Unit;
+
+#[inline]
+fn rem_euclid(x: f64, modulus: f64) -> f64 {
+    #[cfg(feature = "std")]
+    {
+        x.rem_euclid(modulus)
+    }
+    #[cfg(not(feature = "std"))]
+    {
+        let r = crate::libm::fmod(x, modulus);
+        if r < 0.0 {
+            r + modulus
+        } else {
+            r
+        }
+    }
+}
 
 /// Dimension tag for angular measures (e.g., degrees, radians, arcseconds).
 pub enum Angular {}
@@ -54,8 +70,11 @@ impl Dimension for Angular {}
 /// > **Naming note:** The historical spelling `QUARTED_TURN` is retained for backward compatibility. It represents a
 /// > quarter turn (90°).
 pub trait AngularUnit: Unit<Dim = Angular> {
+    /// One full revolution (τ radians / 360°) expressed in this unit.
     const FULL_TURN: f64;
+    /// Half a revolution (π radians / 180°) expressed in this unit.
     const HALF_TURN: f64;
+    /// A quarter revolution (π/2 radians / 90°) expressed in this unit.
     const QUARTED_TURN: f64;
 }
 impl<T: Unit<Dim = Angular>> AngularUnit for T {
@@ -70,35 +89,67 @@ impl<T: Unit<Dim = Angular>> AngularUnit for T {
 impl<U: AngularUnit + Copy> Quantity<U> {
     /// Constant representing τ radians (2π rad == 360°).
     pub const TAU: Quantity<U> = Quantity::<U>::new(U::FULL_TURN);
-    /// One full revolution (360°) expressed in Quantity<T> unit.
+    /// One full revolution (360°) expressed as `Quantity<U>`.
     pub const FULL_TURN: Quantity<U> = Quantity::<U>::new(U::FULL_TURN);
-    /// Half a revolution (180°) expressed in Quantity<T> unit.
+    /// Half a revolution (180°) expressed as `Quantity<U>`.
     pub const HALF_TURN: Quantity<U> = Quantity::<U>::new(U::HALF_TURN);
-    /// Quarter revolution (90°) expressed in Quantity<T> unit.
+    /// Quarter revolution (90°) expressed as `Quantity<U>`.
     pub const QUARTED_TURN: Quantity<U> = Quantity::<U>::new(U::QUARTED_TURN);
 
     /// Sine of the angle.
     #[inline]
     pub fn sin(&self) -> f64 {
-        self.to::<Radian>().value().sin()
+        let x = self.to::<Radian>().value();
+        #[cfg(feature = "std")]
+        {
+            x.sin()
+        }
+        #[cfg(not(feature = "std"))]
+        {
+            crate::libm::sin(x)
+        }
     }
 
     /// Cosine of the angle.
     #[inline]
     pub fn cos(&self) -> f64 {
-        self.to::<Radian>().value().cos()
+        let x = self.to::<Radian>().value();
+        #[cfg(feature = "std")]
+        {
+            x.cos()
+        }
+        #[cfg(not(feature = "std"))]
+        {
+            crate::libm::cos(x)
+        }
     }
 
     /// Tangent of the angle.
     #[inline]
     pub fn tan(&self) -> f64 {
-        self.to::<Radian>().value().tan()
+        let x = self.to::<Radian>().value();
+        #[cfg(feature = "std")]
+        {
+            x.tan()
+        }
+        #[cfg(not(feature = "std"))]
+        {
+            crate::libm::tan(x)
+        }
     }
 
     /// Simultaneously compute sine and cosine.
     #[inline]
     pub fn sin_cos(&self) -> (f64, f64) {
-        self.to::<Radian>().value().sin_cos()
+        let x = self.to::<Radian>().value();
+        #[cfg(feature = "std")]
+        {
+            x.sin_cos()
+        }
+        #[cfg(not(feature = "std"))]
+        {
+            (crate::libm::sin(x), crate::libm::cos(x))
+        }
     }
 
     /// Sign of the *raw numeric* in this unit (same semantics as `f64::signum()`).
@@ -118,7 +169,7 @@ impl<U: AngularUnit + Copy> Quantity<U> {
     /// Wrap into the positive range `[0, FULL_TURN)` using Euclidean remainder.
     #[inline]
     pub fn wrap_pos(self) -> Self {
-        Self::new(self.value().rem_euclid(U::FULL_TURN))
+        Self::new(rem_euclid(self.value(), U::FULL_TURN))
     }
 
     /// Wrap into the signed range `(-HALF_TURN, HALF_TURN]`.
@@ -129,7 +180,7 @@ impl<U: AngularUnit + Copy> Quantity<U> {
         let full = U::FULL_TURN;
         let half = 0.5 * full;
         let x = self.value();
-        let y = (x + half).rem_euclid(full) - half;
+        let y = rem_euclid(x + half, full) - half;
         let norm = if y <= -half { y + full } else { y };
         Self::new(norm)
     }
@@ -156,7 +207,7 @@ impl<U: AngularUnit + Copy> Quantity<U> {
         let full = U::FULL_TURN;
         let half = 0.5 * full;
         let quarter = 0.25 * full;
-        let y = (self.value() + quarter).rem_euclid(full);
+        let y = rem_euclid(self.value() + quarter, full);
         // quarter - |y - half| yields [-quarter, quarter]
         Self::new(quarter - (y - half).abs())
     }
@@ -175,6 +226,7 @@ impl<U: AngularUnit + Copy> Quantity<U> {
     }
 }
 
+/// Degree.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "Deg", dimension = Angular, ratio = 1.0)]
 pub struct Degree;
@@ -185,9 +237,9 @@ pub type Degrees = Quantity<Deg>;
 /// One degree.
 pub const DEG: Degrees = Degrees::new(1.0);
 
-// NOTE: 1 rad = 180/π degrees.
+/// Radian.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Rad", dimension = Angular, ratio = 180.0 / 3.141592653589793)]
+#[unit(symbol = "Rad", dimension = Angular, ratio = 180.0 / core::f64::consts::PI)]
 pub struct Radian;
 /// Type alias shorthand for [`Radian`].
 pub type Rad = Radian;
@@ -196,7 +248,7 @@ pub type Radians = Quantity<Rad>;
 /// One radian.
 pub const RAD: Radians = Radians::new(1.0);
 
-// NOTE: 1 arcsecond = 1/3600 degree.
+/// Arcsecond (`1/3600` degree).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "Arcs", dimension = Angular, ratio = 1.0 / 3600.0)]
 pub struct Arcsecond;
@@ -207,7 +259,7 @@ pub type Arcseconds = Quantity<Arcs>;
 /// One arcsecond.
 pub const ARCS: Arcseconds = Arcseconds::new(1.0);
 
-// NOTE: 1 milliarcsecond = 1/3_600_000 degree.
+/// Milliarcsecond (`1/3_600_000` degree).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "Mas", dimension = Angular, ratio = 1.0 / 3_600_000.0)]
 pub struct MilliArcsecond;
@@ -218,7 +270,7 @@ pub type MilliArcseconds = Quantity<Mas>;
 /// One milliarcsecond.
 pub const MAS: MilliArcseconds = MilliArcseconds::new(1.0);
 
-// NOTE: 1 hour angle = 15 degrees.
+/// Hour angle hour (`15` degrees).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "Hms", dimension = Angular, ratio = 15.0)]
 pub struct HourAngle;
@@ -234,8 +286,8 @@ impl HourAngles {
     ///
     /// Sign is taken from `hours`; the `minutes` and `seconds` parameters are treated as magnitudes.
     ///
-    /// ```rust,ignore
-    /// use crate::angular::HourAngles;
+    /// ```rust
+    /// use unit_core::angular::HourAngles;
     /// let ra = HourAngles::from_hms(5, 30, 0.0); // 5h30m == 5.5h
     /// assert_eq!(ra.value(), 5.5);
     /// ```
@@ -255,8 +307,8 @@ impl Degrees {
     /// Sign is taken from `deg`; the magnitude of `min` and `sec` is always added.
     /// No range checking is performed. Use one of the wrapping helpers if you need a canonical range.
     ///
-    /// ```rust,ignore
-    /// use crate::angular::Degrees;
+    /// ```rust
+    /// use unit_core::angular::Degrees;
     /// let lat = Degrees::from_dms(-33, 52, 0.0); // −33°52′00″
     /// assert!(lat.value() < 0.0);
     /// ```
@@ -293,9 +345,9 @@ impl From<Radians> for Degrees {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::f64::consts::{PI, TAU};
     use approx::{assert_abs_diff_eq, assert_relative_eq};
     use proptest::prelude::*;
+    use std::f64::consts::{PI, TAU};
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Angular unit constants
@@ -478,22 +530,42 @@ mod tests {
 
     #[test]
     fn wrap_pos_basic() {
-        assert_abs_diff_eq!(Degrees::new(370.0).wrap_pos().value(), 10.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(370.0).wrap_pos().value(),
+            10.0,
+            epsilon = 1e-12
+        );
         assert_abs_diff_eq!(Degrees::new(720.0).wrap_pos().value(), 0.0, epsilon = 1e-12);
         assert_abs_diff_eq!(Degrees::new(0.0).wrap_pos().value(), 0.0, epsilon = 1e-12);
     }
 
     #[test]
     fn wrap_pos_negative() {
-        assert_abs_diff_eq!(Degrees::new(-10.0).wrap_pos().value(), 350.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-370.0).wrap_pos().value(), 350.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-720.0).wrap_pos().value(), 0.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(-10.0).wrap_pos().value(),
+            350.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-370.0).wrap_pos().value(),
+            350.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-720.0).wrap_pos().value(),
+            0.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]
     fn wrap_pos_boundary() {
         assert_abs_diff_eq!(Degrees::new(360.0).wrap_pos().value(), 0.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-360.0).wrap_pos().value(), 0.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(-360.0).wrap_pos().value(),
+            0.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]
@@ -516,26 +588,58 @@ mod tests {
 
     #[test]
     fn wrap_signed_basic() {
-        assert_abs_diff_eq!(Degrees::new(10.0).wrap_signed().value(), 10.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-10.0).wrap_signed().value(), -10.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(10.0).wrap_signed().value(),
+            10.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-10.0).wrap_signed().value(),
+            -10.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]
     fn wrap_signed_over_180() {
-        assert_abs_diff_eq!(Degrees::new(190.0).wrap_signed().value(), -170.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(270.0).wrap_signed().value(), -90.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(190.0).wrap_signed().value(),
+            -170.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(270.0).wrap_signed().value(),
+            -90.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]
     fn wrap_signed_boundary_180() {
-        assert_abs_diff_eq!(Degrees::new(180.0).wrap_signed().value(), 180.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-180.0).wrap_signed().value(), 180.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(180.0).wrap_signed().value(),
+            180.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-180.0).wrap_signed().value(),
+            180.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]
     fn wrap_signed_large_values() {
-        assert_abs_diff_eq!(Degrees::new(540.0).wrap_signed().value(), 180.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-540.0).wrap_signed().value(), 180.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(540.0).wrap_signed().value(),
+            180.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-540.0).wrap_signed().value(),
+            180.0,
+            epsilon = 1e-12
+        );
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -544,22 +648,54 @@ mod tests {
 
     #[test]
     fn wrap_quarter_fold_basic() {
-        assert_abs_diff_eq!(Degrees::new(0.0).wrap_quarter_fold().value(), 0.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(45.0).wrap_quarter_fold().value(), 45.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-45.0).wrap_quarter_fold().value(), -45.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(0.0).wrap_quarter_fold().value(),
+            0.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(45.0).wrap_quarter_fold().value(),
+            45.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-45.0).wrap_quarter_fold().value(),
+            -45.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]
     fn wrap_quarter_fold_boundary() {
-        assert_abs_diff_eq!(Degrees::new(90.0).wrap_quarter_fold().value(), 90.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-90.0).wrap_quarter_fold().value(), -90.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(90.0).wrap_quarter_fold().value(),
+            90.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-90.0).wrap_quarter_fold().value(),
+            -90.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]
     fn wrap_quarter_fold_over_90() {
-        assert_abs_diff_eq!(Degrees::new(100.0).wrap_quarter_fold().value(), 80.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(135.0).wrap_quarter_fold().value(), 45.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(180.0).wrap_quarter_fold().value(), 0.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(100.0).wrap_quarter_fold().value(),
+            80.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(135.0).wrap_quarter_fold().value(),
+            45.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(180.0).wrap_quarter_fold().value(),
+            0.0,
+            epsilon = 1e-12
+        );
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -610,7 +746,11 @@ mod tests {
     #[test]
     fn degrees_from_dms_with_seconds() {
         let d = Degrees::from_dms(10, 20, 30.0);
-        assert_abs_diff_eq!(d.value(), 10.0 + 20.0 / 60.0 + 30.0 / 3600.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            d.value(),
+            10.0 + 20.0 / 60.0 + 30.0 / 3600.0,
+            epsilon = 1e-12
+        );
     }
 
     #[test]

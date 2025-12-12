@@ -1,47 +1,48 @@
-//! # Mass Units Module
+//! Mass units.
 //!
-//! This module provides types and utilities for handling mass-related calculations
-//! in astronomical and scientific contexts. It includes representations for various
-//! mass units and conversions between them.
+//! The canonical scaling unit for this dimension is [`Gram`] (`Gram::RATIO == 1.0`).
 //!
-//! ## Features
-//! - **Kilograms (kg)**: The SI base unit of mass, with arithmetic operations.
-//! - **Solar Masses (M☉)**: The mass of the Sun, commonly used in astronomy.
+//! ```rust
+//! use unit_core::mass::{Kilograms, SolarMass};
 //!
-//! ## Example Usage
-//! ```rust,ignore
-//! use crate::{Kilograms, SolarMasses};
-//!
-//! let m_kg = Kilograms::new(5.0);
-//! assert_eq!(m_kg.value(), 5.0);
-//!
-//! let m_solar = SolarMasses::new(2.0);
-//! assert_eq!(m_solar.value(), 2.0);
+//! let m = Kilograms::new(1.0);
+//! let sm = m.to::<SolarMass>();
+//! assert!(sm.value() < 1.0);
 //! ```
 
 use crate::{Dimension, Quantity, Unit};
-use units_derive::Unit;
+use unit_derive::Unit;
 
+/// Dimension tag for mass.
 pub enum Mass {}
 impl Dimension for Mass {}
+/// Marker trait for any [`Unit`] whose dimension is [`Mass`].
 pub trait MassUnit: Unit<Dim = Mass> {}
 impl<T: Unit<Dim = Mass>> MassUnit for T {}
 
+/// Gram.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "g", dimension = Mass, ratio = 1.0)]
 pub struct Gram;
+/// A quantity measured in grams.
 pub type Grams = Quantity<Gram>;
 
+/// Kilogram (`1000 g`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "Kg", dimension = Mass, ratio = 1_000.0)]
 pub struct Kilogram;
+/// Type alias shorthand for [`Kilogram`].
 pub type Kg = Kilogram;
+/// A quantity measured in kilograms.
 pub type Kilograms = Quantity<Kg>;
+/// One kilogram.
 pub const KG: Kilograms = Kilograms::new(1.0);
 
+/// Solar mass (grams per M☉).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "M☉", dimension = Mass, ratio = 1.98847e33)]
 pub struct SolarMass;
+/// A quantity measured in solar masses.
 pub type SolarMasses = Quantity<SolarMass>;
 
 #[cfg(test)]

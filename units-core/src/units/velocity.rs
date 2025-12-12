@@ -1,13 +1,21 @@
-//! # Velocity Units Module
+//! Velocity unit aliases (`Length / Time`).
 //!
-//! Composite velocity units built from a length over a time. The underlying
-//! implementation leverages the generic [`Per<N, D>`] type which composes two
-//! phantom unit parameters. This allows the multiplication and division traits
-//! to be implemented once for all unit pairs in [`Quantity`](units_core::Quantity).
+//! This module is mostly type aliases over [`Per`] plus a dimension alias ([`Velocity`]).
+//!
+//! ```rust
+//! use unit_core::length::Kilometers;
+//! use unit_core::time::Seconds;
+//! use unit_core::velocity::KilometersPerSecond;
+//!
+//! let d = Kilometers::new(42.0);
+//! let t = Seconds::new(2.0);
+//! let v: KilometersPerSecond = d / t;
+//! assert!((v.value() - 21.0).abs() < 1e-12);
+//! ```
 
-use crate::{Quantity, Unit, DivDim, Per};
-use crate::units::length::{Length, Meter, Kilometer, Au};
-use crate::units::time::{Time, Second, Hour, Day};
+use crate::units::length::{Au, Kilometer, Length, Meter};
+use crate::units::time::{Day, Hour, Second, Time};
+use crate::{DivDim, Per, Quantity, Unit};
 
 /// Dimension alias for velocities (`Length / Time`).
 pub type Velocity = DivDim<Length, Time>;
@@ -16,25 +24,33 @@ pub type Velocity = DivDim<Length, Time>;
 pub trait VelocityUnit: Unit<Dim = Velocity> {}
 impl<T: Unit<Dim = Velocity>> VelocityUnit for T {}
 
+/// Metres per second (`m / s`).
 pub type MeterPerSecond = Per<Meter, Second>;
+/// A quantity measured in metres per second.
 pub type MetersPerSecond = Quantity<MeterPerSecond>;
 
+/// Kilometres per second (`km / s`).
 pub type KilometerPerSecond = Per<Kilometer, Second>;
+/// A quantity measured in kilometres per second.
 pub type KilometersPerSecond = Quantity<KilometerPerSecond>;
 
+/// Kilometres per hour (`km / h`).
 pub type KilometerPerHour = Per<Kilometer, Hour>;
+/// A quantity measured in kilometres per hour.
 pub type KilometersPerHour = Quantity<KilometerPerHour>;
 
+/// Astronomical units per day (`AU / d`).
 pub type AuPerDay = Per<Au, Day>;
+/// A quantity measured in astronomical units per day.
 pub type AusPerDay = Quantity<AuPerDay>;
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::units::length::Kilometers;
+    use crate::units::time::Seconds;
     use approx::{assert_abs_diff_eq, assert_relative_eq};
     use proptest::prelude::*;
-    use crate::units::time::Seconds;
-    use crate::units::length::Kilometers;
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Basic velocity conversions

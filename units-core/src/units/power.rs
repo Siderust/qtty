@@ -1,28 +1,17 @@
-//! # Power Units Module
+//! Power units.
 //!
-//! Commonly used power units in astronomy.
+//! The canonical scaling unit for this dimension is [`Watt`] (`Watt::RATIO == 1.0`).
 //!
-//! ## Units
-//! - **Watt (W)**: SI base unit of power.
-//! - **Solar Luminosity (L☉)**: power radiated by the Sun.
+//! ```rust
+//! use unit_core::power::{SolarLuminosities, Watt};
 //!
-//! ## Example
-//! ```rust,ignore
-//! use crate::*;
-//!
-//! // 2 kW
-//! let p_w = Watts::new(2_000.0);
-//!
-//! // 3 L☉
-//! let p_sol = SolarLuminosities::new(3.0);
-//!
-//! // Convenient conversion
-//! let p_w_equiv = p_sol.to::<Watt>();
-//! assert!((p_w_equiv.value() - 3.0 * 3.828e26).abs() < 1e15);
+//! let sol = SolarLuminosities::new(1.0);
+//! let w = sol.to::<Watt>();
+//! assert!((w.value() - 3.828e26).abs() < 1e18);
 //! ```
 
 use crate::{Dimension, Quantity, Unit};
-use units_derive::Unit;
+use unit_derive::Unit;
 
 /// Fundamental dimension – power.
 pub enum Power {}
@@ -34,16 +23,22 @@ impl<T: Unit<Dim = Power>> PowerUnit for T {}
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "W", dimension = Power, ratio = 1.0)]
+/// Watt.
 pub struct Watt;
+/// Type alias shorthand for [`Watt`].
 pub type W = Watt;
+/// A quantity measured in watts.
 pub type Watts = Quantity<W>;
+/// One watt.
 pub const WATT: Watts = Watts::new(1.0);
 
-// 1 L☉ = 3.828 × 10²⁶ W (IAU 2015)
+/// Solar luminosity (IAU 2015; watts per L☉).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "L☉", dimension = Power, ratio = 3.828e26)]
 pub struct SolarLuminosity;
+/// A quantity measured in solar luminosities.
 pub type SolarLuminosities = Quantity<SolarLuminosity>;
+/// One solar luminosity.
 pub const L_SUN: SolarLuminosities = SolarLuminosities::new(1.0);
 
 #[cfg(test)]
