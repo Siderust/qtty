@@ -6,30 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Sem
 ## [Unreleased]
 
 ### Added
-- Procedural derive macro for defining units via `#[derive(Unit)]` and `#[unit(...)]`.
-- Workspace split into crates: `units-core` (types), `units-derive` (proc-macro), `unit` (re-exports).
+- Workspace split into crates: `unit` (facade), `unit-core` (types + units), `unit-derive` (proc-macro).
 - Feature flags: `std` (default) and optional `serde` for `Quantity<U>`.
-- `no_std` support (uses `libm` for math).
-- Unit definitions organized under `units-core/src/units/` (angular, length, time, mass, power, velocity, frequency, unitless).
+- `no_std` support in `unit-core` (uses `libm` for floating-point math not in `core`).
+- Predefined unit modules under `unit-core::units` (angular, time, length, mass, power, velocity, frequency, unitless).
 
 ### Changed
-- Refactored from a single-crate declarative-macro setup to a multi-crate workspace using procedural macros.
-- Migrated ~40 units from `define_unit!` to the `#[derive(Unit)]` workflow.
-- Moved unit modules into `units-core/src/units/`.
-- Improved proc-macro hygiene (explicit paths for better IDE support and diagnostics).
+- Documentation rewrite for docs.rs (crate docs, READMEs, examples).
 
 ### Deprecated
-- `define_unit!` remains available for now, but is deprecated in favor of `#[derive(Unit)]`.
-- Planned removal in a future major version (kept temporarily for migration compatibility).
+- `define_unit!` is retained for internal use and backward compatibility; new units in `unit-core` use `#[derive(Unit)]`.
 
 ### Fixed
-- Fixed doctests to use correct crate paths.
-- Moved unit definitions into `units-core` to satisfy Rust orphan rules.
-- Reorganized tests into appropriate crates (189 unit tests, 29 integration tests).
-
-### Security
-
-## [0.0.0] - 2025-09-01
-
-### Added
-- Migration from Siderust.
+- `unit` feature flags now correctly control `unit-core` defaults (including `no_std` builds).

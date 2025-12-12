@@ -25,7 +25,7 @@
 //!
 //! let angle: Degrees = Degrees::new(90.0);
 //! let r: Radians = angle.to();
-//! assert!((r.value() - std::f64::consts::FRAC_PI_2).abs() < 1e-12);
+//! assert!((r.value() - core::f64::consts::FRAC_PI_2).abs() < 1e-12);
 //! assert!((angle.sin() - 1.0).abs() < 1e-12);
 //! ```
 //!
@@ -38,8 +38,25 @@
 //! ```
 
 use crate::{Dimension, Quantity, Unit};
-use std::f64::consts::TAU;
+use core::f64::consts::TAU;
 use unit_derive::Unit;
+
+#[inline]
+fn rem_euclid(x: f64, modulus: f64) -> f64 {
+    #[cfg(feature = "std")]
+    {
+        x.rem_euclid(modulus)
+    }
+    #[cfg(not(feature = "std"))]
+    {
+        let r = crate::libm::fmod(x, modulus);
+        if r < 0.0 {
+            r + modulus
+        } else {
+            r
+        }
+    }
+}
 
 /// Dimension tag for angular measures (e.g., degrees, radians, arcseconds).
 pub enum Angular {}
@@ -53,8 +70,11 @@ impl Dimension for Angular {}
 /// > **Naming note:** The historical spelling `QUARTED_TURN` is retained for backward compatibility. It represents a
 /// > quarter turn (90°).
 pub trait AngularUnit: Unit<Dim = Angular> {
+    /// One full revolution (τ radians / 360°) expressed in this unit.
     const FULL_TURN: f64;
+    /// Half a revolution (π radians / 180°) expressed in this unit.
     const HALF_TURN: f64;
+    /// A quarter revolution (π/2 radians / 90°) expressed in this unit.
     const QUARTED_TURN: f64;
 }
 impl<T: Unit<Dim = Angular>> AngularUnit for T {
@@ -69,35 +89,67 @@ impl<T: Unit<Dim = Angular>> AngularUnit for T {
 impl<U: AngularUnit + Copy> Quantity<U> {
     /// Constant representing τ radians (2π rad == 360°).
     pub const TAU: Quantity<U> = Quantity::<U>::new(U::FULL_TURN);
-    /// One full revolution (360°) expressed in Quantity<T> unit.
+    /// One full revolution (360°) expressed as `Quantity<U>`.
     pub const FULL_TURN: Quantity<U> = Quantity::<U>::new(U::FULL_TURN);
-    /// Half a revolution (180°) expressed in Quantity<T> unit.
+    /// Half a revolution (180°) expressed as `Quantity<U>`.
     pub const HALF_TURN: Quantity<U> = Quantity::<U>::new(U::HALF_TURN);
-    /// Quarter revolution (90°) expressed in Quantity<T> unit.
+    /// Quarter revolution (90°) expressed as `Quantity<U>`.
     pub const QUARTED_TURN: Quantity<U> = Quantity::<U>::new(U::QUARTED_TURN);
 
     /// Sine of the angle.
     #[inline]
     pub fn sin(&self) -> f64 {
-        self.to::<Radian>().value().sin()
+        let x = self.to::<Radian>().value();
+        #[cfg(feature = "std")]
+        {
+            x.sin()
+        }
+        #[cfg(not(feature = "std"))]
+        {
+            crate::libm::sin(x)
+        }
     }
 
     /// Cosine of the angle.
     #[inline]
     pub fn cos(&self) -> f64 {
-        self.to::<Radian>().value().cos()
+        let x = self.to::<Radian>().value();
+        #[cfg(feature = "std")]
+        {
+            x.cos()
+        }
+        #[cfg(not(feature = "std"))]
+        {
+            crate::libm::cos(x)
+        }
     }
 
     /// Tangent of the angle.
     #[inline]
     pub fn tan(&self) -> f64 {
-        self.to::<Radian>().value().tan()
+        let x = self.to::<Radian>().value();
+        #[cfg(feature = "std")]
+        {
+            x.tan()
+        }
+        #[cfg(not(feature = "std"))]
+        {
+            crate::libm::tan(x)
+        }
     }
 
     /// Simultaneously compute sine and cosine.
     #[inline]
     pub fn sin_cos(&self) -> (f64, f64) {
-        self.to::<Radian>().value().sin_cos()
+        let x = self.to::<Radian>().value();
+        #[cfg(feature = "std")]
+        {
+            x.sin_cos()
+        }
+        #[cfg(not(feature = "std"))]
+        {
+            (crate::libm::sin(x), crate::libm::cos(x))
+        }
     }
 
     /// Sign of the *raw numeric* in this unit (same semantics as `f64::signum()`).
@@ -117,7 +169,7 @@ impl<U: AngularUnit + Copy> Quantity<U> {
     /// Wrap into the positive range `[0, FULL_TURN)` using Euclidean remainder.
     #[inline]
     pub fn wrap_pos(self) -> Self {
-        Self::new(self.value().rem_euclid(U::FULL_TURN))
+        Self::new(rem_euclid(self.value(), U::FULL_TURN))
     }
 
     /// Wrap into the signed range `(-HALF_TURN, HALF_TURN]`.
@@ -128,7 +180,7 @@ impl<U: AngularUnit + Copy> Quantity<U> {
         let full = U::FULL_TURN;
         let half = 0.5 * full;
         let x = self.value();
-        let y = (x + half).rem_euclid(full) - half;
+        let y = rem_euclid(x + half, full) - half;
         let norm = if y <= -half { y + full } else { y };
         Self::new(norm)
     }
@@ -155,7 +207,7 @@ impl<U: AngularUnit + Copy> Quantity<U> {
         let full = U::FULL_TURN;
         let half = 0.5 * full;
         let quarter = 0.25 * full;
-        let y = (self.value() + quarter).rem_euclid(full);
+        let y = rem_euclid(self.value() + quarter, full);
         // quarter - |y - half| yields [-quarter, quarter]
         Self::new(quarter - (y - half).abs())
     }
@@ -174,6 +226,7 @@ impl<U: AngularUnit + Copy> Quantity<U> {
     }
 }
 
+/// Degree.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "Deg", dimension = Angular, ratio = 1.0)]
 pub struct Degree;
@@ -184,9 +237,9 @@ pub type Degrees = Quantity<Deg>;
 /// One degree.
 pub const DEG: Degrees = Degrees::new(1.0);
 
-// NOTE: 1 rad = 180/π degrees.
+/// Radian.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Rad", dimension = Angular, ratio = 180.0 / std::f64::consts::PI)]
+#[unit(symbol = "Rad", dimension = Angular, ratio = 180.0 / core::f64::consts::PI)]
 pub struct Radian;
 /// Type alias shorthand for [`Radian`].
 pub type Rad = Radian;
@@ -195,7 +248,7 @@ pub type Radians = Quantity<Rad>;
 /// One radian.
 pub const RAD: Radians = Radians::new(1.0);
 
-// NOTE: 1 arcsecond = 1/3600 degree.
+/// Arcsecond (`1/3600` degree).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "Arcs", dimension = Angular, ratio = 1.0 / 3600.0)]
 pub struct Arcsecond;
@@ -206,7 +259,7 @@ pub type Arcseconds = Quantity<Arcs>;
 /// One arcsecond.
 pub const ARCS: Arcseconds = Arcseconds::new(1.0);
 
-// NOTE: 1 milliarcsecond = 1/3_600_000 degree.
+/// Milliarcsecond (`1/3_600_000` degree).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "Mas", dimension = Angular, ratio = 1.0 / 3_600_000.0)]
 pub struct MilliArcsecond;
@@ -217,7 +270,7 @@ pub type MilliArcseconds = Quantity<Mas>;
 /// One milliarcsecond.
 pub const MAS: MilliArcseconds = MilliArcseconds::new(1.0);
 
-// NOTE: 1 hour angle = 15 degrees.
+/// Hour angle hour (`15` degrees).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "Hms", dimension = Angular, ratio = 15.0)]
 pub struct HourAngle;

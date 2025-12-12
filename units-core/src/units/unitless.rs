@@ -1,6 +1,18 @@
-//! # Unitless Module
+//! Dimensionless helpers.
 //!
-//! Support for dimensionless quantities and conversions.
+//! This module contains small adapters for working with dimensionless values.
+//!
+//! The provided conversion from a length quantity to a unitless quantity is *lossy*: it drops the unit type without
+//! performing any normalization. The numeric value is preserved as-is.
+//!
+//! ```rust
+//! use unit_core::length::Kilometers;
+//! use unit_core::{Quantity, Unitless};
+//!
+//! let km = Kilometers::new(3.0);
+//! let u: Quantity<Unitless> = km.into();
+//! assert_eq!(u.value(), 3.0);
+//! ```
 
 use crate::units::length::LengthUnit;
 use crate::{Quantity, Unitless};
