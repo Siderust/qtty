@@ -187,7 +187,7 @@ pub const DEG: Degrees = Degrees::new(1.0);
 
 // NOTE: 1 rad = 180/π degrees.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Rad", dimension = Angular, ratio = 180.0 / 3.141592653589793)]
+#[unit(symbol = "Rad", dimension = Angular, ratio = 180.0 / std::f64::consts::PI)]
 pub struct Radian;
 /// Type alias shorthand for [`Radian`].
 pub type Rad = Radian;

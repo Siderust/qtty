@@ -87,7 +87,7 @@ pub const JULIAN_CENTURY: JulianCenturies = JulianCenturies::new(1.0);
 #[cfg(test)]
 mod tests {
     use super::*;
-    use approx::{assert_abs_diff_eq, assert_relative_eq};
+    use approx::assert_abs_diff_eq;
     use proptest::prelude::*;
 
     // ─────────────────────────────────────────────────────────────────────────────
