@@ -1,4 +1,4 @@
-//! # Units Core
+//! # Unit Core
 //!
 //! This crate provides the core types and traits for zero-cost strongly-typed
 //! physical units. All type information is resolved at compile time using phantom
@@ -15,7 +15,7 @@
 //! ## Example
 //!
 //! ```rust
-//! use units_core::*;
+//! use unit_core::*;
 //!
 //! // Define a dimension
 //! pub enum Length {}
@@ -67,7 +67,7 @@ pub use units::velocity;
 /// You usually model each dimension as an empty enum:
 ///
 /// ```rust
-/// use units_core::Dimension;
+/// use unit_core::Dimension;
 /// #[derive(Debug)]
 /// pub enum Length {}
 /// impl Dimension for Length {}
@@ -138,7 +138,7 @@ impl<N: Unit, D: Unit> Display for Quantity<Per<N, D>> {
 /// # Examples
 ///
 /// ```rust
-/// use units_core::{Quantity, Unit, Dimension};
+/// use unit_core::{Quantity, Unit, Dimension};
 ///
 /// pub enum Length {}
 /// impl Dimension for Length {}
@@ -186,7 +186,7 @@ impl<U: Unit + Copy> Quantity<U> {
     /// # Example
     ///
     /// ```rust
-    /// use units_core::{Quantity, Unit, Dimension};
+    /// use unit_core::{Quantity, Unit, Dimension};
     ///
     /// pub enum Length {}
     /// impl Dimension for Length {}
@@ -467,12 +467,16 @@ impl<'de, U: Unit> Deserialize<'de> for Quantity<U> {
 /// Generate a **unit type** and its [`Display`] implementation.
 ///
 /// This macro is provided for backward compatibility. New code should prefer
-/// using the `#[derive(Unit)]` procedural macro from `units-derive`.
+/// using the `#[derive(Unit)]` procedural macro from `unit-derive`.
+///
+/// Note: This macro is intended for use *inside* `unit-core`. The expansion
+/// includes an `impl Display for unit_core::Quantity<...>`, which downstream
+/// crates cannot compile due to Rust’s orphan rules.
 ///
 /// # Example
 ///
 /// ```rust,ignore
-/// use units_core::{define_unit, Unit, Quantity, Dimension};
+/// use unit_core::{define_unit, Unit, Quantity, Dimension};
 ///
 /// pub enum Length {}
 /// impl Dimension for Length {}

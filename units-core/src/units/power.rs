@@ -1,28 +1,21 @@
-//! # Power Units Module
-//!
-//! Commonly used power units in astronomy.
-//!
-//! ## Units
-//! - **Watt (W)**: SI base unit of power.
-//! - **Solar Luminosity (L☉)**: power radiated by the Sun.
+//! Power units and conversions.
 //!
 //! ## Example
-//! ```rust,ignore
-//! use crate::*;
+//! ```rust
+//! use unit_core::power::{SolarLuminosities, Watt, Watts};
 //!
 //! // 2 kW
 //! let p_w = Watts::new(2_000.0);
+//! assert_eq!(p_w.value(), 2_000.0);
 //!
-//! // 3 L☉
+//! // Convert solar luminosities to watts.
 //! let p_sol = SolarLuminosities::new(3.0);
-//!
-//! // Convenient conversion
 //! let p_w_equiv = p_sol.to::<Watt>();
 //! assert!((p_w_equiv.value() - 3.0 * 3.828e26).abs() < 1e15);
 //! ```
 
 use crate::{Dimension, Quantity, Unit};
-use units_derive::Unit;
+use unit_derive::Unit;
 
 /// Fundamental dimension – power.
 pub enum Power {}

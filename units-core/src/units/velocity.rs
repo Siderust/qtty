@@ -3,7 +3,7 @@
 //! Composite velocity units built from a length over a time. The underlying
 //! implementation leverages the generic [`Per<N, D>`] type which composes two
 //! phantom unit parameters. This allows the multiplication and division traits
-//! to be implemented once for all unit pairs in [`Quantity`](units_core::Quantity).
+//! to be implemented once for all unit pairs in [`Quantity`](unit_core::Quantity).
 
 use crate::units::length::{Au, Kilometer, Length, Meter};
 use crate::units::time::{Day, Hour, Second, Time};

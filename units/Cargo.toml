@@ -1,5 +1,5 @@
 [package]
-name = "siderust-units"
+name = "unit"
 description = "Strongly typed physical and astronomical units."
 version.workspace = true
 edition.workspace = true
@@ -11,12 +11,12 @@ categories.workspace = true
 
 [features]
 default = []
-std = ["units-core/std"]
-serde = ["units-core/serde"]
+std = ["unit-core/std"]
+serde = ["unit-core/serde"]
 
 [dependencies]
-units-core = { path = "../units-core" }
-units-derive = { path = "../units-derive" }
+unit-core = { version = "0.1.0", path = "../units-core" }
+unit-derive = { version = "0.1.0", path = "../units-derive" }
 
 [dev-dependencies]
 approx = "0.5"

@@ -15,7 +15,7 @@
 //!
 //! ## Example Usage
 //! ```rust
-//! use siderust_units::*;
+//! use unit::*;
 //!
 //! // Angular Units
 //! let degrees = Degrees::new(180.0);
@@ -40,27 +40,27 @@
 //! - [`mass`]: Mass-related units and utilities.
 //! - [`power`]: Power-related units and utilities.
 
-// Re-export all units-core types and modules
-pub use units_core::*;
+// Re-export all unit-core types and modules
+pub use unit_core::*;
 
 // Re-export the derive macro
-pub use units_derive::Unit;
+pub use unit_derive::Unit;
 
-// Re-export unit modules - they're defined in units-core
-pub use units_core::units::angular;
-pub use units_core::units::frequency;
-pub use units_core::units::length;
-pub use units_core::units::mass;
-pub use units_core::units::power;
-pub use units_core::units::time;
-pub use units_core::units::unitless;
-pub use units_core::units::velocity;
+// Re-export unit modules - they're defined in unit-core
+pub use unit_core::units::angular;
+pub use unit_core::units::frequency;
+pub use unit_core::units::length;
+pub use unit_core::units::mass;
+pub use unit_core::units::power;
+pub use unit_core::units::time;
+pub use unit_core::units::unitless;
+pub use unit_core::units::velocity;
 
 // Re-export all types from unit modules for convenience
-pub use units_core::units::angular::*;
-pub use units_core::units::frequency::*;
-pub use units_core::units::length::*;
-pub use units_core::units::mass::*;
-pub use units_core::units::power::*;
-pub use units_core::units::time::*;
-pub use units_core::units::velocity::*;
+pub use unit_core::units::angular::*;
+pub use unit_core::units::frequency::*;
+pub use unit_core::units::length::*;
+pub use unit_core::units::mass::*;
+pub use unit_core::units::power::*;
+pub use unit_core::units::time::*;
+pub use unit_core::units::velocity::*;

@@ -1,9 +1,9 @@
-//! Integration tests for siderust-units
+//! Integration tests for unit
 //!
 //! These tests exercise the public API across modules, simulating real-world usage
 //! patterns and ensuring the prelude-style imports work correctly.
 
-use siderust_units::*;
+use unit::*;
 
 use approx::{assert_abs_diff_eq, assert_relative_eq};
 
