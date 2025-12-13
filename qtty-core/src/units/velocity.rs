@@ -1,6 +1,19 @@
 //! Velocity unit aliases (`Length / Time`).
 //!
-//! This module is mostly type aliases over [`Per`] plus a dimension alias ([`Velocity`]).
+//! This module defines velocity units as *pure type aliases* over [`Per`] using
+//! length and time units already defined elsewhere in the crate.
+//!
+//! No standalone velocity units are introduced: every velocity is represented as
+//! `Length / Time` at the type level.
+//!
+//! ## Design notes
+//!
+//! - The velocity *dimension* is [`Velocity`] = [`Length`] / [`Time`].
+//! - All velocity units are zero-cost type aliases.
+//! - Conversions are handled automatically via the underlying length and time units.
+//! - No assumptions are made about reference frames, relativistic effects, or media.
+//!
+//! ## Examples
 //!
 //! ```rust
 //! use qtty_core::length::Kilometers;
@@ -12,6 +25,15 @@
 //! let v: KilometersPerSecond = d / t;
 //! assert!((v.value() - 21.0).abs() < 1e-12);
 //! ```
+//!
+//! ```rust
+//! use qtty_core::length::Meters;
+//! use qtty_core::time::Hours;
+//! use qtty_core::velocity::MetersPerHour;
+//!
+//! let v = Meters::new(3_600.0) / Hours::new(1.0);
+//! assert!((v.value() - 3_600.0).abs() < 1e-12);
+//! ```
 
 use crate::units::length::{Au, Kilometer, Length, Meter};
 use crate::units::time::{Day, Hour, Second, Time};
@@ -20,29 +42,79 @@ use crate::{DivDim, Per, Quantity, Unit};
 /// Dimension alias for velocities (`Length / Time`).
 pub type Velocity = DivDim<Length, Time>;
 
-/// Marker trait for any unit with velocity dimension.
+/// Marker trait for any unit whose dimension is [`Velocity`].
 pub trait VelocityUnit: Unit<Dim = Velocity> {}
 impl<T: Unit<Dim = Velocity>> VelocityUnit for T {}
 
+
+// --- SI and metric velocities ---
+
 /// Metres per second (`m / s`).
+///
+/// Canonical SI velocity unit.
 pub type MeterPerSecond = Per<Meter, Second>;
 /// A quantity measured in metres per second.
 pub type MetersPerSecond = Quantity<MeterPerSecond>;
 
 /// Kilometres per second (`km / s`).
+///
+/// Common in astronomy, spaceflight, and high-speed physics.
 pub type KilometerPerSecond = Per<Kilometer, Second>;
 /// A quantity measured in kilometres per second.
 pub type KilometersPerSecond = Quantity<KilometerPerSecond>;
 
+/// Metres per hour (`m / h`).
+///
+/// Useful for low-speed processes and engineering contexts.
+pub type MeterPerHour = Per<Meter, Hour>;
+/// A quantity measured in metres per hour.
+pub type MetersPerHour = Quantity<MeterPerHour>;
+
 /// Kilometres per hour (`km / h`).
+///
+/// Common civil and transportation velocity unit.
 pub type KilometerPerHour = Per<Kilometer, Hour>;
 /// A quantity measured in kilometres per hour.
 pub type KilometersPerHour = Quantity<KilometerPerHour>;
 
+/// Metres per day (`m / d`).
+///
+/// Useful in geoscience, biology, and slow drift phenomena.
+pub type MeterPerDay = Per<Meter, Day>;
+/// A quantity measured in metres per day.
+pub type MetersPerDay = Quantity<MeterPerDay>;
+
+/// Kilometres per day (`km / d`).
+///
+/// Often used for large-scale migrations and orbital approximations.
+pub type KilometerPerDay = Per<Kilometer, Day>;
+/// A quantity measured in kilometres per day.
+pub type KilometersPerDay = Quantity<KilometerPerDay>;
+
+
+// --- Astronomical velocities ---
+
+/// Astronomical units per second (`AU / s`).
+///
+/// Extremely large velocity scale, mainly theoretical.
+pub type AuPerSecond = Per<Au, Second>;
+/// A quantity measured in astronomical units per second.
+pub type AusPerSecond = Quantity<AuPerSecond>;
+
+/// Astronomical units per hour (`AU / h`).
+///
+/// Occasionally useful for coarse interplanetary motion.
+pub type AuPerHour = Per<Au, Hour>;
+/// A quantity measured in astronomical units per hour.
+pub type AusPerHour = Quantity<AuPerHour>;
+
 /// Astronomical units per day (`AU / d`).
+///
+/// Common in orbital mechanics and ephemerides.
 pub type AuPerDay = Per<Au, Day>;
 /// A quantity measured in astronomical units per day.
 pub type AusPerDay = Quantity<AuPerDay>;
+
 
 #[cfg(test)]
 mod tests {
