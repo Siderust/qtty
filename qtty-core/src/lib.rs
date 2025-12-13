@@ -116,7 +116,7 @@ macro_rules! impl_unit_conversions {
                     value.to::<$rest>()
                 }
             }
-            
+
             impl From<$crate::Quantity<$rest>> for $crate::Quantity<$first> {
                 fn from(value: $crate::Quantity<$rest>) -> Self {
                     value.to::<$first>()

@@ -48,43 +48,43 @@ pub const G: Grams = Grams::new(1.0);
 macro_rules! si_gram {
     ($name:ident, $sym:literal, $ratio:expr, $alias:ident, $qty:ident, $one:ident) => {
         #[doc = concat!(
-            "SI mass unit `",
-            stringify!($name),
-            "` with gram-based prefix (symbol `",
-            $sym,
-            "`)."
-        )]
+                    "SI mass unit `",
+                    stringify!($name),
+                    "` with gram-based prefix (symbol `",
+                    $sym,
+                    "`)."
+                )]
         #[doc = concat!(
-            "By definition, `1 ",
-            $sym,
-            " = ",
-            stringify!($ratio),
-            " g`."
-        )]
+                    "By definition, `1 ",
+                    $sym,
+                    " = ",
+                    stringify!($ratio),
+                    " g`."
+                )]
         #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
         #[unit(symbol = $sym, dimension = Mass, ratio = $ratio)]
         pub struct $name;
         #[doc = concat!(
-            "Shorthand alias for [`",
-            stringify!($name),
-            "`]."
-        )]
+                    "Shorthand alias for [`",
+                    stringify!($name),
+                    "`]."
+                )]
         pub type $alias = $name;
         #[doc = concat!(
-            "Quantity measured in ",
-            stringify!($name),
-            " (",
-            $sym,
-            ")."
-        )]
+                    "Quantity measured in ",
+                    stringify!($name),
+                    " (",
+                    $sym,
+                    ")."
+                )]
         pub type $qty = Quantity<$alias>;
         #[doc = concat!(
-            "Constant equal to one ",
-            stringify!($name),
-            " (1 ",
-            $sym,
-            ")."
-        )]
+                    "Constant equal to one ",
+                    stringify!($name),
+                    " (1 ",
+                    $sym,
+                    ")."
+                )]
         pub const $one: $qty = $qty::new(1.0);
     };
 }
@@ -92,25 +92,25 @@ macro_rules! si_gram {
 // Full SI prefix ladder (gram-based)
 si_gram!(Yoctogram, "yg", 1e-24, Yg, Yoctograms, YG);
 si_gram!(Zeptogram, "zg", 1e-21, Zg, Zeptograms, ZG);
-si_gram!(Attogram,  "ag", 1e-18, Ag, Attograms, AG);
+si_gram!(Attogram, "ag", 1e-18, Ag, Attograms, AG);
 si_gram!(Femtogram, "fg", 1e-15, Fg, Femtograms, FG);
-si_gram!(Picogram,  "pg", 1e-12, Pg, Picograms, PG);
-si_gram!(Nanogram,  "ng", 1e-9,  Ng, Nanograms, NG);
-si_gram!(Microgram, "µg", 1e-6,  Ug, Micrograms, UG);
-si_gram!(Milligram, "mg", 1e-3,  Mg, Milligrams, MG);
-si_gram!(Centigram, "cg", 1e-2,  Cg, Centigrams, CG);
-si_gram!(Decigram,  "dg", 1e-1,  Dg, Decigrams, DG);
+si_gram!(Picogram, "pg", 1e-12, Pg, Picograms, PG);
+si_gram!(Nanogram, "ng", 1e-9, Ng, Nanograms, NG);
+si_gram!(Microgram, "µg", 1e-6, Ug, Micrograms, UG);
+si_gram!(Milligram, "mg", 1e-3, Mg, Milligrams, MG);
+si_gram!(Centigram, "cg", 1e-2, Cg, Centigrams, CG);
+si_gram!(Decigram, "dg", 1e-1, Dg, Decigrams, DG);
 
-si_gram!(Decagram,  "dag", 1e1,  Dag, Decagrams, DAG);
-si_gram!(Hectogram, "hg",  1e2,  Hg,  Hectograms, HG);
-si_gram!(Kilogram,  "kg",  1e3,  Kg,  Kilograms, KG);
-si_gram!(Megagram,  "Mg",  1e6,  MgG, Megagrams, MEGAGRAM);
-si_gram!(Gigagram,  "Gg",  1e9,  Gg,  Gigagrams, GG);
-si_gram!(Teragram,  "Tg",  1e12, Tg,  Teragrams, TG);
-si_gram!(Petagram,  "Pg",  1e15, PgG, Petagrams, PETAGRAM);
-si_gram!(Exagram,   "Eg",  1e18, Eg,  Exagrams, EG);
-si_gram!(Zettagram, "Zg",  1e21, ZgG, Zettagrams, ZETTAGRAM);
-si_gram!(Yottagram, "Yg",  1e24, YgG, Yottagrams, YOTTAGRAM);
+si_gram!(Decagram, "dag", 1e1, Dag, Decagrams, DAG);
+si_gram!(Hectogram, "hg", 1e2, Hg, Hectograms, HG);
+si_gram!(Kilogram, "kg", 1e3, Kg, Kilograms, KG);
+si_gram!(Megagram, "Mg", 1e6, MgG, Megagrams, MEGAGRAM);
+si_gram!(Gigagram, "Gg", 1e9, Gg, Gigagrams, GG);
+si_gram!(Teragram, "Tg", 1e12, Tg, Teragrams, TG);
+si_gram!(Petagram, "Pg", 1e15, PgG, Petagrams, PETAGRAM);
+si_gram!(Exagram, "Eg", 1e18, Eg, Exagrams, EG);
+si_gram!(Zettagram, "Zg", 1e21, ZgG, Zettagrams, ZETTAGRAM);
+si_gram!(Yottagram, "Yg", 1e24, YgG, Yottagrams, YOTTAGRAM);
 
 /// Tonne (metric ton): `1 t = 1_000_000 g` (exact).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
@@ -223,16 +223,37 @@ pub const MSUN: SolarMasses = SolarMasses::new(1.0);
 // Generate all bidirectional From implementations between mass units
 crate::impl_unit_conversions!(
     Gram,
-    Yoctogram, Zeptogram, Attogram, Femtogram, Picogram, Nanogram, Microgram, Milligram, Centigram, Decigram,
-    Decagram, Hectogram, Kilogram, Megagram, Gigagram, Teragram, Petagram, Exagram, Zettagram, Yottagram,
+    Yoctogram,
+    Zeptogram,
+    Attogram,
+    Femtogram,
+    Picogram,
+    Nanogram,
+    Microgram,
+    Milligram,
+    Centigram,
+    Decigram,
+    Decagram,
+    Hectogram,
+    Kilogram,
+    Megagram,
+    Gigagram,
+    Teragram,
+    Petagram,
+    Exagram,
+    Zettagram,
+    Yottagram,
     Tonne,
     Carat,
     Grain,
-    Pound, Ounce, Stone, ShortTon, LongTon,
+    Pound,
+    Ounce,
+    Stone,
+    ShortTon,
+    LongTon,
     AtomicMassUnit,
     SolarMass
 );
-
 
 #[cfg(test)]
 mod tests {

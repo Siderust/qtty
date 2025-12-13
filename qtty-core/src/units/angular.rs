@@ -910,8 +910,16 @@ mod tests {
     #[test]
     fn wrap_signed_lo_boundary_half_turn() {
         // +half turn should map to -half turn to make the upper bound exclusive.
-        assert_abs_diff_eq!(Degrees::new(180.0).wrap_signed_lo().value(), -180.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Degrees::new(-180.0).wrap_signed_lo().value(), -180.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Degrees::new(180.0).wrap_signed_lo().value(),
+            -180.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-180.0).wrap_signed_lo().value(),
+            -180.0,
+            epsilon = 1e-12
+        );
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -1036,7 +1044,7 @@ mod tests {
 
     #[test]
     fn roundtrip_turn_radian() {
-        let original = Turns::new(2.718);
+        let original = Turns::new(2.717);
         let rad = original.to::<Radian>();
         let back = rad.to::<Turn>();
         assert_abs_diff_eq!(back.value(), original.value(), epsilon = 1e-12);
@@ -1065,7 +1073,7 @@ mod tests {
         let arcs = mas.to::<Arcsecond>();
         let arcm = arcs.to::<Arcminute>();
         let deg = arcm.to::<Degree>();
-        
+
         assert_abs_diff_eq!(mas.value(), 1_000_000.0, epsilon = 1e-6);
         assert_abs_diff_eq!(arcs.value(), 1_000.0, epsilon = 1e-9);
         assert_abs_diff_eq!(arcm.value(), 1_000.0 / 60.0, epsilon = 1e-9);
@@ -1103,14 +1111,46 @@ mod tests {
     #[test]
     fn all_units_to_degrees() {
         // Verify all units convert correctly to degrees
-        assert_abs_diff_eq!(Radians::new(PI).to::<Degree>().value(), 180.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Arcminutes::new(60.0).to::<Degree>().value(), 1.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Arcseconds::new(3600.0).to::<Degree>().value(), 1.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(MilliArcseconds::new(3_600_000.0).to::<Degree>().value(), 1.0, epsilon = 1e-9);
-        assert_abs_diff_eq!(MicroArcseconds::new(3_600_000_000.0).to::<Degree>().value(), 1.0, epsilon = 1e-6);
-        assert_abs_diff_eq!(Gradians::new(100.0).to::<Degree>().value(), 90.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(Turns::new(1.0).to::<Degree>().value(), 360.0, epsilon = 1e-12);
-        assert_abs_diff_eq!(HourAngles::new(1.0).to::<Degree>().value(), 15.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(
+            Radians::new(PI).to::<Degree>().value(),
+            180.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Arcminutes::new(60.0).to::<Degree>().value(),
+            1.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Arcseconds::new(3600.0).to::<Degree>().value(),
+            1.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            MilliArcseconds::new(3_600_000.0).to::<Degree>().value(),
+            1.0,
+            epsilon = 1e-9
+        );
+        assert_abs_diff_eq!(
+            MicroArcseconds::new(3_600_000_000.0).to::<Degree>().value(),
+            1.0,
+            epsilon = 1e-6
+        );
+        assert_abs_diff_eq!(
+            Gradians::new(100.0).to::<Degree>().value(),
+            90.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Turns::new(1.0).to::<Degree>().value(),
+            360.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            HourAngles::new(1.0).to::<Degree>().value(),
+            15.0,
+            epsilon = 1e-12
+        );
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
