@@ -191,17 +191,17 @@ mod tests {
 
     #[test]
     fn per_ratio_deg_day() {
-        // Degree::RATIO = 1.0, Day::RATIO = 1.0
-        // So Per<Degree, Day>::RATIO = 1.0 / 1.0 = 1.0
+        // Degree::RATIO = 1.0, Day::RATIO = 86400.0
+        // So Per<Degree, Day>::RATIO = 1.0 / 86400.0
         let ratio = <Per<Degree, Day>>::RATIO;
-        assert_abs_diff_eq!(ratio, 1.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(ratio, 1.0 / 86400.0, epsilon = 1e-12);
     }
 
     #[test]
     fn per_ratio_rad_day() {
-        // Radian::RATIO = 180/π, Day::RATIO = 1.0
+        // Radian::RATIO = 180/π, Day::RATIO = 86400.0
         let ratio = <Per<Radian, Day>>::RATIO;
-        assert_relative_eq!(ratio, 180.0 / PI, max_relative = 1e-12);
+        assert_relative_eq!(ratio, (180.0 / PI) / 86400.0, max_relative = 1e-12);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
