@@ -84,10 +84,10 @@ extern crate libm;
 // Core modules
 // ─────────────────────────────────────────────────────────────────────────────
 
-mod macros;
 mod dimension;
-mod unit;
+mod macros;
 mod quantity;
+mod unit;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Public re-exports of core types

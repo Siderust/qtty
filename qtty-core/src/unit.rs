@@ -52,8 +52,17 @@ impl<N: Unit, D: Unit> Display for Quantity<Per<N, D>> {
     }
 }
 
-/// Unitless type, used for dimensionless ratios.
-pub type Unitless = f64;
+/// Zero-sized marker type for dimensionless quantities.
+///
+/// `Unitless` represents a dimensionless unit with a conversion ratio of 1.0
+/// and an empty symbol. It is used to model the result of simplifying same-unit
+/// ratios (e.g., `Meters / Meters`) into a plain "number-like" `Quantity<Unitless>`.
+///
+/// Unlike a type alias to `f64`, this is a proper zero-sized type, which ensures
+/// that only explicitly constructed `Quantity<Unitless>` values are treated as
+/// dimensionless, not bare `f64` primitives.
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+pub struct Unitless;
 
 impl Unit for Unitless {
     const RATIO: f64 = 1.0;
