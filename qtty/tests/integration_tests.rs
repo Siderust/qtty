@@ -1,3 +1,5 @@
+//! Integration-level smoke tests for the `qtty` facade crate.
+
 use qtty::*;
 
 use approx::{assert_abs_diff_eq, assert_relative_eq};
