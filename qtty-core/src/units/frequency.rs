@@ -1,6 +1,11 @@
 //! Angular frequency unit aliases (`Angular / Time`).
 //!
-//! This module is mostly type aliases over [`Per`] plus a dimension alias ([`Frequency`]).
+//! This module provides a **dimension alias** [`Frequency`] and a small set of **type aliases**
+//! built on [`Per`] for common angular-frequency units (e.g., `rad/s`, `deg/day`, `mas/yr`).
+//!
+//! Naming conventions:
+//! - `XPerY` is the **unit type** (`Per<X, Y>`).
+//! - `XsPerY` is the corresponding **quantity type** (`Quantity<XPerY>`).
 //!
 //! ```rust
 //! use qtty_core::frequency::{DegreesPerDay, RadiansPerDay};
@@ -10,36 +15,124 @@
 //! assert!((f_rad.value() - core::f64::consts::PI).abs() < 1e-12);
 //! ```
 
-use crate::units::angular::{Angular, Degree, MilliArcsecond, Radian};
-use crate::units::time::{Day, Time, Year};
+use crate::units::angular::{
+    Angular, Arcsecond, Degree, Gradian, MicroArcsecond, MilliArcsecond, Radian, Turn,
+};
+use crate::units::time::{Day, Hour, Minute, Second, Time, Year};
 use crate::{DivDim, Per, Quantity, Unit};
 
 /// Dimension alias for angular frequency (`Angular / Time`).
 pub type Frequency = DivDim<Angular, Time>;
 
-/// Marker trait for any unit with frequency dimension.
+/// Marker trait for any unit with frequency dimension (`Angular / Time`).
 pub trait FrequencyUnit: Unit<Dim = Frequency> {}
 impl<T: Unit<Dim = Frequency>> FrequencyUnit for T {}
 
-/// Radians per day (`rad / d`).
-pub type RadianPerDay = Per<Radian, Day>;
-/// A quantity measured in radians per day.
-pub type RadiansPerDay = Quantity<RadianPerDay>;
+macro_rules! freq_alias {
+    // (UnitName, QuantityName, Numerator, Denominator, "short human label")
+    ($u:ident, $q:ident, $num:ty, $den:ty, $label:literal) => {
+        #[doc = $label]
+        pub type $u = Per<$num, $den>;
+        #[doc = $label]
+        pub type $q = Quantity<$u>;
+    };
+}
 
-/// Degrees per day (`deg / d`).
-pub type DegreePerDay = Per<Degree, Day>;
-/// A quantity measured in degrees per day.
-pub type DegreesPerDay = Quantity<DegreePerDay>;
+// Radians
+freq_alias!(RadianPerSecond, RadiansPerSecond, Radian, Second, "Radians per second (`rad/s`).");
+freq_alias!(RadianPerMinute, RadiansPerMinute, Radian, Minute, "Radians per minute (`rad/min`).");
+freq_alias!(RadianPerHour, RadiansPerHour, Radian, Hour, "Radians per hour (`rad/h`).");
+freq_alias!(RadianPerDay, RadiansPerDay, Radian, Day, "Radians per day (`rad/d`).");
+freq_alias!(RadianPerYear, RadiansPerYear, Radian, Year, "Radians per year (`rad/yr`).");
 
-/// Degrees per year (`deg / yr`).
-pub type DegreePerYear = Per<Degree, Year>;
-/// A quantity measured in degrees per year.
-pub type DegreesPerYear = Quantity<DegreePerYear>;
+// Degrees
+freq_alias!(DegreePerSecond, DegreesPerSecond, Degree, Second, "Degrees per second (`deg/s`).");
+freq_alias!(DegreePerMinute, DegreesPerMinute, Degree, Minute, "Degrees per minute (`deg/min`).");
+freq_alias!(DegreePerHour, DegreesPerHour, Degree, Hour, "Degrees per hour (`deg/h`).");
+freq_alias!(DegreePerDay, DegreesPerDay, Degree, Day, "Degrees per day (`deg/d`).");
+freq_alias!(DegreePerYear, DegreesPerYear, Degree, Year, "Degrees per year (`deg/yr`).");
 
-/// Milliarcseconds per day (`mas / d`).
-pub type MilliArcsecondPerDay = Per<MilliArcsecond, Day>;
-/// A quantity measured in milliarcseconds per day.
-pub type MilliArcsecondsPerDay = Quantity<MilliArcsecondPerDay>;
+// Turns (revolutions)
+freq_alias!(TurnPerSecond, TurnsPerSecond, Turn, Second, "Turns per second (`turn/s`).");
+freq_alias!(TurnPerMinute, TurnsPerMinute, Turn, Minute, "Turns per minute (`turn/min`).");
+freq_alias!(TurnPerHour, TurnsPerHour, Turn, Hour, "Turns per hour (`turn/h`).");
+freq_alias!(TurnPerDay, TurnsPerDay, Turn, Day, "Turns per day (`turn/d`).");
+freq_alias!(TurnPerYear, TurnsPerYear, Turn, Year, "Turns per year (`turn/yr`).");
+
+// Gradians (gon)
+freq_alias!(GradianPerSecond, GradiansPerSecond, Gradian, Second, "Gradians per second (`gon/s`).");
+freq_alias!(GradianPerMinute, GradiansPerMinute, Gradian, Minute, "Gradians per minute (`gon/min`).");
+freq_alias!(GradianPerHour, GradiansPerHour, Gradian, Hour, "Gradians per hour (`gon/h`).");
+freq_alias!(GradianPerDay, GradiansPerDay, Gradian, Day, "Gradians per day (`gon/d`).");
+freq_alias!(GradianPerYear, GradiansPerYear, Gradian, Year, "Gradians per year (`gon/yr`).");
+
+// Arcseconds and submultiples (common in astrometry)
+freq_alias!(
+    ArcsecondPerSecond,
+    ArcsecondsPerSecond,
+    Arcsecond,
+    Second,
+    "Arcseconds per second (`arcsec/s`)."
+);
+freq_alias!(
+    ArcsecondPerDay,
+    ArcsecondsPerDay,
+    Arcsecond,
+    Day,
+    "Arcseconds per day (`arcsec/d`)."
+);
+freq_alias!(
+    ArcsecondPerYear,
+    ArcsecondsPerYear,
+    Arcsecond,
+    Year,
+    "Arcseconds per year (`arcsec/yr`)."
+);
+
+freq_alias!(
+    MilliArcsecondPerSecond,
+    MilliArcsecondsPerSecond,
+    MilliArcsecond,
+    Second,
+    "Milliarcseconds per second (`mas/s`)."
+);
+freq_alias!(
+    MilliArcsecondPerDay,
+    MilliArcsecondsPerDay,
+    MilliArcsecond,
+    Day,
+    "Milliarcseconds per day (`mas/d`)."
+);
+freq_alias!(
+    MilliArcsecondPerYear,
+    MilliArcsecondsPerYear,
+    MilliArcsecond,
+    Year,
+    "Milliarcseconds per year (`mas/yr`)."
+);
+
+freq_alias!(
+    MicroArcsecondPerSecond,
+    MicroArcsecondsPerSecond,
+    MicroArcsecond,
+    Second,
+    "Microarcseconds per second (`µas/s`)."
+);
+freq_alias!(
+    MicroArcsecondPerDay,
+    MicroArcsecondsPerDay,
+    MicroArcsecond,
+    Day,
+    "Microarcseconds per day (`µas/d`)."
+);
+freq_alias!(
+    MicroArcsecondPerYear,
+    MicroArcsecondsPerYear,
+    MicroArcsecond,
+    Year,
+    "Microarcseconds per year (`µas/yr`)."
+);
+
 
 #[cfg(test)]
 mod tests {
