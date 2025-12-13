@@ -37,9 +37,6 @@ impl<T: Unit<Dim = FrequencyDim>> FrequencyUnit for T {}
 /// ```
 pub type Frequency<N, D> = Quantity<Per<N, D>>;
 
-// Note: Specific frequency aliases (e.g. RadiansPerSecond) have been removed
-// in favor of using `Quantity<Per<Radian, Second>>` directly.
-
 #[cfg(test)]
 mod tests {
     use super::*;
