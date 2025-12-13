@@ -1,6 +1,6 @@
-//! Strongly typed physical units and conversions.
+//! Strongly typed physical quantities and conversions.
 //!
-//! `unit` is the user-facing crate in this workspace. It re-exports the full API from `unit-core` plus a curated set
+//! `qtty` is the user-facing crate in this workspace. It re-exports the full API from `qtty-core` plus a curated set
 //! of predefined units (time, angles, lengths, …).
 //!
 //! The core idea is: a value is always a `Quantity<U>`, where `U` is a zero-sized type describing the unit. This keeps
@@ -23,7 +23,7 @@
 //! Convert degrees to radians:
 //!
 //! ```rust
-//! use unit::{Degrees, Radian};
+//! use qtty::{Degrees, Radian};
 //!
 //! let a = Degrees::new(180.0);
 //! let r = a.to::<Radian>();
@@ -33,18 +33,19 @@
 //! Compose and use derived units (velocity = length / time):
 //!
 //! ```rust
-//! use unit::{Kilometers, KilometersPerSecond, Seconds};
+//! use qtty::{Kilometer, Kilometers, Second, Seconds};
+//! use qtty::velocity::Velocity;
 //!
 //! let d = Kilometers::new(1_000.0);
 //! let t = Seconds::new(100.0);
-//! let v: KilometersPerSecond = d / t;
+//! let v: Velocity<Kilometer, Second> = d / t;
 //! assert!((v.value() - 10.0).abs() < 1e-12);
 //! ```
 //!
 //! # Incorrect usage (type error)
 //!
 //! ```compile_fail
-//! use unit::{Kilometers, Seconds};
+//! use qtty::{Kilometers, Seconds};
 //!
 //! let d = Kilometers::new(1.0);
 //! let t = Seconds::new(1.0);
@@ -55,17 +56,17 @@
 //!
 //! Units are grouped by dimension under modules (also re-exported at the crate root for convenience):
 //!
-//! - `unit::angular` (degrees, radians, arcseconds, wrapping/trigonometry helpers)
-//! - `unit::time` (seconds, days, years, …)
-//! - `unit::length` (metres, kilometres, AU, light-year, …)
-//! - `unit::mass` (grams, kilograms, solar mass)
-//! - `unit::power` (watts, solar luminosity)
-//! - `unit::velocity` (`Length / Time` aliases)
-//! - `unit::frequency` (`Angular / Time` aliases)
+//! - `qtty::angular` (degrees, radians, arcseconds, wrapping/trigonometry helpers)
+//! - `qtty::time` (seconds, days, years, …)
+//! - `qtty::length` (metres, kilometres, AU, light-year, …)
+//! - `qtty::mass` (grams, kilograms, solar mass)
+//! - `qtty::power` (watts, solar luminosity)
+//! - `qtty::velocity` (`Length / Time` aliases)
+//! - `qtty::frequency` (`Angular / Time` aliases)
 //!
 //! # Feature flags
 //!
-//! - `std` (default): enables `std` support in `unit-core`.
+//! - `std` (default): enables `std` support in `qtty-core`.
 //! - `serde`: enables `serde` support for `Quantity<U>`; serialization is the raw `f64` value only.
 //!
 //! Disable default features for `no_std`:
@@ -87,27 +88,27 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![forbid(unsafe_code)]
 
-pub use unit_core::*;
+pub use qtty_core::*;
 
-/// Derive macro used by `unit-core` to define unit marker types.
+/// Derive macro used by `qtty-core` to define unit marker types.
 ///
-/// This macro expands in terms of `crate::Unit` and `crate::Quantity`, so it is intended for use inside `unit-core`
+/// This macro expands in terms of `crate::Unit` and `crate::Quantity`, so it is intended for use inside `qtty-core`
 /// (or crates exposing the same crate-root API). Most users should not need this.
-pub use unit_derive::Unit;
+pub use qtty_derive::Unit;
 
-pub use unit_core::units::angular;
-pub use unit_core::units::frequency;
-pub use unit_core::units::length;
-pub use unit_core::units::mass;
-pub use unit_core::units::power;
-pub use unit_core::units::time;
-pub use unit_core::units::unitless;
-pub use unit_core::units::velocity;
+pub use qtty_core::units::angular;
+pub use qtty_core::units::frequency;
+pub use qtty_core::units::length;
+pub use qtty_core::units::mass;
+pub use qtty_core::units::power;
+pub use qtty_core::units::time;
+pub use qtty_core::units::unitless;
+pub use qtty_core::units::velocity;
 
-pub use unit_core::units::angular::*;
-pub use unit_core::units::frequency::*;
-pub use unit_core::units::length::*;
-pub use unit_core::units::mass::*;
-pub use unit_core::units::power::*;
-pub use unit_core::units::time::*;
-pub use unit_core::units::velocity::*;
+pub use qtty_core::units::angular::*;
+pub use qtty_core::units::frequency::*;
+pub use qtty_core::units::length::*;
+pub use qtty_core::units::mass::*;
+pub use qtty_core::units::power::*;
+pub use qtty_core::units::time::*;
+pub use qtty_core::units::velocity::*;

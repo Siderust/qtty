@@ -1,10 +1,10 @@
-//! Derive macro implementation used by `unit-core`.
+//! Derive macro implementation used by `qtty-core`.
 //!
-//! `unit-derive` is an implementation detail of this workspace. The `Unit` derive expands in terms of `crate::Unit`
-//! and `crate::Quantity`, so it is intended to be used by `unit-core` (or by crates that expose an identical
+//! `qtty-derive` is an implementation detail of this workspace. The `Unit` derive expands in terms of `crate::Unit`
+//! and `crate::Quantity`, so it is intended to be used by `qtty-core` (or by crates that expose an identical
 //! crate-root API).
 //!
-//! Most users should depend on `unit` instead and use the predefined units.
+//! Most users should depend on `qtty` instead and use the predefined units.
 //!
 //! # Generated impls
 //!
@@ -36,7 +36,7 @@ use syn::{
 ///
 /// The derive must be paired with a `#[unit(...)]` attribute providing `symbol`, `dimension`, and `ratio`.
 ///
-/// This macro is intended for use by `unit-core`.
+/// This macro is intended for use by `qtty-core`.
 #[proc_macro_derive(Unit, attributes(unit))]
 pub fn derive_unit(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);

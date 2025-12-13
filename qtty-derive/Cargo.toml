@@ -1,6 +1,6 @@
 [package]
-name = "unit-derive"
-description = "Procedural macro derives for unit-core."
+name = "qtty-derive"
+description = "Procedural macro derives for qtty-core."
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -9,7 +9,7 @@ repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
 readme = "README.md"
-documentation = "https://docs.rs/unit-derive"
+documentation = "https://docs.rs/qtty-derive"
 
 [lib]
 proc-macro = true
@@ -20,4 +20,4 @@ quote = "1.0"
 proc-macro2 = "1.0"
 
 [dev-dependencies]
-unit-core = { path = "../units-core" }
+qtty-core = { path = "../qtty-core" }
