@@ -37,6 +37,10 @@ Disable default features for `no_std`:
 qtty = { version = "0.1.0", default-features = false }
 ```
 
+## Stability
+
+This workspace is currently `0.x`. Expect breaking changes between minor versions until `1.0`.
+
 ## Documentation
 
 - API docs: `https://docs.rs/qtty` (published versions)

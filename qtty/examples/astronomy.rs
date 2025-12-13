@@ -1,3 +1,5 @@
+//! Astronomy-flavored example using AU, light-years, and an orbital velocity estimate.
+
 use qtty::velocity::Velocity;
 use qtty::{AstronomicalUnits, Days, Kilometer, Kilometers, LightYears, Second, Seconds};
 

@@ -60,9 +60,6 @@ impl<T: Unit<Dim = VelocityDim>> VelocityUnit for T {}
 /// ```
 pub type Velocity<N, D> = Quantity<Per<N, D>>;
 
-// Note: Specific velocity aliases (e.g. MetersPerSecond) have been removed
-// in favor of using `Quantity<Per<Meter, Second>>` directly.
-
 #[cfg(test)]
 mod tests {
     use super::*;
