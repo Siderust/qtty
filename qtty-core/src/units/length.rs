@@ -444,7 +444,7 @@ pub const A0: BohrRadii = BohrRadii::new(1.0);
 
 /// Classical electron radius (`re`). CODATA 2018 value in metres.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "re", dimension = Length, ratio = 2.817_940_3262e-15)]
+#[unit(symbol = "re", dimension = Length, ratio = 2.817_940_326_2e-15)]
 pub struct ClassicalElectronRadius;
 /// A quantity measured in classical electron radii.
 pub type ClassicalElectronRadii = Quantity<ClassicalElectronRadius>;
@@ -509,7 +509,7 @@ pub mod nominal {
 
     /// Earth polar radius.
     #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-    #[unit(symbol = "Rearth_p", dimension = Length, ratio = 6_356_752.3142)]
+    #[unit(symbol = "Rearth_p", dimension = Length, ratio = 6_356_752.314_2)]
     pub struct EarthPolarRadius;
     /// A quantity measured in Earth polar radii.
     pub type EarthPolarRadii = Quantity<EarthPolarRadius>;

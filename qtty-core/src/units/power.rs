@@ -87,7 +87,7 @@ pub const ERG_PER_S: ErgsPerSecond = ErgsPerSecond::new(1.0);
 
 /// Metric horsepower (`PS`), defined as exactly `735.49875 W`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "PS", dimension = Power, ratio = 735_498_75.0 / 100_000.0)]
+#[unit(symbol = "PS", dimension = Power, ratio = 73_549_875.0 / 100_000.0)]
 pub struct HorsepowerMetric;
 /// A quantity measured in metric horsepower.
 pub type HorsepowerMetrics = Quantity<HorsepowerMetric>;
