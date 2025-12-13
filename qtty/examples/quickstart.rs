@@ -1,5 +1,5 @@
-use qtty::{Degrees, Kilometer, Kilometers, Radian, Second, Seconds};
 use qtty::velocity::Velocity;
+use qtty::{Degrees, Kilometer, Kilometers, Radian, Second, Seconds};
 
 fn main() {
     let a = Degrees::new(180.0);

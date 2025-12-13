@@ -47,14 +47,14 @@ pub trait VelocityUnit: Unit<Dim = VelocityDim> {}
 impl<T: Unit<Dim = VelocityDim>> VelocityUnit for T {}
 
 /// A velocity quantity parameterized by length and time units.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use qtty_core::length::{Kilometer, Meter};
 /// use qtty_core::time::{Second, Hour};
 /// use qtty_core::velocity::Velocity;
-/// 
+///
 /// let v1: Velocity<Meter, Second> = Velocity::new(10.0);
 /// let v2: Velocity<Kilometer, Hour> = Velocity::new(36.0);
 /// ```

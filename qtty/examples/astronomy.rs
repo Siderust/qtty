@@ -1,5 +1,5 @@
-use qtty::{AstronomicalUnits, Days, Kilometer, Kilometers, LightYears, Second, Seconds};
 use qtty::velocity::Velocity;
+use qtty::{AstronomicalUnits, Days, Kilometer, Kilometers, LightYears, Second, Seconds};
 
 fn main() {
     let earth_velocity: Velocity<Kilometer, Second> = Velocity::new(29.78);
