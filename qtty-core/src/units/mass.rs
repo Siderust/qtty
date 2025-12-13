@@ -45,6 +45,9 @@ pub struct SolarMass;
 /// A quantity measured in solar masses.
 pub type SolarMasses = Quantity<SolarMass>;
 
+// Generate all bidirectional From implementations between mass units
+crate::impl_unit_conversions!(Gram, Kilogram, SolarMass);
+
 #[cfg(test)]
 mod tests {
     use super::*;

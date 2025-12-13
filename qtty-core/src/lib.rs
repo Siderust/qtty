@@ -93,22 +93,41 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 /// orphan rules.
 pub mod units;
 
-/// Angular units and helpers.
 pub use units::angular;
-/// Angular frequency unit aliases (`Angular / Time`).
 pub use units::frequency;
-/// Length units.
 pub use units::length;
-/// Mass units.
 pub use units::mass;
-/// Power units.
 pub use units::power;
-/// Time units.
 pub use units::time;
-/// Dimensionless helpers.
 pub use units::unitless;
-/// Velocity unit aliases (`Length / Time`).
 pub use units::velocity;
+
+/// Generates `From` trait implementations for all pairs of units within a dimension.
+#[macro_export]
+macro_rules! impl_unit_conversions {
+    // Base case: single unit, no conversions needed
+    ($unit:ty) => {};
+
+    // Recursive case: implement conversions from first to all others, then recurse
+    ($first:ty, $($rest:ty),+ $(,)?) => {
+        $(
+            impl From<$crate::Quantity<$first>> for $crate::Quantity<$rest> {
+                fn from(value: $crate::Quantity<$first>) -> Self {
+                    value.to::<$rest>()
+                }
+            }
+            
+            impl From<$crate::Quantity<$rest>> for $crate::Quantity<$first> {
+                fn from(value: $crate::Quantity<$rest>) -> Self {
+                    value.to::<$first>()
+                }
+            }
+        )+
+
+        // Recurse with the rest of the units
+        $crate::impl_unit_conversions!($($rest),+);
+    };
+}
 
 /// Marker trait for **dimensions** (Length, Time, Mass …).
 ///

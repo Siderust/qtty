@@ -78,19 +78,15 @@ pub type Parsecs = Quantity<Parsec>;
 /// One parsec.
 pub const PS: Parsecs = Parsecs::new(1.0);
 
-/// AstronomicalUnit -> LightYear.
-impl From<AstronomicalUnits> for LightYears {
-    fn from(au: AstronomicalUnits) -> Self {
-        au.to::<LightYear>()
-    }
-}
-
-/// LightYear -> AstronomicalUnits.
-impl From<LightYears> for AstronomicalUnits {
-    fn from(ly: LightYears) -> Self {
-        ly.to::<AstronomicalUnit>()
-    }
-}
+// Generate all bidirectional From implementations between length units
+crate::impl_unit_conversions!(
+    Meter,
+    Kilometer,
+    AstronomicalUnit,
+    LightYear,
+    SolarRadius,
+    Parsec
+);
 
 #[cfg(test)]
 mod tests {
