@@ -24,14 +24,14 @@ pub trait FrequencyUnit: Unit<Dim = FrequencyDim> {}
 impl<T: Unit<Dim = FrequencyDim>> FrequencyUnit for T {}
 
 /// A frequency quantity parameterized by angular and time units.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use qtty_core::angular::{Degree, Radian};
 /// use qtty_core::time::{Second, Day};
 /// use qtty_core::frequency::Frequency;
-/// 
+///
 /// let f1: Frequency<Degree, Second> = Frequency::new(360.0);
 /// let f2: Frequency<Radian, Day> = Frequency::new(6.28);
 /// ```

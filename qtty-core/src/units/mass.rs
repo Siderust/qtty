@@ -47,44 +47,19 @@ pub const G: Grams = Grams::new(1.0);
 /// `$name::RATIO` such that `1 $sym = $ratio g`.
 macro_rules! si_gram {
     ($name:ident, $sym:literal, $ratio:expr, $alias:ident, $qty:ident, $one:ident) => {
-        #[doc = concat!(
-                    "SI mass unit `",
-                    stringify!($name),
-                    "` with gram-based prefix (symbol `",
-                    $sym,
-                    "`)."
-                )]
-        #[doc = concat!(
-                    "By definition, `1 ",
-                    $sym,
-                    " = ",
-                    stringify!($ratio),
-                    " g`."
-                )]
+        #[doc = concat!("SI mass unit `", stringify!($name), "` with gram-based prefix (symbol `", $sym,"`).")]
+        #[doc = concat!("By definition, `1 ", $sym, " = ", stringify!($ratio), " g`.")]
         #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
         #[unit(symbol = $sym, dimension = Mass, ratio = $ratio)]
         pub struct $name;
-        #[doc = concat!(
-                    "Shorthand alias for [`",
-                    stringify!($name),
-                    "`]."
-                )]
+
+        #[doc = concat!("Shorthand alias for [`", stringify!($name), "`]." )]
         pub type $alias = $name;
-        #[doc = concat!(
-                    "Quantity measured in ",
-                    stringify!($name),
-                    " (",
-                    $sym,
-                    ")."
-                )]
+
+        #[doc = concat!("Quantity measured in ", stringify!($name), " (",$sym,").")]
         pub type $qty = Quantity<$alias>;
-        #[doc = concat!(
-                    "Constant equal to one ",
-                    stringify!($name),
-                    " (1 ",
-                    $sym,
-                    ")."
-                )]
+
+        #[doc = concat!("Constant equal to one ", stringify!($name), " (1 ",$sym,").")]
         pub const $one: $qty = $qty::new(1.0);
     };
 }
