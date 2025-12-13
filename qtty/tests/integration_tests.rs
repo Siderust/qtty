@@ -39,15 +39,15 @@ fn smoke_test_power() {
 
 #[test]
 fn smoke_test_velocity() {
-    let v: KilometersPerSecond = Quantity::new(1.0);
-    let v_mps: MetersPerSecond = v.to();
+    let v: velocity::Velocity<Kilometer, Second> = velocity::Velocity::new(1.0);
+    let v_mps: velocity::Velocity<Meter, Second> = v.to();
     assert_abs_diff_eq!(v_mps.value(), 1000.0, epsilon = 1e-9);
 }
 
 #[test]
 fn smoke_test_frequency() {
-    let f: DegreesPerDay = Quantity::new(360.0);
-    let f_rad: RadiansPerDay = f.to();
+    let f: frequency::Frequency<Degree, Day> = frequency::Frequency::new(360.0);
+    let f_rad: frequency::Frequency<Radian, Day> = f.to();
     assert_abs_diff_eq!(f_rad.value(), 2.0 * std::f64::consts::PI, epsilon = 1e-12);
 }
 
@@ -61,7 +61,7 @@ fn smoke_test_unitless() {
 #[test]
 fn orbital_distance_calculation() {
     // Earth's orbital velocity ≈ 29.78 km/s
-    let earth_velocity: KilometersPerSecond = Quantity::new(29.78);
+    let earth_velocity: velocity::Velocity<Kilometer, Second> = velocity::Velocity::new(29.78);
 
     // Time: 1 day
     let time = Days::new(1.0);
@@ -102,7 +102,7 @@ fn angular_separation() {
 #[test]
 fn earth_rotation() {
     // Earth rotates 360° per sidereal day (~23h 56m)
-    let rotation_rate: DegreesPerDay = Quantity::new(360.0);
+    let rotation_rate: frequency::Frequency<Degree, Day> = frequency::Frequency::new(360.0);
 
     // After 6 hours (0.25 days)
     let time = Days::new(0.25);
@@ -140,7 +140,7 @@ fn calculate_velocity_from_distance_time() {
     let time_sec: Seconds = time.to();
 
     // Velocity = distance / time
-    let velocity: KilometersPerSecond = distance_km / time_sec;
+    let velocity: velocity::Velocity<Kilometer, Second> = distance_km / time_sec;
 
     // Should be approximately speed of light (299,792 km/s)
     assert_relative_eq!(velocity.value(), 299_792.458, max_relative = 0.001);
@@ -149,10 +149,10 @@ fn calculate_velocity_from_distance_time() {
 #[test]
 fn mean_motion_conversion() {
     // Earth's mean motion ≈ 0.9856°/day
-    let mean_motion: DegreesPerDay = Quantity::new(0.9856);
+    let mean_motion: frequency::Frequency<Degree, Day> = frequency::Frequency::new(0.9856);
 
     // Convert to degrees per year
-    let per_year: DegreesPerYear = mean_motion.to();
+    let per_year: frequency::Frequency<Degree, Year> = mean_motion.to();
 
     // Should be about 360°/year
     assert_relative_eq!(per_year.value(), 360.0, max_relative = 0.01);
@@ -243,14 +243,14 @@ fn quantity_abs() {
 
 #[test]
 fn per_unit_display() {
-    let v: KilometersPerSecond = Quantity::new(10.0);
+    let v: velocity::Velocity<Kilometer, Second> = velocity::Velocity::new(10.0);
     let s = format!("{}", v);
     assert_eq!(s, "10 Km/s");
 }
 
 #[test]
 fn per_unit_multiplication_recovers_numerator() {
-    let v: KilometersPerSecond = Quantity::new(100.0);
+    let v: velocity::Velocity<Kilometer, Second> = velocity::Velocity::new(100.0);
     let t: Seconds = Seconds::new(3600.0);
     let d: Kilometers = v * t;
     assert_abs_diff_eq!(d.value(), 360_000.0, epsilon = 1e-6);
@@ -260,7 +260,7 @@ fn per_unit_multiplication_recovers_numerator() {
 fn per_unit_division_creates_composite() {
     let d = Kilometers::new(100.0);
     let t = Seconds::new(10.0);
-    let v: KilometersPerSecond = d / t;
+    let v: velocity::Velocity<Kilometer, Second> = d / t;
     assert_abs_diff_eq!(v.value(), 10.0, epsilon = 1e-12);
 }
 

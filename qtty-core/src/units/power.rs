@@ -80,10 +80,8 @@ si_watt!(Yottawatt, "YW", 1e24, YW, Yottawatts, YW_1);
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "erg/s", dimension = Power, ratio = 1e-7)]
 pub struct ErgPerSecond;
-/// A quantity measured in erg/s.
-pub type ErgsPerSecond = Quantity<ErgPerSecond>;
 /// One erg/s.
-pub const ERG_PER_S: ErgsPerSecond = ErgsPerSecond::new(1.0);
+pub const ERG_PER_S: Quantity<ErgPerSecond> = Quantity::new(1.0);
 
 /// Metric horsepower (`PS`), defined as exactly `735.49875 W`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
