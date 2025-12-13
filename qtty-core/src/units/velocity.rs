@@ -100,18 +100,18 @@ mod tests {
 
     #[test]
     fn per_ratio_km_s() {
-        // Per<Kilometer, Second> should have RATIO = 1000 / (1/86400) = 86,400,000
+        // Per<Kilometer, Second> should have RATIO = 1000 / 1 = 1000
         let ratio = <Per<Kilometer, Second>>::RATIO;
-        // Kilometer::RATIO = 1000, Second::RATIO = 1/86400
-        // So Per ratio = 1000 / (1/86400) = 1000 * 86400 = 86,400,000
-        assert_relative_eq!(ratio, 1000.0 / (1.0 / 86400.0), max_relative = 1e-12);
+        // Kilometer::RATIO = 1000, Second::RATIO = 1.0
+        // So Per ratio = 1000 / 1.0 = 1000
+        assert_relative_eq!(ratio, 1000.0, max_relative = 1e-12);
     }
 
     #[test]
     fn per_ratio_m_s() {
-        // Per<Meter, Second> has RATIO = 1 / (1/86400) = 86400
+        // Per<Meter, Second> has RATIO = 1 / 1 = 1
         let ratio = <Per<Meter, Second>>::RATIO;
-        assert_relative_eq!(ratio, 86400.0, max_relative = 1e-12);
+        assert_relative_eq!(ratio, 1.0, max_relative = 1e-12);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────

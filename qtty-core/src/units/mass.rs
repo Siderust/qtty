@@ -136,7 +136,7 @@ pub const CT: Carats = Carats::new(1.0);
 
 /// Grain: `1 gr = 64.79891 mg` (exact) == `0.064_798_91 g`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "gr", dimension = Mass, ratio = 64_798_91.0 / 1_000_000_000.0)]
+#[unit(symbol = "gr", dimension = Mass, ratio = 6_479_891.0 / 1_000_000_000.0)]
 pub struct Grain;
 /// Shorthand type alias for [`Grain`].
 pub type Gr = Grain;

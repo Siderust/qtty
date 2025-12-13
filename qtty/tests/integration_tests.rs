@@ -178,7 +178,7 @@ fn derive_macro_produces_correct_symbol() {
     // Verify that units defined with derive macro have correct symbols
     assert_eq!(Meter::SYMBOL, "m");
     assert_eq!(Kilometer::SYMBOL, "Km");
-    assert_eq!(Second::SYMBOL, "sec");
+    assert_eq!(Second::SYMBOL, "s");
     assert_eq!(Day::SYMBOL, "d");
     assert_eq!(Degree::SYMBOL, "Deg");
     assert_eq!(Radian::SYMBOL, "Rad");
@@ -189,7 +189,7 @@ fn derive_macro_produces_correct_ratio() {
     // Verify ratios are correct
     assert_eq!(Meter::RATIO, 1.0);
     assert_eq!(Kilometer::RATIO, 1000.0);
-    assert_eq!(Day::RATIO, 1.0);
+    assert_eq!(Second::RATIO, 1.0);
     assert_eq!(Degree::RATIO, 1.0);
 }
 
@@ -245,7 +245,7 @@ fn quantity_abs() {
 fn per_unit_display() {
     let v: KilometersPerSecond = Quantity::new(10.0);
     let s = format!("{}", v);
-    assert_eq!(s, "10 Km/sec");
+    assert_eq!(s, "10 Km/s");
 }
 
 #[test]
