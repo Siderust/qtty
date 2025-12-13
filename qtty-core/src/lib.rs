@@ -1,13 +1,13 @@
-//! Core type system for strongly typed physical units.
+//! Core type system for strongly typed physical quantities.
 //!
-//! `unit-core` provides a minimal, zero-cost units model:
+//! `qtty-core` provides a minimal, zero-cost units model:
 //!
 //! - A *unit* is a zero-sized marker type implementing [`Unit`].
 //! - A value tagged with a unit is a [`Quantity<U>`], backed by an `f64`.
 //! - Conversion is an explicit, type-checked scaling via [`Quantity::to`].
 //! - Derived units like velocity are expressed as [`Per<N, D>`] (e.g. `Meter/Second`).
 //!
-//! Most users should depend on `unit` (the facade crate) unless they need direct access to these primitives.
+//! Most users should depend on `qtty` (the facade crate) unless they need direct access to these primitives.
 //!
 //! # What this crate solves
 //!
@@ -27,7 +27,7 @@
 //! Convert between predefined units:
 //!
 //! ```rust
-//! use unit_core::length::{Kilometers, Meter};
+//! use qtty_core::length::{Kilometers, Meter};
 //!
 //! let km = Kilometers::new(1.25);
 //! let m = km.to::<Meter>();
@@ -37,19 +37,19 @@
 //! Compose derived units using `/`:
 //!
 //! ```rust
-//! use unit_core::length::Meters;
-//! use unit_core::time::Seconds;
-//! use unit_core::velocity::MetersPerSecond;
+//! use qtty_core::length::{Meter, Meters};
+//! use qtty_core::time::{Second, Seconds};
+//! use qtty_core::velocity::Velocity;
 //!
 //! let d = Meters::new(100.0);
 //! let t = Seconds::new(20.0);
-//! let v: MetersPerSecond = d / t;
+//! let v: Velocity<Meter, Second> = d / t;
 //! assert!((v.value() - 5.0).abs() < 1e-12);
 //! ```
 //!
 //! # `no_std`
 //!
-//! Disable default features to build `unit-core` without `std`:
+//! Disable default features to build `qtty-core` without `std`:
 //!
 //! ```toml
 //! [dependencies]
@@ -89,26 +89,45 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 /// Predefined unit modules (grouped by dimension).
 ///
-/// These are defined in `unit-core` so they can implement formatting and helper traits without running into Rust’s
+/// These are defined in `qtty-core` so they can implement formatting and helper traits without running into Rust’s
 /// orphan rules.
 pub mod units;
 
-/// Angular units and helpers.
 pub use units::angular;
-/// Angular frequency unit aliases (`Angular / Time`).
 pub use units::frequency;
-/// Length units.
 pub use units::length;
-/// Mass units.
 pub use units::mass;
-/// Power units.
 pub use units::power;
-/// Time units.
 pub use units::time;
-/// Dimensionless helpers.
 pub use units::unitless;
-/// Velocity unit aliases (`Length / Time`).
 pub use units::velocity;
+
+/// Generates `From` trait implementations for all pairs of units within a dimension.
+#[macro_export]
+macro_rules! impl_unit_conversions {
+    // Base case: single unit, no conversions needed
+    ($unit:ty) => {};
+
+    // Recursive case: implement conversions from first to all others, then recurse
+    ($first:ty, $($rest:ty),+ $(,)?) => {
+        $(
+            impl From<$crate::Quantity<$first>> for $crate::Quantity<$rest> {
+                fn from(value: $crate::Quantity<$first>) -> Self {
+                    value.to::<$rest>()
+                }
+            }
+
+            impl From<$crate::Quantity<$rest>> for $crate::Quantity<$first> {
+                fn from(value: $crate::Quantity<$rest>) -> Self {
+                    value.to::<$first>()
+                }
+            }
+        )+
+
+        // Recurse with the rest of the units
+        $crate::impl_unit_conversions!($($rest),+);
+    };
+}
 
 /// Marker trait for **dimensions** (Length, Time, Mass …).
 ///
@@ -116,7 +135,7 @@ pub use units::velocity;
 /// You usually model each dimension as an empty enum:
 ///
 /// ```rust
-/// use unit_core::Dimension;
+/// use qtty_core::Dimension;
 /// #[derive(Debug)]
 /// pub enum Length {}
 /// impl Dimension for Length {}
@@ -187,7 +206,7 @@ impl<N: Unit, D: Unit> Display for Quantity<Per<N, D>> {
 /// # Examples
 ///
 /// ```rust
-/// use unit_core::{Quantity, Unit, Dimension};
+/// use qtty_core::{Quantity, Unit, Dimension};
 ///
 /// pub enum Length {}
 /// impl Dimension for Length {}
@@ -212,7 +231,7 @@ impl<U: Unit + Copy> Quantity<U> {
     /// A constant representing NaN for this quantity type.
     ///
     /// ```rust
-    /// use unit_core::length::Meters;
+    /// use qtty_core::length::Meters;
     /// assert!(Meters::NAN.value().is_nan());
     /// ```
     pub const NAN: Self = Self::new(f64::NAN);
@@ -220,7 +239,7 @@ impl<U: Unit + Copy> Quantity<U> {
     /// Creates a new quantity with the given value.
     ///
     /// ```rust
-    /// use unit_core::length::Meters;
+    /// use qtty_core::length::Meters;
     /// let d = Meters::new(3.0);
     /// assert_eq!(d.value(), 3.0);
     /// ```
@@ -232,7 +251,7 @@ impl<U: Unit + Copy> Quantity<U> {
     /// Returns the raw numeric value.
     ///
     /// ```rust
-    /// use unit_core::time::Seconds;
+    /// use qtty_core::time::Seconds;
     /// let t = Seconds::new(2.5);
     /// assert_eq!(t.value(), 2.5);
     /// ```
@@ -244,7 +263,7 @@ impl<U: Unit + Copy> Quantity<U> {
     /// Returns the absolute value.
     ///
     /// ```rust
-    /// use unit_core::angular::Degrees;
+    /// use qtty_core::angular::Degrees;
     /// let a = Degrees::new(-10.0);
     /// assert_eq!(a.abs().value(), 10.0);
     /// ```
@@ -258,7 +277,7 @@ impl<U: Unit + Copy> Quantity<U> {
     /// # Example
     ///
     /// ```rust
-    /// use unit_core::{Quantity, Unit, Dimension};
+    /// use qtty_core::{Quantity, Unit, Dimension};
     ///
     /// pub enum Length {}
     /// impl Dimension for Length {}
@@ -291,7 +310,7 @@ impl<U: Unit + Copy> Quantity<U> {
     /// Returns the minimum of this quantity and another.
     ///
     /// ```rust
-    /// use unit_core::length::Meters;
+    /// use qtty_core::length::Meters;
     /// let a = Meters::new(3.0);
     /// let b = Meters::new(5.0);
     /// assert_eq!(a.min(b).value(), 3.0);
@@ -304,7 +323,7 @@ impl<U: Unit + Copy> Quantity<U> {
     /// Const addition of two quantities.
     ///
     /// ```rust
-    /// use unit_core::length::Meters;
+    /// use qtty_core::length::Meters;
     /// let a = Meters::new(1.0);
     /// let b = Meters::new(2.0);
     /// assert_eq!(a.add(b).value(), 3.0);
@@ -317,7 +336,7 @@ impl<U: Unit + Copy> Quantity<U> {
     /// Const subtraction of two quantities.
     ///
     /// ```rust
-    /// use unit_core::length::Meters;
+    /// use qtty_core::length::Meters;
     /// let a = Meters::new(5.0);
     /// let b = Meters::new(2.0);
     /// assert_eq!(a.sub(b).value(), 3.0);
@@ -332,7 +351,7 @@ impl<U: Unit + Copy> Quantity<U> {
     /// For a dimensionless ratio, prefer `/` (which yields a `Per<U, U>`) plus [`Simplify`].
     ///
     /// ```rust
-    /// use unit_core::length::Meters;
+    /// use qtty_core::length::Meters;
     /// let a = Meters::new(6.0);
     /// let b = Meters::new(2.0);
     /// assert_eq!(a.div(b).value(), 3.0);
@@ -345,7 +364,7 @@ impl<U: Unit + Copy> Quantity<U> {
     /// Const multiplication of two quantities (returns same unit).
     ///
     /// ```rust
-    /// use unit_core::length::Meters;
+    /// use qtty_core::length::Meters;
     /// let a = Meters::new(3.0);
     /// let b = Meters::new(4.0);
     /// assert_eq!(a.mul(b).value(), 12.0);
@@ -506,8 +525,8 @@ impl Display for Quantity<Unitless> {
 impl<U: Unit> Simplify for Quantity<Per<U, U>> {
     type Out = Unitless;
     /// ```rust
-    /// use unit_core::length::Meters;
-    /// use unit_core::{Quantity, Simplify, Unitless};
+    /// use qtty_core::length::Meters;
+    /// use qtty_core::{Quantity, Simplify, Unitless};
     ///
     /// let ratio = Meters::new(1.0) / Meters::new(2.0);
     /// let unitless: Quantity<Unitless> = ratio.simplify();
@@ -529,7 +548,7 @@ impl<U: Unit> Quantity<Per<U, U>> {
     /// Arc sine of a unitless ratio.
     ///
     /// ```rust
-    /// use unit_core::length::Meters;
+    /// use qtty_core::length::Meters;
     /// let ratio = Meters::new(1.0) / Meters::new(2.0);
     /// let angle_rad = ratio.asin();
     /// assert!((angle_rad - core::f64::consts::FRAC_PI_6).abs() < 1e-12);
@@ -571,16 +590,16 @@ impl<'de, U: Unit> Deserialize<'de> for Quantity<U> {
 /// Generate a **unit type** and its [`Display`] implementation.
 ///
 /// This macro is provided for backward compatibility. New code should prefer
-/// using the `#[derive(Unit)]` procedural macro from `unit-derive`.
+/// using the `#[derive(Unit)]` procedural macro from `qtty-derive`.
 ///
-/// Note: This macro is intended for use *inside* `unit-core`. The expansion
-/// includes an `impl Display for unit_core::Quantity<...>`, which downstream
+/// Note: This macro is intended for use *inside* `qtty-core`. The expansion
+/// includes an `impl Display for qtty_core::Quantity<...>`, which downstream
 /// crates cannot compile due to Rust’s orphan rules.
 ///
 /// # Example
 ///
 /// ```rust,ignore
-/// use unit_core::{define_unit, Unit, Quantity, Dimension};
+/// use qtty_core::{define_unit, Unit, Quantity, Dimension};
 ///
 /// pub enum Length {}
 /// impl Dimension for Length {}
