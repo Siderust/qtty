@@ -73,7 +73,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! unit = { version = "0.1.0", default-features = false }
+//! qtty = { version = "0.1.0", default-features = false }
 //! ```
 //!
 //! # Panics and errors

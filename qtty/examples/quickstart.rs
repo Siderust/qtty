@@ -1,3 +1,5 @@
+//! Minimal end-to-end example: convert angles and compute a velocity (length / time).
+
 use qtty::velocity::Velocity;
 use qtty::{Degrees, Kilometer, Kilometers, Radian, Second, Seconds};
 

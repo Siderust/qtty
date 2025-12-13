@@ -27,7 +27,14 @@ assert!((r.value() - core::f64::consts::FRAC_PI_2).abs() < 1e-12);
 ## Features
 
 - `std` (default): enables `std` support in `qtty-core`.
-- `serde`: enables `serde` support for `Quantity<U>`.
+- `serde`: enables `serde` support for `Quantity<U>` (serialize/deserialize as a bare `f64`).
+
+Disable default features for `no_std`:
+
+```toml
+[dependencies]
+qtty = { version = "0.1.0", default-features = false }
+```
 
 ## License
 

@@ -1,3 +1,5 @@
+//! Angle helpers example: wrapping and separation in a single unit type.
+
 use qtty::{Arcseconds, Degrees};
 
 fn main() {

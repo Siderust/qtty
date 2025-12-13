@@ -1,3 +1,5 @@
+//! Derived-unit example: ratios and `Simplify` to recover `Unitless`.
+
 use qtty::{Meters, Seconds, Simplify, Unitless};
 
 fn main() {
