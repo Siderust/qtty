@@ -10,11 +10,23 @@
 //!   `Degree::RATIO == 1.0`, and all other angular units express how many *degrees* correspond to one of that unit.
 //!   For example, `Radian::RATIO == 180.0 / PI` because 1 radian = 180/π degrees.
 //! * **Associated constants:** The `AngularUnit` trait exposes precomputed constants (`FULL_TURN`, `HALF_TURN`,
-//!   `QUARTED_TURN`) expressed *in the receiving unit* for ergonomic range‑wrapping.
+//!   `QUARTED_TURN`) expressed *in the receiving unit* for ergonomic range‑wrapping. These are derived from `τ`
+//!   radians and then converted to the target unit to avoid cumulative error from chained conversions.
 //! * **Trigonometry:** `sin`, `cos`, `tan`, and `sin_cos` methods are provided on angular quantities; they convert to
 //!   radians internally and then call the corresponding `f64` intrinsic.
 //! * **Wrapping helpers:** Utility methods to wrap any angle into common ranges — `[0, 360)` (or unit equivalent),
 //!   `(-180, 180]`, and the latitude‑style quarter fold `[-90, 90]`.
+//!
+//! ## Edge cases
+//!
+//! Wrapping and trig operations follow IEEE‑754 semantics from `f64`: if the underlying numeric is `NaN` or
+//! `±∞`, results will generally be `NaN`.
+//!
+//! ## Unit symbols
+//!
+//! Unit `SYMBOL`s are used for display (e.g., `format!("{}", angle)`) and are not intended to be a strict
+//! standards reference. Some symbols use ASCII abbreviations (e.g., `"Deg"`, `"Rad"`), and others may use
+//! Unicode where it improves readability (e.g., `"μas"`).
 //!
 //! ## Examples
 //!
@@ -65,7 +77,8 @@ impl Dimension for Angular {}
 /// Blanket extension trait for any [`Unit`] whose dimension is [`Angular`].
 ///
 /// These associated constants provide the size of key turn fractions *expressed in the implementing unit*.
-/// They are computed using a compiletime conversion from `TAU` radians (i.e., a full revolution).
+/// They are computed via a compile-time conversion from `TAU` radians (i.e., a full revolution) and then scaled.
+/// This keeps all fractions derived from the same base value.
 ///
 /// > **Naming note:** The historical spelling `QUARTED_TURN` is retained for backward compatibility. It represents a
 /// > quarter turn (90°).
@@ -88,6 +101,8 @@ impl<T: Unit<Dim = Angular>> AngularUnit for T {
 
 impl<U: AngularUnit + Copy> Quantity<U> {
     /// Constant representing τ radians (2π rad == 360°).
+    ///
+    /// For angular quantities, `TAU` and [`Self::FULL_TURN`] are identical by construction.
     pub const TAU: Quantity<U> = Quantity::<U>::new(U::FULL_TURN);
     /// One full revolution (360°) expressed as `Quantity<U>`.
     pub const FULL_TURN: Quantity<U> = Quantity::<U>::new(U::FULL_TURN);
@@ -97,6 +112,8 @@ impl<U: AngularUnit + Copy> Quantity<U> {
     pub const QUARTED_TURN: Quantity<U> = Quantity::<U>::new(U::QUARTED_TURN);
 
     /// Sine of the angle.
+    ///
+    /// IEEE‑754 note: `NaN`/`±∞` inputs generally produce `NaN`.
     #[inline]
     pub fn sin(&self) -> f64 {
         let x = self.to::<Radian>().value();
@@ -111,6 +128,8 @@ impl<U: AngularUnit + Copy> Quantity<U> {
     }
 
     /// Cosine of the angle.
+    ///
+    /// IEEE‑754 note: `NaN`/`±∞` inputs generally produce `NaN`.
     #[inline]
     pub fn cos(&self) -> f64 {
         let x = self.to::<Radian>().value();
@@ -125,6 +144,8 @@ impl<U: AngularUnit + Copy> Quantity<U> {
     }
 
     /// Tangent of the angle.
+    ///
+    /// IEEE‑754 note: `NaN`/`±∞` inputs generally produce `NaN`.
     #[inline]
     pub fn tan(&self) -> f64 {
         let x = self.to::<Radian>().value();
@@ -139,6 +160,8 @@ impl<U: AngularUnit + Copy> Quantity<U> {
     }
 
     /// Simultaneously compute sine and cosine.
+    ///
+    /// IEEE‑754 note: `NaN`/`±∞` inputs generally produce `NaN`.
     #[inline]
     pub fn sin_cos(&self) -> (f64, f64) {
         let x = self.to::<Radian>().value();
@@ -167,6 +190,8 @@ impl<U: AngularUnit + Copy> Quantity<U> {
     }
 
     /// Wrap into the positive range `[0, FULL_TURN)` using Euclidean remainder.
+    ///
+    /// IEEE‑754 note: `NaN`/`±∞` inputs generally produce `NaN`.
     #[inline]
     pub fn wrap_pos(self) -> Self {
         Self::new(rem_euclid(self.value(), U::FULL_TURN))
@@ -175,6 +200,8 @@ impl<U: AngularUnit + Copy> Quantity<U> {
     /// Wrap into the signed range `(-HALF_TURN, HALF_TURN]`.
     ///
     /// *Upper bound is inclusive*; lower bound is exclusive. Useful for computing minimal signed angular differences.
+    ///
+    /// IEEE‑754 note: `NaN`/`±∞` inputs generally produce `NaN`.
     #[inline]
     pub fn wrap_signed(self) -> Self {
         let full = U::FULL_TURN;
@@ -188,11 +215,13 @@ impl<U: AngularUnit + Copy> Quantity<U> {
     /// Wrap into the alternate signed range `[-HALF_TURN, HALF_TURN)`.
     ///
     /// Lower bound inclusive; upper bound exclusive. Equivalent to `self.wrap_signed()` with the boundary flipped.
+    ///
+    /// IEEE‑754 note: `NaN`/`±∞` inputs generally produce `NaN`.
     #[inline]
     pub fn wrap_signed_lo(self) -> Self {
         let mut y = self.wrap_signed().value(); // now in (-half, half]
         let half = 0.5 * U::FULL_TURN;
-        if y > half {
+        if y >= half {
             // move +half to -half
             y -= U::FULL_TURN;
         }
@@ -202,6 +231,8 @@ impl<U: AngularUnit + Copy> Quantity<U> {
     /// "Latitude fold": map into `[-QUARTER_TURN, +QUARTER_TURN]`.
     ///
     /// Useful for folding polar coordinates (e.g., converting declination‑like angles to a limited range).
+    ///
+    /// IEEE‑754 note: `NaN`/`±∞` inputs generally produce `NaN`.
     #[inline]
     pub fn wrap_quarter_fold(self) -> Self {
         let full = U::FULL_TURN;
@@ -248,10 +279,23 @@ pub type Radians = Quantity<Rad>;
 /// One radian.
 pub const RAD: Radians = Radians::new(1.0);
 
+/// Milliradian (`1/1000` radian).
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
+#[unit(symbol = "mrad", dimension = Angular, ratio = (180.0 / core::f64::consts::PI) / 1_000.0)]
+pub struct Milliradian;
+/// Type alias shorthand for [`Milliradian`].
+pub type Mrad = Milliradian;
+/// Convenience alias for a milliradian quantity.
+pub type Milliradians = Quantity<Mrad>;
+/// One milliradian.
+pub const MRAD: Milliradians = Milliradians::new(1.0);
+
 /// Arcminute (`1/60` degree).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "Arcm", dimension = Angular, ratio = 1.0 / 60.0)]
 pub struct Arcminute;
+/// Alias for [`Arcminute`] (minute of angle, MOA).
+pub type MOA = Arcminute;
 /// Type alias shorthand for [`Arcminute`].
 pub type Arcm = Arcminute;
 /// Convenience alias for an arcminute quantity.
@@ -377,6 +421,7 @@ impl Degrees {
 crate::impl_unit_conversions!(
     Degree,
     Radian,
+    Milliradian,
     Arcminute,
     Arcsecond,
     MilliArcsecond,
@@ -848,6 +893,7 @@ mod tests {
     fn unit_constants() {
         assert_eq!(DEG.value(), 1.0);
         assert_eq!(RAD.value(), 1.0);
+        assert_eq!(MRAD.value(), 1.0);
         assert_eq!(ARCM.value(), 1.0);
         assert_eq!(ARCS.value(), 1.0);
         assert_eq!(MAS.value(), 1.0);
@@ -855,6 +901,17 @@ mod tests {
         assert_eq!(GON.value(), 1.0);
         assert_eq!(TURN.value(), 1.0);
         assert_eq!(HOUR_ANGLE.value(), 1.0);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // wrap_signed_lo: [-180, 180)
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn wrap_signed_lo_boundary_half_turn() {
+        // +half turn should map to -half turn to make the upper bound exclusive.
+        assert_abs_diff_eq!(Degrees::new(180.0).wrap_signed_lo().value(), -180.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(Degrees::new(-180.0).wrap_signed_lo().value(), -180.0, epsilon = 1e-12);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -922,6 +979,13 @@ mod tests {
         let deg = Degrees::new(360.0);
         let turn = deg.to::<Turn>();
         assert_abs_diff_eq!(turn.value(), 1.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn conversion_milliradians_to_radians() {
+        let mrad = Milliradians::new(1_000.0);
+        let rad = mrad.to::<Radian>();
+        assert_abs_diff_eq!(rad.value(), 1.0, epsilon = 1e-12);
     }
 
     #[test]
