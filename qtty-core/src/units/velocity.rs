@@ -46,7 +46,6 @@ pub type Velocity = DivDim<Length, Time>;
 pub trait VelocityUnit: Unit<Dim = Velocity> {}
 impl<T: Unit<Dim = Velocity>> VelocityUnit for T {}
 
-
 // --- SI and metric velocities ---
 
 /// Metres per second (`m / s`).
@@ -91,7 +90,6 @@ pub type KilometerPerDay = Per<Kilometer, Day>;
 /// A quantity measured in kilometres per day.
 pub type KilometersPerDay = Quantity<KilometerPerDay>;
 
-
 // --- Astronomical velocities ---
 
 /// Astronomical units per second (`AU / s`).
@@ -114,7 +112,6 @@ pub type AusPerHour = Quantity<AuPerHour>;
 pub type AuPerDay = Per<Au, Day>;
 /// A quantity measured in astronomical units per day.
 pub type AusPerDay = Quantity<AuPerDay>;
-
 
 #[cfg(test)]
 mod tests {

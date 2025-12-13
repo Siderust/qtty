@@ -467,7 +467,8 @@ pub struct ElectronReducedComptonWavelength;
 /// A quantity measured in reduced Compton wavelengths of the electron.
 pub type ElectronReducedComptonWavelengths = Quantity<ElectronReducedComptonWavelength>;
 /// One reduced Compton wavelength of the electron.
-pub const LAMBDA_BAR_E: ElectronReducedComptonWavelengths = ElectronReducedComptonWavelengths::new(1.0);
+pub const LAMBDA_BAR_E: ElectronReducedComptonWavelengths =
+    ElectronReducedComptonWavelengths::new(1.0);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Nominal radii and distances
@@ -608,11 +609,10 @@ crate::impl_unit_conversions!(
     ElectronReducedComptonWavelength
 );
 
-
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::nominal::SolarRadiuses;
+    use super::*;
     use approx::{assert_abs_diff_eq, assert_relative_eq};
     use proptest::prelude::*;
 

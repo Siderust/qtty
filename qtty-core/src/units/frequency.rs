@@ -39,32 +39,152 @@ macro_rules! freq_alias {
 }
 
 // Radians
-freq_alias!(RadianPerSecond, RadiansPerSecond, Radian, Second, "Radians per second (`rad/s`).");
-freq_alias!(RadianPerMinute, RadiansPerMinute, Radian, Minute, "Radians per minute (`rad/min`).");
-freq_alias!(RadianPerHour, RadiansPerHour, Radian, Hour, "Radians per hour (`rad/h`).");
-freq_alias!(RadianPerDay, RadiansPerDay, Radian, Day, "Radians per day (`rad/d`).");
-freq_alias!(RadianPerYear, RadiansPerYear, Radian, Year, "Radians per year (`rad/yr`).");
+freq_alias!(
+    RadianPerSecond,
+    RadiansPerSecond,
+    Radian,
+    Second,
+    "Radians per second (`rad/s`)."
+);
+freq_alias!(
+    RadianPerMinute,
+    RadiansPerMinute,
+    Radian,
+    Minute,
+    "Radians per minute (`rad/min`)."
+);
+freq_alias!(
+    RadianPerHour,
+    RadiansPerHour,
+    Radian,
+    Hour,
+    "Radians per hour (`rad/h`)."
+);
+freq_alias!(
+    RadianPerDay,
+    RadiansPerDay,
+    Radian,
+    Day,
+    "Radians per day (`rad/d`)."
+);
+freq_alias!(
+    RadianPerYear,
+    RadiansPerYear,
+    Radian,
+    Year,
+    "Radians per year (`rad/yr`)."
+);
 
 // Degrees
-freq_alias!(DegreePerSecond, DegreesPerSecond, Degree, Second, "Degrees per second (`deg/s`).");
-freq_alias!(DegreePerMinute, DegreesPerMinute, Degree, Minute, "Degrees per minute (`deg/min`).");
-freq_alias!(DegreePerHour, DegreesPerHour, Degree, Hour, "Degrees per hour (`deg/h`).");
-freq_alias!(DegreePerDay, DegreesPerDay, Degree, Day, "Degrees per day (`deg/d`).");
-freq_alias!(DegreePerYear, DegreesPerYear, Degree, Year, "Degrees per year (`deg/yr`).");
+freq_alias!(
+    DegreePerSecond,
+    DegreesPerSecond,
+    Degree,
+    Second,
+    "Degrees per second (`deg/s`)."
+);
+freq_alias!(
+    DegreePerMinute,
+    DegreesPerMinute,
+    Degree,
+    Minute,
+    "Degrees per minute (`deg/min`)."
+);
+freq_alias!(
+    DegreePerHour,
+    DegreesPerHour,
+    Degree,
+    Hour,
+    "Degrees per hour (`deg/h`)."
+);
+freq_alias!(
+    DegreePerDay,
+    DegreesPerDay,
+    Degree,
+    Day,
+    "Degrees per day (`deg/d`)."
+);
+freq_alias!(
+    DegreePerYear,
+    DegreesPerYear,
+    Degree,
+    Year,
+    "Degrees per year (`deg/yr`)."
+);
 
 // Turns (revolutions)
-freq_alias!(TurnPerSecond, TurnsPerSecond, Turn, Second, "Turns per second (`turn/s`).");
-freq_alias!(TurnPerMinute, TurnsPerMinute, Turn, Minute, "Turns per minute (`turn/min`).");
-freq_alias!(TurnPerHour, TurnsPerHour, Turn, Hour, "Turns per hour (`turn/h`).");
-freq_alias!(TurnPerDay, TurnsPerDay, Turn, Day, "Turns per day (`turn/d`).");
-freq_alias!(TurnPerYear, TurnsPerYear, Turn, Year, "Turns per year (`turn/yr`).");
+freq_alias!(
+    TurnPerSecond,
+    TurnsPerSecond,
+    Turn,
+    Second,
+    "Turns per second (`turn/s`)."
+);
+freq_alias!(
+    TurnPerMinute,
+    TurnsPerMinute,
+    Turn,
+    Minute,
+    "Turns per minute (`turn/min`)."
+);
+freq_alias!(
+    TurnPerHour,
+    TurnsPerHour,
+    Turn,
+    Hour,
+    "Turns per hour (`turn/h`)."
+);
+freq_alias!(
+    TurnPerDay,
+    TurnsPerDay,
+    Turn,
+    Day,
+    "Turns per day (`turn/d`)."
+);
+freq_alias!(
+    TurnPerYear,
+    TurnsPerYear,
+    Turn,
+    Year,
+    "Turns per year (`turn/yr`)."
+);
 
 // Gradians (gon)
-freq_alias!(GradianPerSecond, GradiansPerSecond, Gradian, Second, "Gradians per second (`gon/s`).");
-freq_alias!(GradianPerMinute, GradiansPerMinute, Gradian, Minute, "Gradians per minute (`gon/min`).");
-freq_alias!(GradianPerHour, GradiansPerHour, Gradian, Hour, "Gradians per hour (`gon/h`).");
-freq_alias!(GradianPerDay, GradiansPerDay, Gradian, Day, "Gradians per day (`gon/d`).");
-freq_alias!(GradianPerYear, GradiansPerYear, Gradian, Year, "Gradians per year (`gon/yr`).");
+freq_alias!(
+    GradianPerSecond,
+    GradiansPerSecond,
+    Gradian,
+    Second,
+    "Gradians per second (`gon/s`)."
+);
+freq_alias!(
+    GradianPerMinute,
+    GradiansPerMinute,
+    Gradian,
+    Minute,
+    "Gradians per minute (`gon/min`)."
+);
+freq_alias!(
+    GradianPerHour,
+    GradiansPerHour,
+    Gradian,
+    Hour,
+    "Gradians per hour (`gon/h`)."
+);
+freq_alias!(
+    GradianPerDay,
+    GradiansPerDay,
+    Gradian,
+    Day,
+    "Gradians per day (`gon/d`)."
+);
+freq_alias!(
+    GradianPerYear,
+    GradiansPerYear,
+    Gradian,
+    Year,
+    "Gradians per year (`gon/yr`)."
+);
 
 // Arcseconds and submultiples (common in astrometry)
 freq_alias!(
@@ -132,7 +252,6 @@ freq_alias!(
     Year,
     "Microarcseconds per year (`µas/yr`)."
 );
-
 
 #[cfg(test)]
 mod tests {

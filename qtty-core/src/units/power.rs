@@ -55,24 +55,24 @@ macro_rules! si_watt {
 // Full SI prefix ladder on watt
 si_watt!(Yoctowatt, "yW", 1e-24, Yw, Yoctowatts, YW);
 si_watt!(Zeptowatt, "zW", 1e-21, Zw, Zeptowatts, ZW);
-si_watt!(Attowatt,  "aW", 1e-18, Aw, Attowatts,  AW);
+si_watt!(Attowatt, "aW", 1e-18, Aw, Attowatts, AW);
 si_watt!(Femtowatt, "fW", 1e-15, Fw, Femtowatts, FW);
-si_watt!(Picowatt,  "pW", 1e-12, Pw, Picowatts,  PW);
-si_watt!(Nanowatt,  "nW", 1e-9,  Nw, Nanowatts,  NW);
-si_watt!(Microwatt, "µW", 1e-6,  Uw, Microwatts, UW);
-si_watt!(Milliwatt, "mW", 1e-3,  Mw, Milliwatts, MW_1);
+si_watt!(Picowatt, "pW", 1e-12, Pw, Picowatts, PW);
+si_watt!(Nanowatt, "nW", 1e-9, Nw, Nanowatts, NW);
+si_watt!(Microwatt, "µW", 1e-6, Uw, Microwatts, UW);
+si_watt!(Milliwatt, "mW", 1e-3, Mw, Milliwatts, MW_1);
 
-si_watt!(Deciwatt,  "dW", 1e-1, Dw, Deciwatts,  DW);
-si_watt!(Decawatt,  "daW", 1e1, Daw, Decawatts,  DAW);
-si_watt!(Hectowatt, "hW",  1e2, Hw, Hectowatts, HW);
-si_watt!(Kilowatt,  "kW",  1e3, Kw, Kilowatts,  KW);
-si_watt!(Megawatt,  "MW",  1e6, MW, Megawatts,  MEGAWATT);
-si_watt!(Gigawatt,  "GW",  1e9, GW, Gigawatts,  GW_1);
-si_watt!(Terawatt,  "TW",  1e12, TW, Terawatts, TW_1);
-si_watt!(Petawatt,  "PW",  1e15, PW, Petawatts, PETAWATT);
-si_watt!(Exawatt,   "EW",  1e18, EW, Exawatts,   EW_1);
-si_watt!(Zettawatt, "ZW",  1e21, ZW, Zettawatts, ZW_1);
-si_watt!(Yottawatt, "YW",  1e24, YW, Yottawatts, YW_1);
+si_watt!(Deciwatt, "dW", 1e-1, Dw, Deciwatts, DW);
+si_watt!(Decawatt, "daW", 1e1, Daw, Decawatts, DAW);
+si_watt!(Hectowatt, "hW", 1e2, Hw, Hectowatts, HW);
+si_watt!(Kilowatt, "kW", 1e3, Kw, Kilowatts, KW);
+si_watt!(Megawatt, "MW", 1e6, MW, Megawatts, MEGAWATT);
+si_watt!(Gigawatt, "GW", 1e9, GW, Gigawatts, GW_1);
+si_watt!(Terawatt, "TW", 1e12, TW, Terawatts, TW_1);
+si_watt!(Petawatt, "PW", 1e15, PW, Petawatts, PETAWATT);
+si_watt!(Exawatt, "EW", 1e18, EW, Exawatts, EW_1);
+si_watt!(Zettawatt, "ZW", 1e21, ZW, Zettawatts, ZW_1);
+si_watt!(Yottawatt, "YW", 1e24, YW, Yottawatts, YW_1);
 
 /// Erg per second (`erg/s`).
 ///
@@ -117,14 +117,30 @@ pub const L_SUN: SolarLuminosities = SolarLuminosities::new(1.0);
 // Generate all bidirectional From implementations between power units
 crate::impl_unit_conversions!(
     Watt,
-    Yoctowatt, Zeptowatt, Attowatt, Femtowatt, Picowatt, Nanowatt, Microwatt, Milliwatt,
-    Deciwatt, Decawatt, Hectowatt, Kilowatt, Megawatt, Gigawatt, Terawatt, Petawatt, Exawatt, Zettawatt, Yottawatt,
+    Yoctowatt,
+    Zeptowatt,
+    Attowatt,
+    Femtowatt,
+    Picowatt,
+    Nanowatt,
+    Microwatt,
+    Milliwatt,
+    Deciwatt,
+    Decawatt,
+    Hectowatt,
+    Kilowatt,
+    Megawatt,
+    Gigawatt,
+    Terawatt,
+    Petawatt,
+    Exawatt,
+    Zettawatt,
+    Yottawatt,
     ErgPerSecond,
     HorsepowerMetric,
     HorsepowerElectric,
     SolarLuminosity
 );
-
 
 #[cfg(test)]
 mod tests {

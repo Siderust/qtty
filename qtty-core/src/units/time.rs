@@ -315,7 +315,6 @@ pub type SiderealYears = Quantity<SiderealYear>;
 /// A constant representing one sidereal year.
 pub const SIDEREAL_YEAR: SiderealYears = SiderealYears::new(1.0);
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
