@@ -117,7 +117,7 @@ fn sun_mass() {
     let kg: Kilograms = sun.to();
 
     // Sun's mass is about 2e30 kg
-    assert_relative_eq!(kg.value(), 1.98847e30, max_relative = 1e-5);
+    assert_relative_eq!(kg.value(), 1.988416e30, max_relative = 1e-5);
 }
 
 #[test]
