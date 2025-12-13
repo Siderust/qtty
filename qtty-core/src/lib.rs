@@ -37,13 +37,13 @@
 //! Compose derived units using `/`:
 //!
 //! ```rust
-//! use qtty_core::length::Meters;
-//! use qtty_core::time::Seconds;
-//! use qtty_core::velocity::MetersPerSecond;
+//! use qtty_core::length::{Meter, Meters};
+//! use qtty_core::time::{Second, Seconds};
+//! use qtty_core::velocity::Velocity;
 //!
 //! let d = Meters::new(100.0);
 //! let t = Seconds::new(20.0);
-//! let v: MetersPerSecond = d / t;
+//! let v: Velocity<Meter, Second> = d / t;
 //! assert!((v.value() - 5.0).abs() < 1e-12);
 //! ```
 //!

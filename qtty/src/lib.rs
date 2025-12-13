@@ -33,11 +33,12 @@
 //! Compose and use derived units (velocity = length / time):
 //!
 //! ```rust
-//! use qtty::{Kilometers, KilometersPerSecond, Seconds};
+//! use qtty::{Kilometer, Kilometers, Second, Seconds};
+//! use qtty::velocity::Velocity;
 //!
 //! let d = Kilometers::new(1_000.0);
 //! let t = Seconds::new(100.0);
-//! let v: KilometersPerSecond = d / t;
+//! let v: Velocity<Kilometer, Second> = d / t;
 //! assert!((v.value() - 10.0).abs() < 1e-12);
 //! ```
 //!
