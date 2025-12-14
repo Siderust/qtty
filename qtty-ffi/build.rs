@@ -160,7 +160,7 @@ fn generate_registry(units: &[UnitDef], out_dir: &str) {
         code.push_str("    }),\n");
     }
     
-    code.push_str("    _ => None,\n}\n");
+    code.push_str("}\n");
     
     let dest_path = PathBuf::from(out_dir).join("unit_registry.rs");
     fs::write(&dest_path, code).expect("Failed to write unit_registry.rs");
