@@ -20,8 +20,7 @@
 
 use crate::registry;
 use crate::types::{
-    DimensionId, QttyQuantity, UnitId, QTTY_ERR_NULL_OUT,
-    QTTY_ERR_UNKNOWN_UNIT, QTTY_OK,
+    DimensionId, QttyQuantity, UnitId, QTTY_ERR_NULL_OUT, QTTY_ERR_UNKNOWN_UNIT, QTTY_OK,
 };
 use core::ffi::c_char;
 
@@ -79,7 +78,7 @@ pub extern "C" fn qtty_unit_is_valid(unit: UnitId) -> bool {
 /// The caller must ensure that `out` points to valid, writable memory for a `DimensionId`,
 /// or is null (in which case an error is returned).
 #[no_mangle]
-pub extern "C" fn qtty_unit_dimension(unit: UnitId, out: *mut DimensionId) -> i32 {
+pub unsafe extern "C" fn qtty_unit_dimension(unit: UnitId, out: *mut DimensionId) -> i32 {
     catch_panic!(QTTY_ERR_UNKNOWN_UNIT, {
         if out.is_null() {
             return QTTY_ERR_NULL_OUT;
@@ -115,7 +114,7 @@ pub extern "C" fn qtty_unit_dimension(unit: UnitId, out: *mut DimensionId) -> i3
 /// The caller must ensure that `out` points to valid, writable memory for a `bool`,
 /// or is null (in which case an error is returned).
 #[no_mangle]
-pub extern "C" fn qtty_units_compatible(a: UnitId, b: UnitId, out: *mut bool) -> i32 {
+pub unsafe extern "C" fn qtty_units_compatible(a: UnitId, b: UnitId, out: *mut bool) -> i32 {
     catch_panic!(QTTY_ERR_UNKNOWN_UNIT, {
         if out.is_null() {
             return QTTY_ERR_NULL_OUT;
@@ -155,7 +154,11 @@ pub extern "C" fn qtty_units_compatible(a: UnitId, b: UnitId, out: *mut bool) ->
 /// The caller must ensure that `out` points to valid, writable memory for a `QttyQuantity`,
 /// or is null (in which case an error is returned).
 #[no_mangle]
-pub extern "C" fn qtty_quantity_make(value: f64, unit: UnitId, out: *mut QttyQuantity) -> i32 {
+pub unsafe extern "C" fn qtty_quantity_make(
+    value: f64,
+    unit: UnitId,
+    out: *mut QttyQuantity,
+) -> i32 {
     catch_panic!(QTTY_ERR_UNKNOWN_UNIT, {
         if out.is_null() {
             return QTTY_ERR_NULL_OUT;
@@ -194,7 +197,7 @@ pub extern "C" fn qtty_quantity_make(value: f64, unit: UnitId, out: *mut QttyQua
 /// The caller must ensure that `out` points to valid, writable memory for a `QttyQuantity`,
 /// or is null (in which case an error is returned).
 #[no_mangle]
-pub extern "C" fn qtty_quantity_convert(
+pub unsafe extern "C" fn qtty_quantity_convert(
     src: QttyQuantity,
     dst_unit: UnitId,
     out: *mut QttyQuantity,
@@ -240,7 +243,7 @@ pub extern "C" fn qtty_quantity_convert(
 /// The caller must ensure that `out_value` points to valid, writable memory for an `f64`,
 /// or is null (in which case an error is returned).
 #[no_mangle]
-pub extern "C" fn qtty_quantity_convert_value(
+pub unsafe extern "C" fn qtty_quantity_convert_value(
     value: f64,
     src_unit: UnitId,
     dst_unit: UnitId,
@@ -323,22 +326,22 @@ mod tests {
     fn test_unit_dimension() {
         let mut dim = DimensionId::Length;
 
-        let status = qtty_unit_dimension(UnitId::Meter, &mut dim);
+        let status = unsafe { qtty_unit_dimension(UnitId::Meter, &mut dim) };
         assert_eq!(status, QTTY_OK);
         assert_eq!(dim, DimensionId::Length);
 
-        let status = qtty_unit_dimension(UnitId::Second, &mut dim);
+        let status = unsafe { qtty_unit_dimension(UnitId::Second, &mut dim) };
         assert_eq!(status, QTTY_OK);
         assert_eq!(dim, DimensionId::Time);
 
-        let status = qtty_unit_dimension(UnitId::Radian, &mut dim);
+        let status = unsafe { qtty_unit_dimension(UnitId::Radian, &mut dim) };
         assert_eq!(status, QTTY_OK);
         assert_eq!(dim, DimensionId::Angle);
     }
 
     #[test]
     fn test_unit_dimension_null_out() {
-        let status = qtty_unit_dimension(UnitId::Meter, core::ptr::null_mut());
+        let status = unsafe { qtty_unit_dimension(UnitId::Meter, core::ptr::null_mut()) };
         assert_eq!(status, QTTY_ERR_NULL_OUT);
     }
 
@@ -346,18 +349,21 @@ mod tests {
     fn test_units_compatible() {
         let mut result = false;
 
-        let status = qtty_units_compatible(UnitId::Meter, UnitId::Kilometer, &mut result);
+        let status =
+            unsafe { qtty_units_compatible(UnitId::Meter, UnitId::Kilometer, &mut result) };
         assert_eq!(status, QTTY_OK);
         assert!(result);
 
-        let status = qtty_units_compatible(UnitId::Meter, UnitId::Second, &mut result);
+        let status = unsafe { qtty_units_compatible(UnitId::Meter, UnitId::Second, &mut result) };
         assert_eq!(status, QTTY_OK);
         assert!(!result);
     }
 
     #[test]
     fn test_units_compatible_null_out() {
-        let status = qtty_units_compatible(UnitId::Meter, UnitId::Kilometer, core::ptr::null_mut());
+        let status = unsafe {
+            qtty_units_compatible(UnitId::Meter, UnitId::Kilometer, core::ptr::null_mut())
+        };
         assert_eq!(status, QTTY_ERR_NULL_OUT);
     }
 
@@ -365,7 +371,7 @@ mod tests {
     fn test_quantity_make() {
         let mut q = QttyQuantity::default();
 
-        let status = qtty_quantity_make(1000.0, UnitId::Meter, &mut q);
+        let status = unsafe { qtty_quantity_make(1000.0, UnitId::Meter, &mut q) };
         assert_eq!(status, QTTY_OK);
         assert_relative_eq!(q.value, 1000.0);
         assert_eq!(q.unit, UnitId::Meter);
@@ -373,7 +379,7 @@ mod tests {
 
     #[test]
     fn test_quantity_make_null_out() {
-        let status = qtty_quantity_make(1000.0, UnitId::Meter, core::ptr::null_mut());
+        let status = unsafe { qtty_quantity_make(1000.0, UnitId::Meter, core::ptr::null_mut()) };
         assert_eq!(status, QTTY_ERR_NULL_OUT);
     }
 
@@ -382,7 +388,7 @@ mod tests {
         let src = QttyQuantity::new(1000.0, UnitId::Meter);
         let mut dst = QttyQuantity::default();
 
-        let status = qtty_quantity_convert(src, UnitId::Kilometer, &mut dst);
+        let status = unsafe { qtty_quantity_convert(src, UnitId::Kilometer, &mut dst) };
         assert_eq!(status, QTTY_OK);
         assert_relative_eq!(dst.value, 1.0, epsilon = 1e-12);
         assert_eq!(dst.unit, UnitId::Kilometer);
@@ -393,7 +399,7 @@ mod tests {
         let src = QttyQuantity::new(3600.0, UnitId::Second);
         let mut dst = QttyQuantity::default();
 
-        let status = qtty_quantity_convert(src, UnitId::Hour, &mut dst);
+        let status = unsafe { qtty_quantity_convert(src, UnitId::Hour, &mut dst) };
         assert_eq!(status, QTTY_OK);
         assert_relative_eq!(dst.value, 1.0, epsilon = 1e-12);
         assert_eq!(dst.unit, UnitId::Hour);
@@ -404,7 +410,7 @@ mod tests {
         let src = QttyQuantity::new(180.0, UnitId::Degree);
         let mut dst = QttyQuantity::default();
 
-        let status = qtty_quantity_convert(src, UnitId::Radian, &mut dst);
+        let status = unsafe { qtty_quantity_convert(src, UnitId::Radian, &mut dst) };
         assert_eq!(status, QTTY_OK);
         assert_relative_eq!(dst.value, PI, epsilon = 1e-12);
         assert_eq!(dst.unit, UnitId::Radian);
@@ -415,7 +421,7 @@ mod tests {
         let src = QttyQuantity::new(100.0, UnitId::Meter);
         let mut dst = QttyQuantity::default();
 
-        let status = qtty_quantity_convert(src, UnitId::Second, &mut dst);
+        let status = unsafe { qtty_quantity_convert(src, UnitId::Second, &mut dst) };
         assert_eq!(status, QTTY_ERR_INCOMPATIBLE_DIM);
     }
 
@@ -423,7 +429,8 @@ mod tests {
     fn test_quantity_convert_null_out() {
         let src = QttyQuantity::new(1000.0, UnitId::Meter);
 
-        let status = qtty_quantity_convert(src, UnitId::Kilometer, core::ptr::null_mut());
+        let status =
+            unsafe { qtty_quantity_convert(src, UnitId::Kilometer, core::ptr::null_mut()) };
         assert_eq!(status, QTTY_ERR_NULL_OUT);
     }
 
@@ -431,15 +438,23 @@ mod tests {
     fn test_quantity_convert_value() {
         let mut out = 0.0;
 
-        let status = qtty_quantity_convert_value(1000.0, UnitId::Meter, UnitId::Kilometer, &mut out);
+        let status = unsafe {
+            qtty_quantity_convert_value(1000.0, UnitId::Meter, UnitId::Kilometer, &mut out)
+        };
         assert_eq!(status, QTTY_OK);
         assert_relative_eq!(out, 1.0, epsilon = 1e-12);
     }
 
     #[test]
     fn test_quantity_convert_value_null_out() {
-        let status =
-            qtty_quantity_convert_value(1000.0, UnitId::Meter, UnitId::Kilometer, core::ptr::null_mut());
+        let status = unsafe {
+            qtty_quantity_convert_value(
+                1000.0,
+                UnitId::Meter,
+                UnitId::Kilometer,
+                core::ptr::null_mut(),
+            )
+        };
         assert_eq!(status, QTTY_ERR_NULL_OUT);
     }
 

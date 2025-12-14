@@ -189,9 +189,9 @@ pub fn try_into_degrees(q: QttyQuantity) -> Result<qtty::angular::Degrees, i32> 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::QTTY_ERR_INCOMPATIBLE_DIM;
     use approx::assert_relative_eq;
     use core::f64::consts::PI;
-    use crate::QTTY_ERR_INCOMPATIBLE_DIM;
 
     #[test]
     fn test_meters_roundtrip() {
@@ -255,5 +255,68 @@ mod tests {
         let ffi = meters_into_ffi(m);
         let km = try_into_kilometers(ffi).unwrap();
         assert_relative_eq!(km.value(), 1.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn test_all_helper_functions_cover_unit_variants() {
+        use qtty::angular::{Degrees, Radians};
+        use qtty::length::{Kilometers, Meters};
+        use qtty::time::{Days, Hours, Minutes, Seconds};
+
+        let meters_qty = meters_into_ffi(Meters::new(12.0));
+        assert_eq!(meters_qty.unit, UnitId::Meter);
+        assert_relative_eq!(meters_qty.value, 12.0, epsilon = 1e-12);
+
+        let kilometers_qty = kilometers_into_ffi(Kilometers::new(3.0));
+        assert_eq!(kilometers_qty.unit, UnitId::Kilometer);
+        assert_relative_eq!(kilometers_qty.value, 3.0, epsilon = 1e-12);
+
+        let meters_from_kilometers = try_into_meters(kilometers_qty).unwrap();
+        assert_relative_eq!(meters_from_kilometers.value(), 3000.0, epsilon = 1e-12);
+
+        let kilometers_from_meters = try_into_kilometers(meters_qty).unwrap();
+        assert_relative_eq!(kilometers_from_meters.value(), 0.012, epsilon = 1e-12);
+
+        let seconds_qty = seconds_into_ffi(Seconds::new(90.0));
+        assert_eq!(seconds_qty.unit, UnitId::Second);
+        assert_relative_eq!(seconds_qty.value, 90.0, epsilon = 1e-12);
+
+        let minutes_qty = minutes_into_ffi(Minutes::new(2.5));
+        assert_eq!(minutes_qty.unit, UnitId::Minute);
+        assert_relative_eq!(minutes_qty.value, 2.5, epsilon = 1e-12);
+
+        let seconds_from_minutes = try_into_seconds(minutes_qty).unwrap();
+        assert_relative_eq!(seconds_from_minutes.value(), 150.0, epsilon = 1e-12);
+
+        let minutes_from_seconds = try_into_minutes(seconds_qty).unwrap();
+        assert_relative_eq!(minutes_from_seconds.value(), 1.5, epsilon = 1e-12);
+
+        let hours_qty = hours_into_ffi(Hours::new(4.0));
+        assert_eq!(hours_qty.unit, UnitId::Hour);
+        assert_relative_eq!(hours_qty.value, 4.0, epsilon = 1e-12);
+
+        let hours_from_minutes = try_into_hours(minutes_into_ffi(Minutes::new(180.0))).unwrap();
+        assert_relative_eq!(hours_from_minutes.value(), 3.0, epsilon = 1e-12);
+
+        let days_qty = days_into_ffi(Days::new(1.25));
+        assert_eq!(days_qty.unit, UnitId::Day);
+        assert_relative_eq!(days_qty.value, 1.25, epsilon = 1e-12);
+
+        let days_from_hours = try_into_days(hours_into_ffi(Hours::new(48.0))).unwrap();
+        assert_relative_eq!(days_from_hours.value(), 2.0, epsilon = 1e-12);
+
+        let radians_qty = radians_into_ffi(Radians::new(PI));
+        assert_eq!(radians_qty.unit, UnitId::Radian);
+        assert_relative_eq!(radians_qty.value, PI, epsilon = 1e-12);
+
+        let degrees_qty = degrees_into_ffi(Degrees::new(270.0));
+        assert_eq!(degrees_qty.unit, UnitId::Degree);
+        assert_relative_eq!(degrees_qty.value, 270.0, epsilon = 1e-12);
+
+        let radians_from_degrees = try_into_radians(degrees_qty).unwrap();
+        assert_relative_eq!(radians_from_degrees.value(), 1.5 * PI, epsilon = 1e-12);
+
+        let degrees_from_radians = try_into_degrees(radians_qty).unwrap();
+        assert_relative_eq!(degrees_from_radians.value(), 180.0, epsilon = 1e-12);
     }
 }
