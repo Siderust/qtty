@@ -4,8 +4,8 @@
 
 #[cfg(feature = "serde")]
 fn main() {
-    use qtty::{Meters, Seconds, Kilometers};
-    use serde::{Serialize, Deserialize};
+    use qtty::{Kilometers, Meters, Seconds};
+    use serde::{Deserialize, Serialize};
     use serde_json;
 
     println!("=== Advanced Serialization Examples ===\n");
@@ -15,11 +15,11 @@ fn main() {
     let zero = Meters::new(0.0);
     let json = serde_json::to_string(&zero).unwrap();
     println!("   Zero: {} → {}", zero, json);
-    
+
     let negative = Meters::new(-42.5);
     let json = serde_json::to_string(&negative).unwrap();
     println!("   Negative: {} → {}", negative, json);
-    
+
     let large = Meters::new(1.23e15);
     let json = serde_json::to_string(&large).unwrap();
     println!("   Large number: {} → {}", large, json);
@@ -32,7 +32,7 @@ fn main() {
         name: String,
         coordinates: Coordinates,
     }
-    
+
     #[derive(Serialize, Deserialize, Debug)]
     struct Coordinates {
         x: Meters,
@@ -51,7 +51,7 @@ fn main() {
 
     let json = serde_json::to_string_pretty(&location).unwrap();
     println!("{}", json);
-    
+
     let restored: Location = serde_json::from_str(&json).unwrap();
     println!("   Restored name: {}", restored.name);
     println!();
@@ -71,26 +71,32 @@ fn main() {
         optional: Some(Meters::new(50.0)),
         skipped_if_none: Some(Seconds::new(10.0)),
     };
-    println!("   With values: {}", serde_json::to_string_pretty(&with_value).unwrap());
+    println!(
+        "   With values: {}",
+        serde_json::to_string_pretty(&with_value).unwrap()
+    );
 
     let without_value = Measurement {
         required: Meters::new(100.0),
         optional: None,
         skipped_if_none: None,
     };
-    println!("   Without optional: {}", serde_json::to_string_pretty(&without_value).unwrap());
+    println!(
+        "   Without optional: {}",
+        serde_json::to_string_pretty(&without_value).unwrap()
+    );
     println!();
 
     // Example 4: Unit conversion awareness
     println!("4. Unit Conversion During Serialization:");
     println!("   ⚠️  WARNING: Always convert to base units before serializing!");
-    
+
     let distance_km = Kilometers::new(5.0);
     let distance_m = distance_km.to::<qtty::Meter>();
-    
+
     let json_km = serde_json::to_string(&distance_km).unwrap();
     let json_m = serde_json::to_string(&distance_m).unwrap();
-    
+
     println!("   5 Km serialized directly: {}", json_km);
     println!("   5 Km converted to meters: {}", json_m);
     println!("   Note: Both serialize the same value, but semantics differ!");
@@ -98,14 +104,14 @@ fn main() {
 
     // Example 5: Error handling
     println!("5. Error Handling:");
-    
+
     // Invalid JSON
     let invalid_json = "not_a_number";
     match serde_json::from_str::<Meters>(invalid_json) {
         Ok(_) => println!("   Unexpected success"),
         Err(e) => println!("   Expected error: {}", e),
     }
-    
+
     // Empty string
     let empty = "";
     match serde_json::from_str::<Meters>(empty) {
@@ -129,7 +135,7 @@ fn main() {
 
     let compact = serde_json::to_string(&data).unwrap();
     println!("   Compact: {}", compact);
-    
+
     let pretty = serde_json::to_string_pretty(&data).unwrap();
     println!("   Pretty:\n{}", pretty);
     println!();
