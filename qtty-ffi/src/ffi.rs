@@ -20,8 +20,7 @@
 
 use crate::registry;
 use crate::types::{
-    DimensionId, QttyQuantity, UnitId, QTTY_ERR_NULL_OUT,
-    QTTY_ERR_UNKNOWN_UNIT, QTTY_OK,
+    DimensionId, QttyQuantity, UnitId, QTTY_ERR_NULL_OUT, QTTY_ERR_UNKNOWN_UNIT, QTTY_OK,
 };
 use core::ffi::c_char;
 
@@ -431,15 +430,20 @@ mod tests {
     fn test_quantity_convert_value() {
         let mut out = 0.0;
 
-        let status = qtty_quantity_convert_value(1000.0, UnitId::Meter, UnitId::Kilometer, &mut out);
+        let status =
+            qtty_quantity_convert_value(1000.0, UnitId::Meter, UnitId::Kilometer, &mut out);
         assert_eq!(status, QTTY_OK);
         assert_relative_eq!(out, 1.0, epsilon = 1e-12);
     }
 
     #[test]
     fn test_quantity_convert_value_null_out() {
-        let status =
-            qtty_quantity_convert_value(1000.0, UnitId::Meter, UnitId::Kilometer, core::ptr::null_mut());
+        let status = qtty_quantity_convert_value(
+            1000.0,
+            UnitId::Meter,
+            UnitId::Kilometer,
+            core::ptr::null_mut(),
+        );
         assert_eq!(status, QTTY_ERR_NULL_OUT);
     }
 

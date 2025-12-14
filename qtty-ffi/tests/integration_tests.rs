@@ -29,11 +29,7 @@ fn test_all_units_are_valid() {
     ];
 
     for unit in units {
-        assert!(
-            qtty_unit_is_valid(unit),
-            "Unit {:?} should be valid",
-            unit
-        );
+        assert!(qtty_unit_is_valid(unit), "Unit {:?} should be valid", unit);
     }
 }
 
@@ -267,7 +263,11 @@ fn test_unit_names() {
 
     for (unit, expected_name) in test_cases {
         let name_ptr = qtty_unit_name(unit);
-        assert!(!name_ptr.is_null(), "Name for {:?} should not be null", unit);
+        assert!(
+            !name_ptr.is_null(),
+            "Name for {:?} should not be null",
+            unit
+        );
 
         // SAFETY: We verified the pointer is not null and it points to static memory
         let name = unsafe { CStr::from_ptr(name_ptr) };
