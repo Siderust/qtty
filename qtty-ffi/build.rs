@@ -60,7 +60,7 @@ fn parse_units_csv(crate_dir: &str) -> Vec<UnitDef> {
         units.push(UnitDef {
             discriminant: parts[0]
                 .parse()
-                .expect(&format!("Invalid discriminant: {}", parts[0])),
+                .unwrap_or_else(|_| panic!("Invalid discriminant: {}", parts[0])),
             dimension: parts[1].to_string(),
             name: parts[2].to_string(),
             symbol: parts[3].to_string(),
@@ -117,7 +117,7 @@ fn generate_unit_names_cstr(units: &[UnitDef], out_dir: &str) {
 
     for unit in units {
         code.push_str(&format!(
-            "    UnitId::{} => b\"{}\\0\".as_ptr() as *const c_char,\n",
+            "    UnitId::{} => c\"{}\".as_ptr(),\n",
             unit.name, unit.name
         ));
     }
