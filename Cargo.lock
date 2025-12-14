@@ -168,6 +168,7 @@ dependencies = [
  "proptest",
  "qtty-core",
  "qtty-derive",
+ "serde",
  "serde_json",
 ]
 
