@@ -7,8 +7,8 @@
 
 #[cfg(feature = "serde")]
 fn main() {
-    use qtty::{Meters, Seconds, Kilometers};
-    use serde::{Serialize, Deserialize};
+    use qtty::{Kilometers, Meters, Seconds};
+    use serde::{Deserialize, Serialize};
     use serde_json;
 
     println!("=== Using serde_with_unit Helper ===\n");
@@ -23,10 +23,10 @@ fn main() {
         // This field will serialize WITH unit information
         #[serde(with = "qtty_core::serde_with_unit")]
         max_range: Meters,
-        
+
         // This field uses default (compact) serialization
         current_distance: Meters,
-        
+
         // Another field with unit info
         #[serde(with = "qtty_core::serde_with_unit")]
         timestamp: Seconds,
@@ -56,13 +56,13 @@ fn main() {
     #[derive(Serialize, Deserialize, Debug)]
     struct WeatherReport {
         station_id: String,
-        
+
         #[serde(with = "qtty_core::serde_with_unit")]
-        temperature_celsius: Meters,  // Using Meters as example
-        
+        temperature_celsius: Meters, // Using Meters as example
+
         #[serde(with = "qtty_core::serde_with_unit")]
         wind_speed: Meters,
-        
+
         #[serde(with = "qtty_core::serde_with_unit")]
         visibility: Kilometers,
     }
@@ -85,17 +85,17 @@ fn main() {
     #[derive(Serialize, Deserialize, Debug)]
     struct RobotConfig {
         name: String,
-        
+
         // Document the units in config files
         #[serde(with = "qtty_core::serde_with_unit")]
         max_speed: Meters,
-        
+
         #[serde(with = "qtty_core::serde_with_unit")]
         safe_distance: Meters,
-        
+
         #[serde(with = "qtty_core::serde_with_unit")]
         timeout: Seconds,
-        
+
         // Internal value doesn't need unit documentation
         calibration_offset: Meters,
     }
@@ -124,14 +124,14 @@ fn main() {
     }
 
     let valid_json = r#"{"distance": {"value": 100.0, "unit": "m"}}"#;
-    let data: SingleValue = serde_json::from_str(valid_json)
-        .expect("Should deserialize with matching unit");
+    let data: SingleValue =
+        serde_json::from_str(valid_json).expect("Should deserialize with matching unit");
     println!("✓ Valid JSON with correct unit: {}", data.distance);
 
     // Missing unit field (backwards compatible)
     let no_unit_json = r#"{"distance": {"value": 50.0}}"#;
-    let data2: SingleValue = serde_json::from_str(no_unit_json)
-        .expect("Should work without unit field");
+    let data2: SingleValue =
+        serde_json::from_str(no_unit_json).expect("Should work without unit field");
     println!("✓ Valid JSON without unit field: {}", data2.distance);
 
     // Wrong unit (will fail validation)
@@ -150,15 +150,24 @@ fn main() {
     #[derive(Serialize, Deserialize, Debug)]
     struct Measurement {
         id: u32,
-        
+
         #[serde(with = "qtty_core::serde_with_unit")]
         value: Meters,
     }
 
     let measurements = vec![
-        Measurement { id: 1, value: Meters::new(10.0) },
-        Measurement { id: 2, value: Meters::new(20.0) },
-        Measurement { id: 3, value: Meters::new(30.0) },
+        Measurement {
+            id: 1,
+            value: Meters::new(10.0),
+        },
+        Measurement {
+            id: 2,
+            value: Meters::new(20.0),
+        },
+        Measurement {
+            id: 3,
+            value: Meters::new(30.0),
+        },
     ];
 
     let json = serde_json::to_string_pretty(&measurements).unwrap();
@@ -174,15 +183,15 @@ fn main() {
         name: String,
         coordinates: Coordinates,
     }
-    
+
     #[derive(Serialize, Deserialize, Debug)]
     struct Coordinates {
         #[serde(with = "qtty_core::serde_with_unit")]
         x: Meters,
-        
+
         #[serde(with = "qtty_core::serde_with_unit")]
         y: Meters,
-        
+
         #[serde(with = "qtty_core::serde_with_unit")]
         z: Meters,
     }

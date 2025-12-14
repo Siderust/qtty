@@ -381,7 +381,7 @@ impl<'de, U: Unit> Deserialize<'de> for Quantity<U> {
 pub mod serde_with_unit {
     use super::*;
     use serde::de::{self, Deserializer, MapAccess, Visitor};
-    use serde::ser::{Serializer, SerializeStruct};
+    use serde::ser::{SerializeStruct, Serializer};
 
     /// Serializes a `Quantity<U>` as a struct with `value` and `unit` fields.
     ///
@@ -450,7 +450,7 @@ pub mod serde_with_unit {
                 }
 
                 let value = value.ok_or_else(|| de::Error::missing_field("value"))?;
-                
+
                 // Validate unit if provided (optional for backwards compatibility)
                 if let Some(ref unit_str) = unit {
                     if unit_str != U::SYMBOL {
