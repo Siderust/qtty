@@ -158,14 +158,14 @@ mod tests {
     #[test]
     fn unit_id_discriminants_are_stable() {
         // These values are part of the ABI contract and must never change
-        assert_eq!(UnitId::Meter as u32, 100);
-        assert_eq!(UnitId::Kilometer as u32, 101);
-        assert_eq!(UnitId::Second as u32, 208);
-        assert_eq!(UnitId::Minute as u32, 215);
-        assert_eq!(UnitId::Hour as u32, 216);
-        assert_eq!(UnitId::Day as u32, 217);
-        assert_eq!(UnitId::Radian as u32, 301);
-        assert_eq!(UnitId::Degree as u32, 300);
+        assert_eq!(UnitId::Meter as u32, 10011);       // Length, SI, #11
+        assert_eq!(UnitId::Kilometer as u32, 10014);   // Length, SI, #14
+        assert_eq!(UnitId::Second as u32, 20008);      // Time, SI, #8
+        assert_eq!(UnitId::Minute as u32, 21000);      // Time, Common, #0
+        assert_eq!(UnitId::Hour as u32, 21001);        // Time, Common, #1
+        assert_eq!(UnitId::Day as u32, 21002);         // Time, Common, #2
+        assert_eq!(UnitId::Radian as u32, 30001);      // Angle, Radian, #1
+        assert_eq!(UnitId::Degree as u32, 31004);      // Angle, Degree, #4
     }
 
     #[test]
