@@ -1,5 +1,5 @@
 [workspace]
-members = ["qtty-core", "qtty-derive", "qtty"]
+members = ["qtty-core", "qtty-derive", "qtty", "qtty-ffi"]
 resolver = "2"
 
 [workspace.package]
