@@ -255,4 +255,20 @@ mod tests {
             convert_value(f64::NEG_INFINITY, UnitId::Second, UnitId::Minute).unwrap();
         assert!(neg_inf_result.is_infinite() && neg_inf_result.is_sign_negative());
     }
+
+    #[test]
+    fn test_convert_value_status_success() {
+        let mut out = 0.0;
+        let status = convert_value_status(2.0, UnitId::Hour, UnitId::Minute, &mut out);
+        assert_eq!(status, QTTY_OK);
+        assert_relative_eq!(out, 120.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn test_convert_value_status_incompatible_dimension() {
+        let mut out = -1.0;
+        let status = convert_value_status(1.0, UnitId::Meter, UnitId::Second, &mut out);
+        assert_eq!(status, QTTY_ERR_INCOMPATIBLE_DIM);
+        assert_relative_eq!(out, -1.0, epsilon = 1e-12);
+    }
 }
