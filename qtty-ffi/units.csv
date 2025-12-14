@@ -33,9 +33,9 @@
 11003,Length,AstronomicalUnit,au,149597870700.0
 11004,Length,LightYear,ly,9460730472580800.0
 11005,Length,Parsec,pc,30856775814913672.8
-11006,Length,Kiloparsec,kpc,3.0856775814913673e19
-11007,Length,Megaparsec,Mpc,3.0856775814913673e22
-11008,Length,Gigaparsec,Gpc,3.0856775814913673e25
+11006,Length,Kiloparsec,kpc,3.085_677_581_491_367e19
+11007,Length,Megaparsec,Mpc,3.085_677_581_491_367e22
+11008,Length,Gigaparsec,Gpc,3.085_677_581_491_367e25
 12000,Length,Inch,in,0.0254
 12001,Length,Foot,ft,0.3048
 12002,Length,Yard,yd,0.9144
@@ -94,7 +94,7 @@
 31003,Angle,Arcminute,′,0.0002908882086657216
 31004,Angle,Degree,°,0.017453292519943295
 32000,Angle,Gradian,gon,0.015707963267948967
-32001,Angle,Turn,tr,6.283185307179586
+32001,Angle,Turn,tr,std::f64::consts::TAU
 32002,Angle,HourAngle,ʰ,0.2617993877991494
 # Mass units (4xxxx): 400xx=SI, 410xx=Imperial, 420xx=Special
 40000,Mass,Yoctogram,yg,1e-24

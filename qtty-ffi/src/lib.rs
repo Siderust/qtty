@@ -158,7 +158,7 @@ mod tests {
         let mut out = QttyQuantity::default();
         let src = QttyQuantity::new(1000.0, UnitId::Meter);
 
-        let status = qtty_quantity_convert(src, UnitId::Kilometer, &mut out);
+        let status = unsafe { qtty_quantity_convert(src, UnitId::Kilometer, &mut out) };
 
         assert_eq!(status, QTTY_OK);
         assert!((out.value - 1.0).abs() < 1e-12);
@@ -171,7 +171,7 @@ mod tests {
         let mut out = QttyQuantity::default();
         let src = QttyQuantity::new(3600.0, UnitId::Second);
 
-        let status = qtty_quantity_convert(src, UnitId::Hour, &mut out);
+        let status = unsafe { qtty_quantity_convert(src, UnitId::Hour, &mut out) };
 
         assert_eq!(status, QTTY_OK);
         assert!((out.value - 1.0).abs() < 1e-12);
@@ -186,7 +186,7 @@ mod tests {
         let mut out = QttyQuantity::default();
         let src = QttyQuantity::new(180.0, UnitId::Degree);
 
-        let status = qtty_quantity_convert(src, UnitId::Radian, &mut out);
+        let status = unsafe { qtty_quantity_convert(src, UnitId::Radian, &mut out) };
 
         assert_eq!(status, QTTY_OK);
         assert!((out.value - PI).abs() < 1e-12);
@@ -199,7 +199,7 @@ mod tests {
         let mut out = QttyQuantity::default();
         let src = QttyQuantity::new(100.0, UnitId::Meter);
 
-        let status = qtty_quantity_convert(src, UnitId::Second, &mut out);
+        let status = unsafe { qtty_quantity_convert(src, UnitId::Second, &mut out) };
 
         assert_eq!(status, QTTY_ERR_INCOMPATIBLE_DIM);
     }
@@ -209,7 +209,8 @@ mod tests {
     fn test_null_out_pointer() {
         let src = QttyQuantity::new(100.0, UnitId::Meter);
 
-        let status = qtty_quantity_convert(src, UnitId::Kilometer, core::ptr::null_mut());
+        let status =
+            unsafe { qtty_quantity_convert(src, UnitId::Kilometer, core::ptr::null_mut()) };
 
         assert_eq!(status, QTTY_ERR_NULL_OUT);
     }
