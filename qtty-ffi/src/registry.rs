@@ -24,7 +24,6 @@
 use crate::types::{
     DimensionId, UnitId, QTTY_ERR_INCOMPATIBLE_DIM, QTTY_ERR_UNKNOWN_UNIT, QTTY_OK,
 };
-use core::f64::consts::PI;
 
 // =============================================================================
 // Unit Metadata
@@ -46,26 +45,6 @@ pub struct UnitMeta {
 }
 
 // =============================================================================
-// Scale Constants
-// =============================================================================
-
-// Length scales (canonical: Meter)
-const METER_SCALE: f64 = 1.0;
-const KILOMETER_SCALE: f64 = 1_000.0;
-
-// Time scales (canonical: Second)
-const SECOND_SCALE: f64 = 1.0;
-const MINUTE_SCALE: f64 = 60.0;
-const HOUR_SCALE: f64 = 3_600.0;
-const DAY_SCALE: f64 = 86_400.0;
-
-// Angle scales (canonical: Radian)
-// Note: qtty uses Degree as canonical internally, but for FFI we use Radian
-// as it's the SI unit. The conversion is: 1 rad = 180/π degrees
-const RADIAN_SCALE: f64 = 1.0;
-const DEGREE_SCALE: f64 = PI / 180.0; // 1 degree = π/180 radians
-
-// =============================================================================
 // Registry Functions
 // =============================================================================
 
@@ -74,48 +53,7 @@ const DEGREE_SCALE: f64 = PI / 180.0; // 1 degree = π/180 radians
 /// Returns `None` if the unit ID is not recognized.
 #[inline]
 pub fn meta(id: UnitId) -> Option<UnitMeta> {
-    match id {
-        UnitId::Meter => Some(UnitMeta {
-            dim: DimensionId::Length,
-            scale_to_canonical: METER_SCALE,
-            name: "Meter",
-        }),
-        UnitId::Kilometer => Some(UnitMeta {
-            dim: DimensionId::Length,
-            scale_to_canonical: KILOMETER_SCALE,
-            name: "Kilometer",
-        }),
-        UnitId::Second => Some(UnitMeta {
-            dim: DimensionId::Time,
-            scale_to_canonical: SECOND_SCALE,
-            name: "Second",
-        }),
-        UnitId::Minute => Some(UnitMeta {
-            dim: DimensionId::Time,
-            scale_to_canonical: MINUTE_SCALE,
-            name: "Minute",
-        }),
-        UnitId::Hour => Some(UnitMeta {
-            dim: DimensionId::Time,
-            scale_to_canonical: HOUR_SCALE,
-            name: "Hour",
-        }),
-        UnitId::Day => Some(UnitMeta {
-            dim: DimensionId::Time,
-            scale_to_canonical: DAY_SCALE,
-            name: "Day",
-        }),
-        UnitId::Radian => Some(UnitMeta {
-            dim: DimensionId::Angle,
-            scale_to_canonical: RADIAN_SCALE,
-            name: "Radian",
-        }),
-        UnitId::Degree => Some(UnitMeta {
-            dim: DimensionId::Angle,
-            scale_to_canonical: DEGREE_SCALE,
-            name: "Degree",
-        }),
-    }
+    include!(concat!(env!("OUT_DIR"), "/unit_registry.rs"))
 }
 
 /// Returns the dimension for the given unit ID.
@@ -214,6 +152,7 @@ pub fn convert_value_status(v: f64, src: UnitId, dst: UnitId, result: &mut f64) 
 mod tests {
     use super::*;
     use approx::assert_relative_eq;
+    use core::f64::consts::PI;
 
     #[test]
     fn test_meta_returns_correct_dimensions() {

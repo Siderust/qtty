@@ -349,6 +349,8 @@ dependencies = [
  "approx",
  "cbindgen",
  "qtty",
+ "quote",
+ "syn",
 ]
 
 [[package]]
