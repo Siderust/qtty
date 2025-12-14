@@ -14,7 +14,7 @@ readme = "README.md"
 crate-type = ["cdylib", "staticlib", "rlib"]
 
 [dependencies]
-qtty = "0.2.0"
+qtty = { version = "0.2.0", path = "../qtty" }
 
 [build-dependencies]
 cbindgen = "0.27"

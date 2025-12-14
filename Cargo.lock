@@ -310,12 +310,12 @@ dependencies = [
 
 [[package]]
 name = "qtty"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "approx",
  "proptest",
- "qtty-core",
- "qtty-derive",
+ "qtty-core 0.2.0",
+ "qtty-derive 0.1.0",
  "serde",
  "serde_json",
 ]
@@ -323,11 +323,21 @@ dependencies = [
 [[package]]
 name = "qtty-core"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1ffc4282ad0d156ef4631e90c44660243b2dc3f7dd3ba4b661eac7c11312d06"
+dependencies = [
+ "libm",
+ "qtty-derive 0.1.0",
+]
+
+[[package]]
+name = "qtty-core"
+version = "0.2.0"
 dependencies = [
  "approx",
  "libm",
  "proptest",
- "qtty-derive",
+ "qtty-derive 0.1.0",
  "serde",
  "serde_json",
 ]
@@ -335,16 +345,27 @@ dependencies = [
 [[package]]
 name = "qtty-derive"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbbe021bee01b292c6d6c6fc8f33be3744212a5a9b4c17b557e991b612d42084"
 dependencies = [
  "proc-macro2",
- "qtty-core",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "qtty-derive"
+version = "0.2.0"
+dependencies = [
+ "proc-macro2",
+ "qtty-core 0.1.0",
  "quote",
  "syn",
 ]
 
 [[package]]
 name = "qtty-ffi"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "approx",
  "cbindgen",

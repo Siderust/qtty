@@ -17,7 +17,7 @@ std = ["qtty-core/std"]
 serde = ["qtty-core/serde"]
 
 [dependencies]
-qtty-core = { version = "0.2.0", default-features = false }
+qtty-core = { version = "0.2.0", path = "../qtty-core", default-features = false }
 qtty-derive = "0.1.0"
 
 [dev-dependencies]
