@@ -11,8 +11,8 @@
 #[cfg(feature = "serde")]
 fn main() {
     use qtty::velocity::Velocity;
-    use qtty::{Kilometers, Kilograms, Meter, Meters, Second, Seconds, Watts};
-    use serde::{Serialize, Deserialize};
+    use qtty::{Kilograms, Kilometers, Meter, Meters, Second, Seconds, Watts};
+    use serde::{Deserialize, Serialize};
     use serde_json;
 
     println!("=== Quantity Serialization Examples ===\n");
@@ -22,11 +22,11 @@ fn main() {
     let distance = Meters::new(42.5);
     let json = serde_json::to_string(&distance).unwrap();
     println!("   Distance: {} → JSON: {}", distance, json);
-    
+
     let time = Seconds::new(3.14);
     let json = serde_json::to_string(&time).unwrap();
     println!("   Time: {} → JSON: {}", time, json);
-    
+
     let mass = Kilograms::new(100.0);
     let json = serde_json::to_string(&mass).unwrap();
     println!("   Mass: {} → JSON: {}", mass, json);
@@ -37,7 +37,7 @@ fn main() {
     let json_distance = "42.5";
     let distance = serde_json::from_str::<Meters>(json_distance).unwrap();
     println!("   JSON: {} → {}", json_distance, distance);
-    
+
     let json_time = "3.14";
     let time = serde_json::from_str::<Seconds>(json_time).unwrap();
     println!("   JSON: {} → {}", json_time, time);
@@ -53,7 +53,10 @@ fn main() {
     println!("   Original: {}", original);
     println!("   JSON: {}", json);
     println!("   Restored: {}", restored);
-    println!("   Equal: {}", (original.value() - restored.value()).abs() < 1e-6);
+    println!(
+        "   Equal: {}",
+        (original.value() - restored.value()).abs() < 1e-6
+    );
     println!();
 
     // Example 4: Serializing structs containing quantities
@@ -70,10 +73,10 @@ fn main() {
         time: Seconds::new(9.58),
         mass: Kilograms::new(75.0),
     };
-    
+
     let json = serde_json::to_string_pretty(&measurement).unwrap();
     println!("   Struct to JSON:\n{}", json);
-    
+
     let restored: Measurement = serde_json::from_str(&json).unwrap();
     println!("   Restored: {:?}", restored);
     println!();
@@ -83,7 +86,7 @@ fn main() {
     let distances = vec![Meters::new(10.0), Meters::new(20.0), Meters::new(30.0)];
     let json = serde_json::to_string(&distances).unwrap();
     println!("   Vec of distances → JSON: {}", json);
-    
+
     let restored: Vec<Meters> = serde_json::from_str(&json).unwrap();
     println!("   Restored: {:?}", restored);
     println!();
