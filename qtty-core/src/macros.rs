@@ -26,5 +26,3 @@ macro_rules! impl_unit_conversions {
         $crate::impl_unit_conversions!($($rest),+);
     };
 }
-
-
