@@ -1,7 +1,8 @@
 //! Macros for implementing FFI conversions for qtty unit types.
 //!
 //! This module provides macros that make it easy to implement `From` and `TryFrom`
-//! conversions between `qtty` unit types and [`QttyQuantity`].
+//! conversions between `qtty` unit types and [`QttyQuantity`], as well as code generation
+//! macros for defining all FFI units in one place.
 //!
 //! # Example
 //!
@@ -20,6 +21,44 @@
 //! let meters = MyMeters::new(100.0);
 //! let quantity: QttyQuantity = meters.into();
 //! ```
+
+/// Internal helper macro for generating unit match arms in `UnitId` methods.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! unit_match_arms {
+    ($(($variant:ident, $name:expr)),* $(,)?) => {
+        $(
+            UnitId::$variant => $name
+        ),*
+    };
+}
+
+/// Internal helper macro for generating unit `from_u32` match arms.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! unit_from_u32_arms {
+    ($(($discriminant:expr, $variant:ident)),* $(,)?) => {
+        $(
+            $discriminant => Some(UnitId::$variant)
+        ),*
+    };
+}
+
+/// Internal helper macro for generating registry metadata match arms.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! registry_match_arms {
+    ($(($variant:ident, $dim:ident, $scale:expr, $name:expr)),* $(,)?) => {
+        $(
+            UnitId::$variant => Some(UnitMeta {
+                dim: DimensionId::$dim,
+                scale_to_canonical: $scale,
+                name: $name,
+            })
+        ),*
+    };
+}
+
 /// Implements `From<$qty_type>` for `QttyQuantity` and `TryFrom<QttyQuantity>` for `$qty_type`.
 ///
 /// This macro generates bidirectional conversion implementations between a specific
