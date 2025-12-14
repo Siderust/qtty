@@ -19,6 +19,33 @@ cargo build -p qtty-ffi
 # qtty-ffi/include/qtty_ffi.h
 ```
 
+### Unit Definitions
+
+All FFI units are defined in [`units.csv`](units.csv), a simple CSV file with the format:
+
+```csv
+discriminant,dimension,name,symbol,ratio
+10011,Length,Meter,m,1.0
+10014,Length,Kilometer,km,1000.0
+```
+
+**Discriminant encoding (DSSCC):**
+- **D** (1 digit): Dimension (1=Length, 2=Time, 3=Angle, 4=Mass, 5=Power)
+- **SS** (2 digits): System/Category (00=SI, 10=Astronomical/Common, 20=Imperial/Calendar, etc.)
+- **CC** (2 digits): Counter within system (00-99)
+
+Example: `10011` = Meter (Length/SI/#11), `21000` = Minute (Time/Common/#0)
+
+**Benefits:**
+- ✅ Single source of truth for all units
+- ✅ Easy to add/modify units (just edit CSV)
+- ✅ Simple build script (~200 lines vs 400+ with AST parsing)
+- ✅ Git diffs show exactly what changed
+- ✅ No complex dependencies (no syn/quote)
+- ✅ Clear ABI contract visible in one file
+
+See [`units.csv.md`](units.csv.md) for full documentation on the CSV format and how to add new units.
+
 ## ABI Types
 
 ### `QttyQuantity` (C: `qtty_quantity_t`)
