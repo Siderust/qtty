@@ -1,0 +1,23 @@
+[package]
+name = "qtty-ffi"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords = ["ffi", "quantities", "c", "interop", "science"]
+categories = ["science", "development-tools::ffi", "api-bindings"]
+description = "C-compatible FFI bindings for qtty physical quantities and unit conversions"
+readme = "README.md"
+
+[lib]
+crate-type = ["cdylib", "staticlib", "rlib"]
+
+[dependencies]
+qtty = { path = "../qtty" }
+
+[build-dependencies]
+cbindgen = "0.27"
+
+[dev-dependencies]
+approx = "0.5"
