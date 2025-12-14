@@ -1,270 +1,148 @@
-# qtty-ffi
+# `qtty-ffi`
 
-C-compatible FFI bindings for [qtty](../qtty/) physical quantities and unit conversions.
+[![Crates.io](https://img.shields.io/crates/v/qtty-ffi.svg)](https://crates.io/crates/qtty-ffi)
+[![Docs.rs](https://docs.rs/qtty-ffi/badge.svg)](https://docs.rs/qtty-ffi)
 
-## Overview
+C-compatible FFI bindings for [`qtty`](../qtty/) physical quantities and unit conversions.
 
-`qtty-ffi` provides a stable C ABI for the `qtty` library, enabling:
+## What this crate provides
 
-1. **C/C++ interoperability**: Call into Rust to construct and convert quantities using `qtty`'s conversion logic.
-2. **Downstream Rust FFI**: Expose your own structs/functions over FFI using shared `qtty-ffi` types.
+- **Stable ABI**: `#[repr(C)]`/`#[repr(u32)]` types with explicit discriminants for every unit.
+- **Generated header**: `build.rs` runs `cbindgen`, producing `include/qtty_ffi.h` for C/C++ consumers.
+- **CSV-driven registry**: every unit lives in [`units.csv`](units.csv); edit one file and the Rust code plus header stay in sync (details in [`units.csv.md`](units.csv.md)).
+- **Rust helpers**: conversion traits, helper fns, and the `impl_unit_ffi!` macro to adapt your own quantity wrappers.
 
-## Building
+## Building & header generation
 
 ```bash
-# Build as cdylib (shared library) and staticlib
+# Build cdylib/staticlib/rlib targets
 cargo build -p qtty-ffi
 
-# The header file is generated at:
+# Generated header checked into git:
 # qtty-ffi/include/qtty_ffi.h
 ```
 
-### Unit Definitions
+`build.rs` re-runs whenever `units.csv`, `src/`, or `cbindgen.toml` change. It emits:
 
-All FFI units are defined in [`units.csv`](units.csv), a simple CSV file with the format:
+- `UnitId` enum variants/discriminants and the lookup tables behind `qtty_unit_*` APIs.
+- The runtime registry that powers conversions.
+- The C header described above.
+
+### Unit definitions
+
+`units.csv` rows look like:
 
 ```csv
 discriminant,dimension,name,symbol,ratio
 10011,Length,Meter,m,1.0
-10014,Length,Kilometer,km,1000.0
+21000,Time,Minute,min,60.0
+30001,Angle,Degree,deg,0.017453292519943295
 ```
 
-**Discriminant encoding (DSSCC):**
-- **D** (1 digit): Dimension (1=Length, 2=Time, 3=Angle, 4=Mass, 5=Power)
-- **SS** (2 digits): System/Category (00=SI, 10=Astronomical/Common, 20=Imperial/Calendar, etc.)
-- **CC** (2 digits): Counter within system (00-99)
+- **Discriminants** follow a DSSCC scheme (`D = dimension`, `SS = system/category`, `CC = counter`).
+- **Dimension** must be one of the `DimensionId` variants (`Length`, `Time`, `Angle`, `Mass`, `Power`).
+- **Ratio** is the scale factor relative to the canonical unit (meters, seconds, radians, grams, watts).
 
-Example: `10011` = Meter (Length/SI/#11), `21000` = Minute (Time/Common/#0)
+The CSV becomes the ABI contract: review diffs to see exactly which units were added or changed.
 
-**Benefits:**
-- ✅ Single source of truth for all units
-- ✅ Easy to add/modify units (just edit CSV)
-- ✅ Simple build script (~200 lines vs 400+ with AST parsing)
-- ✅ Git diffs show exactly what changed
-- ✅ No complex dependencies (no syn/quote)
-- ✅ Clear ABI contract visible in one file
+## ABI surface
 
-See [`units.csv.md`](units.csv.md) for full documentation on the CSV format and how to add new units.
-
-## ABI Types
-
-### `QttyQuantity` (C: `qtty_quantity_t`)
-
-A POD quantity carrier type:
+### Types
 
 ```c
 typedef struct {
     double value;
     UnitId unit;
 } qtty_quantity_t;
+
+typedef enum {
+    DimensionId_Length = 1,
+    DimensionId_Time = 2,
+    DimensionId_Angle = 3,
+    DimensionId_Mass = 4,
+    DimensionId_Power = 5,
+} DimensionId;
 ```
 
-### `UnitId`
+`UnitId` is `#[repr(u32)]` and contains every row from `units.csv`. Layouts (16-byte `qtty_quantity_t`, 4-byte enums) are part of the ABI contract.
 
-Unit identifier enum with explicit discriminants:
+### Status codes
 
-| Unit | Discriminant | Dimension |
-|------|--------------|-----------|
-| `Meter` | 100 | Length |
-| `Kilometer` | 101 | Length |
-| `Second` | 200 | Time |
-| `Minute` | 201 | Time |
-| `Hour` | 202 | Time |
-| `Day` | 203 | Time |
-| `Radian` | 300 | Angle |
-| `Degree` | 301 | Angle |
-
-### `DimensionId`
-
-Dimension identifier enum:
-
-| Dimension | Discriminant |
-|-----------|--------------|
-| `Length` | 1 |
-| `Time` | 2 |
-| `Angle` | 3 |
-
-### Status Codes
-
-| Code | Value | Description |
-|------|-------|-------------|
+| Constant | Value | Meaning |
+| --- | --- | --- |
 | `QTTY_OK` | 0 | Success |
-| `QTTY_ERR_UNKNOWN_UNIT` | -1 | Invalid unit ID |
+| `QTTY_ERR_UNKNOWN_UNIT` | -1 | Invalid unit id |
 | `QTTY_ERR_INCOMPATIBLE_DIM` | -2 | Dimension mismatch |
 | `QTTY_ERR_NULL_OUT` | -3 | Null output pointer |
-| `QTTY_ERR_INVALID_VALUE` | -4 | Invalid value (reserved) |
+| `QTTY_ERR_INVALID_VALUE` | -4 | Reserved for future validation |
 
-## C API Functions
-
-### Unit Validation
+### Functions
 
 ```c
-// Check if a unit ID is valid
 bool qtty_unit_is_valid(UnitId unit);
-
-// Get the dimension of a unit
 int32_t qtty_unit_dimension(UnitId unit, DimensionId* out);
-
-// Check if two units are compatible (same dimension)
 int32_t qtty_units_compatible(UnitId a, UnitId b, bool* out);
-
-// Get unit name as NUL-terminated string
 const char* qtty_unit_name(UnitId unit);
-```
 
-### Quantity Operations
-
-```c
-// Create a quantity
 int32_t qtty_quantity_make(double value, UnitId unit, qtty_quantity_t* out);
+int32_t qtty_quantity_convert(qtty_quantity_t src, UnitId dst, qtty_quantity_t* out);
+int32_t qtty_quantity_convert_value(double value, UnitId src, UnitId dst, double* out_value);
 
-// Convert a quantity to a different unit
-int32_t qtty_quantity_convert(qtty_quantity_t src, UnitId dst_unit, qtty_quantity_t* out);
-
-// Convert just the value (without wrapping in struct)
-int32_t qtty_quantity_convert_value(double value, UnitId src_unit, UnitId dst_unit, double* out_value);
+uint32_t qtty_ffi_version(void); // currently 1
 ```
 
-### Version
-
-```c
-// Get FFI ABI version (currently 1)
-uint32_t qtty_ffi_version(void);
-```
-
-## Usage in C/C++
-
-Include the generated header and link against the library:
+## Usage from C/C++
 
 ```c
 #include "qtty_ffi.h"
 #include <stdio.h>
 
-int main() {
-    qtty_quantity_t meters, kilometers;
-    
-    // Create a quantity: 1000 meters
-    int32_t status = qtty_quantity_make(1000.0, UNIT_ID_METER, &meters);
-    if (status != QTTY_OK) {
-        fprintf(stderr, "Failed to create quantity\n");
+int main(void) {
+    qtty_quantity_t meters;
+    if (qtty_quantity_make(1000.0, UnitId_Meter, &meters) != QTTY_OK) {
         return 1;
     }
-    
-    // Convert to kilometers
-    status = qtty_quantity_convert(meters, UNIT_ID_KILOMETER, &kilometers);
-    if (status == QTTY_OK) {
+
+    qtty_quantity_t kilometers;
+    if (qtty_quantity_convert(meters, UnitId_Kilometer, &kilometers) == QTTY_OK) {
         printf("1000 meters = %.2f kilometers\n", kilometers.value);
-    } else if (status == QTTY_ERR_INCOMPATIBLE_DIM) {
-        fprintf(stderr, "Cannot convert between different dimensions\n");
     }
-    
+
     return 0;
 }
 ```
 
-## Usage in Downstream Rust Crates
-
-### Using the Helper Traits
-
-The crate provides `From` and `TryFrom` implementations for converting between `qtty` types and `QttyQuantity`:
+## Usage from Rust
 
 ```rust
-use qtty::length::{Meters, Kilometers};
-use qtty_ffi::{QttyQuantity, UnitId};
-
-// Convert Rust type to FFI
-let meters = Meters::new(1000.0);
-let ffi_qty: QttyQuantity = meters.into();
-
-// Convert FFI back to Rust type (with automatic unit conversion)
-let km: Kilometers = ffi_qty.try_into().unwrap();
-assert!((km.value() - 1.0).abs() < 1e-12);
-```
-
-### Using the Macro
-
-For custom types, use the `impl_unit_ffi!` macro:
-
-```rust
+use qtty::length::{Kilometers, Meters};
 use qtty_ffi::{impl_unit_ffi, QttyQuantity, UnitId};
 
-// Your custom quantity type (must have new() and value() methods)
+// Built-in conversions via From/TryFrom
+let ffi: QttyQuantity = Meters::new(1_000.0).into();
+let km: Kilometers = ffi.try_into().unwrap();
+assert!((km.value() - 1.0).abs() < 1e-12);
+
+// Custom wrapper (must expose new()/value())
 struct MyMeters(f64);
 impl MyMeters {
     fn new(v: f64) -> Self { Self(v) }
     fn value(&self) -> f64 { self.0 }
 }
 
-// Implement FFI conversions
 impl_unit_ffi!(MyMeters, UnitId::Meter);
-
-// Now you can convert
-let m = MyMeters::new(100.0);
-let ffi: QttyQuantity = m.into();
+let ffi_again: QttyQuantity = MyMeters::new(42.0).into();
 ```
 
-### Using the Helper Functions
+Helper functions like `meters_into_ffi`, `try_into_hours`, etc. are available for ergonomic wrappers.
 
-Explicit functions are also available:
+## ABI stability & thread safety
 
-```rust
-use qtty::length::Meters;
-use qtty_ffi::{meters_into_ffi, try_into_kilometers};
-
-let m = Meters::new(1000.0);
-let ffi = meters_into_ffi(m);
-let km = try_into_kilometers(ffi).unwrap();
-```
-
-### Exposing Your Own FFI
-
-When building your own FFI layer on top of `qtty-ffi`:
-
-```rust
-use qtty_ffi::{QttyQuantity, UnitId, QTTY_OK, QTTY_ERR_NULL_OUT};
-
-#[no_mangle]
-pub extern "C" fn my_crate_do_something(
-    input: QttyQuantity,
-    out: *mut QttyQuantity
-) -> i32 {
-    if out.is_null() {
-        return QTTY_ERR_NULL_OUT;
-    }
-    
-    // Process the quantity...
-    let result = QttyQuantity::new(input.value * 2.0, input.unit);
-    
-    unsafe { *out = result; }
-    QTTY_OK
-}
-```
-
-## ABI Stability Contract
-
-The following are guaranteed stable:
-
-- All discriminant values in `UnitId` and `DimensionId`
-- Memory layout of `QttyQuantity` (16 bytes: f64 + u32 + padding)
-- All status code values
-- All exported function signatures
-
-New items may be added in future versions:
-- New unit variants (with new discriminant values)
-- New dimension variants (with new discriminant values)
-- New functions
-
-## Thread Safety
-
-All functions are thread-safe. The library contains no global mutable state.
-
-## Error Handling
-
-- Functions never panic across FFI boundaries
-- All errors are returned as status codes
-- Special float values (NaN, ±Inf) propagate through conversions
-- Null output pointers are always checked before use
+- Existing `UnitId`/`DimensionId` discriminants, status codes, type layouts, and exported signatures will not change.
+- New variants/functions may be added in minor versions (callers should handle unknown ids defensively).
+- All functions are thread-safe and never panic; errors flow through the status codes above.
+- Special `f64` values (`NaN`, `±INF`) are passed through untouched.
 
 ## License
 
-Same license as the parent `qtty` workspace (AGPL-3.0).
+Same license as the parent workspace (AGPL-3.0). See `../LICENSE`.
