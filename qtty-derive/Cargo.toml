@@ -20,4 +20,4 @@ quote = "1.0"
 proc-macro2 = "1.0"
 
 [dev-dependencies]
-qtty-core = "0.2.0"
+qtty-core = "0.1.0"
