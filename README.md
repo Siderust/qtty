@@ -1,18 +1,31 @@
 # `qtty`
 
-Strongly typed physical and astronomy-friendly units built around a small, zero-cost core.
+[![Crates.io](https://img.shields.io/crates/v/qtty.svg)](https://crates.io/crates/qtty)
+[![Docs.rs](https://docs.rs/qtty/badge.svg)](https://docs.rs/qtty)
 
-This repository is a Cargo workspace containing three crates:
+Strongly typed physical and astronomy-friendly units built around a tiny, zero-cost type system.
 
-- `qtty` — the user-facing crate that re-exports the full API and a set of predefined units.
-- `qtty-core` — the type system (`Quantity`, `Unit`, `Per`, …) and the predefined qtty modules.
-- `qtty-derive` — an internal proc-macro used by `qtty-core` to define units.
+This repository is a Cargo workspace containing four crates:
+
+- `qtty` — the user-facing crate that re-exports the core API plus curated unit modules.
+- `qtty-core` — the minimal type system (`Quantity`, `Unit`, `Per`, …) and predefined units.
+- `qtty-derive` — a proc-macro used to implement new `Unit` marker types.
+- `qtty-ffi` — a C-compatible ABI for constructing and converting quantities outside of Rust.
+
+Most users should depend on the `qtty` crate; the other crates exist for advanced/custom use cases.
 
 ## Install
 
 ```toml
 [dependencies]
 qtty = "0.1.0"
+```
+
+Disable default features for `no_std` (uses `libm` behind the scenes):
+
+```toml
+[dependencies]
+qtty = { version = "0.1.0", default-features = false }
 ```
 
 ## Quick start
@@ -28,23 +41,17 @@ assert!((r.value() - core::f64::consts::PI).abs() < 1e-12);
 ## Features
 
 - `std` (default): enables `std` support in `qtty-core`.
-- `serde`: enables `serde` support for `Quantity<U>` (serialize/deserialize as a bare `f64`).
+- `serde`: serializes/deserializes `Quantity<U>` as bare `f64` values.
 
-Disable default features for `no_std`:
+Need a C ABI? Use the companion `qtty-ffi` crate (see `qtty-ffi/README.md`).
 
-```toml
-[dependencies]
-qtty = { version = "0.1.0", default-features = false }
-```
-
-## Stability
+## Stability & documentation
 
 This workspace is currently `0.x`. Expect breaking changes between minor versions until `1.0`.
 
-## Documentation
-
-- API docs: `https://docs.rs/qtty` (published versions)
-- Workspace repository: `https://github.com/Siderust/qtty`
+- Docs: https://docs.rs/qtty (published versions of the facade crate)
+- Repo: https://github.com/Siderust/qtty
+- FFI guide: see `qtty-ffi/README.md`
 
 ## License
 
