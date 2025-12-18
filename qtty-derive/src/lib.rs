@@ -157,4 +157,169 @@ fn parse_unit_attribute(attrs: &[Attribute]) -> syn::Result<UnitAttribute> {
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use super::*;
+    use quote::quote;
+    use syn::parse_quote;
+
+    #[test]
+    fn test_parse_unit_attribute_complete() {
+        let input: DeriveInput = parse_quote! {
+            #[unit(symbol = "m", dimension = Length, ratio = 1.0)]
+            pub enum Meter {}
+        };
+
+        let attr = parse_unit_attribute(&input.attrs).unwrap();
+        assert_eq!(attr.symbol.value(), "m");
+    }
+
+    #[test]
+    fn test_parse_unit_attribute_missing() {
+        let input: DeriveInput = parse_quote! {
+            pub enum Meter {}
+        };
+
+        let result = parse_unit_attribute(&input.attrs);
+        assert!(result.is_err());
+        let err = result.err().unwrap();
+        let err_msg = err.to_string();
+        assert!(err_msg.contains("missing #[unit(...)] attribute"));
+    }
+
+    #[test]
+    fn test_parse_unit_attribute_missing_symbol() {
+        let input: DeriveInput = parse_quote! {
+            #[unit(dimension = Length, ratio = 1.0)]
+            pub enum Meter {}
+        };
+
+        let result = parse_unit_attribute(&input.attrs);
+        assert!(result.is_err());
+        let err = result.err().unwrap();
+        let err_msg = err.to_string();
+        assert!(err_msg.contains("missing required attribute `symbol`"));
+    }
+
+    #[test]
+    fn test_parse_unit_attribute_missing_dimension() {
+        let input: DeriveInput = parse_quote! {
+            #[unit(symbol = "m", ratio = 1.0)]
+            pub enum Meter {}
+        };
+
+        let result = parse_unit_attribute(&input.attrs);
+        assert!(result.is_err());
+        let err = result.err().unwrap();
+        let err_msg = err.to_string();
+        assert!(err_msg.contains("missing required attribute `dimension`"));
+    }
+
+    #[test]
+    fn test_parse_unit_attribute_missing_ratio() {
+        let input: DeriveInput = parse_quote! {
+            #[unit(symbol = "m", dimension = Length)]
+            pub enum Meter {}
+        };
+
+        let result = parse_unit_attribute(&input.attrs);
+        assert!(result.is_err());
+        let err = result.err().unwrap();
+        let err_msg = err.to_string();
+        assert!(err_msg.contains("missing required attribute `ratio`"));
+    }
+
+    #[test]
+    fn test_parse_unit_attribute_unknown_field() {
+        let input: DeriveInput = parse_quote! {
+            #[unit(symbol = "m", dimension = Length, ratio = 1.0, unknown = "value")]
+            pub enum Meter {}
+        };
+
+        let result = parse_unit_attribute(&input.attrs);
+        assert!(result.is_err());
+        let err = result.err().unwrap();
+        let err_msg = err.to_string();
+        assert!(err_msg.contains("unknown attribute"));
+    }
+
+    #[test]
+    fn test_derive_unit_impl_basic() {
+        let input: DeriveInput = parse_quote! {
+            #[unit(symbol = "m", dimension = Length, ratio = 1.0)]
+            pub enum Meter {}
+        };
+
+        let result = derive_unit_impl(input);
+        assert!(result.is_ok());
+        let tokens = result.unwrap();
+        let code = tokens.to_string();
+        assert!(code.contains("impl crate :: Unit for Meter"));
+        assert!(code.contains("const RATIO : f64 = 1.0"));
+        assert!(code.contains("const SYMBOL : & 'static str = \"m\""));
+        assert!(code.contains("type Dim = Length"));
+    }
+
+    #[test]
+    fn test_derive_unit_impl_with_expression_ratio() {
+        let input: DeriveInput = parse_quote! {
+            #[unit(symbol = "km", dimension = Length, ratio = 1000.0)]
+            pub enum Kilometer {}
+        };
+
+        let result = derive_unit_impl(input);
+        assert!(result.is_ok());
+        let tokens = result.unwrap();
+        let code = tokens.to_string();
+        assert!(code.contains("const RATIO : f64 = 1000.0"));
+    }
+
+    #[test]
+    fn test_unit_attribute_parse_with_trailing_comma() {
+        let tokens = quote! {
+            symbol = "m", dimension = Length, ratio = 1.0,
+        };
+        let attr: UnitAttribute = syn::parse2(tokens).unwrap();
+        assert_eq!(attr.symbol.value(), "m");
+    }
+
+    #[test]
+    fn test_unit_attribute_parse_no_trailing_comma() {
+        let tokens = quote! {
+            symbol = "m", dimension = Length, ratio = 1.0
+        };
+        let attr: UnitAttribute = syn::parse2(tokens).unwrap();
+        assert_eq!(attr.symbol.value(), "m");
+    }
+
+    #[test]
+    fn test_unit_attribute_parse_duplicate_symbol() {
+        // Parser accepts duplicates - last one wins
+        let tokens = quote! {
+            symbol = "m", symbol = "km", dimension = Length, ratio = 1.0
+        };
+        let attr: UnitAttribute = syn::parse2(tokens).unwrap();
+        assert_eq!(attr.symbol.value(), "km");
+    }
+
+    #[test]
+    fn test_parse_empty_attribute() {
+        let tokens = quote! {};
+        let result: syn::Result<UnitAttribute> = syn::parse2(tokens);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_derive_unit_impl_error_path() {
+        // Test error handling in derive_unit_impl
+        let input: DeriveInput = parse_quote! {
+            pub enum Meter {}
+        };
+        let result = derive_unit_impl(input);
+        assert!(result.is_err());
+        // The error should contain information about missing attribute
+        let err = result.err().unwrap();
+        let err_tokens = err.to_compile_error();
+        let code = err_tokens.to_string();
+        assert!(code.contains("compile_error"));
+    }
+}
