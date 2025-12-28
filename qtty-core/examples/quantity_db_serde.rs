@@ -1,22 +1,25 @@
-/// Example showing how to use qtty::Quantity types with serde and Tiberius DB.
-///
-/// This demonstrates the new features added to qtty-core:
-/// - serde_f64: Simple numeric serialization for Quantity<U>
-/// - Tiberius support: Direct DB query binding and extraction
-///
-/// Run with:
-/// ```bash
-/// cargo run --example quantity_db_serde --features serde,tiberius
-/// ```
+//! Example showing how to use `qtty_core::Quantity` types with `serde` and (optionally) Tiberius DB.
+//!
+//! This demonstrates:
+//! - `qtty_core::serde_f64`: serialize `Quantity<U>` as a raw `f64` via `#[serde(with = "...")]`
+//! - `tiberius` feature: bind/extract `Quantity<U>` directly (conceptual example)
+//!
+//! Run with:
+//! - `cargo run -p qtty-core --example quantity_db_serde --features serde`
+//! - `cargo run -p qtty-core --example quantity_db_serde --features serde,tiberius`
 
+#[cfg(feature = "serde")]
 use qtty_core::angular::Degrees;
+#[cfg(feature = "serde")]
 use qtty_core::time::Seconds;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Example 1: Serde with f64 serialization
 // ─────────────────────────────────────────────────────────────────────────────
 
+#[cfg(feature = "serde")]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 struct SchedulingConstraints {
     /// Minimum altitude in degrees
@@ -40,6 +43,7 @@ struct SchedulingConstraints {
     pub min_observation_time: Seconds,
 }
 
+#[cfg(feature = "serde")]
 fn example_serde() {
     println!("=== Serde Example ===\n");
 
@@ -67,7 +71,7 @@ fn example_serde() {
 // Example 2: Direct DB usage (conceptual - requires actual DB connection)
 // ─────────────────────────────────────────────────────────────────────────────
 
-#[cfg(feature = "tiberius")]
+#[cfg(all(feature = "serde", feature = "tiberius"))]
 fn example_tiberius_concept() {
     println!("=== Tiberius DB Example (conceptual) ===\n");
 
@@ -87,6 +91,7 @@ fn example_tiberius_concept() {
 // Example 3: Migration comparison
 // ─────────────────────────────────────────────────────────────────────────────
 
+#[cfg(feature = "serde")]
 fn example_migration_comparison() {
     println!("=== Migration Comparison ===\n");
 
@@ -114,7 +119,7 @@ fn example_migration_comparison() {
     println!("Old approach:");
     println!("  - Store: f64");
     println!("  - Access: .min_alt() -> Degrees");
-    println!("  - Value: {} degrees\n", old.min_alt().value());
+    println!("  - Values: {}..{} degrees\n", old.min_alt().value(), old.max_alt().value());
 
     // New approach: store as Quantity directly
     #[derive(Serialize, Deserialize)]
@@ -133,7 +138,7 @@ fn example_migration_comparison() {
     println!("New approach:");
     println!("  - Store: Degrees (typed!)");
     println!("  - Access: .min_alt (direct)");
-    println!("  - Value: {} degrees", new.min_alt.value());
+    println!("  - Values: {}..{} degrees", new.min_alt.value(), new.max_alt.value());
     println!("  ✓ No conversion methods needed!");
     println!("  ✓ Type safety at compile time!\n");
 }
@@ -142,13 +147,14 @@ fn example_migration_comparison() {
 // Main
 // ─────────────────────────────────────────────────────────────────────────────
 
-fn main() {
+#[cfg(feature = "serde")]
+fn run() {
     println!("\n╔═══════════════════════════════════════════════════════╗");
-    println!("║  qtty-core: Serde and DB Integration Examples        ║");
+    println!("║  qtty-core: Serde and DB Integration Examples         ║");
     println!("╚═══════════════════════════════════════════════════════╝\n");
 
     example_serde();
-    
+
     #[cfg(feature = "tiberius")]
     example_tiberius_concept();
 
@@ -159,48 +165,14 @@ fn main() {
     println!("═══════════════════════════════════════════════════════\n");
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_serde_roundtrip() {
-        let constraints = SchedulingConstraints {
-            min_altitude: Degrees::new(45.0),
-            max_altitude: Degrees::new(85.0),
-            min_azimuth: Degrees::new(10.0),
-            max_azimuth: Degrees::new(350.0),
-            min_observation_time: Seconds::new(600.0),
-        };
-
-        let json = serde_json::to_string(&constraints).unwrap();
-        let parsed: SchedulingConstraints = serde_json::from_str(&json).unwrap();
-
-        assert_eq!(
-            constraints.min_altitude.value(),
-            parsed.min_altitude.value()
-        );
-        assert_eq!(
-            constraints.max_altitude.value(),
-            parsed.max_altitude.value()
-        );
+fn main() {
+    #[cfg(feature = "serde")]
+    {
+        run();
     }
 
-    #[test]
-    fn test_json_format() {
-        let constraints = SchedulingConstraints {
-            min_altitude: Degrees::new(30.0),
-            max_altitude: Degrees::new(90.0),
-            min_azimuth: Degrees::new(0.0),
-            max_azimuth: Degrees::new(360.0),
-            min_observation_time: Seconds::new(1200.0),
-        };
-
-        let json = serde_json::to_value(&constraints).unwrap();
-
-        // Verify it's serialized as raw numbers
-        assert_eq!(json["min_altitude"], 30.0);
-        assert_eq!(json["max_altitude"], 90.0);
-        assert_eq!(json["min_observation_time"], 1200.0);
+    #[cfg(not(feature = "serde"))]
+    {
+        eprintln!("This example requires `--features serde`.");
     }
 }

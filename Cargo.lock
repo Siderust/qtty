@@ -556,20 +556,11 @@ version = "0.2.1"
 dependencies = [
  "approx",
  "proptest",
- "qtty-core 0.2.1",
- "qtty-derive 0.1.0",
+ "pyo3",
+ "qtty-core",
+ "qtty-derive 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "serde_json",
-]
-
-[[package]]
-name = "qtty-core"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1ffc4282ad0d156ef4631e90c44660243b2dc3f7dd3ba4b661eac7c11312d06"
-dependencies = [
- "libm",
- "qtty-derive 0.1.0",
 ]
 
 [[package]]
@@ -602,7 +593,18 @@ name = "qtty-derive"
 version = "0.2.1"
 dependencies = [
  "proc-macro2",
- "qtty-core 0.1.0",
+ "qtty-core",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "qtty-derive"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "40e9b9234b4947ff1132b4aea5a1cb106bb344cc5c6de709404ed2f61a39ac33"
+dependencies = [
+ "proc-macro2",
  "quote",
  "syn",
 ]

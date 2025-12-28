@@ -89,6 +89,8 @@ mod dimension;
 mod macros;
 mod quantity;
 mod unit;
+#[cfg(feature = "python")]
+mod python;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Public re-exports of core types
