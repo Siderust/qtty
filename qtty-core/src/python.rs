@@ -58,40 +58,37 @@ mod tests {
 
     #[test]
     fn quantity_to_python_roundtrip() {
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let meters = Meters::new(42.5);
-            let obj = meters.to_object(py);
-            let extracted = obj.extract::<f64>(py).unwrap();
+            let obj = meters.into_pyobject(py).unwrap();
+            let extracted = obj.extract::<f64>().unwrap();
             assert_eq!(extracted, 42.5);
         });
     }
 
     #[test]
     fn quantity_from_python_roundtrip() {
-        Python::with_gil(|py| {
-            let obj = 12.25f64.to_object(py);
-            let any = obj.as_ref(py);
-            let meters = Meters::extract(any).unwrap();
+        Python::attach(|py| {
+            let obj = 12.25f64.into_pyobject(py).unwrap();
+            let meters: Meters = obj.extract().unwrap();
             assert_eq!(meters.value(), 12.25);
         });
     }
 
     #[test]
     fn quantity_from_python_other_unit() {
-        Python::with_gil(|py| {
-            let obj = 180.0f64.to_object(py);
-            let any = obj.as_ref(py);
-            let degrees = Degrees::extract(any).unwrap();
+        Python::attach(|py| {
+            let obj = 180.0f64.into_pyobject(py).unwrap();
+            let degrees: Degrees = obj.extract().unwrap();
             assert_eq!(degrees.value(), 180.0);
         });
     }
 
     #[test]
     fn quantity_from_python_per_unit_alias() {
-        Python::with_gil(|py| {
-            let obj = 3.5f64.to_object(py);
-            let any = obj.as_ref(py);
-            let velocity: Velocity<Meter, Second> = Velocity::extract(any).unwrap();
+        Python::attach(|py| {
+            let obj = 3.5f64.into_pyobject(py).unwrap();
+            let velocity: Velocity<Meter, Second> = obj.extract().unwrap();
             assert_eq!(velocity.value(), 3.5);
         });
     }
