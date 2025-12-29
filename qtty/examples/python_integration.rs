@@ -20,7 +20,10 @@ pub struct DegreeRange {
 impl DegreeRange {
     #[new]
     fn new(min: f64, max: f64) -> Self {
-        Self { min: Degrees::new(min), max: Degrees::new(max) }
+        Self {
+            min: Degrees::new(min),
+            max: Degrees::new(max),
+        }
     }
 
     fn span(&self) -> f64 {

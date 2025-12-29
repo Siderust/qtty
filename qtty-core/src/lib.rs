@@ -87,10 +87,10 @@ extern crate libm;
 
 mod dimension;
 mod macros;
-mod quantity;
-mod unit;
 #[cfg(feature = "python")]
 mod python;
+mod quantity;
+mod unit;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Public re-exports of core types

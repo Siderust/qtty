@@ -28,7 +28,10 @@ macro_rules! impl_py_for_quantity {
             type Error = core::convert::Infallible;
 
             fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-                Ok(pyo3::types::PyFloat::new(py, <Self as QuantityRepr>::value(&self)))
+                Ok(pyo3::types::PyFloat::new(
+                    py,
+                    <Self as QuantityRepr>::value(&self),
+                ))
             }
         }
 

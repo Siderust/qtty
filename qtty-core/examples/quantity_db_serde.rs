@@ -63,7 +63,10 @@ fn example_serde() {
     // Deserialize back
     let parsed: SchedulingConstraints = serde_json::from_str(&json).unwrap();
     println!("Deserialized successfully!");
-    assert_eq!(constraints.min_altitude.value(), parsed.min_altitude.value());
+    assert_eq!(
+        constraints.min_altitude.value(),
+        parsed.min_altitude.value()
+    );
     println!("✓ Round-trip successful\n");
 }
 
@@ -119,7 +122,11 @@ fn example_migration_comparison() {
     println!("Old approach:");
     println!("  - Store: f64");
     println!("  - Access: .min_alt() -> Degrees");
-    println!("  - Values: {}..{} degrees\n", old.min_alt().value(), old.max_alt().value());
+    println!(
+        "  - Values: {}..{} degrees\n",
+        old.min_alt().value(),
+        old.max_alt().value()
+    );
 
     // New approach: store as Quantity directly
     #[derive(Serialize, Deserialize)]
@@ -138,7 +145,11 @@ fn example_migration_comparison() {
     println!("New approach:");
     println!("  - Store: Degrees (typed!)");
     println!("  - Access: .min_alt (direct)");
-    println!("  - Values: {}..{} degrees", new.min_alt.value(), new.max_alt.value());
+    println!(
+        "  - Values: {}..{} degrees",
+        new.min_alt.value(),
+        new.max_alt.value()
+    );
     println!("  ✓ No conversion methods needed!");
     println!("  ✓ Type safety at compile time!\n");
 }

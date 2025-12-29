@@ -8,7 +8,7 @@ use core::ops::*;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 #[cfg(feature = "tiberius")]
-use tiberius::{ToSql, FromSql, ColumnData};
+use tiberius::{ColumnData, FromSql, ToSql};
 
 /// A quantity with a specific unit.
 ///
