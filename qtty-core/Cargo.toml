@@ -20,7 +20,7 @@ tiberius = ["dep:tiberius"]
 
 [dependencies]
 serde = { version = "1.0", default-features = false, features = ["derive", "alloc"], optional = true }
-pyo3 = { version = "0.27.2", optional = true }
+pyo3 = { version = "0.27.2", optional = true, features = ["auto-initialize"] }
 tiberius = { version = "0.12", default-features = false, optional = true }
 libm = "0.2"
 qtty-derive = "0.1.0"
