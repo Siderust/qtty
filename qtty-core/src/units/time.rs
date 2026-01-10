@@ -40,7 +40,6 @@ pub const SECONDS_PER_DAY: f64 = 86_400.0;
 
 /// Attoseconds (`1 as = 10^-18 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "as", dimension = Time, ratio = 1e-18)]
 pub struct Attosecond;
 /// A quantity measured in attoseconds.
@@ -50,7 +49,6 @@ pub const ATTOSEC: Attoseconds = Attoseconds::new(1.0);
 
 /// Femtoseconds (`1 fs = 10^-15 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "fs", dimension = Time, ratio = 1e-15)]
 pub struct Femtosecond;
 /// A quantity measured in femtoseconds.
@@ -60,7 +58,6 @@ pub const FEMTOSEC: Femtoseconds = Femtoseconds::new(1.0);
 
 /// Picoseconds (`1 ps = 10^-12 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "ps", dimension = Time, ratio = 1e-12)]
 pub struct Picosecond;
 /// A quantity measured in picoseconds.
@@ -70,7 +67,6 @@ pub const PICOSEC: Picoseconds = Picoseconds::new(1.0);
 
 /// Nanoseconds (`1 ns = 10^-9 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "ns", dimension = Time, ratio = 1e-9)]
 pub struct Nanosecond;
 /// A quantity measured in nanoseconds.
@@ -80,7 +76,6 @@ pub const NANOSEC: Nanoseconds = Nanoseconds::new(1.0);
 
 /// Microseconds (`1 µs = 10^-6 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "µs", dimension = Time, ratio = 1e-6)]
 pub struct Microsecond;
 /// A quantity measured in microseconds.
@@ -90,7 +85,6 @@ pub const MICROSEC: Microseconds = Microseconds::new(1.0);
 
 /// Milliseconds (`1 ms = 10^-3 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "ms", dimension = Time, ratio = 1e-3)]
 pub struct Millisecond;
 /// A quantity measured in milliseconds.
@@ -100,7 +94,6 @@ pub const MILLISEC: Milliseconds = Milliseconds::new(1.0);
 
 /// Centiseconds (`1 cs = 10^-2 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "cs", dimension = Time, ratio = 1e-2)]
 pub struct Centisecond;
 /// A quantity measured in centiseconds.
@@ -110,7 +103,6 @@ pub const CENTISEC: Centiseconds = Centiseconds::new(1.0);
 
 /// Deciseconds (`1 ds = 10^-1 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "ds", dimension = Time, ratio = 1e-1)]
 pub struct Decisecond;
 /// A quantity measured in deciseconds.
@@ -120,7 +112,6 @@ pub const DECISEC: Deciseconds = Deciseconds::new(1.0);
 
 /// Seconds (SI base unit).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "s", dimension = Time, ratio = 1.0)]
 pub struct Second;
 /// A quantity measured in seconds.
@@ -132,7 +123,6 @@ pub const SEC: Seconds = Seconds::new(1.0);
 
 /// Decaseconds (`1 das = 10 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "das", dimension = Time, ratio = 10.0)]
 pub struct Decasecond;
 /// A quantity measured in decaseconds.
@@ -142,7 +132,6 @@ pub const DECASEC: Decaseconds = Decaseconds::new(1.0);
 
 /// Hectoseconds (`1 hs = 100 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "hs", dimension = Time, ratio = 100.0)]
 pub struct Hectosecond;
 /// A quantity measured in hectoseconds.
@@ -152,7 +141,6 @@ pub const HECTOSEC: Hectoseconds = Hectoseconds::new(1.0);
 
 /// Kiloseconds (`1 ks = 1_000 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "ks", dimension = Time, ratio = 1_000.0)]
 pub struct Kilosecond;
 /// A quantity measured in kiloseconds.
@@ -162,7 +150,6 @@ pub const KILOSEC: Kiloseconds = Kiloseconds::new(1.0);
 
 /// Megaseconds (`1 Ms = 10^6 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "Ms", dimension = Time, ratio = 1e6)]
 pub struct Megasecond;
 /// A quantity measured in megaseconds.
@@ -172,7 +159,6 @@ pub const MEGASEC: Megaseconds = Megaseconds::new(1.0);
 
 /// Gigaseconds (`1 Gs = 10^9 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "Gs", dimension = Time, ratio = 1e9)]
 pub struct Gigasecond;
 /// A quantity measured in gigaseconds.
@@ -182,7 +168,6 @@ pub const GIGASEC: Gigaseconds = Gigaseconds::new(1.0);
 
 /// Teraseconds (`1 Ts = 10^12 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "Ts", dimension = Time, ratio = 1e12)]
 pub struct Terasecond;
 /// A quantity measured in teraseconds.
@@ -194,7 +179,6 @@ pub const TERASEC: Teraseconds = Teraseconds::new(1.0);
 
 /// Minutes (`60 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "min", dimension = Time, ratio = 60.0)]
 pub struct Minute;
 /// A quantity measured in minutes.
@@ -204,7 +188,6 @@ pub const MIN: Minutes = Minutes::new(1.0);
 
 /// Hours (`3_600 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "h", dimension = Time, ratio = 3_600.0)]
 pub struct Hour;
 /// A quantity measured in hours.
@@ -214,7 +197,6 @@ pub const HOUR: Hours = Hours::new(1.0);
 
 /// Mean solar day (`86_400 s` by convention; leap seconds ignored).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "d", dimension = Time, ratio = SECONDS_PER_DAY)]
 pub struct Day;
 /// A quantity measured in days.
@@ -224,7 +206,6 @@ pub const DAY: Days = Days::new(1.0);
 
 /// Week (`7 d = 604_800 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "wk", dimension = Time, ratio = 7.0 * SECONDS_PER_DAY)]
 pub struct Week;
 /// A quantity measured in weeks.
@@ -234,7 +215,6 @@ pub const WEEK: Weeks = Weeks::new(1.0);
 
 /// Fortnight (`14 d = 1_209_600 s`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "fn", dimension = Time, ratio = 14.0 * SECONDS_PER_DAY)]
 pub struct Fortnight;
 /// A quantity measured in fortnights.
@@ -246,7 +226,6 @@ pub const FORTNIGHT: Fortnights = Fortnights::new(1.0);
 ///
 /// Convention used: `365.2425 d`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "yr", dimension = Time, ratio = 365.242_5 * SECONDS_PER_DAY)]
 pub struct Year;
 /// A quantity measured in years.
@@ -256,7 +235,6 @@ pub const YEAR: Years = Years::new(1.0);
 
 /// Decade (`10` mean tropical years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "dec", dimension = Time, ratio = 10.0 * 365.242_5 * SECONDS_PER_DAY)]
 pub struct Decade;
 /// A quantity measured in decades.
@@ -266,7 +244,6 @@ pub const DECADE: Decades = Decades::new(1.0);
 
 /// Century (`100` mean tropical years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "cent", dimension = Time, ratio = 100.0 * 365.242_5 * SECONDS_PER_DAY)]
 pub struct Century;
 /// A quantity measured in centuries.
@@ -276,7 +253,6 @@ pub const CENTURY: Centuries = Centuries::new(1.0);
 
 /// Millennium (`1000` mean tropical years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "mill", dimension = Time, ratio = 1000.0 * 365.242_5 * SECONDS_PER_DAY)]
 pub struct Millennium;
 /// A quantity measured in millennia.
@@ -288,7 +264,6 @@ pub const MILLENNIUM: Millennia = Millennia::new(1.0);
 
 /// Julian year (`365.25 d`), expressed in seconds.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "a", dimension = Time, ratio = 365.25 * SECONDS_PER_DAY)]
 pub struct JulianYear;
 /// A quantity measured in Julian years.
@@ -298,7 +273,6 @@ pub const JULIAN_YEAR: JulianYears = JulianYears::new(1.0);
 
 /// Julian century (`36_525 d`), expressed in seconds.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "JC", dimension = Time, ratio = 36_525.0 * SECONDS_PER_DAY)]
 pub struct JulianCentury;
 /// A quantity measured in Julian centuries.
@@ -312,7 +286,6 @@ pub const JULIAN_CENTURY: JulianCenturies = JulianCenturies::new(1.0);
 ///
 /// Convention used: `1 sidereal day ≈ 86_164.0905 s`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "sd", dimension = Time, ratio = 86_164.090_5)]
 pub struct SiderealDay;
 /// A quantity measured in sidereal days.
@@ -324,7 +297,6 @@ pub const SIDEREAL_DAY: SiderealDays = SiderealDays::new(1.0);
 ///
 /// Convention used: `1 synodic month ≈ 29.530588 d`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "synmo", dimension = Time, ratio = 29.530_588 * SECONDS_PER_DAY)]
 pub struct SynodicMonth;
 /// A quantity measured in synodic months.
@@ -336,7 +308,6 @@ pub const SYNODIC_MONTH: SynodicMonths = SynodicMonths::new(1.0);
 ///
 /// Common convention: `1 sidereal year ≈ 365.256363004 d`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "syr", dimension = Time, ratio = 365.256_363_004 * SECONDS_PER_DAY)]
 pub struct SiderealYear;
 /// A quantity measured in sidereal years.

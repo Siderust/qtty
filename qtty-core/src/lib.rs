@@ -62,7 +62,7 @@
 //!
 //! - `std` (default): enables `std` support.
 //! - `serde`: enables `serde` support for `Quantity<U>`; serialization is the raw `f64` value only.
-//! - `python`: enables PyO3 bindings for Python interop via `#[pyclass]` and `#[pymethods]`.
+//! - `pyo3`: enables PyO3 bindings for Python interop via `#[pyclass]` and `#[pymethods]`.
 //!
 //! # Panics and errors
 //!
@@ -87,8 +87,8 @@ extern crate libm;
 
 mod dimension;
 mod macros;
-#[cfg(feature = "python")]
-mod python;
+#[cfg(feature = "pyo3")]
+mod pyo3;
 mod quantity;
 mod unit;
 

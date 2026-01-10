@@ -28,7 +28,6 @@ impl<T: Unit<Dim = Mass>> MassUnit for T {}
 
 /// Gram.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "g", dimension = Mass, ratio = 1.0)]
 pub struct Gram;
 /// A quantity measured in grams.
@@ -90,7 +89,6 @@ si_gram!(Yottagram, "Yg", 1e24, YgG, Yottagrams, YOTTAGRAM);
 
 /// Tonne (metric ton): `1 t = 1_000_000 g` (exact).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "t", dimension = Mass, ratio = 1_000_000.0)]
 pub struct Tonne;
 /// Shorthand type alias for [`Tonne`].
@@ -102,7 +100,6 @@ pub const TONE: Tonnes = Tonnes::new(1.0);
 
 /// Carat: `1 ct = 0.2 g` (exact).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "ct", dimension = Mass, ratio = 1.0 / 5.0)]
 pub struct Carat;
 /// Shorthand type alias for [`Carat`].
@@ -114,7 +111,6 @@ pub const CT: Carats = Carats::new(1.0);
 
 /// Grain: `1 gr = 64.79891 mg` (exact) == `0.064_798_91 g`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "gr", dimension = Mass, ratio = 6_479_891.0 / 1_000_000_000.0)]
 pub struct Grain;
 /// Shorthand type alias for [`Grain`].
@@ -126,7 +122,6 @@ pub const GR: Grains = Grains::new(1.0);
 
 /// Avoirdupois pound: `1 lb = 0.45359237 kg` (exact) == `453.59237 g`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "lb", dimension = Mass, ratio = 45_359_237.0 / 100_000.0)]
 pub struct Pound;
 /// Shorthand type alias for [`Pound`].
@@ -138,7 +133,6 @@ pub const LB: Pounds = Pounds::new(1.0);
 
 /// Avoirdupois ounce: `1 oz = 1/16 lb` (exact).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "oz", dimension = Mass, ratio = (45_359_237.0 / 100_000.0) / 16.0)]
 pub struct Ounce;
 /// Shorthand type alias for [`Ounce`].
@@ -150,7 +144,6 @@ pub const OZ: Ounces = Ounces::new(1.0);
 
 /// Avoirdupois stone: `1 st = 14 lb` (exact).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "st", dimension = Mass, ratio = (45_359_237.0 / 100_000.0) * 14.0)]
 pub struct Stone;
 /// Shorthand type alias for [`Stone`].
@@ -162,7 +155,6 @@ pub const ST: Stones = Stones::new(1.0);
 
 /// Short ton (US customary): `2000 lb` (exact given lb).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "ton_us", dimension = Mass, ratio = (45_359_237.0 / 100_000.0) * 2000.0)]
 pub struct ShortTon;
 /// Quantity measured in short tons (US).
@@ -172,7 +164,6 @@ pub const TON_US: ShortTons = ShortTons::new(1.0);
 
 /// Long ton (Imperial): `2240 lb` (exact given lb).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "ton_uk", dimension = Mass, ratio = (45_359_237.0 / 100_000.0) * 2240.0)]
 pub struct LongTon;
 /// Quantity measured in long tons (UK).
@@ -184,7 +175,6 @@ pub const TON_UK: LongTons = LongTons::new(1.0);
 ///
 /// Stored in grams using the CODATA recommended value for `m_u` in kilograms, converted by `1 kg = 1000 g`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "u", dimension = Mass, ratio = 1.660_539_068_92e-24)]
 pub struct AtomicMassUnit;
 /// Type alias shorthand for [`AtomicMassUnit`].
@@ -198,7 +188,6 @@ pub const U: AtomicMassUnits = AtomicMassUnits::new(1.0);
 ///
 /// This is a **conversion constant** (nominal), not a “best estimate” of the Sun’s true mass.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "M☉", dimension = Mass, ratio = 1.988_416e33)]
 pub struct SolarMass;
 /// A quantity measured in solar masses.

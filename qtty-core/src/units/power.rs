@@ -28,7 +28,6 @@ impl<T: Unit<Dim = Power>> PowerUnit for T {}
 
 /// Watt (SI coherent derived unit).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "W", dimension = Power, ratio = 1.0)]
 pub struct Watt;
 /// Type alias shorthand for [`Watt`].
@@ -79,7 +78,6 @@ si_watt!(Yottawatt, "YW", 1e24, YW, Yottawatts, YW_1);
 ///
 /// Exact: `1 erg = 1e-7 J`, so `1 erg/s = 1e-7 W`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "erg/s", dimension = Power, ratio = 1e-7)]
 pub struct ErgPerSecond;
 /// One erg/s.
@@ -87,7 +85,6 @@ pub const ERG_PER_S: Quantity<ErgPerSecond> = Quantity::new(1.0);
 
 /// Metric horsepower (`PS`), defined as exactly `735.49875 W`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "PS", dimension = Power, ratio = 73_549_875.0 / 100_000.0)]
 pub struct HorsepowerMetric;
 /// A quantity measured in metric horsepower.
@@ -97,7 +94,6 @@ pub const PS: HorsepowerMetrics = HorsepowerMetrics::new(1.0);
 
 /// Electric horsepower (`hp_e`), defined as exactly `746 W`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "hp_e", dimension = Power, ratio = 746.0)]
 pub struct HorsepowerElectric;
 /// A quantity measured in electric horsepower.
@@ -109,7 +105,6 @@ pub const HP_E: HorsepowerElectrics = HorsepowerElectrics::new(1.0);
 ///
 /// This is a *nominal reference* value intended for consistent conversion.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[unit(symbol = "L☉", dimension = Power, ratio = 3.828e26)]
 pub struct SolarLuminosity;
 /// A quantity measured in solar luminosities.

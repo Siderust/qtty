@@ -5,9 +5,6 @@ use crate::Quantity;
 use core::fmt::{Debug, Display, Formatter, Result};
 use core::marker::PhantomData;
 
-#[cfg(feature = "python")]
-use pyo3::pyclass;
-
 /// Trait implemented by every **unit** type.
 ///
 /// * `RATIO` is the conversion factor from this unit to the *canonical scaling unit* of the same dimension.
@@ -65,7 +62,6 @@ impl<N: Unit, D: Unit> Display for Quantity<Per<N, D>> {
 /// that only explicitly constructed `Quantity<Unitless>` values are treated as
 /// dimensionless, not bare `f64` primitives.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "python", pyclass)]
 pub struct Unitless;
 
 impl Unit for Unitless {
