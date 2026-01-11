@@ -90,7 +90,7 @@ mod macros;
 #[cfg(feature = "pyo3")]
 mod feature_pyo3;
 #[cfg(feature = "serde")]
-mod serde_support;
+mod feature_serde;
 mod quantity;
 mod unit;
 
@@ -103,7 +103,7 @@ pub use quantity::Quantity;
 pub use unit::{Per, Simplify, Unit, Unitless};
 
 #[cfg(feature = "serde")]
-pub use serde_support::{serde_f64, serde_with_unit};
+pub use feature_serde::{serde_f64, serde_with_unit};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Predefined unit modules (grouped by dimension)
