@@ -62,6 +62,7 @@
 //!
 //! - `std` (default): enables `std` support.
 //! - `serde`: enables `serde` support for `Quantity<U>`; serialization is the raw `f64` value only.
+//! - `pyo3`: enables PyO3 bindings for Python interop via `#[pyclass]` and `#[pymethods]`.
 //!
 //! # Panics and errors
 //!
@@ -85,6 +86,12 @@ extern crate libm;
 // ─────────────────────────────────────────────────────────────────────────────
 
 mod dimension;
+#[cfg(feature = "diesel")]
+mod feature_diesel;
+#[cfg(feature = "pyo3")]
+mod feature_pyo3;
+#[cfg(feature = "serde")]
+mod feature_serde;
 mod macros;
 mod quantity;
 mod unit;
@@ -98,7 +105,7 @@ pub use quantity::Quantity;
 pub use unit::{Per, Simplify, Unit, Unitless};
 
 #[cfg(feature = "serde")]
-pub use quantity::serde_with_unit;
+pub use feature_serde::{serde_f64, serde_with_unit};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Predefined unit modules (grouped by dimension)

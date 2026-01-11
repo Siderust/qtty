@@ -15,13 +15,21 @@ documentation = "https://docs.rs/qtty"
 default = ["std"]
 std = ["qtty-core/std"]
 serde = ["qtty-core/serde"]
+python = ["qtty-core/pyo3", "dep:pyo3"]
+tiberius = ["qtty-core/tiberius"]
+diesel = ["qtty-core/diesel"]
 
 [dependencies]
 qtty-core = { version = "0.2.0", path = "../qtty-core", default-features = false }
-qtty-derive = "0.1.0"
+qtty-derive = "0.2.1"
+pyo3 = { version = "0.27.2", optional = true, features = ["auto-initialize"] }
 
 [dev-dependencies]
 approx = "0.5"
 proptest = "1.4"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+[[example]]
+name = "python_integration"
+required-features = ["python"]
