@@ -88,7 +88,7 @@ extern crate libm;
 mod dimension;
 mod macros;
 #[cfg(feature = "pyo3")]
-mod pyo3;
+mod feature_pyo3;
 #[cfg(feature = "serde")]
 mod serde_support;
 mod quantity;
