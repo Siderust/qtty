@@ -86,6 +86,8 @@ extern crate libm;
 // ─────────────────────────────────────────────────────────────────────────────
 
 mod dimension;
+#[cfg(feature = "diesel")]
+mod feature_diesel;
 #[cfg(feature = "pyo3")]
 mod feature_pyo3;
 #[cfg(feature = "serde")]

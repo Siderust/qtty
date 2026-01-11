@@ -70,6 +70,15 @@ impl<U: Unit + Copy> Quantity<U> {
         self.0
     }
 
+    /// Returns a reference to the raw numeric value.
+    ///
+    /// This is useful for serialization and other operations that need
+    /// to borrow the value without consuming self.
+    #[inline]
+    pub const fn value_ref(&self) -> &f64 {
+        &self.0
+    }
+
     /// Returns the absolute value.
     ///
     /// ```rust

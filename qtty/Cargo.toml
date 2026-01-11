@@ -17,6 +17,7 @@ std = ["qtty-core/std"]
 serde = ["qtty-core/serde"]
 python = ["qtty-core/pyo3", "dep:pyo3"]
 tiberius = ["qtty-core/tiberius"]
+diesel = ["qtty-core/diesel"]
 
 [dependencies]
 qtty-core = { version = "0.2.0", path = "../qtty-core", default-features = false }
