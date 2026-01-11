@@ -86,11 +86,11 @@ extern crate libm;
 // ─────────────────────────────────────────────────────────────────────────────
 
 mod dimension;
-mod macros;
 #[cfg(feature = "pyo3")]
 mod feature_pyo3;
 #[cfg(feature = "serde")]
 mod feature_serde;
+mod macros;
 mod quantity;
 mod unit;
 
