@@ -1,0 +1,29 @@
+[package]
+name = "qtty-ffi"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords = ["ffi", "quantities", "c", "interop", "science"]
+categories = ["science", "development-tools::ffi", "api-bindings"]
+description = "py & C-compatible FFI bindings for qtty physical quantities and unit conversions"
+readme = "README.md"
+
+[lib]
+crate-type = ["cdylib", "staticlib", "rlib"]
+
+[dependencies]
+qtty = { version = "0.2.2", path = "../qtty" }
+pyo3 = { version = "0.27.2", optional = true }
+
+[features]
+pyo3 = ["dep:pyo3"]
+
+[build-dependencies]
+cbindgen = "0.29.2"
+syn = { version = "2.0", features = ["full"] }
+quote = "1.0"
+
+[dev-dependencies]
+approx = "0.5"

@@ -1,0 +1,99 @@
+# cbindgen configuration for qtty-ffi
+# See https://github.com/mozilla/cbindgen/blob/master/docs.md
+
+# Language configuration
+language = "C"
+
+# Include doc comments in header
+documentation = true
+documentation_style = "c"
+
+# Header configuration
+header = """
+/**
+ * @file qtty_ffi.h
+ * @brief C-compatible FFI bindings for qtty physical quantities and unit conversions.
+ *
+ * This header provides the C API for the qtty-ffi library, enabling C/C++ code
+ * to construct and convert physical quantities using qtty's conversion logic.
+ *
+ * # Example Usage
+ *
+ * @code{.c}
+ * #include "qtty_ffi.h"
+ * #include <stdio.h>
+ *
+ * int main() {
+ *     qtty_quantity_t meters, kilometers;
+ *     
+ *     // Create a quantity: 1000 meters
+ *     int32_t status = qtty_quantity_make(1000.0, UNIT_ID_METER, &meters);
+ *     if (status != QTTY_OK) {
+ *         fprintf(stderr, "Failed to create quantity\\n");
+ *         return 1;
+ *     }
+ *     
+ *     // Convert to kilometers
+ *     status = qtty_quantity_convert(meters, UNIT_ID_KILOMETER, &kilometers);
+ *     if (status == QTTY_OK) {
+ *         printf("1000 meters = %.2f kilometers\\n", kilometers.value);
+ *     }
+ *     
+ *     return 0;
+ * }
+ * @endcode
+ *
+ * # Thread Safety
+ *
+ * All functions are thread-safe. The library contains no global mutable state.
+ *
+ * # ABI Stability
+ *
+ * Enum discriminant values and struct layouts are part of the ABI contract
+ * and will not change in backward-compatible releases.
+ *
+ * @version 1.0
+ */
+"""
+
+trailer = """
+/* End of qtty_ffi.h */
+"""
+
+# Include guards
+include_guard = "QTTY_FFI_H"
+
+# C++ compatibility
+cpp_compat = true
+
+# Use stdint types
+usize_is_size_t = true
+
+[defines]
+
+[export]
+include = ["UnitId", "DimensionId", "QttyQuantity"]
+exclude = ["UnitMeta"]
+
+[export.rename]
+"QttyQuantity" = "qtty_quantity_t"
+
+[fn]
+rename_args = "SnakeCase"
+
+[struct]
+rename_fields = "SnakeCase"
+
+[enum]
+rename_variants = "ScreamingSnakeCase"
+prefix_with_name = true
+
+[parse]
+parse_deps = false
+include = ["qtty-ffi"]
+
+[parse.expand]
+crates = ["qtty-ffi"]
+
+[macro_expansion]
+bitflags = false
