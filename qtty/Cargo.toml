@@ -23,9 +23,21 @@ scalar-rational = ["qtty-core/scalar-rational"]
 [dependencies]
 qtty-core = { version = "0.2.0", path = "../qtty-core", default-features = false }
 qtty-derive = "0.2.2"
+pyo3 = ["qtty-core/pyo3", "dep:pyo3"]
+tiberius = ["qtty-core/tiberius"]
+diesel = ["qtty-core/diesel"]
+
+[dependencies]
+qtty-core = { version = "0.2.2", path = "../qtty-core", default-features = false }
+qtty-derive = { path = "../qtty-derive" }
+pyo3 = { version = "0.27.2", optional = true, features = ["auto-initialize"] }
 
 [dev-dependencies]
 approx = "0.5"
 proptest = "1.4"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+[[example]]
+name = "python_integration"
+required-features = ["pyo3"]

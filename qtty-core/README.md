@@ -77,6 +77,7 @@ qtty-core = { version = "0.1.0", default-features = false }
 
 - `std` (default): enables `std` support.
 - `serde`: serializes/deserializes `Quantity<U>` as bare `f64` values.
+- `pyo3`: enables PyO3 conversions for `Quantity<U>` and Python interop traits.
 
 ## License
 
