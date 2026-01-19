@@ -25,4 +25,6 @@ pub use crate::length::{
 };
 pub use crate::mass::{Grams, Kilograms, SolarMasses};
 pub use crate::power::{Kilowatts, SolarLuminosities, Watts};
-pub use crate::time::{Days, Hours, Microseconds, Milliseconds, Minutes, Nanoseconds, Seconds, Years};
+pub use crate::time::{
+    Days, Hours, Microseconds, Milliseconds, Minutes, Nanoseconds, Seconds, Years,
+};

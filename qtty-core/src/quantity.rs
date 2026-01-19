@@ -562,7 +562,10 @@ pub mod serde_scalar {
 
     /// Serializes the quantity's scalar value directly.
     #[allow(dead_code)]
-    pub fn serialize<U, S, Ser>(quantity: &Quantity<U, S>, serializer: Ser) -> Result<Ser::Ok, Ser::Error>
+    pub fn serialize<U, S, Ser>(
+        quantity: &Quantity<U, S>,
+        serializer: Ser,
+    ) -> Result<Ser::Ok, Ser::Error>
     where
         U: Unit,
         S: Scalar + Serialize,
@@ -620,7 +623,10 @@ pub mod serde_with_unit {
     /// ```json
     /// {"value": 42.5, "unit": "m"}
     /// ```
-    pub fn serialize<U, S, Ser>(quantity: &Quantity<U, S>, serializer: Ser) -> Result<Ser::Ok, Ser::Error>
+    pub fn serialize<U, S, Ser>(
+        quantity: &Quantity<U, S>,
+        serializer: Ser,
+    ) -> Result<Ser::Ok, Ser::Error>
     where
         U: Unit,
         S: Real,
