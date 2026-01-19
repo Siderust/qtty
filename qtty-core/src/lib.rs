@@ -92,6 +92,8 @@ mod feature_diesel;
 mod feature_pyo3;
 #[cfg(feature = "serde")]
 mod feature_serde;
+#[cfg(feature = "tiberius")]
+mod feature_tiberius;
 mod macros;
 mod quantity;
 pub mod scalar;
