@@ -112,7 +112,7 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
 
     /// Returns a reference to the raw numeric value.
     #[inline]
-    pub fn value_ref(&self) -> &S {
+    pub const fn value_ref(&self) -> &S {
         &self.0
     }
 
@@ -149,13 +149,13 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
 
     /// A constant representing the zero value for this quantity type.
     #[inline]
-    pub fn zero() -> Self {
+    pub const fn zero() -> Self {
         Self::new(S::ZERO)
     }
 
     /// A constant representing the unit value (one) for this quantity type.
     #[inline]
-    pub fn one() -> Self {
+    pub const fn one() -> Self {
         Self::new(S::ONE)
     }
 }
