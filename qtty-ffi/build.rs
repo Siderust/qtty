@@ -16,6 +16,7 @@ fn main() {
     generate_unit_enum(&units, &out_dir);
     generate_unit_names(&units, &out_dir);
     generate_unit_names_cstr(&units, &out_dir);
+    generate_unit_symbols(&units, &out_dir);
     generate_from_u32(&units, &out_dir);
     generate_registry(&units, &out_dir);
 
@@ -81,6 +82,9 @@ fn generate_unit_enum(units: &[UnitDef], out_dir: &str) {
     );
     code.push_str("#[repr(u32)]\n");
     code.push_str("#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]\n");
+    code.push_str(
+        "#[cfg_attr(feature = \"pyo3\", pyo3::pyclass(eq, eq_int, module = \"qtty\"))]\n",
+    );
     code.push_str("pub enum UnitId {\n");
 
     for unit in units {
@@ -88,6 +92,22 @@ fn generate_unit_enum(units: &[UnitDef], out_dir: &str) {
         code.push_str(&format!("    {} = {},\n", unit.name, unit.discriminant));
     }
 
+    code.push_str("}\n\n");
+
+    // Add pickle support methods when pyo3 feature is enabled
+    code.push_str("#[cfg(feature = \"pyo3\")]\n");
+    code.push_str("#[pyo3::pymethods]\n");
+    code.push_str("impl UnitId {\n");
+    code.push_str("    #[new]\n");
+    code.push_str("    fn __new__(value: u32) -> pyo3::PyResult<Self> {\n");
+    code.push_str("        Self::from_u32(value).ok_or_else(|| {\n");
+    code.push_str("            pyo3::exceptions::PyValueError::new_err(format!(\"Invalid UnitId: {}\", value))\n");
+    code.push_str("        })\n");
+    code.push_str("    }\n");
+    code.push_str("    \n");
+    code.push_str("    fn __getnewargs__(&self) -> (u32,) {\n");
+    code.push_str("        (*self as u32,)\n");
+    code.push_str("    }\n");
     code.push_str("}\n");
 
     let dest_path = PathBuf::from(out_dir).join("unit_id_enum.rs");
@@ -126,6 +146,23 @@ fn generate_unit_names_cstr(units: &[UnitDef], out_dir: &str) {
 
     let dest_path = PathBuf::from(out_dir).join("unit_names_cstr.rs");
     fs::write(&dest_path, code).expect("Failed to write unit_names_cstr.rs");
+}
+
+fn generate_unit_symbols(units: &[UnitDef], out_dir: &str) {
+    let mut code = String::from("// Auto-generated from units.csv\n");
+    code.push_str("match self {\n");
+
+    for unit in units {
+        code.push_str(&format!(
+            "    UnitId::{} => \"{}\",\n",
+            unit.name, unit.symbol
+        ));
+    }
+
+    code.push_str("}\n");
+
+    let dest_path = PathBuf::from(out_dir).join("unit_symbols.rs");
+    fs::write(&dest_path, code).expect("Failed to write unit_symbols.rs");
 }
 
 fn generate_from_u32(units: &[UnitDef], out_dir: &str) {

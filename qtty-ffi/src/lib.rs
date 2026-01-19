@@ -91,7 +91,8 @@
 //! All functions are thread-safe. The library contains no global mutable state.
 
 #![deny(missing_docs)]
-#![deny(unsafe_op_in_unsafe_fn)]
+// PyO3 generated code contains unsafe operations, so we can't enforce this when pyo3 feature is enabled
+#![cfg_attr(not(feature = "pyo3"), deny(unsafe_op_in_unsafe_fn))]
 
 // Core modules
 mod ffi;
@@ -109,8 +110,8 @@ pub use ffi::{
 
 // Re-export types
 pub use types::{
-    DimensionId, QttyQuantity, UnitId, QTTY_ERR_INCOMPATIBLE_DIM, QTTY_ERR_INVALID_VALUE,
-    QTTY_ERR_NULL_OUT, QTTY_ERR_UNKNOWN_UNIT, QTTY_OK,
+    DimensionId, QttyDerivedQuantity, QttyQuantity, UnitId, QTTY_ERR_INCOMPATIBLE_DIM,
+    QTTY_ERR_INVALID_VALUE, QTTY_ERR_NULL_OUT, QTTY_ERR_UNKNOWN_UNIT, QTTY_OK,
 };
 
 // The impl_unit_ffi! macro is automatically exported at crate root by #[macro_export]

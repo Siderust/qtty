@@ -16,18 +16,22 @@ default = ["std"]
 std = []
 serde = ["dep:serde"]
 
-# Optional scalar type support
+# Optional support
 scalar-decimal = ["rust_decimal"]
 scalar-rational = ["num-rational"]
-
-[dependencies]
-serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
-libm = "0.2"
-qtty-derive = "0.2.2"
-
-# Optional scalar type dependencies
 rust_decimal = { version = "1.36", optional = true, features = ["maths"] }
 num-rational = { version = "0.4", optional = true, default-features = false }
+pyo3 = ["dep:pyo3"]
+tiberius = ["dep:tiberius"]
+diesel = ["dep:diesel"]
+
+[dependencies]
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"], optional = true }
+pyo3 = { version = "0.27.2", optional = true, features = ["auto-initialize"] }
+tiberius = { version = "0.12", default-features = false, optional = true }
+diesel = { version = "2.1", default-features = false, optional = true }
+libm = "0.2"
+qtty-derive = { path = "../qtty-derive" }
 
 [dev-dependencies]
 approx = "0.5"

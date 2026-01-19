@@ -90,6 +90,12 @@ impl UnitId {
         include!(concat!(env!("OUT_DIR"), "/unit_names.rs"))
     }
 
+    /// Returns the unit symbol as a Rust string slice (e.g., "m", "km", "s").
+    #[inline]
+    pub const fn symbol(&self) -> &'static str {
+        include!(concat!(env!("OUT_DIR"), "/unit_symbols.rs"))
+    }
+
     /// Attempts to create a `UnitId` from a raw `u32` discriminant value.
     ///
     /// Returns `None` if the value does not correspond to a valid unit.
@@ -141,6 +147,132 @@ impl QttyQuantity {
     pub const fn new(value: f64, unit: UnitId) -> Self {
         Self { value, unit }
     }
+
+    /// Checks if this quantity is compatible with another (same dimension).
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use qtty_ffi::{QttyQuantity, UnitId};
+    ///
+    /// let meters = QttyQuantity::new(100.0, UnitId::Meter);
+    /// let km = QttyQuantity::new(1.0, UnitId::Kilometer);
+    /// let seconds = QttyQuantity::new(60.0, UnitId::Second);
+    ///
+    /// assert!(meters.compatible(&km));
+    /// assert!(!meters.compatible(&seconds));
+    /// ```
+    #[inline]
+    pub fn compatible(&self, other: &Self) -> bool {
+        crate::registry::compatible(self.unit, other.unit)
+    }
+
+    /// Returns the dimension of this quantity.
+    #[inline]
+    pub fn dimension(&self) -> Option<DimensionId> {
+        crate::registry::dimension(self.unit)
+    }
+
+    /// Converts this quantity to a different unit.
+    ///
+    /// Returns `None` if the units are incompatible (different dimensions).
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use qtty_ffi::{QttyQuantity, UnitId};
+    ///
+    /// let meters = QttyQuantity::new(1000.0, UnitId::Meter);
+    /// let km = meters.convert_to(UnitId::Kilometer).unwrap();
+    /// assert!((km.value - 1.0).abs() < 1e-12);
+    /// assert_eq!(km.unit, UnitId::Kilometer);
+    /// ```
+    #[inline]
+    pub fn convert_to(&self, target: UnitId) -> Option<Self> {
+        crate::registry::convert_value(self.value, self.unit, target)
+            .ok()
+            .map(|v| Self::new(v, target))
+    }
+
+    /// Adds two quantities, returning result in the left operand's unit.
+    ///
+    /// Returns `None` if the quantities have different dimensions.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use qtty_ffi::{QttyQuantity, UnitId};
+    ///
+    /// let a = QttyQuantity::new(1.0, UnitId::Kilometer);
+    /// let b = QttyQuantity::new(500.0, UnitId::Meter);
+    /// let sum = a.add(&b).unwrap();
+    /// assert!((sum.value - 1.5).abs() < 1e-12);
+    /// assert_eq!(sum.unit, UnitId::Kilometer);
+    /// ```
+    #[inline]
+    pub fn add(&self, other: &Self) -> Option<Self> {
+        let other_converted = other.convert_to(self.unit)?;
+        Some(Self::new(self.value + other_converted.value, self.unit))
+    }
+
+    /// Subtracts another quantity from this one, returning result in this quantity's unit.
+    ///
+    /// Returns `None` if the quantities have different dimensions.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use qtty_ffi::{QttyQuantity, UnitId};
+    ///
+    /// let a = QttyQuantity::new(2.0, UnitId::Kilometer);
+    /// let b = QttyQuantity::new(500.0, UnitId::Meter);
+    /// let diff = a.sub(&b).unwrap();
+    /// assert!((diff.value - 1.5).abs() < 1e-12);
+    /// assert_eq!(diff.unit, UnitId::Kilometer);
+    /// ```
+    #[inline]
+    pub fn sub(&self, other: &Self) -> Option<Self> {
+        let other_converted = other.convert_to(self.unit)?;
+        Some(Self::new(self.value - other_converted.value, self.unit))
+    }
+
+    /// Multiplies the quantity by a scalar value.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use qtty_ffi::{QttyQuantity, UnitId};
+    ///
+    /// let q = QttyQuantity::new(5.0, UnitId::Meter);
+    /// let result = q.mul_scalar(3.0);
+    /// assert!((result.value - 15.0).abs() < 1e-12);
+    /// ```
+    #[inline]
+    pub const fn mul_scalar(&self, scalar: f64) -> Self {
+        Self::new(self.value * scalar, self.unit)
+    }
+
+    /// Divides the quantity by a scalar value.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use qtty_ffi::{QttyQuantity, UnitId};
+    ///
+    /// let q = QttyQuantity::new(15.0, UnitId::Meter);
+    /// let result = q.div_scalar(3.0);
+    /// assert!((result.value - 5.0).abs() < 1e-12);
+    /// ```
+    #[inline]
+    pub const fn div_scalar(&self, scalar: f64) -> Self {
+        Self::new(self.value / scalar, self.unit)
+    }
+
+    /// Negates the quantity value.
+    #[inline]
+    pub const fn neg(&self) -> Self {
+        Self::new(-self.value, self.unit)
+    }
 }
 
 impl Default for QttyQuantity {
@@ -148,6 +280,133 @@ impl Default for QttyQuantity {
         Self {
             value: 0.0,
             unit: UnitId::Meter,
+        }
+    }
+}
+
+// =============================================================================
+// QttyDerivedQuantity - Compound quantities like velocity (m/s)
+// =============================================================================
+
+/// A derived quantity representing a compound unit (numerator/denominator).
+///
+/// This is useful for quantities like velocity (m/s), frequency (rad/s), etc.
+///
+/// # ABI Stability
+///
+/// This struct has `#[repr(C)]` layout:
+/// - `value` at offset 0 (8 bytes)
+/// - `numerator` at offset 8 (4 bytes)
+/// - `denominator` at offset 12 (4 bytes)
+/// - Total size: 16 bytes
+///
+/// # Example
+///
+/// ```rust
+/// use qtty_ffi::{QttyDerivedQuantity, UnitId};
+///
+/// // Create a velocity: 100 m/s
+/// let velocity = QttyDerivedQuantity::new(100.0, UnitId::Meter, UnitId::Second);
+/// assert_eq!(velocity.value, 100.0);
+/// assert_eq!(velocity.numerator, UnitId::Meter);
+/// assert_eq!(velocity.denominator, UnitId::Second);
+/// ```
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct QttyDerivedQuantity {
+    /// The numeric value of the derived quantity.
+    pub value: f64,
+    /// The numerator unit identifier.
+    pub numerator: UnitId,
+    /// The denominator unit identifier.
+    pub denominator: UnitId,
+}
+
+impl QttyDerivedQuantity {
+    /// Creates a new derived quantity with the given value and units.
+    #[inline]
+    pub const fn new(value: f64, numerator: UnitId, denominator: UnitId) -> Self {
+        Self {
+            value,
+            numerator,
+            denominator,
+        }
+    }
+
+    /// Returns the symbol string for this derived quantity (e.g., "m/s").
+    #[inline]
+    pub fn symbol(&self) -> String {
+        format!("{}/{}", self.numerator.symbol(), self.denominator.symbol())
+    }
+
+    /// Converts this derived quantity to different units.
+    ///
+    /// Returns `None` if the numerator or denominator dimensions are incompatible.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use qtty_ffi::{QttyDerivedQuantity, UnitId};
+    ///
+    /// // Convert 100 m/s to km/h
+    /// let velocity = QttyDerivedQuantity::new(100.0, UnitId::Meter, UnitId::Second);
+    /// let converted = velocity.convert_to(UnitId::Kilometer, UnitId::Hour).unwrap();
+    /// // 100 m/s = 360 km/h
+    /// assert!((converted.value - 360.0).abs() < 1e-9);
+    /// ```
+    pub fn convert_to(&self, target_num: UnitId, target_den: UnitId) -> Option<Self> {
+        // Check dimensional compatibility
+        let num_dim = crate::registry::dimension(self.numerator)?;
+        let den_dim = crate::registry::dimension(self.denominator)?;
+        let target_num_dim = crate::registry::dimension(target_num)?;
+        let target_den_dim = crate::registry::dimension(target_den)?;
+
+        if num_dim != target_num_dim || den_dim != target_den_dim {
+            return None;
+        }
+
+        // Convert numerator: e.g., 100 m -> ? km
+        let num_converted =
+            crate::registry::convert_value(self.value, self.numerator, target_num).ok()?;
+
+        // Convert denominator scale: e.g., 1 s -> ? h (0.000278 h)
+        // If 1 s = 0.000278 h, then dividing by that gives us the factor
+        let den_converted =
+            crate::registry::convert_value(1.0, self.denominator, target_den).ok()?;
+
+        // Result = (num in new units) / (den scale factor)
+        // 100 m = 0.1 km, 1 s = 1/3600 h
+        // 100 m/s = 0.1 km / (1/3600 h) = 0.1 * 3600 km/h = 360 km/h
+        let result_value = num_converted / den_converted;
+
+        Some(Self::new(result_value, target_num, target_den))
+    }
+
+    /// Multiplies the derived quantity by a scalar.
+    #[inline]
+    pub const fn mul_scalar(&self, scalar: f64) -> Self {
+        Self::new(self.value * scalar, self.numerator, self.denominator)
+    }
+
+    /// Divides the derived quantity by a scalar.
+    #[inline]
+    pub const fn div_scalar(&self, scalar: f64) -> Self {
+        Self::new(self.value / scalar, self.numerator, self.denominator)
+    }
+
+    /// Negates the derived quantity.
+    #[inline]
+    pub const fn neg(&self) -> Self {
+        Self::new(-self.value, self.numerator, self.denominator)
+    }
+}
+
+impl Default for QttyDerivedQuantity {
+    fn default() -> Self {
+        Self {
+            value: 0.0,
+            numerator: UnitId::Meter,
+            denominator: UnitId::Second,
         }
     }
 }
