@@ -81,28 +81,28 @@ fn quantity_conversion_roundtrip() {
 fn const_add() {
     let a = TU::new(3.0);
     let b = TU::new(7.0);
-    assert_eq!(a.add(b).value(), 10.0);
+    assert_eq!(a.const_add(b).value(), 10.0);
 }
 
 #[test]
 fn const_sub() {
     let a = TU::new(10.0);
     let b = TU::new(3.0);
-    assert_eq!(a.sub(b).value(), 7.0);
+    assert_eq!(a.const_sub(b).value(), 7.0);
 }
 
 #[test]
 fn const_mul() {
     let a = TU::new(4.0);
-    let b = TU::new(5.0);
-    assert_eq!(Quantity::mul(&a, b).value(), 20.0);
+    let b = 5.0;
+    assert_eq!(a.const_mul(b).value(), 20.0);
 }
 
 #[test]
 fn const_div() {
     let a = TU::new(20.0);
-    let b = TU::new(4.0);
-    assert_eq!(Quantity::div(&a, b).value(), 5.0);
+    let b = 4.0;
+    assert_eq!(a.const_div(b).value(), 5.0);
 }
 
 #[test]
