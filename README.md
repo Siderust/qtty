@@ -42,6 +42,7 @@ assert!((r.value() - core::f64::consts::PI).abs() < 1e-12);
 
 - `std` (default): enables `std` support in `qtty-core`.
 - `serde`: serializes/deserializes `Quantity<U>` as bare `f64` values.
+- `pyo3`: enables PyO3 conversions for `Quantity<U>` and `#[pyclass]` interop.
 
 Need a C ABI? Use the companion `qtty-ffi` crate (see `qtty-ffi/README.md`).
 

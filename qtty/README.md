@@ -62,6 +62,8 @@ assert!((v.value() - 10.0).abs() < 1e-12);
 
 - `std` (default): enables `std` support in `qtty-core`.
 - `serde`: serializes/deserializes `Quantity<U>` as bare `f64` values (unit is encoded by the type).
+- `pyo3`: enables PyO3 conversions so `Quantity<U>` types convert to/from Python `float` and can be used
+   directly as `#[pyclass]` fields (requires building with `--features pyo3` for `qtty-core`).
 
 ## Related crates
 
