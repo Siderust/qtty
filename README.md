@@ -55,4 +55,10 @@ This workspace is currently `0.x`. Expect breaking changes between minor version
 
 ## License
 
-AGPL-3.0 (see `LICENSE`).
+Copyright (C) 2026 Vallés Puig, Ramon
+
+This project is licensed under the GNU Affero General Public License v3.0
+or later. See the LICENSE file for details.
+
+> **Note for commercial or proprietary use:**
+> If you wish to incorporate this code into a closed-source or otherwise differently licensed project, a **dual-licensing** arrangement can be negotiated. Please contact the authors to discuss terms and conditions for a commercial or proprietary license that suits your needs.

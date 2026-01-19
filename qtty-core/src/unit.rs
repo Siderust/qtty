@@ -1,6 +1,7 @@
 //! Unit types and traits.
 
 use crate::dimension::{Dimension, Dimensionless, DivDim};
+use crate::scalar::{Real, Scalar};
 use crate::Quantity;
 use core::fmt::{Debug, Display, Formatter, Result};
 use core::marker::PhantomData;
@@ -46,9 +47,9 @@ impl<N: Unit, D: Unit> Unit for Per<N, D> {
     const SYMBOL: &'static str = "";
 }
 
-impl<N: Unit, D: Unit> Display for Quantity<Per<N, D>> {
+impl<N: Unit, D: Unit, S: Real> Display for Quantity<Per<N, D>, S> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{} {}/{}", self.value(), N::SYMBOL, D::SYMBOL)
+        write!(f, "{} {}/{}", self.value().to_f64(), N::SYMBOL, D::SYMBOL)
     }
 }
 
@@ -70,7 +71,7 @@ impl Unit for Unitless {
     const SYMBOL: &'static str = "";
 }
 
-impl Display for Quantity<Unitless> {
+impl<S: Real> Display for Quantity<Unitless, S> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "{}", self.value())
     }
@@ -81,13 +82,16 @@ impl Display for Quantity<Unitless> {
 /// This allows reducing complex unit expressions to simpler forms,
 /// such as `Per<U, U>` to `Unitless` or `Per<N, Per<N, D>>` to `D`.
 pub trait Simplify {
+    /// The scalar type of this quantity.
+    type Scalar: Scalar;
     /// The simplified unit type.
     type Out: Unit;
     /// Convert this quantity to its simplified unit.
-    fn simplify(self) -> Quantity<Self::Out>;
+    fn simplify(self) -> Quantity<Self::Out, Self::Scalar>;
 }
 
-impl<U: Unit> Simplify for Quantity<Per<U, U>> {
+impl<U: Unit, S: Scalar> Simplify for Quantity<Per<U, U>, S> {
+    type Scalar = S;
     type Out = Unitless;
     /// ```rust
     /// use qtty_core::length::Meters;
@@ -97,14 +101,15 @@ impl<U: Unit> Simplify for Quantity<Per<U, U>> {
     /// let unitless: Quantity<Unitless> = ratio.simplify();
     /// assert!((unitless.value() - 0.5).abs() < 1e-12);
     /// ```
-    fn simplify(self) -> Quantity<Unitless> {
+    fn simplify(self) -> Quantity<Unitless, S> {
         Quantity::new(self.value())
     }
 }
 
-impl<N: Unit, D: Unit> Simplify for Quantity<Per<N, Per<N, D>>> {
+impl<N: Unit, D: Unit, S: Scalar> Simplify for Quantity<Per<N, Per<N, D>>, S> {
+    type Scalar = S;
     type Out = D;
-    fn simplify(self) -> Quantity<D> {
+    fn simplify(self) -> Quantity<D, S> {
         Quantity::new(self.value())
     }
 }
