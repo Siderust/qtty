@@ -558,6 +558,7 @@ pub mod serde_scalar {
     use super::*;
 
     /// Serializes the quantity's scalar value directly.
+    #[allow(dead_code)]
     pub fn serialize<U, S, Ser>(quantity: &Quantity<U, S>, serializer: Ser) -> Result<Ser::Ok, Ser::Error>
     where
         U: Unit,
@@ -568,6 +569,7 @@ pub mod serde_scalar {
     }
 
     /// Deserializes the quantity from a scalar value directly.
+    #[allow(dead_code)]
     pub fn deserialize<'de, U, S, D>(deserializer: D) -> Result<Quantity<U, S>, D::Error>
     where
         U: Unit,
