@@ -49,8 +49,8 @@
 //! assert_eq!(a.value(), 10.0);
 //! ```
 
-use crate::{Dimension, Quantity, Unit};
 use crate::scalar::Transcendental;
+use crate::{Dimension, Quantity, Unit};
 use core::f64::consts::TAU;
 use qtty_derive::Unit;
 
