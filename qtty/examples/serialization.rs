@@ -23,7 +23,7 @@ fn main() {
     let json = serde_json::to_string(&distance).unwrap();
     println!("   Distance: {} → JSON: {}", distance, json);
 
-    let time = Seconds::new(3.14);
+    let time = Seconds::new(std::f64::consts::PI);
     let json = serde_json::to_string(&time).unwrap();
     println!("   Time: {} → JSON: {}", time, json);
 

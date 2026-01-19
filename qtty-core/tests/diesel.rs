@@ -99,8 +99,8 @@ fn to_sql_special_values() {
 
 #[test]
 fn nullable_some() {
-    let q = Some(TU::new(42.5));
-    assert_eq!(q.unwrap().value(), 42.5);
+    let q = TU::new(42.5);
+    assert_eq!(q.value(), 42.5);
 }
 
 #[test]
@@ -111,8 +111,8 @@ fn nullable_none() {
 
 #[test]
 fn nullable_roundtrip() {
-    let original = Some(TU::new(123.456));
-    let value = original.unwrap().value();
+    let original = TU::new(123.456);
+    let value = original.value();
     let restored = TU::new(value);
     assert_eq!(restored.value(), 123.456);
 }
