@@ -92,11 +92,11 @@ pub trait AngularUnit: Unit<Dim = Angular> {
 }
 impl<T: Unit<Dim = Angular>> AngularUnit for T {
     /// One full revolution (360°) expressed in T unit.
-    const FULL_TURN: f64 = Radians::new(TAU).to::<T>().value();
+    const FULL_TURN: f64 = Radians::new(TAU).to_const::<T>().value();
     /// Half a revolution (180°) expressed in T unit.
-    const HALF_TURN: f64 = Radians::new(TAU).to::<T>().value() * 0.5;
+    const HALF_TURN: f64 = Radians::new(TAU).to_const::<T>().value() * 0.5;
     /// Quarter revolution (90°) expressed in T unit.
-    const QUARTED_TURN: f64 = Radians::new(TAU).to::<T>().value() * 0.25;
+    const QUARTED_TURN: f64 = Radians::new(TAU).to_const::<T>().value() * 0.25;
 }
 
 impl<U: AngularUnit + Copy> Quantity<U> {
@@ -177,7 +177,7 @@ impl<U: AngularUnit + Copy> Quantity<U> {
 
     /// Sign of the *raw numeric* in this unit (same semantics as `f64::signum()`).
     #[inline]
-    pub const fn signum(self) -> f64 {
+    pub const fn signum_const(self) -> f64 {
         self.value().signum()
     }
 
