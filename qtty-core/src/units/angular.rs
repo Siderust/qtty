@@ -50,6 +50,7 @@
 //! ```
 
 use crate::{Dimension, Quantity, Unit};
+use crate::scalar::Transcendental;
 use core::f64::consts::TAU;
 use qtty_derive::Unit;
 
@@ -110,70 +111,6 @@ impl<U: AngularUnit + Copy> Quantity<U> {
     pub const HALF_TURN: Quantity<U> = Quantity::<U>::new(U::HALF_TURN);
     /// Quarter revolution (90°) expressed as `Quantity<U>`.
     pub const QUARTED_TURN: Quantity<U> = Quantity::<U>::new(U::QUARTED_TURN);
-
-    /// Sine of the angle.
-    ///
-    /// IEEE‑754 note: `NaN`/`±∞` inputs generally produce `NaN`.
-    #[inline]
-    pub fn sin(&self) -> f64 {
-        let x = self.to::<Radian>().value();
-        #[cfg(feature = "std")]
-        {
-            x.sin()
-        }
-        #[cfg(not(feature = "std"))]
-        {
-            crate::libm::sin(x)
-        }
-    }
-
-    /// Cosine of the angle.
-    ///
-    /// IEEE‑754 note: `NaN`/`±∞` inputs generally produce `NaN`.
-    #[inline]
-    pub fn cos(&self) -> f64 {
-        let x = self.to::<Radian>().value();
-        #[cfg(feature = "std")]
-        {
-            x.cos()
-        }
-        #[cfg(not(feature = "std"))]
-        {
-            crate::libm::cos(x)
-        }
-    }
-
-    /// Tangent of the angle.
-    ///
-    /// IEEE‑754 note: `NaN`/`±∞` inputs generally produce `NaN`.
-    #[inline]
-    pub fn tan(&self) -> f64 {
-        let x = self.to::<Radian>().value();
-        #[cfg(feature = "std")]
-        {
-            x.tan()
-        }
-        #[cfg(not(feature = "std"))]
-        {
-            crate::libm::tan(x)
-        }
-    }
-
-    /// Simultaneously compute sine and cosine.
-    ///
-    /// IEEE‑754 note: `NaN`/`±∞` inputs generally produce `NaN`.
-    #[inline]
-    pub fn sin_cos(&self) -> (f64, f64) {
-        let x = self.to::<Radian>().value();
-        #[cfg(feature = "std")]
-        {
-            x.sin_cos()
-        }
-        #[cfg(not(feature = "std"))]
-        {
-            (crate::libm::sin(x), crate::libm::cos(x))
-        }
-    }
 
     /// Sign of the *raw numeric* in this unit (same semantics as `f64::signum()`).
     #[inline]
@@ -254,6 +191,52 @@ impl<U: AngularUnit + Copy> Quantity<U> {
     pub fn abs_separation(self, other: Self) -> Self {
         let sep = self.signed_separation(other);
         Self::new(sep.value().abs())
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Generic trigonometric implementations for any Transcendental scalar type
+// ─────────────────────────────────────────────────────────────────────────────
+
+impl<U: AngularUnit + Copy, S: Transcendental> Quantity<U, S> {
+    /// Sine of the angle.
+    ///
+    /// Converts the angle to radians and computes the sine.
+    /// Works with any scalar type that implements [`Transcendental`] (e.g., `f32`, `f64`).
+    #[inline]
+    pub fn sin(self) -> S {
+        let x_rad = self.to::<Radian>().value();
+        x_rad.sin()
+    }
+
+    /// Cosine of the angle.
+    ///
+    /// Converts the angle to radians and computes the cosine.
+    /// Works with any scalar type that implements [`Transcendental`] (e.g., `f32`, `f64`).
+    #[inline]
+    pub fn cos(self) -> S {
+        let x_rad = self.to::<Radian>().value();
+        x_rad.cos()
+    }
+
+    /// Tangent of the angle.
+    ///
+    /// Converts the angle to radians and computes the tangent.
+    /// Works with any scalar type that implements [`Transcendental`] (e.g., `f32`, `f64`).
+    #[inline]
+    pub fn tan(self) -> S {
+        let x_rad = self.to::<Radian>().value();
+        x_rad.tan()
+    }
+
+    /// Simultaneously compute sine and cosine.
+    ///
+    /// Converts the angle to radians and computes both sine and cosine.
+    /// Works with any scalar type that implements [`Transcendental`] (e.g., `f32`, `f64`).
+    #[inline]
+    pub fn sin_cos(self) -> (S, S) {
+        let x_rad = self.to::<Radian>().value();
+        x_rad.sin_cos()
     }
 }
 
