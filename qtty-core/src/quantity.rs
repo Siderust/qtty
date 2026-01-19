@@ -8,9 +8,6 @@ use core::ops::*;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-#[cfg(feature = "tiberius")]
-use tiberius::{ColumnData, FromSql, ToSql};
-
 /// A quantity with a specific unit and scalar type.
 ///
 /// `Quantity<U, S>` wraps a scalar value of type `S` together with phantom type
@@ -710,31 +707,5 @@ pub mod serde_with_unit {
             &["value", "unit"],
             QuantityVisitor(core::marker::PhantomData),
         )
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Tiberius SQL integration (for f64-backed quantities only)
-// ─────────────────────────────────────────────────────────────────────────────
-
-#[cfg(feature = "tiberius")]
-impl<U: Unit + Send + Sync> ToSql for Quantity<U, f64> {
-    fn to_sql(&self) -> ColumnData<'_> {
-        ColumnData::F64(Some(self.value()))
-    }
-}
-
-#[cfg(feature = "tiberius")]
-impl<U: Unit> FromSql<'_> for Quantity<U, f64> {
-    fn from_sql(value: &ColumnData<'_>) -> tiberius::Result<Option<Self>> {
-        match value {
-            ColumnData::F64(Some(val)) => Ok(Some(Quantity::new(*val))),
-            ColumnData::F32(Some(val)) => Ok(Some(Quantity::new(*val as f64))),
-            ColumnData::I16(Some(val)) => Ok(Some(Quantity::new(*val as f64))),
-            ColumnData::I32(Some(val)) => Ok(Some(Quantity::new(*val as f64))),
-            ColumnData::I64(Some(val)) => Ok(Some(Quantity::new(*val as f64))),
-            ColumnData::U8(Some(val)) => Ok(Some(Quantity::new(*val as f64))),
-            _ => Ok(None),
-        }
     }
 }

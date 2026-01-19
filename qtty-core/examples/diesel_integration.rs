@@ -18,7 +18,6 @@
 fn main() {
     use qtty_core::angular::Degrees;
     use qtty_core::length::Meters;
-    use qtty_core::Quantity;
 
     println!("=== Diesel ORM Integration Example ===\n");
 

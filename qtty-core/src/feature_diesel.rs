@@ -116,7 +116,7 @@ impl<U: Unit> AsExpression<Double> for Quantity<U> {
     }
 }
 
-impl<'a, U: Unit> AsExpression<Double> for &'a Quantity<U> {
+impl<U: Unit> AsExpression<Double> for &Quantity<U> {
     type Expression = <f64 as AsExpression<Double>>::Expression;
 
     fn as_expression(self) -> Self::Expression {
@@ -133,7 +133,7 @@ impl<U: Unit> AsExpression<Nullable<Double>> for Quantity<U> {
     }
 }
 
-impl<'a, U: Unit> AsExpression<Nullable<Double>> for &'a Quantity<U> {
+impl<U: Unit> AsExpression<Nullable<Double>> for &Quantity<U> {
     type Expression = <f64 as AsExpression<Nullable<Double>>>::Expression;
 
     fn as_expression(self) -> Self::Expression {
