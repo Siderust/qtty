@@ -333,6 +333,62 @@ impl<U: Unit + Copy> Quantity<U, f64> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Const methods for f32
+// ─────────────────────────────────────────────────────────────────────────────
+
+impl<U: Unit + Copy> Quantity<U, f32> {
+    /// Const addition of two quantities.
+    #[inline]
+    pub const fn const_add(self, other: Self) -> Self {
+        Self(self.0 + other.0, PhantomData)
+    }
+
+    /// Const subtraction of two quantities.
+    #[inline]
+    pub const fn const_sub(self, other: Self) -> Self {
+        Self(self.0 - other.0, PhantomData)
+    }
+
+    /// Const multiplication by a scalar.
+    #[inline]
+    pub const fn const_mul(self, rhs: f32) -> Self {
+        Self(self.0 * rhs, PhantomData)
+    }
+
+    /// Const division by a scalar.
+    #[inline]
+    pub const fn const_div(self, rhs: f32) -> Self {
+        Self(self.0 / rhs, PhantomData)
+    }
+
+    /// Const conversion to another unit.
+    #[inline]
+    pub const fn to_const<T: Unit<Dim = U::Dim> + Copy>(self) -> Quantity<T, f32> {
+        Quantity::<T, f32>(self.0 * (U::RATIO as f32 / T::RATIO as f32), PhantomData)
+    }
+
+    /// Const min of two quantities.
+    #[inline]
+    pub const fn min_const(self, other: Self) -> Self {
+        if self.0 < other.0 {
+            self
+        } else {
+            other
+        }
+    }
+
+    /// Const max of two quantities.
+    #[inline]
+    pub const fn max_const(self, other: Self) -> Self {
+        if self.0 > other.0 {
+            self
+        } else {
+            other
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Operator implementations
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -411,6 +467,36 @@ impl<U: Unit> Mul<Quantity<U, f32>> for f32 {
     type Output = Quantity<U, f32>;
     #[inline]
     fn mul(self, rhs: Quantity<U, f32>) -> Self::Output {
+        rhs * self
+    }
+}
+
+// Multiplication for Decimal (feature-gated)
+#[cfg(feature = "scalar-decimal")]
+impl<U: Unit> Mul<Quantity<U, rust_decimal::Decimal>> for rust_decimal::Decimal {
+    type Output = Quantity<U, rust_decimal::Decimal>;
+    #[inline]
+    fn mul(self, rhs: Quantity<U, rust_decimal::Decimal>) -> Self::Output {
+        rhs * self
+    }
+}
+
+// Multiplication for Rational64 (feature-gated)
+#[cfg(feature = "scalar-rational")]
+impl<U: Unit> Mul<Quantity<U, num_rational::Rational64>> for num_rational::Rational64 {
+    type Output = Quantity<U, num_rational::Rational64>;
+    #[inline]
+    fn mul(self, rhs: Quantity<U, num_rational::Rational64>) -> Self::Output {
+        rhs * self
+    }
+}
+
+// Multiplication for Rational32 (feature-gated)
+#[cfg(feature = "scalar-rational")]
+impl<U: Unit> Mul<Quantity<U, num_rational::Rational32>> for num_rational::Rational32 {
+    type Output = Quantity<U, num_rational::Rational32>;
+    #[inline]
+    fn mul(self, rhs: Quantity<U, num_rational::Rational32>) -> Self::Output {
         rhs * self
     }
 }
