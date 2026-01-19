@@ -16,10 +16,18 @@ default = ["std"]
 std = []
 serde = ["dep:serde"]
 
+# Optional scalar type support
+scalar-decimal = ["rust_decimal"]
+scalar-rational = ["num-rational"]
+
 [dependencies]
 serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
 libm = "0.2"
-qtty-derive = "0.1.0"
+qtty-derive = "0.2.2"
+
+# Optional scalar type dependencies
+rust_decimal = { version = "1.36", optional = true, features = ["maths"] }
+num-rational = { version = "0.4", optional = true, default-features = false }
 
 [dev-dependencies]
 approx = "0.5"

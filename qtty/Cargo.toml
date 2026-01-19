@@ -16,9 +16,13 @@ default = ["std"]
 std = ["qtty-core/std"]
 serde = ["qtty-core/serde"]
 
+# Scalar type support
+scalar-decimal = ["qtty-core/scalar-decimal"]
+scalar-rational = ["qtty-core/scalar-rational"]
+
 [dependencies]
 qtty-core = { version = "0.2.0", path = "../qtty-core", default-features = false }
-qtty-derive = "0.1.0"
+qtty-derive = "0.2.2"
 
 [dev-dependencies]
 approx = "0.5"
