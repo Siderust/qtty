@@ -117,6 +117,9 @@ pub use quantity::QuantityRational;
 #[cfg(feature = "serde")]
 pub use feature_serde::serde_with_unit;
 
+#[cfg(feature = "serde")]
+pub use feature_serde::serde_scalar;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Predefined unit modules (grouped by dimension)
 // ─────────────────────────────────────────────────────────────────────────────
