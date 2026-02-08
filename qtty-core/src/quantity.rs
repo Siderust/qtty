@@ -39,7 +39,7 @@ use core::ops::*;
 /// let x: Quantity<Meter, f32> = Quantity::new(5.0_f32);
 /// assert_eq!(x.value(), 5.0_f32);
 /// ```
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Quantity<U: Unit, S: Scalar = f64>(S, PhantomData<U>);
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -645,11 +645,19 @@ impl<U: Unit, S: Scalar> PartialOrd<S> for Quantity<U, S> {
     }
 }
 
+// PartialOrd between quantities of the same unit/scalar.
+impl<U: Unit, S: Scalar> PartialOrd for Quantity<U, S> {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.0.partial_cmp(&other.0)
+    }
+}
+
 // Eq for scalar types that support total equality (integers, rationals, decimals)
 impl<U: Unit, S: Scalar + Eq> Eq for Quantity<U, S> {}
 
 // Ord for scalar types that support total ordering (integers, rationals, decimals)
-impl<U: Unit + PartialOrd, S: Scalar + Ord> Ord for Quantity<U, S> {
+impl<U: Unit, S: Scalar + Ord> Ord for Quantity<U, S> {
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
         self.0.cmp(&other.0)
