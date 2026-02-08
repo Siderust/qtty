@@ -434,3 +434,197 @@ fn test_i128_rem_euclid() {
     let val = 27_i128;
     assert_eq!(val.rem_euclid(10), 7);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Const methods for i8, i16, i128
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_i8_const_add_sub() {
+    let a = Quantity::<Meter, i8>::new(10);
+    let b = Quantity::<Meter, i8>::new(3);
+    assert_eq!(a.const_add(b).value(), 13_i8);
+    assert_eq!(a.const_sub(b).value(), 7_i8);
+}
+
+#[test]
+fn test_i8_const_mul_div() {
+    let a = Quantity::<Meter, i8>::new(10);
+    assert_eq!(a.const_mul(3).value(), 30_i8);
+    assert_eq!(a.const_div(5).value(), 2_i8);
+}
+
+#[test]
+fn test_i8_min_max_const() {
+    let a = Quantity::<Meter, i8>::new(3);
+    let b = Quantity::<Meter, i8>::new(7);
+    assert_eq!(a.min_const(b).value(), 3_i8);
+    assert_eq!(a.max_const(b).value(), 7_i8);
+}
+
+#[test]
+fn test_i16_const_add_sub() {
+    let a = Quantity::<Meter, i16>::new(1000);
+    let b = Quantity::<Meter, i16>::new(500);
+    assert_eq!(a.const_add(b).value(), 1500_i16);
+    assert_eq!(a.const_sub(b).value(), 500_i16);
+}
+
+#[test]
+fn test_i16_const_mul_div() {
+    let a = Quantity::<Meter, i16>::new(100);
+    assert_eq!(a.const_mul(3).value(), 300_i16);
+    assert_eq!(a.const_div(10).value(), 10_i16);
+}
+
+#[test]
+fn test_i16_min_max_const() {
+    let a = Quantity::<Meter, i16>::new(100);
+    let b = Quantity::<Meter, i16>::new(200);
+    assert_eq!(a.min_const(b).value(), 100_i16);
+    assert_eq!(a.max_const(b).value(), 200_i16);
+}
+
+#[test]
+fn test_i128_const_add_sub() {
+    let a = Quantity::<Meter, i128>::new(1_000_000);
+    let b = Quantity::<Meter, i128>::new(500_000);
+    assert_eq!(a.const_add(b).value(), 1_500_000_i128);
+    assert_eq!(a.const_sub(b).value(), 500_000_i128);
+}
+
+#[test]
+fn test_i128_const_mul_div() {
+    let a = Quantity::<Meter, i128>::new(1000);
+    assert_eq!(a.const_mul(3).value(), 3000_i128);
+    assert_eq!(a.const_div(10).value(), 100_i128);
+}
+
+#[test]
+fn test_i128_min_max_const() {
+    let a = Quantity::<Meter, i128>::new(100);
+    let b = Quantity::<Meter, i128>::new(200);
+    assert_eq!(a.min_const(b).value(), 100_i128);
+    assert_eq!(a.max_const(b).value(), 200_i128);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// to_lossy for i8, i16, i128
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_i8_to_lossy() {
+    // Using units where the ratio is small enough for i8
+    let km = Quantity::<Kilometer, i8>::new(1);
+    let m: Quantity<Meter, i8> = km.to_lossy();
+    // 1 km = 1000m, but i8 max is 127, so this overflows/saturates
+    // The result depends on `from_f64_approx` which does `value as i8`
+    // 1000.0 as i8 = -24 (wraps). This is expected lossy behavior.
+    let _ = m.value(); // Just ensure it doesn't panic
+}
+
+#[test]
+fn test_i16_to_lossy() {
+    let km = Quantity::<Kilometer, i16>::new(2);
+    let m: Quantity<Meter, i16> = km.to_lossy();
+    assert_eq!(m.value(), 2000_i16);
+}
+
+#[test]
+fn test_i128_to_lossy() {
+    let km = Quantity::<Kilometer, i128>::new(5);
+    let m: Quantity<Meter, i128> = km.to_lossy();
+    assert_eq!(m.value(), 5000_i128);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Additional i16/i128 commutative mul
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_i16_commutative_mul() {
+    let a = Quantity::<Meter, i16>::new(5);
+    assert_eq!((3_i16 * a).value(), 15_i16);
+}
+
+#[test]
+fn test_i128_commutative_mul() {
+    let a = Quantity::<Meter, i128>::new(5);
+    assert_eq!((3_i128 * a).value(), 15_i128);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// i16/i128 Display, From, PartialEq, Rem
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_i16_display() {
+    let m = Quantity::<Meter, i16>::new(100);
+    assert_eq!(format!("{}", m), "100 m");
+}
+
+#[test]
+fn test_i128_display() {
+    let m = Quantity::<Meter, i128>::new(999);
+    assert_eq!(format!("{}", m), "999 m");
+}
+
+#[test]
+fn test_i16_from_scalar() {
+    let a: Quantity<Meter, i16> = 100_i16.into();
+    assert_eq!(a.value(), 100_i16);
+}
+
+#[test]
+fn test_i128_from_scalar() {
+    let a: Quantity<Meter, i128> = 999_i128.into();
+    assert_eq!(a.value(), 999_i128);
+}
+
+#[test]
+fn test_i16_partial_eq() {
+    let a = Quantity::<Meter, i16>::new(42);
+    assert_eq!(a, 42_i16);
+}
+
+#[test]
+fn test_i128_partial_eq() {
+    let a = Quantity::<Meter, i128>::new(42);
+    assert_eq!(a, 42_i128);
+}
+
+#[test]
+fn test_i16_rem() {
+    let a = Quantity::<Meter, i16>::new(17);
+    assert_eq!((a % 5_i16).value(), 2_i16);
+}
+
+#[test]
+fn test_i128_rem() {
+    let a = Quantity::<Meter, i128>::new(17);
+    assert_eq!((a % 5_i128).value(), 2_i128);
+}
+
+#[test]
+fn test_i8_display() {
+    let m = Quantity::<Meter, i8>::new(42);
+    assert_eq!(format!("{}", m), "42 m");
+}
+
+#[test]
+fn test_i8_from_scalar() {
+    let a: Quantity<Meter, i8> = 42_i8.into();
+    assert_eq!(a.value(), 42_i8);
+}
+
+#[test]
+fn test_i8_partial_eq() {
+    let a = Quantity::<Meter, i8>::new(42);
+    assert_eq!(a, 42_i8);
+}
+
+#[test]
+fn test_i8_rem() {
+    let a = Quantity::<Meter, i8>::new(17);
+    assert_eq!((a % 5_i8).value(), 2_i8);
+}
