@@ -7,6 +7,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Sem
 
 ### Added
 - Added support for operations with Rust built-in numeric types, improving ergonomics when combining `Quantity` values with primitive scalars.
+- Full dimensional arithmetic support using compile-time exponent math (`Dim`, `DimMul`, `DimDiv`) powered by `typenum`.
+- New product unit type `Prod<A, B>` to represent unit multiplication (`Length * Length`, `Area * Length`, etc.).
+- New `area` unit module with metric, land, and imperial/US units (for example `SquareMeter`, `Hectare`, `Acre`).
+- New `volume` unit module with metric cubic units, liter-family units, and imperial/US units (for example `CubicMeter`, `Liter`, `UsGallon`).
+- New `qtty` example `dimensional_arithmetic` demonstrating compile-time dimensional composition and conversions.
+
+### Changed
+- Division and multiplication now compose dimensions generically at the type level, so multiplied quantities produce `Quantity<Prod<...>>` and can be converted to named units with `.to()`.
+- Core/base dimensions are now unified under the new generic `Dim<...>` model, with backward-compatible aliases for `DivDim` and new `MulDim`.
+- Public exports now include area/volume modules and additional dimension aliases from `qtty-core` and the `qtty` facade.
 
 ## [0.2.2] - 2026-01-13
 
