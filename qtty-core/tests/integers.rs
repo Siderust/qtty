@@ -171,7 +171,7 @@ fn test_i32_display() {
 #[test]
 fn test_i64_display() {
     let km = Quantity::<Kilometer, i64>::new(42);
-    assert_eq!(format!("{}", km), "42 Km");
+    assert_eq!(format!("{}", km), "42 km");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

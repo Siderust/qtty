@@ -97,8 +97,8 @@ fn main() {
     let json_km = serde_json::to_string(&distance_km).unwrap();
     let json_m = serde_json::to_string(&distance_m).unwrap();
 
-    println!("   5 Km serialized directly: {}", json_km);
-    println!("   5 Km converted to meters: {}", json_m);
+    println!("   5 km serialized directly: {}", json_km);
+    println!("   5 km converted to meters: {}", json_m);
     println!("   Note: Both serialize the same value, but semantics differ!");
     println!();
 

@@ -60,7 +60,7 @@ pub const M: Meters = Meters::new(1.0);
 
 /// Kilometre (`1000 m`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Km", dimension = Length, ratio = 1_000.0)]
+#[unit(symbol = "km", dimension = Length, ratio = 1_000.0)]
 pub struct Kilometer;
 /// Type alias shorthand for [`Kilometer`].
 pub type Km = Kilometer;
@@ -93,7 +93,7 @@ pub const MM: Millimeters = Millimeters::new(1.0);
 
 /// Micrometre (`1e-6 m`).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "um", dimension = Length, ratio = 1e-6)]
+#[unit(symbol = "μm", dimension = Length, ratio = 1e-6)]
 pub struct Micrometer;
 /// Type alias shorthand for [`Micrometer`].
 pub type Um = Micrometer;
