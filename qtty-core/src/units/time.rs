@@ -22,12 +22,11 @@
 //! assert!((two_hours.value() - 0.5).abs() < 1e-12);
 //! ```
 
-use crate::{Dimension, Quantity, Unit};
+use crate::{Quantity, Unit};
 use qtty_derive::Unit;
 
-/// Dimension tag for time.
-pub enum Time {}
-impl Dimension for Time {}
+/// Re-export from the dimension module.
+pub use crate::dimension::Time;
 
 /// Marker trait for any [`Unit`] whose dimension is [`Time`].
 pub trait TimeUnit: Unit<Dim = Time> {}

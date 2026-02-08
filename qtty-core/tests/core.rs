@@ -1,8 +1,7 @@
 use qtty_core::*;
 
-#[derive(Debug)]
-pub enum TestDim {}
-impl Dimension for TestDim {}
+// Use Length as the test dimension.
+type TestDim = Length;
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub enum TestUnit {}
@@ -200,7 +199,7 @@ fn per_ratio_conversion() {
 fn per_multiplication_recovers_numerator() {
     let rate: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(5.0);
     let time = Dtu::new(4.0);
-    let result: TU = rate * time;
+    let result: TU = (rate * time).to();
     assert!((result.value() - 20.0).abs() < 1e-12);
 }
 
@@ -208,8 +207,8 @@ fn per_multiplication_recovers_numerator() {
 fn per_multiplication_commutative() {
     let rate: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(5.0);
     let time = Dtu::new(4.0);
-    let result1: TU = rate * time;
-    let result2: TU = time * rate;
+    let result1: TU = (rate * time).to();
+    let result2: TU = (time * rate).to();
     assert!((result1.value() - result2.value()).abs() < 1e-12);
 }
 
