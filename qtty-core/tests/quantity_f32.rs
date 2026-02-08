@@ -123,6 +123,13 @@ fn f32_quantity_sqrt() {
 }
 
 #[test]
+fn f32_quantity_ceil() {
+    assert_eq!(TU32::new(3.2).ceil().value(), 4.0_f32);
+    assert_eq!(TU32::new(-3.2).ceil().value(), -3.0_f32);
+    assert_eq!(TU32::new(5.0).ceil().value(), 5.0_f32);
+}
+
+#[test]
 fn f32_quantity_cast() {
     let q = TU32::new(42.5);
     let q_f64: Quantity<TestUnit, f64> = q.cast();
