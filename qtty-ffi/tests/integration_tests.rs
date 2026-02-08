@@ -407,3 +407,102 @@ fn test_negative_values() {
     assert_eq!(status, QTTY_OK);
     assert_relative_eq!(dst.value, -1.0, epsilon = 1e-12);
 }
+
+// =============================================================================
+// QttyQuantity method tests
+// =============================================================================
+
+#[test]
+fn test_qtty_quantity_compatible() {
+    let q1 = QttyQuantity::new(100.0, UnitId::Meter);
+    let q2 = QttyQuantity::new(1.0, UnitId::Kilometer);
+    let q3 = QttyQuantity::new(10.0, UnitId::Second);
+
+    assert!(q1.compatible(&q2));
+    assert!(!q1.compatible(&q3));
+}
+
+#[test]
+fn test_qtty_quantity_dimension() {
+    let q = QttyQuantity::new(100.0, UnitId::Meter);
+    assert_eq!(q.dimension(), Some(DimensionId::Length));
+
+    let q2 = QttyQuantity::new(10.0, UnitId::Second);
+    assert_eq!(q2.dimension(), Some(DimensionId::Time));
+}
+
+#[test]
+fn test_qtty_quantity_convert_to() {
+    let q = QttyQuantity::new(1000.0, UnitId::Meter);
+    let converted = q.convert_to(UnitId::Kilometer);
+    assert!(converted.is_some());
+    let conv = converted.unwrap();
+    assert_relative_eq!(conv.value, 1.0, epsilon = 1e-12);
+    assert_eq!(conv.unit, UnitId::Kilometer);
+}
+
+#[test]
+fn test_qtty_quantity_convert_to_incompatible() {
+    let q = QttyQuantity::new(1000.0, UnitId::Meter);
+    let converted = q.convert_to(UnitId::Second);
+    assert!(converted.is_none());
+}
+
+#[test]
+fn test_qtty_quantity_add() {
+    let q1 = QttyQuantity::new(100.0, UnitId::Meter);
+    let q2 = QttyQuantity::new(0.5, UnitId::Kilometer);
+    let result = q1.add(&q2);
+    assert!(result.is_some());
+    let sum = result.unwrap();
+    assert_relative_eq!(sum.value, 600.0, epsilon = 1e-10); // 100 + 500
+    assert_eq!(sum.unit, UnitId::Meter);
+}
+
+#[test]
+fn test_qtty_quantity_add_incompatible() {
+    let q1 = QttyQuantity::new(100.0, UnitId::Meter);
+    let q2 = QttyQuantity::new(10.0, UnitId::Second);
+    assert!(q1.add(&q2).is_none());
+}
+
+#[test]
+fn test_qtty_quantity_sub() {
+    let q1 = QttyQuantity::new(1.0, UnitId::Kilometer);
+    let q2 = QttyQuantity::new(500.0, UnitId::Meter);
+    let result = q1.sub(&q2);
+    assert!(result.is_some());
+    let diff = result.unwrap();
+    assert_relative_eq!(diff.value, 0.5, epsilon = 1e-10); // 1000 - 500 = 500m = 0.5km
+    assert_eq!(diff.unit, UnitId::Kilometer);
+}
+
+#[test]
+fn test_qtty_quantity_sub_incompatible() {
+    let q1 = QttyQuantity::new(100.0, UnitId::Meter);
+    let q2 = QttyQuantity::new(10.0, UnitId::Second);
+    assert!(q1.sub(&q2).is_none());
+}
+
+#[test]
+fn test_qtty_quantity_mul_scalar() {
+    let q = QttyQuantity::new(100.0, UnitId::Meter);
+    let result = q.mul_scalar(2.5);
+    assert_relative_eq!(result.value, 250.0);
+    assert_eq!(result.unit, UnitId::Meter);
+}
+
+#[test]
+fn test_qtty_quantity_div_scalar() {
+    let q = QttyQuantity::new(100.0, UnitId::Meter);
+    let result = q.div_scalar(4.0);
+    assert_relative_eq!(result.value, 25.0);
+    assert_eq!(result.unit, UnitId::Meter);
+}
+
+#[test]
+fn test_qtty_quantity_div_scalar_zero() {
+    let q = QttyQuantity::new(100.0, UnitId::Meter);
+    let result = q.div_scalar(0.0);
+    assert!(result.value.is_infinite());
+}

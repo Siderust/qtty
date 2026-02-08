@@ -81,28 +81,28 @@ fn quantity_conversion_roundtrip() {
 fn const_add() {
     let a = TU::new(3.0);
     let b = TU::new(7.0);
-    assert_eq!(a.add(b).value(), 10.0);
+    assert_eq!(a.const_add(b).value(), 10.0);
 }
 
 #[test]
 fn const_sub() {
     let a = TU::new(10.0);
     let b = TU::new(3.0);
-    assert_eq!(a.sub(b).value(), 7.0);
+    assert_eq!(a.const_sub(b).value(), 7.0);
 }
 
 #[test]
 fn const_mul() {
     let a = TU::new(4.0);
-    let b = TU::new(5.0);
-    assert_eq!(Quantity::mul(&a, b).value(), 20.0);
+    let b = 5.0;
+    assert_eq!(a.const_mul(b).value(), 20.0);
 }
 
 #[test]
 fn const_div() {
     let a = TU::new(20.0);
-    let b = TU::new(4.0);
-    assert_eq!(Quantity::div(&a, b).value(), 5.0);
+    let b = 4.0;
+    assert_eq!(a.const_div(b).value(), 5.0);
 }
 
 #[test]
@@ -303,4 +303,123 @@ fn edge_case_infinity() {
     assert!(neg_inf.value().is_infinite());
     assert_eq!(inf.value().signum(), 1.0);
     assert_eq!(neg_inf.value().signum(), -1.0);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Additional method coverage tests
+// ─────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_is_nan() {
+    let nan = TU::new(f64::NAN);
+    let normal = TU::new(42.0);
+    assert!(nan.is_nan());
+    assert!(!normal.is_nan());
+}
+
+#[test]
+fn test_is_infinite() {
+    let inf = TU::new(f64::INFINITY);
+    let neg_inf = TU::new(f64::NEG_INFINITY);
+    let normal = TU::new(42.0);
+    assert!(inf.is_infinite());
+    assert!(neg_inf.is_infinite());
+    assert!(!normal.is_infinite());
+}
+
+#[test]
+fn test_is_finite() {
+    let normal = TU::new(42.0);
+    let inf = TU::new(f64::INFINITY);
+    let nan = TU::new(f64::NAN);
+    assert!(normal.is_finite());
+    assert!(!inf.is_finite());
+    assert!(!nan.is_finite());
+}
+
+#[test]
+fn test_signum() {
+    let pos = TU::new(42.0);
+    let neg = TU::new(-42.0);
+    assert_eq!(pos.signum(), 1.0);
+    assert_eq!(neg.signum(), -1.0);
+}
+
+#[test]
+fn test_sqrt() {
+    let q = TU::new(16.0);
+    let sqrt_q = q.sqrt();
+    assert!((sqrt_q.value() - 4.0).abs() < 1e-12);
+}
+
+#[test]
+fn test_cast() {
+    let q = TU::new(42.5);
+    let q_f32: Quantity<TestUnit, f32> = q.cast();
+    assert!((q_f32.value() - 42.5).abs() < 0.01);
+}
+
+#[test]
+fn test_max() {
+    let a = TU::new(5.0);
+    let b = TU::new(10.0);
+    assert_eq!(a.max(b).value(), 10.0);
+    assert_eq!(b.max(a).value(), 10.0);
+}
+
+#[test]
+fn test_acos() {
+    let ratio: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(0.5);
+    let result = ratio.acos();
+    assert!((result - 0.5_f64.acos()).abs() < 1e-12);
+}
+
+#[test]
+fn test_atan() {
+    let ratio: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(1.0);
+    let result = ratio.atan();
+    assert!((result - core::f64::consts::FRAC_PI_4).abs() < 1e-12);
+}
+
+#[test]
+fn test_to_lossy() {
+    use qtty_core::units::length::{Kilometer, Meter};
+    let km: Quantity<Kilometer, i32> = Quantity::new(5);
+    let m: Quantity<Meter, i32> = km.to_lossy();
+    assert_eq!(m.value(), 5000);
+}
+
+#[test]
+fn test_value_ref() {
+    let q = TU::new(42.5);
+    assert_eq!(*q.value_ref(), 42.5);
+}
+
+#[test]
+fn test_zero_one() {
+    let zero = TU::zero();
+    let one = TU::one();
+    assert_eq!(zero.value(), 0.0);
+    assert_eq!(one.value(), 1.0);
+}
+
+#[test]
+fn test_min_const() {
+    let a = TU::new(3.0);
+    let b = TU::new(7.0);
+    assert_eq!(a.min_const(b).value(), 3.0);
+}
+
+#[test]
+fn test_max_const() {
+    let a = TU::new(3.0);
+    let b = TU::new(7.0);
+    assert_eq!(a.max_const(b).value(), 7.0);
+}
+
+#[test]
+fn test_to_const() {
+    let q = TU::new(10.0);
+    let converted: Dtu = q.to_const();
+    assert!((converted.value() - 5.0).abs() < 1e-12);
 }
