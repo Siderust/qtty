@@ -179,11 +179,11 @@ fn trigonometric_calculation() {
 fn derive_macro_produces_correct_symbol() {
     // Verify that units defined with derive macro have correct symbols
     assert_eq!(Meter::SYMBOL, "m");
-    assert_eq!(Kilometer::SYMBOL, "Km");
+    assert_eq!(Kilometer::SYMBOL, "km");
     assert_eq!(Second::SYMBOL, "s");
     assert_eq!(Day::SYMBOL, "d");
-    assert_eq!(Degree::SYMBOL, "Deg");
-    assert_eq!(Radian::SYMBOL, "Rad");
+    assert_eq!(Degree::SYMBOL, "°");
+    assert_eq!(Radian::SYMBOL, "rad");
 }
 
 #[test]
@@ -201,10 +201,10 @@ fn derive_macro_display_formatting() {
     assert_eq!(format!("{}", m), "42 m");
 
     let km = Kilometers::new(1.5);
-    assert_eq!(format!("{}", km), "1.5 Km");
+    assert_eq!(format!("{}", km), "1.5 km");
 
     let deg = Degrees::new(90.0);
-    assert_eq!(format!("{}", deg), "90 Deg");
+    assert_eq!(format!("{}", deg), "90 °");
 }
 
 #[test]
@@ -247,7 +247,7 @@ fn quantity_abs() {
 fn per_unit_display() {
     let v: velocity::Velocity<Kilometer, Second> = velocity::Velocity::new(10.0);
     let s = format!("{}", v);
-    assert_eq!(s, "10 Km/s");
+    assert_eq!(s, "10 km/s");
 }
 
 #[test]
