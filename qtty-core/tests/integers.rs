@@ -361,3 +361,76 @@ fn test_i32_div_assign() {
     a /= b;
     assert_eq!(a.value(), 2);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Additional coverage for exact conversions
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_i8_exact_conversion() {
+    use qtty_core::scalar::Exact;
+    let val = 42_i8;
+    let f64_val = Exact::to_f64_approx(val);
+    assert_eq!(f64_val, 42.0);
+    let back: i8 = Exact::from_f64_approx(f64_val);
+    assert_eq!(back, 42);
+}
+
+#[test]
+fn test_i16_exact_conversion() {
+    use qtty_core::scalar::Exact;
+    let val = 1000_i16;
+    let f64_val = Exact::to_f64_approx(val);
+    assert_eq!(f64_val, 1000.0);
+    let back: i16 = Exact::from_f64_approx(f64_val);
+    assert_eq!(back, 1000);
+}
+
+#[test]
+fn test_i32_exact_conversion() {
+    use qtty_core::scalar::Exact;
+    let val = 100000_i32;
+    let f64_val = Exact::to_f64_approx(val);
+    assert_eq!(f64_val, 100000.0);
+    let back: i32 = Exact::from_f64_approx(f64_val);
+    assert_eq!(back, 100000);
+}
+
+#[test]
+fn test_i64_exact_conversion() {
+    use qtty_core::scalar::Exact;
+    let val = 1_000_000_i64;
+    let f64_val = Exact::to_f64_approx(val);
+    assert_eq!(f64_val, 1_000_000.0);
+    let back: i64 = Exact::from_f64_approx(f64_val);
+    assert_eq!(back, 1_000_000);
+}
+
+#[test]
+fn test_i128_exact_conversion() {
+    use qtty_core::scalar::Exact;
+    let val = 1_000_000_000_i128;
+    let f64_val = Exact::to_f64_approx(val);
+    assert_eq!(f64_val, 1_000_000_000.0);
+    let back: i128 = Exact::from_f64_approx(f64_val);
+    assert_eq!(back, 1_000_000_000);
+}
+
+#[test]
+fn test_i8_rem_euclid() {
+    let val = 7_i8;
+    assert_eq!(val.rem_euclid(4), 3);
+    assert_eq!((-7_i8).rem_euclid(4), 1);
+}
+
+#[test]
+fn test_i16_rem_euclid() {
+    let val = 17_i16;
+    assert_eq!(val.rem_euclid(5), 2);
+}
+
+#[test]
+fn test_i128_rem_euclid() {
+    let val = 27_i128;
+    assert_eq!(val.rem_euclid(10), 7);
+}
