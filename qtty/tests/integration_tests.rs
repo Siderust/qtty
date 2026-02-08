@@ -344,3 +344,56 @@ fn new_angular_units() {
     let wrapped = turn.wrap_pos();
     assert_abs_diff_eq!(wrapped.value(), 0.7, epsilon = 1e-12);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// f32 scalar type tests
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn smoke_test_f32_angular() {
+    use qtty::f32::{Degrees, Radians};
+
+    let deg = Degrees::new(180.0_f32);
+    let rad: Radians = deg.to();
+    assert!((rad.value() - core::f32::consts::PI).abs() < 1e-5);
+}
+
+#[test]
+fn smoke_test_f32_length() {
+    use qtty::f32::{Kilometers, Meters};
+
+    let km = Kilometers::new(1.0_f32);
+    let m: Meters = km.to();
+    assert!((m.value() - 1000.0).abs() < 1e-4);
+}
+
+#[test]
+fn smoke_test_f32_time() {
+    use qtty::f32::{Days, Seconds};
+
+    let day = Days::new(1.0_f32);
+    let sec: Seconds = day.to();
+    assert!((sec.value() - 86400.0).abs() < 1.0);
+}
+
+#[test]
+fn smoke_test_f32_arithmetic() {
+    use qtty::f32::Meters;
+
+    let a = Meters::new(10.0_f32);
+    let b = Meters::new(5.0_f32);
+    let sum = a + b;
+    let diff = a - b;
+
+    assert!((sum.value() - 15.0).abs() < 1e-6);
+    assert!((diff.value() - 5.0).abs() < 1e-6);
+}
+
+#[test]
+fn smoke_test_f32_trig() {
+    use qtty::f32::Degrees;
+
+    let angle = Degrees::new(90.0_f32);
+    assert!((angle.sin() - 1.0).abs() < 1e-5);
+    assert!(angle.cos().abs() < 1e-5);
+}

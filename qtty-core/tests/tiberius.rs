@@ -157,3 +157,53 @@ fn roundtrip_with_small_values() {
 fn roundtrip_with_zero() {
     test_roundtrip(TU::new(0.0));
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Additional FromSql variants for coverage
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn from_sql_i16_value() {
+    let column_data = ColumnData::I16(Some(42));
+    let result = TU::from_sql(&column_data).unwrap();
+    assert!(result.is_some());
+    assert_eq!(result.unwrap().value(), 42.0);
+}
+
+#[test]
+fn from_sql_i16_none() {
+    let column_data = ColumnData::I16(None);
+    let result = TU::from_sql(&column_data).unwrap();
+    assert!(result.is_none());
+}
+
+#[test]
+fn from_sql_u8_value() {
+    let column_data = ColumnData::U8(Some(255));
+    let result = TU::from_sql(&column_data).unwrap();
+    assert!(result.is_some());
+    assert_eq!(result.unwrap().value(), 255.0);
+}
+
+#[test]
+fn from_sql_u8_none() {
+    let column_data = ColumnData::U8(None);
+    let result = TU::from_sql(&column_data).unwrap();
+    assert!(result.is_none());
+}
+
+#[test]
+fn from_sql_default_arm() {
+    // Using Bit variant which is not handled -> should return None via default arm
+    let column_data = ColumnData::Bit(Some(true));
+    let result = TU::from_sql(&column_data).unwrap();
+    assert!(result.is_none());
+}
+
+#[test]
+fn from_sql_negative_i16() {
+    let column_data = ColumnData::I16(Some(-100));
+    let result = TU::from_sql(&column_data).unwrap();
+    assert!(result.is_some());
+    assert_eq!(result.unwrap().value(), -100.0);
+}

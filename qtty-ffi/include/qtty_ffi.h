@@ -79,47 +79,6 @@
 #define QTTY_ERR_INVALID_VALUE -4
 
 /*
- Dimension identifier for FFI.
-
- Represents the physical dimension of a quantity. All discriminant values are
- explicitly assigned and are part of the ABI contract.
-
- # ABI Contract
-
- **Discriminant values must never change.** New dimensions may be added with
- new explicit discriminant values.
- */
-enum DimensionId
-#ifdef __cplusplus
-  : uint32_t
-#endif // __cplusplus
- {
-  /*
-   Length dimension (e.g., meters, kilometers).
-   */
-  DIMENSION_ID_LENGTH = 1,
-  /*
-   Time dimension (e.g., seconds, hours).
-   */
-  DIMENSION_ID_TIME = 2,
-  /*
-   Angle dimension (e.g., radians, degrees).
-   */
-  DIMENSION_ID_ANGLE = 3,
-  /*
-   Mass dimension (e.g., grams, kilograms).
-   */
-  DIMENSION_ID_MASS = 4,
-  /*
-   Power dimension (e.g., watts, kilowatts).
-   */
-  DIMENSION_ID_POWER = 5,
-};
-#ifndef __cplusplus
-typedef uint32_t DimensionId;
-#endif // __cplusplus
-
-/*
  Unit identifier for FFI.
 
  Each variant corresponds to a specific unit supported by the FFI layer.
@@ -709,6 +668,47 @@ enum UnitId
 };
 #ifndef __cplusplus
 typedef uint32_t UnitId;
+#endif // __cplusplus
+
+/*
+ Dimension identifier for FFI.
+
+ Represents the physical dimension of a quantity. All discriminant values are
+ explicitly assigned and are part of the ABI contract.
+
+ # ABI Contract
+
+ **Discriminant values must never change.** New dimensions may be added with
+ new explicit discriminant values.
+ */
+enum DimensionId
+#ifdef __cplusplus
+  : uint32_t
+#endif // __cplusplus
+ {
+  /*
+   Length dimension (e.g., meters, kilometers).
+   */
+  DIMENSION_ID_LENGTH = 1,
+  /*
+   Time dimension (e.g., seconds, hours).
+   */
+  DIMENSION_ID_TIME = 2,
+  /*
+   Angle dimension (e.g., radians, degrees).
+   */
+  DIMENSION_ID_ANGLE = 3,
+  /*
+   Mass dimension (e.g., grams, kilograms).
+   */
+  DIMENSION_ID_MASS = 4,
+  /*
+   Power dimension (e.g., watts, kilowatts).
+   */
+  DIMENSION_ID_POWER = 5,
+};
+#ifndef __cplusplus
+typedef uint32_t DimensionId;
 #endif // __cplusplus
 
 /*

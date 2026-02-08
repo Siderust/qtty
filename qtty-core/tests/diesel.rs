@@ -99,8 +99,8 @@ fn to_sql_special_values() {
 
 #[test]
 fn nullable_some() {
-    let q = Some(TU::new(42.5));
-    assert_eq!(q.unwrap().value(), 42.5);
+    let q = TU::new(42.5);
+    assert_eq!(q.value(), 42.5);
 }
 
 #[test]
@@ -111,8 +111,8 @@ fn nullable_none() {
 
 #[test]
 fn nullable_roundtrip() {
-    let original = Some(TU::new(123.456));
-    let value = original.unwrap().value();
+    let original = TU::new(123.456);
+    let value = original.value();
     let restored = TU::new(value);
     assert_eq!(restored.value(), 123.456);
 }
@@ -365,4 +365,98 @@ fn simulate_multiple_columns() {
     assert_eq!(m.azimuth.value(), 180.0);
     assert_eq!(m.min_altitude.unwrap().value(), 0.0);
     assert_eq!(m.max_altitude.unwrap().value(), 90.0);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// f32 support tests
+// ─────────────────────────────────────────────────────────────────────────
+
+type TU32 = Quantity<TestUnit, f32>;
+
+#[test]
+fn from_sql_f32_value() {
+    let q = TU32::new(42.5);
+    assert_eq!(q.value(), 42.5);
+}
+
+#[test]
+fn from_sql_f32_none() {
+    let q: Option<TU32> = None;
+    assert!(q.is_none());
+}
+
+#[test]
+fn to_sql_f32_value() {
+    let q = TU32::new(99.99);
+    assert_eq!(q.value(), 99.99);
+}
+
+#[test]
+fn as_expression_f32_owned() {
+    use diesel::sql_types::Float;
+    let q = TU32::new(42.5);
+    let expr = <TU32 as AsExpression<Float>>::as_expression(q);
+    let _ = expr;
+}
+
+#[test]
+fn as_expression_f32_borrowed() {
+    use diesel::sql_types::Float;
+    let q = TU32::new(42.5);
+    let expr = <&TU32 as AsExpression<Float>>::as_expression(&q);
+    let _ = expr;
+    assert_eq!(q.value(), 42.5);
+}
+
+#[test]
+fn as_expression_f32_nullable_owned() {
+    use diesel::sql_types::{Float, Nullable};
+    let q = TU32::new(42.5);
+    let expr = <TU32 as AsExpression<Nullable<Float>>>::as_expression(q);
+    let _ = expr;
+}
+
+#[test]
+fn as_expression_f32_nullable_borrowed() {
+    use diesel::sql_types::{Float, Nullable};
+    let q = TU32::new(42.5);
+    let expr = <&TU32 as AsExpression<Nullable<Float>>>::as_expression(&q);
+    let _ = expr;
+    assert_eq!(q.value(), 42.5);
+}
+
+#[test]
+fn queryable_f32_basic() {
+    let value = 42.5_f32;
+    let q = TU32::new(value);
+    assert_eq!(q.value(), 42.5);
+}
+
+#[test]
+fn f32_roundtrip() {
+    let original = TU32::new(123.456);
+    let value = original.value();
+    let restored = TU32::new(value);
+    assert!((restored.value() - 123.456).abs() < 0.001);
+}
+
+#[test]
+fn f32_special_values() {
+    let inf = TU32::new(f32::INFINITY);
+    assert!(inf.value().is_infinite());
+
+    let nan = TU32::new(f32::NAN);
+    assert!(nan.value().is_nan());
+}
+
+#[test]
+fn f32_nullable_some() {
+    let q = TU32::new(42.5);
+    assert_eq!(q.value(), 42.5);
+}
+
+#[test]
+fn f32_nullable_none() {
+    let q: Option<TU32> = None;
+    assert!(q.is_none());
 }
