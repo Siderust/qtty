@@ -24,9 +24,8 @@
 //!
 //! ## Unit symbols
 //!
-//! Unit `SYMBOL`s are used for display (e.g., `format!("{}", angle)`) and are not intended to be a strict
-//! standards reference. Some symbols use ASCII abbreviations (e.g., `"Deg"`, `"Rad"`), and others may use
-//! Unicode where it improves readability (e.g., `"μas"`).
+//! Unit `SYMBOL`s are used for display (e.g., `format!("{}", angle)`) and follow conventional unit symbols.
+//! Unicode symbols are used where standard notation requires them (e.g., `°`, `′`, `″`, `μas`).
 //!
 //! ## Examples
 //!
@@ -241,7 +240,7 @@ impl<U: AngularUnit + Copy, S: Transcendental> Quantity<U, S> {
 
 /// Degree.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Deg", dimension = Angular, ratio = 1.0)]
+#[unit(symbol = "°", dimension = Angular, ratio = 1.0)]
 pub struct Degree;
 /// Type alias shorthand for [`Degree`].
 pub type Deg = Degree;
@@ -252,7 +251,7 @@ pub const DEG: Degrees = Degrees::new(1.0);
 
 /// Radian.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Rad", dimension = Angular, ratio = 180.0 / core::f64::consts::PI)]
+#[unit(symbol = "rad", dimension = Angular, ratio = 180.0 / core::f64::consts::PI)]
 pub struct Radian;
 /// Type alias shorthand for [`Radian`].
 pub type Rad = Radian;
@@ -274,7 +273,7 @@ pub const MRAD: Milliradians = Milliradians::new(1.0);
 
 /// Arcminute (`1/60` degree).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Arcm", dimension = Angular, ratio = 1.0 / 60.0)]
+#[unit(symbol = "′", dimension = Angular, ratio = 1.0 / 60.0)]
 pub struct Arcminute;
 /// Alias for [`Arcminute`] (minute of angle, MOA).
 pub type MOA = Arcminute;
@@ -287,7 +286,7 @@ pub const ARCM: Arcminutes = Arcminutes::new(1.0);
 
 /// Arcsecond (`1/3600` degree).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Arcs", dimension = Angular, ratio = 1.0 / 3600.0)]
+#[unit(symbol = "″", dimension = Angular, ratio = 1.0 / 3600.0)]
 pub struct Arcsecond;
 /// Type alias shorthand for [`Arcsecond`].
 pub type Arcs = Arcsecond;
@@ -298,7 +297,7 @@ pub const ARCS: Arcseconds = Arcseconds::new(1.0);
 
 /// Milliarcsecond (`1/3_600_000` degree).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Mas", dimension = Angular, ratio = 1.0 / 3_600_000.0)]
+#[unit(symbol = "mas", dimension = Angular, ratio = 1.0 / 3_600_000.0)]
 pub struct MilliArcsecond;
 /// Type alias shorthand for [`MilliArcsecond`].
 pub type Mas = MilliArcsecond;
@@ -320,7 +319,7 @@ pub const UAS: MicroArcseconds = MicroArcseconds::new(1.0);
 
 /// Gradian (also called gon; `1/400` of a full turn = `0.9` degree).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Gon", dimension = Angular, ratio = 0.9)]
+#[unit(symbol = "gon", dimension = Angular, ratio = 0.9)]
 pub struct Gradian;
 /// Type alias shorthand for [`Gradian`].
 pub type Gon = Gradian;
@@ -331,7 +330,7 @@ pub const GON: Gradians = Gradians::new(1.0);
 
 /// Turn (full revolution; `360` degrees).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Turn", dimension = Angular, ratio = 360.0)]
+#[unit(symbol = "turn", dimension = Angular, ratio = 360.0)]
 pub struct Turn;
 /// Convenience alias for a turn quantity.
 pub type Turns = Quantity<Turn>;
@@ -340,7 +339,7 @@ pub const TURN: Turns = Turns::new(1.0);
 
 /// Hour angle hour (`15` degrees).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Hms", dimension = Angular, ratio = 15.0)]
+#[unit(symbol = "h", dimension = Angular, ratio = 15.0)]
 pub struct HourAngle;
 /// Type alias shorthand for [`HourAngle`].
 pub type Hms = HourAngle;
@@ -858,13 +857,13 @@ mod tests {
     #[test]
     fn display_degrees() {
         let d = Degrees::new(45.5);
-        assert_eq!(format!("{}", d), "45.5 Deg");
+        assert_eq!(format!("{}", d), "45.5 °");
     }
 
     #[test]
     fn display_radians() {
         let r = Radians::new(1.0);
-        assert_eq!(format!("{}", r), "1 Rad");
+        assert_eq!(format!("{}", r), "1 rad");
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
