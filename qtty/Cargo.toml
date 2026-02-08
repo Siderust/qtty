@@ -15,6 +15,10 @@ documentation = "https://docs.rs/qtty"
 default = ["std"]
 std = ["qtty-core/std"]
 serde = ["qtty-core/serde"]
+
+# Scalar type support
+scalar-decimal = ["qtty-core/scalar-decimal"]
+scalar-rational = ["qtty-core/scalar-rational"]
 pyo3 = ["qtty-core/pyo3", "dep:pyo3"]
 tiberius = ["qtty-core/tiberius"]
 diesel = ["qtty-core/diesel"]

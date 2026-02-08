@@ -156,3 +156,102 @@ fn serde_with_unit_special_values() {
     let restored: TestStruct = serde_json::from_str(&json).unwrap();
     assert!((restored.distance.value() + 1e-100).abs() < 1e-112);
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// Additional serde edge cases
+// ─────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn serde_negative_value() {
+    let q = TU::new(-999.999);
+    let json = serde_json::to_string(&q).unwrap();
+    let restored: TU = serde_json::from_str(&json).unwrap();
+    assert_eq!(restored.value(), -999.999);
+}
+
+#[test]
+fn serde_zero_value() {
+    let q = TU::new(0.0);
+    let json = serde_json::to_string(&q).unwrap();
+    let restored: TU = serde_json::from_str(&json).unwrap();
+    assert_eq!(restored.value(), 0.0);
+}
+
+#[test]
+fn serde_with_unit_negative() {
+    let data = TestStruct {
+        distance: TU::new(-42.5),
+    };
+    let json = serde_json::to_string(&data).unwrap();
+    let restored: TestStruct = serde_json::from_str(&json).unwrap();
+    assert_eq!(restored.distance.value(), -42.5);
+}
+
+#[test]
+fn serde_with_f32() {
+    let q = Quantity::<TestUnit, f32>::new(42.5);
+    let json = serde_json::to_string(&q).unwrap();
+    let restored: Quantity<TestUnit, f32> = serde_json::from_str(&json).unwrap();
+    assert!((restored.value() - 42.5).abs() < 0.01);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// serde_scalar module tests
+// ─────────────────────────────────────────────────────────────────────────────
+
+mod serde_with_unit {
+    use super::*;
+
+    pub fn serialize<U, S, Ser>(
+        quantity: &Quantity<U, S>,
+        serializer: Ser,
+    ) -> Result<Ser::Ok, Ser::Error>
+    where
+        U: Unit,
+        S: qtty_core::scalar::Real,
+        Ser: serde::Serializer,
+    {
+        qtty_core::serde_with_unit::serialize(quantity, serializer)
+    }
+
+    pub fn deserialize<'de, U, S, D>(deserializer: D) -> Result<Quantity<U, S>, D::Error>
+    where
+        U: Unit,
+        S: qtty_core::scalar::Real,
+        D: serde::Deserializer<'de>,
+    {
+        qtty_core::serde_with_unit::deserialize(deserializer)
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct ScalarStruct {
+    #[serde(with = "qtty_core::serde_scalar")]
+    distance: TU,
+}
+
+#[test]
+fn serde_scalar_serialize() {
+    let data = ScalarStruct {
+        distance: TU::new(42.5),
+    };
+    let json = serde_json::to_string(&data).unwrap();
+    assert!(json.contains("42.5"));
+}
+
+#[test]
+fn serde_scalar_deserialize() {
+    let json = r#"{"distance":42.5}"#;
+    let data: ScalarStruct = serde_json::from_str(json).unwrap();
+    assert_eq!(data.distance.value(), 42.5);
+}
+
+#[test]
+fn serde_scalar_roundtrip() {
+    let original = ScalarStruct {
+        distance: TU::new(123.456),
+    };
+    let json = serde_json::to_string(&original).unwrap();
+    let restored: ScalarStruct = serde_json::from_str(&json).unwrap();
+    assert!((restored.distance.value() - 123.456).abs() < 1e-12);
+}
