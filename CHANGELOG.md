@@ -12,11 +12,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Sem
 - New `area` unit module with metric, land, and imperial/US units (for example `SquareMeter`, `Hectare`, `Acre`).
 - New `volume` unit module with metric cubic units, liter-family units, and imperial/US units (for example `CubicMeter`, `Liter`, `UsGallon`).
 - New `qtty` example `dimensional_arithmetic` demonstrating compile-time dimensional composition and conversions.
+- `Quantity::eq_unit` and `Quantity::cmp_unit` helpers for comparing values across different units in the same dimension.
+- Cross-unit comparison operator support (`==`, `!=`, `<`, `>`, `<=`, `>=`) via `impl_unit_conversions!`, with unit conversion applied before comparison.
+- Expanded `qtty-core` comparison tests covering same-unit ordering, scalar ordering, cross-unit comparisons, NaN behavior, and integer `Eq`/`Ord` use cases.
 
 ### Changed
 - Division and multiplication now compose dimensions generically at the type level, so multiplied quantities produce `Quantity<Prod<...>>` and can be converted to named units with `.to()`.
 - Core/base dimensions are now unified under the new generic `Dim<...>` model, with backward-compatible aliases for `DivDim` and new `MulDim`.
 - Public exports now include area/volume modules and additional dimension aliases from `qtty-core` and the `qtty` facade.
+- `Quantity` ordering/equality trait implementations were refined: `PartialOrd` is now implemented explicitly (same-unit and scalar comparisons), and `Eq`/`Ord` are enabled when the scalar type supports total equality/ordering.
 
 ## [0.2.2] - 2026-01-13
 

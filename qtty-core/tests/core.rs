@@ -422,3 +422,170 @@ fn test_to_const() {
     let converted: Dtu = q.to_const();
     assert!((converted.value() - 5.0).abs() < 1e-12);
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// Comparison operator tests
+// ─────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn partial_ord_same_unit() {
+    let a = TU::new(3.0);
+    let b = TU::new(7.0);
+    assert!(a < b);
+    assert!(a <= b);
+    assert!(b > a);
+    assert!(b >= a);
+    assert!(a <= a);
+    assert!(a >= a);
+}
+
+#[test]
+fn partial_ord_scalar_f64() {
+    let q = TU::new(5.0);
+    assert!(q > 3.0);
+    assert!(q >= 5.0);
+    assert!(q < 10.0);
+    assert!(q <= 5.0);
+    assert!(q >= 4.99);
+    assert!(q <= 5.01);
+}
+
+#[test]
+fn partial_ord_scalar_negative() {
+    let q = TU::new(-2.0);
+    assert!(q < 0.0);
+    assert!(q > -5.0);
+    assert!(q <= -2.0);
+    assert!(q >= -2.0);
+}
+
+#[test]
+fn partial_ord_nan_returns_none() {
+    let nan = TU::new(f64::NAN);
+    let normal = TU::new(5.0);
+    // NaN comparisons are unordered
+    assert!(nan.partial_cmp(&normal).is_none());
+    assert!(!(nan == normal));
+    // NaN vs scalar
+    assert!(nan.partial_cmp(&5.0).is_none());
+    assert!(!(nan == 5.0));
+}
+
+#[test]
+fn eq_ord_integers() {
+    use core::cmp::Ordering;
+    let a: Quantity<TestUnit, i32> = Quantity::new(3);
+    let b: Quantity<TestUnit, i32> = Quantity::new(7);
+    let c: Quantity<TestUnit, i32> = Quantity::new(3);
+
+    // Eq
+    assert_eq!(a, c);
+    assert_ne!(a, b);
+
+    // Ord
+    assert_eq!(a.cmp(&b), Ordering::Less);
+    assert_eq!(b.cmp(&a), Ordering::Greater);
+    assert_eq!(a.cmp(&c), Ordering::Equal);
+}
+
+#[test]
+fn ord_integers_sort() {
+    let mut quantities: Vec<Quantity<TestUnit, i32>> = vec![
+        Quantity::new(5),
+        Quantity::new(1),
+        Quantity::new(3),
+        Quantity::new(2),
+        Quantity::new(4),
+    ];
+    quantities.sort();
+    let values: Vec<i32> = quantities.iter().map(|q| q.value()).collect();
+    assert_eq!(values, vec![1, 2, 3, 4, 5]);
+}
+
+#[test]
+fn ord_integers_min_max() {
+    let a: Quantity<TestUnit, i32> = Quantity::new(3);
+    let b: Quantity<TestUnit, i32> = Quantity::new(7);
+    assert_eq!(a.min(b).value(), 3);
+    assert_eq!(a.max(b).value(), 7);
+}
+
+#[test]
+fn ord_integers_btreemap() {
+    use std::collections::BTreeMap;
+    let mut map: BTreeMap<Quantity<TestUnit, i32>, &str> = BTreeMap::new();
+    map.insert(Quantity::new(3), "three");
+    map.insert(Quantity::new(1), "one");
+    map.insert(Quantity::new(2), "two");
+    let keys: Vec<i32> = map.keys().map(|q| q.value()).collect();
+    assert_eq!(keys, vec![1, 2, 3]);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Cross-unit comparison tests
+// ─────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn cross_unit_eq_method() {
+    // DoubleTestUnit has ratio 2.0, so 5 dtu = 10 tu
+    let dtu = Dtu::new(5.0);
+    let tu = TU::new(10.0);
+    assert!(dtu.eq_unit(&tu));
+    assert!(tu.eq_unit(&dtu));
+}
+
+#[test]
+fn cross_unit_cmp_method() {
+    use core::cmp::Ordering;
+    let dtu = Dtu::new(5.0); // = 10 tu
+    let tu_less = TU::new(3.0);
+    let tu_more = TU::new(20.0);
+    let tu_eq = TU::new(10.0);
+
+    assert_eq!(dtu.cmp_unit(&tu_less), Some(Ordering::Greater));
+    assert_eq!(dtu.cmp_unit(&tu_more), Some(Ordering::Less));
+    assert_eq!(dtu.cmp_unit(&tu_eq), Some(Ordering::Equal));
+}
+
+#[test]
+fn cross_unit_operators_via_macro() {
+    use qtty_core::units::length::{Kilometer, Meter};
+
+    let km: Quantity<Kilometer> = Quantity::new(1.0);
+    let m: Quantity<Meter> = Quantity::new(500.0);
+
+    // 1 km > 500 m
+    assert!(km > m);
+    assert!(km >= m);
+    assert!(m < km);
+    assert!(m <= km);
+    assert!(km != m);
+
+    // 1 km == 1000 m
+    let m_eq: Quantity<Meter> = Quantity::new(1000.0);
+    assert!(km == m_eq);
+    assert!(km >= m_eq);
+    assert!(km <= m_eq);
+}
+
+#[test]
+fn cross_unit_operators_f32() {
+    use qtty_core::units::length::{Kilometer, Meter};
+
+    let km: Quantity<Kilometer, f32> = Quantity::new(2.0_f32);
+    let m: Quantity<Meter, f32> = Quantity::new(1500.0_f32);
+
+    assert!(km > m);
+    assert!(m < km);
+}
+
+#[test]
+fn cross_unit_nan_comparison() {
+    use qtty_core::units::length::{Kilometer, Meter};
+
+    let km_nan: Quantity<Kilometer> = Quantity::new(f64::NAN);
+    let m: Quantity<Meter> = Quantity::new(1000.0);
+
+    assert!(!(km_nan == m));
+    assert!(km_nan.partial_cmp(&m).is_none());
+}
