@@ -49,6 +49,13 @@ fn quantity_abs() {
 }
 
 #[test]
+fn quantity_ceil() {
+    assert_eq!(TU::new(3.2).ceil().value(), 4.0);
+    assert_eq!(TU::new(-3.2).ceil().value(), -3.0);
+    assert_eq!(TU::new(5.0).ceil().value(), 5.0);
+}
+
+#[test]
 fn quantity_from_f64() {
     let q: TU = 123.456.into();
     assert_eq!(q.value(), 123.456);
