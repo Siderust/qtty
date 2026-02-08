@@ -3,8 +3,8 @@
 //! This module is enabled by the `serde` feature. It provides serialization and deserialization
 //! for `Quantity<U, S>` types, including helper modules for different serialization formats.
 
-use crate::{Quantity, Unit};
 use crate::scalar::{Real, Scalar};
+use crate::{Quantity, Unit};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 // Default serde: serialize as f64 (backward compatible)
