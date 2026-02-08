@@ -247,6 +247,12 @@ impl<U: Unit, S: Real> Quantity<U, S> {
         Self::new(self.0.sqrt())
     }
 
+    /// Returns the smallest integer quantity greater than or equal to this value.
+    #[inline]
+    pub fn ceil(self) -> Self {
+        Self::new(self.0.ceil())
+    }
+
     /// Checks equality with a quantity of a different unit in the same dimension.
     ///
     /// The `other` quantity is converted to unit `U` before comparison.
