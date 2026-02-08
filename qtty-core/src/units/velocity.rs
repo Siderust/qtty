@@ -35,12 +35,10 @@
 //! assert!((v.value() - 3_600.0).abs() < 1e-12);
 //! ```
 
-use crate::units::length::Length;
-use crate::units::time::Time;
-use crate::{DivDim, Per, Quantity, Unit};
+use crate::{Per, Quantity, Unit};
 
-/// Dimension alias for velocities (`Length / Time`).
-pub type VelocityDim = DivDim<Length, Time>;
+/// Re-export the velocity dimension from the dimension module.
+pub use crate::dimension::VelocityDim;
 
 /// Marker trait for any unit whose dimension is [`VelocityDim`].
 pub trait VelocityUnit: Unit<Dim = VelocityDim> {}
@@ -139,7 +137,7 @@ mod tests {
     fn velocity_times_time() {
         let v: Velocity<Kilometer, Second> = Velocity::new(10.0);
         let t: Seconds = Seconds::new(5.0);
-        let d: Kilometers = v * t;
+        let d: Kilometers = (v * t).to();
         assert_abs_diff_eq!(d.value(), 50.0, epsilon = 1e-9);
     }
 
@@ -147,7 +145,7 @@ mod tests {
     fn time_times_velocity() {
         let v: Velocity<Kilometer, Second> = Velocity::new(10.0);
         let t: Seconds = Seconds::new(5.0);
-        let d: Kilometers = t * v;
+        let d: Kilometers = (t * v).to();
         assert_abs_diff_eq!(d.value(), 50.0, epsilon = 1e-9);
     }
 
@@ -203,7 +201,7 @@ mod tests {
         ) {
             let v: Velocity<Kilometer, Second> = Velocity::new(v_val);
             let t: Seconds = Seconds::new(t_val);
-            let d: Kilometers = v * t;
+            let d: Kilometers = (v * t).to();
             // d / t should give back v
             let v_back: Velocity<Kilometer, Second> = d / t;
             prop_assert!((v_back.value() - v.value()).abs() / v.value() < 1e-12);

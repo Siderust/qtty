@@ -15,12 +15,11 @@
 //! assert!(sm.value() < 1.0);
 //! ```
 
-use crate::{Dimension, Quantity, Unit};
+use crate::{Quantity, Unit};
 use qtty_derive::Unit;
 
-/// Dimension tag for mass.
-pub enum Mass {}
-impl Dimension for Mass {}
+/// Re-export from the dimension module.
+pub use crate::dimension::Mass;
 
 /// Marker trait for any [`Unit`] whose dimension is [`Mass`].
 pub trait MassUnit: Unit<Dim = Mass> {}

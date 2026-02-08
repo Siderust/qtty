@@ -50,7 +50,7 @@
 //! ```
 
 use crate::scalar::Transcendental;
-use crate::{Dimension, Quantity, Unit};
+use crate::{Quantity, Unit};
 use core::f64::consts::TAU;
 use qtty_derive::Unit;
 
@@ -71,9 +71,8 @@ fn rem_euclid(x: f64, modulus: f64) -> f64 {
     }
 }
 
-/// Dimension tag for angular measures (e.g., degrees, radians, arcseconds).
-pub enum Angular {}
-impl Dimension for Angular {}
+/// Re-export from the dimension module.
+pub use crate::dimension::Angular;
 
 /// Blanket extension trait for any [`Unit`] whose dimension is [`Angular`].
 ///

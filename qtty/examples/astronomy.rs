@@ -7,7 +7,7 @@ fn main() {
     let earth_velocity: Velocity<Kilometer, Second> = Velocity::new(29.78);
     let time = Days::new(1.0);
     let time_sec: Seconds = time.to();
-    let distance: Kilometers = earth_velocity * time_sec;
+    let distance: Kilometers = (earth_velocity * time_sec).to();
 
     assert!((distance.value() - 2_573_395.2).abs() < 5_000.0);
 
