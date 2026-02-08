@@ -490,8 +490,13 @@ fn eq_ord_integers() {
 
 #[test]
 fn ord_integers_sort() {
-    let mut quantities: Vec<Quantity<TestUnit, i32>> =
-        vec![Quantity::new(5), Quantity::new(1), Quantity::new(3), Quantity::new(2), Quantity::new(4)];
+    let mut quantities: Vec<Quantity<TestUnit, i32>> = vec![
+        Quantity::new(5),
+        Quantity::new(1),
+        Quantity::new(3),
+        Quantity::new(2),
+        Quantity::new(4),
+    ];
     quantities.sort();
     let values: Vec<i32> = quantities.iter().map(|q| q.value()).collect();
     assert_eq!(values, vec![1, 2, 3, 4, 5]);
@@ -532,7 +537,7 @@ fn cross_unit_eq_method() {
 #[test]
 fn cross_unit_cmp_method() {
     use core::cmp::Ordering;
-    let dtu = Dtu::new(5.0);  // = 10 tu
+    let dtu = Dtu::new(5.0); // = 10 tu
     let tu_less = TU::new(3.0);
     let tu_more = TU::new(20.0);
     let tu_eq = TU::new(10.0);
