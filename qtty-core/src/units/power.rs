@@ -15,12 +15,11 @@
 //! assert!((w.value() - 3.828e26).abs() < 1e18);
 //! ```
 
-use crate::{Dimension, Quantity, Unit};
+use crate::{Quantity, Unit};
 use qtty_derive::Unit;
 
-/// Fundamental dimension – power.
-pub enum Power {}
-impl Dimension for Power {}
+/// Re-export from the dimension module.
+pub use crate::dimension::Power;
 
 /// Marker trait for power units.
 pub trait PowerUnit: Unit<Dim = Power> {}

@@ -190,7 +190,9 @@ fn test_i32_per_division() {
 fn test_i32_per_multiplication() {
     let velocity = Quantity::<Per<Meter, Second>, i32>::new(10);
     let time = Quantity::<Second, i32>::new(5);
-    let distance: Quantity<Meter, i32> = velocity * time;
+    // Blanket Mul gives Quantity<Prod<Per<Meter,Second>, Second>, i32>
+    // which has the same dimension as Meter; to_lossy converts.
+    let distance: Quantity<Meter, i32> = (velocity * time).to_lossy();
     assert_eq!(distance.value(), 50);
 }
 

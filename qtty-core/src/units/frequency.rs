@@ -12,12 +12,10 @@
 //! assert!((f_rad.value() - core::f64::consts::PI).abs() < 1e-12);
 //! ```
 
-use crate::units::angular::Angular;
-use crate::units::time::Time;
-use crate::{DivDim, Per, Quantity, Unit};
+use crate::{Per, Quantity, Unit};
 
-/// Dimension alias for angular frequency (`Angular / Time`).
-pub type FrequencyDim = DivDim<Angular, Time>;
+/// Re-export the frequency dimension from the dimension module.
+pub use crate::dimension::FrequencyDim;
 
 /// Marker trait for any unit with frequency dimension (`Angular / Time`).
 pub trait FrequencyUnit: Unit<Dim = FrequencyDim> {}
@@ -116,7 +114,7 @@ mod tests {
     fn frequency_times_time() {
         let f: Frequency<Degree, Day> = Frequency::new(360.0);
         let t: Days = Days::new(0.5);
-        let angle: Degrees = f * t;
+        let angle: Degrees = (f * t).to();
         assert_abs_diff_eq!(angle.value(), 180.0, epsilon = 1e-9);
     }
 
@@ -124,7 +122,7 @@ mod tests {
     fn time_times_frequency() {
         let f: Frequency<Degree, Day> = Frequency::new(360.0);
         let t: Days = Days::new(0.5);
-        let angle: Degrees = t * f;
+        let angle: Degrees = (t * f).to();
         assert_abs_diff_eq!(angle.value(), 180.0, epsilon = 1e-9);
     }
 
@@ -172,7 +170,7 @@ mod tests {
         ) {
             let f: Frequency<Degree, Day> = Frequency::new(f_val);
             let t: Days = Days::new(t_val);
-            let angle: Degrees = f * t;
+            let angle: Degrees = (f * t).to();
             // angle / t should give back f
             let f_back: Frequency<Degree, Day> = angle / t;
             prop_assert!((f_back.value() - f.value()).abs() / f.value() < 1e-12);

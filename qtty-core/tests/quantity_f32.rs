@@ -2,9 +2,8 @@
 
 use qtty_core::*;
 
-#[derive(Debug)]
-pub enum TestDim {}
-impl Dimension for TestDim {}
+// Use Length as the test dimension.
+type TestDim = Length;
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub enum TestUnit {}
@@ -222,7 +221,7 @@ fn f32_division_creates_per() {
 fn f32_per_mul_recovers_numerator() {
     let rate: Quantity<Per<TestUnit, DoubleTestUnit>, f32> = Quantity::new(5.0);
     let den = Quantity::<DoubleTestUnit, f32>::new(4.0);
-    let result: TU32 = rate * den;
+    let result: TU32 = (rate * den).to();
     assert!((result.value() - 20.0).abs() < 1e-6);
 }
 
