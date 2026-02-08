@@ -21,6 +21,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Sem
 - Core/base dimensions are now unified under the new generic `Dim<...>` model, with backward-compatible aliases for `DivDim` and new `MulDim`.
 - Public exports now include area/volume modules and additional dimension aliases from `qtty-core` and the `qtty` facade.
 - `Quantity` ordering/equality trait implementations were refined: `PartialOrd` is now implemented explicitly (same-unit and scalar comparisons), and `Eq`/`Ord` are enabled when the scalar type supports total equality/ordering.
+- Unit display symbols were standardized to canonical scientific notation across affected units (for example `Degree` now renders as `°`, `Radian` as `rad`, and SI symbols like `km`/`μm` are used consistently).
 
 ## [0.2.2] - 2026-01-13
 
