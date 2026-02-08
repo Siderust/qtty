@@ -3,8 +3,8 @@
 //! This module is enabled by the `pyo3` feature. It provides `IntoPyObject` and `FromPyObject`
 //! implementations that convert `Quantity<U, S>` to/from Python floats.
 
-use crate::{Quantity, Unit};
 use crate::scalar::Real;
+use crate::{Quantity, Unit};
 use pyo3::prelude::*;
 
 impl<'py, U: Unit, S: Real> pyo3::conversion::IntoPyObject<'py> for Quantity<U, S> {
