@@ -13,14 +13,13 @@
 //!
 //! - Compile-time separation of dimensions (length vs time vs angle, …).
 //! - Zero runtime overhead for unit tags (phantom types only).
-//! - A small vocabulary to express derived units via type aliases (`Per`, `DivDim`).
+//! - Full dimensional arithmetic: `m * m → m²`, `m / s → velocity`, `m² / m → m`.
+//! - Automatic compile-time verification that multiplied/divided quantities produce the correct dimension.
 //!
 //! # What this crate does not try to solve
 //!
 //! - Exact arithmetic (`Quantity` is `f64`).
 //! - General-purpose symbolic simplification of arbitrary unit expressions.
-//! - Automatic tracking of exponent dimensions (`m^2`, `s^-1`, …); only the expression forms represented by the
-//!   provided types are modeled.
 //!
 //! # Quick start
 //!
@@ -103,13 +102,40 @@ mod unit;
 // Public re-exports of core types
 // ─────────────────────────────────────────────────────────────────────────────
 
-pub use dimension::{Dimension, Dimensionless, DivDim};
+pub use dimension::{
+    // Derived dimensions
+    Acceleration,
+    // Additional base dimensions (less commonly used)
+    AmountOfSubstance,
+    // Base dimensions
+    Angular,
+    Area,
+    Current,
+    Dim,
+    DimDiv,
+    DimMul,
+    Dimension,
+    Dimensionless,
+    DivDim,
+    Energy,
+    Force,
+    FrequencyDim,
+    Length,
+    LuminousIntensity,
+    Mass,
+    MulDim,
+    Power,
+    Temperature,
+    Time,
+    VelocityDim,
+    Volume,
+};
 pub use quantity::{
     Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16, QuantityI32, QuantityI64,
     QuantityI8,
 };
 pub use scalar::{Exact, IntegerScalar, Real, Scalar, Transcendental};
-pub use unit::{Per, Simplify, Unit, Unitless};
+pub use unit::{Per, Prod, Simplify, Unit, Unitless};
 
 #[cfg(feature = "scalar-decimal")]
 pub use quantity::QuantityDecimal;
@@ -134,6 +160,7 @@ pub use feature_serde::serde_scalar;
 pub mod units;
 
 pub use units::angular;
+pub use units::area;
 pub use units::frequency;
 pub use units::length;
 pub use units::mass;
@@ -141,6 +168,7 @@ pub use units::power;
 pub use units::time;
 pub use units::unitless;
 pub use units::velocity;
+pub use units::volume;
 
 #[cfg(test)]
 mod tests {
@@ -149,9 +177,9 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────────
     // Test dimension and unit for lib.rs tests
     // ─────────────────────────────────────────────────────────────────────────────
-    #[derive(Debug)]
-    pub enum TestDim {}
-    impl Dimension for TestDim {}
+
+    // Use Length as the test dimension (it's a type alias for Dim<P1, Z0, …>).
+    type TestDim = Length;
 
     #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
     pub enum TestUnit {}
@@ -394,7 +422,9 @@ mod tests {
     fn per_multiplication_recovers_numerator() {
         let rate: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(5.0);
         let time = Dtu::new(4.0);
-        let result: TU = rate * time;
+        // Blanket Mul gives Quantity<Prod<Per<TU,DTU>, DTU>>; .to() converts back to TU
+        // because Prod<Per<TU,DTU>, DTU> has dimension Length (same as TU).
+        let result: TU = (rate * time).to();
         assert!((result.value() - 20.0).abs() < 1e-12);
     }
 
@@ -402,8 +432,8 @@ mod tests {
     fn per_multiplication_commutative() {
         let rate: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(5.0);
         let time = Dtu::new(4.0);
-        let result1: TU = rate * time;
-        let result2: TU = time * rate;
+        let result1: TU = (rate * time).to();
+        let result2: TU = (time * rate).to();
         assert!((result1.value() - result2.value()).abs() < 1e-12);
     }
 

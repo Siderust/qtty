@@ -31,6 +31,7 @@ pyo3 = { version = "0.27.2", optional = true, features = ["auto-initialize"] }
 tiberius = { version = "0.12", default-features = false, optional = true }
 diesel = { version = "2.1", default-features = false, optional = true }
 libm = "0.2"
+typenum = "1.17"
 qtty-derive = { path = "../qtty-derive" }
 
 [dev-dependencies]

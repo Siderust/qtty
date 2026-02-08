@@ -141,6 +141,7 @@ pub mod i64;
 // ─────────────────────────────────────────────────────────────────────────────
 
 pub use qtty_core::units::angular;
+pub use qtty_core::units::area;
 pub use qtty_core::units::frequency;
 pub use qtty_core::units::length;
 pub use qtty_core::units::mass;
@@ -148,15 +149,18 @@ pub use qtty_core::units::power;
 pub use qtty_core::units::time;
 pub use qtty_core::units::unitless;
 pub use qtty_core::units::velocity;
+pub use qtty_core::units::volume;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Convenience re-exports (default f64 types)
 // ─────────────────────────────────────────────────────────────────────────────
 
 pub use qtty_core::units::angular::*;
+pub use qtty_core::units::area::*;
 pub use qtty_core::units::frequency::*;
 pub use qtty_core::units::length::*;
 pub use qtty_core::units::mass::*;
 pub use qtty_core::units::power::*;
 pub use qtty_core::units::time::*;
 pub use qtty_core::units::velocity::*;
+pub use qtty_core::units::volume::*;

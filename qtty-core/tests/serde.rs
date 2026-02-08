@@ -3,9 +3,8 @@
 use qtty_core::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
-pub enum TestDim {}
-impl Dimension for TestDim {}
+// Use Length as the test dimension.
+type TestDim = Length;
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub enum TestUnit {}

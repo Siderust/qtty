@@ -34,13 +34,12 @@
 //! assert_eq!(km.value(), 149_597_870.7);
 //! ```
 
-use crate::{Dimension, Quantity, Unit};
+use crate::{Quantity, Unit};
 use core::f64::consts::PI;
 use qtty_derive::Unit;
 
-/// Dimension tag for length.
-pub enum Length {}
-impl Dimension for Length {}
+/// Re-export from the dimension module.
+pub use crate::dimension::Length;
 
 /// Marker trait for any [`Unit`] whose dimension is [`Length`].
 pub trait LengthUnit: Unit<Dim = Length> {}
