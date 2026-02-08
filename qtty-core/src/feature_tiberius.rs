@@ -3,8 +3,8 @@
 //! This module is enabled by the `tiberius` feature. It provides SQL Server database
 //! integration for `Quantity<U, S>` types through the Tiberius driver.
 
-use crate::{Quantity, Unit};
 use crate::scalar::Real;
+use crate::{Quantity, Unit};
 use tiberius::{ColumnData, FromSql, ToSql};
 
 impl<U: Unit + Send + Sync, S: Real + Send + Sync> ToSql for Quantity<U, S> {

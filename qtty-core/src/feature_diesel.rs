@@ -43,8 +43,8 @@
 //! }
 //! ```
 
-use crate::{Quantity, Unit};
 use crate::scalar::Real;
+use crate::{Quantity, Unit};
 use diesel::{
     backend::Backend,
     deserialize::{self, FromSql as DieselFromSql},
@@ -113,10 +113,6 @@ where
     }
 }
 
-
-
-
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Nullable column support for f64
 // ─────────────────────────────────────────────────────────────────────────────
@@ -172,8 +168,6 @@ where
         <f32 as DieselToSql<Float, DB>>::to_sql(self.value_ref(), out)
     }
 }
-
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AsExpression implementations for f64
@@ -250,8 +244,6 @@ impl<U: Unit> AsExpression<Nullable<Float>> for &Quantity<U, f32> {
         AsExpression::<Nullable<Float>>::as_expression(self.value())
     }
 }
-
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Queryable implementations for f64
