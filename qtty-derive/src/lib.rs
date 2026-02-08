@@ -64,9 +64,9 @@ fn derive_unit_impl(input: DeriveInput) -> syn::Result<TokenStream2> {
             const SYMBOL: &'static str = #symbol;
         }
 
-        impl<S: crate::scalar::Real> ::core::fmt::Display for crate::Quantity<#name, S> {
+        impl<S: crate::scalar::Scalar + ::core::fmt::Display> ::core::fmt::Display for crate::Quantity<#name, S> {
             fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                write!(f, "{} {}", self.value().to_f64(), <#name as crate::Unit>::SYMBOL)
+                write!(f, "{} {}", self.value(), <#name as crate::Unit>::SYMBOL)
             }
         }
     };

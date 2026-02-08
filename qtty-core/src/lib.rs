@@ -104,8 +104,11 @@ mod unit;
 // ─────────────────────────────────────────────────────────────────────────────
 
 pub use dimension::{Dimension, Dimensionless, DivDim};
-pub use quantity::{Quantity, Quantity32, Quantity64};
-pub use scalar::{Exact, Real, Scalar, Transcendental};
+pub use quantity::{
+    Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16, QuantityI32, QuantityI64,
+    QuantityI8,
+};
+pub use scalar::{Exact, IntegerScalar, Real, Scalar, Transcendental};
 pub use unit::{Per, Simplify, Unit, Unitless};
 
 #[cfg(feature = "scalar-decimal")]

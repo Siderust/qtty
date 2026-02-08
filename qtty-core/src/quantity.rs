@@ -1,6 +1,6 @@
 //! Quantity type and its implementations.
 
-use crate::scalar::{Real, Scalar, Transcendental};
+use crate::scalar::{Exact, Real, Scalar, Transcendental};
 use crate::unit::{Per, Unit};
 use core::marker::PhantomData;
 use core::ops::*;
@@ -77,6 +77,21 @@ pub type QuantityDecimal<U> = Quantity<U, rust_decimal::Decimal>;
 /// A quantity backed by `num_rational::Rational64`.
 #[cfg(feature = "scalar-rational")]
 pub type QuantityRational<U> = Quantity<U, num_rational::Rational64>;
+
+/// A quantity backed by `i8`.
+pub type QuantityI8<U> = Quantity<U, i8>;
+
+/// A quantity backed by `i16`.
+pub type QuantityI16<U> = Quantity<U, i16>;
+
+/// A quantity backed by `i32`.
+pub type QuantityI32<U> = Quantity<U, i32>;
+
+/// A quantity backed by `i64`.
+pub type QuantityI64<U> = Quantity<U, i64>;
+
+/// A quantity backed by `i128`.
+pub type QuantityI128<U> = Quantity<U, i128>;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Core implementation for all Scalar types
@@ -270,6 +285,35 @@ impl<U: Unit, S: Real> Quantity<U, S> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Exact-specific implementations (integers, rationals, etc.)
+// ─────────────────────────────────────────────────────────────────────────────
+
+impl<U: Unit, S: Exact> Quantity<U, S> {
+    /// Converts this quantity to another unit of the same dimension (lossy).
+    ///
+    /// For integer scalars this performs the conversion through `f64` intermediate
+    /// arithmetic, then truncates back to the integer type. The result may lose
+    /// precision due to truncation.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use qtty_core::Quantity;
+    /// use qtty_core::length::{Meter, Kilometer};
+    ///
+    /// let m: Quantity<Meter, i32> = Quantity::new(1500);
+    /// let km: Quantity<Kilometer, i32> = m.to_lossy();
+    /// assert_eq!(km.value(), 1); // truncated from 1.5
+    /// ```
+    #[inline]
+    pub fn to_lossy<T: Unit<Dim = U::Dim>>(self) -> Quantity<T, S> {
+        let value_f64 = self.0.to_f64_approx();
+        let ratio = U::RATIO / T::RATIO;
+        Quantity::<T, S>::new(S::from_f64_approx(value_f64 * ratio))
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Const methods for f64 (backward compatibility)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -389,6 +433,62 @@ impl<U: Unit + Copy> Quantity<U, f32> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Const methods for signed integer types
+// ─────────────────────────────────────────────────────────────────────────────
+
+macro_rules! impl_const_for_int {
+    ($($t:ty),*) => { $(
+        impl<U: Unit + Copy> Quantity<U, $t> {
+            /// Const addition of two quantities.
+            #[inline]
+            pub const fn const_add(self, other: Self) -> Self {
+                Self(self.0 + other.0, PhantomData)
+            }
+
+            /// Const subtraction of two quantities.
+            #[inline]
+            pub const fn const_sub(self, other: Self) -> Self {
+                Self(self.0 - other.0, PhantomData)
+            }
+
+            /// Const multiplication by a scalar.
+            #[inline]
+            pub const fn const_mul(self, rhs: $t) -> Self {
+                Self(self.0 * rhs, PhantomData)
+            }
+
+            /// Const division by a scalar.
+            #[inline]
+            pub const fn const_div(self, rhs: $t) -> Self {
+                Self(self.0 / rhs, PhantomData)
+            }
+
+            /// Const min of two quantities.
+            #[inline]
+            pub const fn min_const(self, other: Self) -> Self {
+                if self.0 < other.0 {
+                    self
+                } else {
+                    other
+                }
+            }
+
+            /// Const max of two quantities.
+            #[inline]
+            pub const fn max_const(self, other: Self) -> Self {
+                if self.0 > other.0 {
+                    self
+                } else {
+                    other
+                }
+            }
+        }
+    )* };
+}
+
+impl_const_for_int!(i8, i16, i32, i64, i128);
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Operator implementations
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -501,8 +601,23 @@ impl<U: Unit> Mul<Quantity<U, num_rational::Rational32>> for num_rational::Ratio
     }
 }
 
-// Rem for Real types
-impl<U: Unit, S: Real> Rem<S> for Quantity<U, S> {
+// Commutative multiplication for signed integer scalars
+macro_rules! impl_int_commutative_mul {
+    ($($t:ty),*) => { $(
+        impl<U: Unit> Mul<Quantity<U, $t>> for $t {
+            type Output = Quantity<U, $t>;
+            #[inline]
+            fn mul(self, rhs: Quantity<U, $t>) -> Self::Output {
+                rhs * self
+            }
+        }
+    )* };
+}
+
+impl_int_commutative_mul!(i8, i16, i32, i64, i128);
+
+// Rem for types that implement Rem (floats and integers)
+impl<U: Unit, S: Scalar + Rem<Output = S>> Rem<S> for Quantity<U, S> {
     type Output = Self;
     #[inline]
     fn rem(self, rhs: S) -> Self {

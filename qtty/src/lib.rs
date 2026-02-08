@@ -68,8 +68,14 @@
 //!
 //! - `f64` (default) - double precision floating point
 //! - `f32` - single precision floating point (use `qtty::f32::*`)
+//! - `i8`, `i16`, `i32`, `i64`, `i128` - signed integers (use `qtty::i32::*`, `qtty::i64::*`, etc.)
 //! - `Decimal` - exact decimal (feature `scalar-decimal`)
 //! - `Rational64` - exact rational (feature `scalar-rational`)
+//!
+//! Integer quantities provide compile-time unit safety for discrete values.
+//! They support basic arithmetic and lossy unit conversion via
+//! [`to_lossy()`](crate::Quantity::to_lossy), but not the full [`to()`](crate::Quantity::to)
+//! method (which requires floating-point semantics).
 //!
 //! # Modules
 //!
@@ -84,6 +90,8 @@
 //! - `qtty::frequency` (`Angular / Time` aliases)
 //! - `qtty::f32` (all units with `f32` scalar)
 //! - `qtty::f64` (all units with `f64` scalar - same as root)
+//! - `qtty::i32` (all units with `i32` scalar)
+//! - `qtty::i64` (all units with `i64` scalar)
 //!
 //! # Feature flags
 //!
@@ -125,6 +133,8 @@ pub use qtty_derive::Unit;
 
 pub mod f32;
 pub mod f64;
+pub mod i32;
+pub mod i64;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Unit modules (grouped by dimension)
