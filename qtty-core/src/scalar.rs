@@ -53,6 +53,11 @@ mod private {
 
     impl Sealed for f64 {}
     impl Sealed for f32 {}
+    impl Sealed for i8 {}
+    impl Sealed for i16 {}
+    impl Sealed for i32 {}
+    impl Sealed for i64 {}
+    impl Sealed for i128 {}
 
     #[cfg(feature = "scalar-decimal")]
     impl Sealed for rust_decimal::Decimal {}
@@ -290,13 +295,36 @@ pub trait Transcendental: Real {
 // Exact trait (for rational/decimal types)
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Marker trait for exact numeric types that avoid floating-point rounding.
+/// Trait for exact numeric types that avoid floating-point rounding.
 ///
-/// Types implementing this trait (e.g., `Rational64`, `Decimal`) provide exact
-/// arithmetic but typically do not support transcendental functions.
+/// Types implementing this trait (e.g., `Rational64`, `Decimal`, signed integers)
+/// provide exact arithmetic but typically do not support transcendental functions.
+///
+/// The `to_f64_approx` and `from_f64_approx` methods enable lossy unit conversion
+/// for types that cannot implement [`Real`]. For integers, `from_f64_approx`
+/// truncates toward zero.
 ///
 /// This trait is sealed and cannot be implemented outside this crate.
-pub trait Exact: Scalar {}
+pub trait Exact: Scalar {
+    /// Convert to `f64`, potentially losing precision.
+    ///
+    /// For integers larger than 2^53, this will lose least-significant bits.
+    fn to_f64_approx(self) -> f64;
+
+    /// Convert from `f64`, truncating toward zero.
+    ///
+    /// For integers, this is equivalent to `value as Self` (truncation + saturation).
+    fn from_f64_approx(value: f64) -> Self;
+}
+
+/// Marker trait for integer scalar types.
+///
+/// This is implemented only by signed integer types (`i8`, `i16`, `i32`, `i64`, `i128`).
+/// It is used to provide non-overlapping `Display` implementations for integer quantities,
+/// since `Decimal` implements both [`Real`] and [`Exact`].
+///
+/// This trait is sealed and cannot be implemented outside this crate.
+pub trait IntegerScalar: Exact + Display {}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // f64 implementations
@@ -1273,7 +1301,18 @@ mod decimal_impl {
         }
     }
 
-    impl Exact for Decimal {}
+    impl Exact for Decimal {
+        #[inline]
+        fn to_f64_approx(self) -> f64 {
+            use rust_decimal::prelude::ToPrimitive;
+            ToPrimitive::to_f64(&self).unwrap_or(0.0)
+        }
+
+        #[inline]
+        fn from_f64_approx(value: f64) -> Self {
+            Decimal::try_from(value).unwrap_or(Decimal::ZERO)
+        }
+    }
 
     // Note: Decimal implements a limited Real interface.
     // Transcendental functions are not available.
@@ -1474,7 +1513,17 @@ mod rational_impl {
         }
     }
 
-    impl Exact for Rational64 {}
+    impl Exact for Rational64 {
+        #[inline]
+        fn to_f64_approx(self) -> f64 {
+            *self.numer() as f64 / *self.denom() as f64
+        }
+
+        #[inline]
+        fn from_f64_approx(value: f64) -> Self {
+            Rational64::approximate_float(value).unwrap_or(Rational64::new_raw(0, 1))
+        }
+    }
 
     impl Scalar for Rational32 {
         const ZERO: Self = Rational32::new_raw(0, 1);
@@ -1518,12 +1567,71 @@ mod rational_impl {
         }
     }
 
-    impl Exact for Rational32 {}
+    impl Exact for Rational32 {
+        #[inline]
+        fn to_f64_approx(self) -> f64 {
+            *self.numer() as f64 / *self.denom() as f64
+        }
+
+        #[inline]
+        fn from_f64_approx(value: f64) -> Self {
+            Rational32::approximate_float(value).unwrap_or(Rational32::new_raw(0, 1))
+        }
+    }
 }
 
 // NOTE: BigRational (Ratio<BigInt>) is NOT supported because BigInt does not implement Copy,
 // which is required by the Scalar trait. Supporting arbitrary-precision rationals would require
 // a different design using Clone instead of Copy.
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Signed integer implementations
+// ─────────────────────────────────────────────────────────────────────────────
+
+macro_rules! impl_scalar_for_signed_int {
+    ($($t:ty),*) => { $(
+        impl Scalar for $t {
+            const ZERO: Self = 0;
+            const ONE: Self = 1;
+
+            #[inline]
+            fn abs(self) -> Self {
+                self.abs()
+            }
+
+            #[inline]
+            fn min(self, other: Self) -> Self {
+                Ord::min(self, other)
+            }
+
+            #[inline]
+            fn max(self, other: Self) -> Self {
+                Ord::max(self, other)
+            }
+
+            #[inline]
+            fn rem_euclid(self, rhs: Self) -> Self {
+                self.rem_euclid(rhs)
+            }
+        }
+
+        impl Exact for $t {
+            #[inline]
+            fn to_f64_approx(self) -> f64 {
+                self as f64
+            }
+
+            #[inline]
+            fn from_f64_approx(value: f64) -> Self {
+                value as Self
+            }
+        }
+
+        impl IntegerScalar for $t {}
+    )* };
+}
+
+impl_scalar_for_signed_int!(i8, i16, i32, i64, i128);
 
 #[cfg(test)]
 mod tests {
@@ -1571,5 +1679,64 @@ mod tests {
     fn test_f32_transcendental() {
         let angle = core::f32::consts::FRAC_PI_2;
         assert!((angle.sin() - 1.0).abs() < 1e-6);
+    }
+
+    // ── Integer scalar tests ──────────────────────────────────────────────
+
+    #[test]
+    fn test_i32_scalar_basic() {
+        assert_eq!(i32::ZERO, 0);
+        assert_eq!(i32::ONE, 1);
+        assert_eq!((-5_i32).abs(), 5);
+        assert_eq!(Scalar::min(3_i32, 5), 3);
+        assert_eq!(Scalar::max(3_i32, 5), 5);
+        assert_eq!(7_i32.rem_euclid(4), 3);
+        assert_eq!((-7_i32).rem_euclid(4), 1);
+    }
+
+    #[test]
+    fn test_i64_scalar_basic() {
+        assert_eq!(i64::ZERO, 0);
+        assert_eq!(i64::ONE, 1);
+        assert_eq!((-100_i64).abs(), 100);
+        assert_eq!(Scalar::min(10_i64, 20), 10);
+        assert_eq!(Scalar::max(10_i64, 20), 20);
+    }
+
+    #[test]
+    fn test_i8_scalar_basic() {
+        assert_eq!(i8::ZERO, 0);
+        assert_eq!(i8::ONE, 1);
+        assert_eq!((-5_i8).abs(), 5);
+        assert_eq!(Scalar::max(127_i8, -128), 127);
+    }
+
+    #[test]
+    fn test_i16_scalar_basic() {
+        assert_eq!(i16::ZERO, 0);
+        assert_eq!(i16::ONE, 1);
+        assert_eq!((-1000_i16).abs(), 1000);
+    }
+
+    #[test]
+    fn test_i128_scalar_basic() {
+        assert_eq!(i128::ZERO, 0);
+        assert_eq!(i128::ONE, 1);
+        assert_eq!((-42_i128).abs(), 42);
+    }
+
+    #[test]
+    fn test_integer_exact_conversions() {
+        // i32
+        assert_eq!(42_i32.to_f64_approx(), 42.0);
+        assert_eq!(i32::from_f64_approx(42.9), 42); // truncates toward zero
+        assert_eq!(i32::from_f64_approx(-3.7), -3); // truncates toward zero
+
+        // i64
+        assert_eq!(1000_i64.to_f64_approx(), 1000.0);
+        assert_eq!(i64::from_f64_approx(1500.0), 1500);
+
+        // i8
+        assert_eq!(i8::from_f64_approx(100.0), 100);
     }
 }
