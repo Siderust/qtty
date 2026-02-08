@@ -3,6 +3,7 @@
 use crate::dimension::{DimDiv, DimMul, Dimension};
 use crate::scalar::{Exact, Real, Scalar, Transcendental};
 use crate::unit::{Per, Prod, Unit};
+use core::cmp::Ordering;
 use core::marker::PhantomData;
 use core::ops::*;
 
@@ -244,6 +245,46 @@ impl<U: Unit, S: Real> Quantity<U, S> {
     #[inline]
     pub fn sqrt(self) -> Self {
         Self::new(self.0.sqrt())
+    }
+
+    /// Checks equality with a quantity of a different unit in the same dimension.
+    ///
+    /// The `other` quantity is converted to unit `U` before comparison.
+    /// Note that floating-point conversion may introduce rounding; for exact
+    /// equality checks consider converting both to a common unit first and using
+    /// an epsilon tolerance.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use qtty_core::length::{Kilometers, Meters};
+    ///
+    /// let km = Kilometers::new(1.0);
+    /// let m = Meters::new(1000.0);
+    /// assert!(km.eq_unit(&m));
+    /// ```
+    #[inline]
+    pub fn eq_unit<V: Unit<Dim = U::Dim>>(self, other: &Quantity<V, S>) -> bool {
+        self.0 == other.to::<U>().value()
+    }
+
+    /// Compares with a quantity of a different unit in the same dimension.
+    ///
+    /// The `other` quantity is converted to unit `U` before comparison.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use qtty_core::length::{Kilometers, Meters};
+    /// use core::cmp::Ordering;
+    ///
+    /// let km = Kilometers::new(2.0);
+    /// let m = Meters::new(500.0);
+    /// assert_eq!(km.cmp_unit(&m), Some(Ordering::Greater));
+    /// ```
+    #[inline]
+    pub fn cmp_unit<V: Unit<Dim = U::Dim>>(self, other: &Quantity<V, S>) -> Option<Ordering> {
+        self.0.partial_cmp(&other.to::<U>().value())
     }
 }
 
@@ -593,6 +634,25 @@ impl<U: Unit, S: Scalar> PartialEq<S> for Quantity<U, S> {
     #[inline]
     fn eq(&self, other: &S) -> bool {
         self.0 == *other
+    }
+}
+
+// PartialOrd with scalar
+impl<U: Unit, S: Scalar> PartialOrd<S> for Quantity<U, S> {
+    #[inline]
+    fn partial_cmp(&self, other: &S) -> Option<Ordering> {
+        self.0.partial_cmp(other)
+    }
+}
+
+// Eq for scalar types that support total equality (integers, rationals, decimals)
+impl<U: Unit, S: Scalar + Eq> Eq for Quantity<U, S> {}
+
+// Ord for scalar types that support total ordering (integers, rationals, decimals)
+impl<U: Unit + PartialOrd, S: Scalar + Ord> Ord for Quantity<U, S> {
+    #[inline]
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.0.cmp(&other.0)
     }
 }
 
