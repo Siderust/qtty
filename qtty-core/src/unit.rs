@@ -1,7 +1,7 @@
 //! Unit types and traits.
 
 use crate::dimension::{Dimension, Dimensionless, DivDim};
-use crate::scalar::{Real, Scalar};
+use crate::scalar::Scalar;
 use crate::Quantity;
 use core::fmt::{Debug, Display, Formatter, Result};
 use core::marker::PhantomData;
@@ -47,9 +47,9 @@ impl<N: Unit, D: Unit> Unit for Per<N, D> {
     const SYMBOL: &'static str = "";
 }
 
-impl<N: Unit, D: Unit, S: Real> Display for Quantity<Per<N, D>, S> {
+impl<N: Unit, D: Unit, S: Scalar + Display> Display for Quantity<Per<N, D>, S> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{} {}/{}", self.value().to_f64(), N::SYMBOL, D::SYMBOL)
+        write!(f, "{} {}/{}", self.value(), N::SYMBOL, D::SYMBOL)
     }
 }
 
@@ -71,7 +71,7 @@ impl Unit for Unitless {
     const SYMBOL: &'static str = "";
 }
 
-impl<S: Real> Display for Quantity<Unitless, S> {
+impl<S: Scalar + Display> Display for Quantity<Unitless, S> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "{}", self.value())
     }
