@@ -15,6 +15,7 @@
 //! - [`unitless`]: helpers for dimensionless quantities.
 
 pub mod angular;
+pub mod area;
 pub mod frequency;
 pub mod length;
 pub mod mass;
@@ -22,3 +23,4 @@ pub mod power;
 pub mod time;
 pub mod unitless;
 pub mod velocity;
+pub mod volume;

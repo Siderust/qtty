@@ -1,7 +1,8 @@
 //! Quantity type and its implementations.
 
+use crate::dimension::{DimDiv, DimMul, Dimension};
 use crate::scalar::{Exact, Real, Scalar, Transcendental};
-use crate::unit::{Per, Unit};
+use crate::unit::{Per, Prod, Unit};
 use core::marker::PhantomData;
 use core::ops::*;
 
@@ -19,21 +20,11 @@ use core::ops::*;
 /// Basic usage with default `f64`:
 ///
 /// ```rust
-/// use qtty_core::{Quantity, Unit, Dimension};
+/// use qtty_core::length::{Meter, Meters};
+/// use qtty_core::Quantity;
 ///
-/// pub enum Length {}
-/// impl Dimension for Length {}
-///
-/// #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-/// pub enum Meter {}
-/// impl Unit for Meter {
-///     const RATIO: f64 = 1.0;
-///     type Dim = Length;
-///     const SYMBOL: &'static str = "m";
-/// }
-///
-/// let x = Quantity::<Meter>::new(5.0);
-/// let y = Quantity::<Meter>::new(3.0);
+/// let x = Meters::new(5.0);
+/// let y = Meters::new(3.0);
 /// let sum = x + y;
 /// assert_eq!(sum.value(), 8.0);
 /// ```
@@ -41,18 +32,8 @@ use core::ops::*;
 /// Using `f32` for memory efficiency:
 ///
 /// ```rust
-/// use qtty_core::{Quantity, Unit, Dimension};
-///
-/// pub enum Length {}
-/// impl Dimension for Length {}
-///
-/// #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-/// pub enum Meter {}
-/// impl Unit for Meter {
-///     const RATIO: f64 = 1.0;
-///     type Dim = Length;
-///     const SYMBOL: &'static str = "m";
-/// }
+/// use qtty_core::length::Meter;
+/// use qtty_core::Quantity;
 ///
 /// let x: Quantity<Meter, f32> = Quantity::new(5.0_f32);
 /// assert_eq!(x.value(), 5.0_f32);
@@ -216,28 +197,10 @@ impl<U: Unit, S: Real> Quantity<U, S> {
     /// # Example
     ///
     /// ```rust
-    /// use qtty_core::{Quantity, Unit, Dimension};
+    /// use qtty_core::length::{Meter, Kilometer, Kilometers};
+    /// use qtty_core::Quantity;
     ///
-    /// pub enum Length {}
-    /// impl Dimension for Length {}
-    ///
-    /// #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-    /// pub enum Meter {}
-    /// impl Unit for Meter {
-    ///     const RATIO: f64 = 1.0;
-    ///     type Dim = Length;
-    ///     const SYMBOL: &'static str = "m";
-    /// }
-    ///
-    /// #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-    /// pub enum Kilometer {}
-    /// impl Unit for Kilometer {
-    ///     const RATIO: f64 = 1000.0;
-    ///     type Dim = Length;
-    ///     const SYMBOL: &'static str = "km";
-    /// }
-    ///
-    /// let km = Quantity::<Kilometer>::new(1.0);
+    /// let km = Kilometers::new(1.0);
     /// let m: Quantity<Meter> = km.to();
     /// assert_eq!(m.value(), 1000.0);
     /// ```
@@ -645,7 +608,11 @@ impl<U: Unit, S: Scalar> From<S> for Quantity<U, S> {
 // Division producing Per<N, D>
 // ─────────────────────────────────────────────────────────────────────────────
 
-impl<N: Unit, D: Unit, S: Scalar> Div<Quantity<D, S>> for Quantity<N, S> {
+impl<N: Unit, D: Unit, S: Scalar> Div<Quantity<D, S>> for Quantity<N, S>
+where
+    N::Dim: DimDiv<D::Dim>,
+    <N::Dim as DimDiv<D::Dim>>::Output: Dimension,
+{
     type Output = Quantity<Per<N, D>, S>;
     #[inline]
     fn div(self, rhs: Quantity<D, S>) -> Self::Output {
@@ -654,24 +621,19 @@ impl<N: Unit, D: Unit, S: Scalar> Div<Quantity<D, S>> for Quantity<N, S> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Multiplication: Per<N,D> * D = N
+// Multiplication producing Prod<A, B>
 // ─────────────────────────────────────────────────────────────────────────────
 
-impl<N: Unit, D: Unit, S: Scalar> Mul<Quantity<D, S>> for Quantity<Per<N, D>, S> {
-    type Output = Quantity<N, S>;
+impl<A: Unit, B: Unit, S: Scalar> Mul<Quantity<B, S>> for Quantity<A, S>
+where
+    A::Dim: DimMul<B::Dim>,
+    <A::Dim as DimMul<B::Dim>>::Output: Dimension,
+{
+    type Output = Quantity<Prod<A, B>, S>;
 
     #[inline]
-    fn mul(self, rhs: Quantity<D, S>) -> Self::Output {
-        Quantity::<N, S>::new(self.0 * rhs.0)
-    }
-}
-
-impl<N: Unit, D: Unit, S: Scalar> Mul<Quantity<Per<N, D>, S>> for Quantity<D, S> {
-    type Output = Quantity<N, S>;
-
-    #[inline]
-    fn mul(self, rhs: Quantity<Per<N, D>, S>) -> Self::Output {
-        rhs * self
+    fn mul(self, rhs: Quantity<B, S>) -> Self::Output {
+        Quantity::<Prod<A, B>, S>::new(self.0 * rhs.0)
     }
 }
 
@@ -679,7 +641,11 @@ impl<N: Unit, D: Unit, S: Scalar> Mul<Quantity<Per<N, D>, S>> for Quantity<D, S>
 // Special methods for Per<U, U> (unitless ratios)
 // ─────────────────────────────────────────────────────────────────────────────
 
-impl<U: Unit, S: Transcendental> Quantity<Per<U, U>, S> {
+impl<U: Unit, S: Transcendental> Quantity<Per<U, U>, S>
+where
+    U::Dim: DimDiv<U::Dim>,
+    <U::Dim as DimDiv<U::Dim>>::Output: Dimension,
+{
     /// Arc sine of a unitless ratio.
     ///
     /// ```rust

@@ -1,6 +1,6 @@
 //! Unit types and traits.
 
-use crate::dimension::{Dimension, Dimensionless, DivDim};
+use crate::dimension::{DimDiv, DimMul, Dimension, Dimensionless};
 use crate::scalar::Scalar;
 use crate::Quantity;
 use core::fmt::{Debug, Display, Formatter, Result};
@@ -41,15 +41,51 @@ pub trait Unit: Copy + PartialEq + Debug + 'static {
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub struct Per<N: Unit, D: Unit>(PhantomData<(N, D)>);
 
-impl<N: Unit, D: Unit> Unit for Per<N, D> {
+impl<N: Unit, D: Unit> Unit for Per<N, D>
+where
+    N::Dim: DimDiv<D::Dim>,
+    <N::Dim as DimDiv<D::Dim>>::Output: Dimension,
+{
     const RATIO: f64 = N::RATIO / D::RATIO;
-    type Dim = DivDim<N::Dim, D::Dim>;
+    type Dim = <N::Dim as DimDiv<D::Dim>>::Output;
     const SYMBOL: &'static str = "";
 }
 
-impl<N: Unit, D: Unit, S: Scalar + Display> Display for Quantity<Per<N, D>, S> {
+impl<N: Unit, D: Unit, S: Scalar + Display> Display for Quantity<Per<N, D>, S>
+where
+    N::Dim: DimDiv<D::Dim>,
+    <N::Dim as DimDiv<D::Dim>>::Output: Dimension,
+{
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "{} {}/{}", self.value(), N::SYMBOL, D::SYMBOL)
+    }
+}
+
+/// Unit representing the product of two other units.
+///
+/// `Prod<A, B>` corresponds to `A * B` and carries both the
+/// dimensional information and the scaling ratio between the
+/// constituent units.
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+pub struct Prod<A: Unit, B: Unit>(PhantomData<(A, B)>);
+
+impl<A: Unit, B: Unit> Unit for Prod<A, B>
+where
+    A::Dim: DimMul<B::Dim>,
+    <A::Dim as DimMul<B::Dim>>::Output: Dimension,
+{
+    const RATIO: f64 = A::RATIO * B::RATIO;
+    type Dim = <A::Dim as DimMul<B::Dim>>::Output;
+    const SYMBOL: &'static str = "";
+}
+
+impl<A: Unit, B: Unit, S: Scalar + Display> Display for Quantity<Prod<A, B>, S>
+where
+    A::Dim: DimMul<B::Dim>,
+    <A::Dim as DimMul<B::Dim>>::Output: Dimension,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        write!(f, "{} {}·{}", self.value(), A::SYMBOL, B::SYMBOL)
     }
 }
 
@@ -90,7 +126,11 @@ pub trait Simplify {
     fn simplify(self) -> Quantity<Self::Out, Self::Scalar>;
 }
 
-impl<U: Unit, S: Scalar> Simplify for Quantity<Per<U, U>, S> {
+impl<U: Unit, S: Scalar> Simplify for Quantity<Per<U, U>, S>
+where
+    U::Dim: DimDiv<U::Dim>,
+    <U::Dim as DimDiv<U::Dim>>::Output: Dimension,
+{
     type Scalar = S;
     type Out = Unitless;
     /// ```rust
@@ -106,7 +146,13 @@ impl<U: Unit, S: Scalar> Simplify for Quantity<Per<U, U>, S> {
     }
 }
 
-impl<N: Unit, D: Unit, S: Scalar> Simplify for Quantity<Per<N, Per<N, D>>, S> {
+impl<N: Unit, D: Unit, S: Scalar> Simplify for Quantity<Per<N, Per<N, D>>, S>
+where
+    N::Dim: DimDiv<D::Dim>,
+    <N::Dim as DimDiv<D::Dim>>::Output: Dimension,
+    N::Dim: DimDiv<<N::Dim as DimDiv<D::Dim>>::Output>,
+    <N::Dim as DimDiv<<N::Dim as DimDiv<D::Dim>>::Output>>::Output: Dimension,
+{
     type Scalar = S;
     type Out = D;
     fn simplify(self) -> Quantity<D, S> {
