@@ -463,15 +463,11 @@ fn partial_ord_scalar_negative() {
 fn partial_ord_nan_returns_none() {
     let nan = TU::new(f64::NAN);
     let normal = TU::new(5.0);
-    // NaN comparisons always return false
-    assert!(!(nan < normal));
-    assert!(!(nan > normal));
-    assert!(!(nan <= normal));
-    assert!(!(nan >= normal));
+    // NaN comparisons are unordered
+    assert!(nan.partial_cmp(&normal).is_none());
     assert!(!(nan == normal));
     // NaN vs scalar
-    assert!(!(nan < 5.0));
-    assert!(!(nan > 5.0));
+    assert!(nan.partial_cmp(&5.0).is_none());
     assert!(!(nan == 5.0));
 }
 
@@ -586,6 +582,5 @@ fn cross_unit_nan_comparison() {
     let m: Quantity<Meter> = Quantity::new(1000.0);
 
     assert!(!(km_nan == m));
-    assert!(!(km_nan < m));
-    assert!(!(km_nan > m));
+    assert!(km_nan.partial_cmp(&m).is_none());
 }
