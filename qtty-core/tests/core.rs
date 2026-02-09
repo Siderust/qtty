@@ -174,6 +174,20 @@ fn operator_sub_assign() {
 }
 
 #[test]
+fn iterator_sum_quantity_owned() {
+    let values = vec![TU::new(1.0), TU::new(2.5), TU::new(3.5)];
+    let total: TU = values.into_iter().sum();
+    assert!((total.value() - 7.0).abs() < 1e-12);
+}
+
+#[test]
+fn iterator_sum_quantity_borrowed_to_f64() {
+    let values = [TU::new(1.0), TU::new(2.5), TU::new(3.5)];
+    let total: f64 = values.iter().sum();
+    assert!((total - 7.0).abs() < 1e-12);
+}
+
+#[test]
 fn operator_div_assign() {
     let mut q = TU::new(20.0);
     q /= TU::new(4.0);

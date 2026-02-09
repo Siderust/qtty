@@ -7,6 +7,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Sem
 
 ### Added
 - Added support for operations with Rust built-in numeric types, improving ergonomics when combining `Quantity` values with primitive scalars.
+- Added `Iterator::sum` support for `Quantity`, including ergonomic accumulation into `f64` from iterators of `Quantity<_, f64>` (owned or borrowed items).
 - Full dimensional arithmetic support using compile-time exponent math (`Dim`, `DimMul`, `DimDiv`) powered by `typenum`.
 - New product unit type `Prod<A, B>` to represent unit multiplication (`Length * Length`, `Area * Length`, etc.).
 - New `area` unit module with metric, land, and imperial/US units (for example `SquareMeter`, `Hectare`, `Acre`).
