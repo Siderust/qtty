@@ -3,7 +3,7 @@ All notable changes to this project are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] - 2026-02-09
 
 ### Added
 - Added support for operations with Rust built-in numeric types, improving ergonomics when combining `Quantity` values with primitive scalars.

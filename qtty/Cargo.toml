@@ -24,8 +24,8 @@ tiberius = ["qtty-core/tiberius"]
 diesel = ["qtty-core/diesel"]
 
 [dependencies]
-qtty-core = { version = "0.2.2", path = "../qtty-core", default-features = false }
-qtty-derive = { path = "../qtty-derive" }
+qtty-core = { version = "0.3.0", path = "../qtty-core", default-features = false }
+qtty-derive = { version = "0.3.0", path = "../qtty-derive" }
 pyo3 = { version = "0.27.2", optional = true, features = ["auto-initialize"] }
 
 [dev-dependencies]
