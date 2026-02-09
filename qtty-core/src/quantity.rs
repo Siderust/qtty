@@ -141,6 +141,22 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
         Self::new(self.0.max(other.0))
     }
 
+    /// Returns the arithmetic mean (midpoint) of this quantity and another.
+    ///
+    /// For integer-backed quantities this uses integer division semantics
+    /// (truncation toward zero).
+    ///
+    /// ```rust
+    /// use qtty_core::length::Meters;
+    /// let a = Meters::new(10.0);
+    /// let b = Meters::new(14.0);
+    /// assert_eq!(a.mean(b).value(), 12.0);
+    /// ```
+    #[inline]
+    pub fn mean(self, other: Self) -> Self {
+        Self::new((self.0 + other.0) / (S::ONE + S::ONE))
+    }
+
     /// A constant representing the zero value for this quantity type.
     #[inline]
     pub const fn zero() -> Self {
