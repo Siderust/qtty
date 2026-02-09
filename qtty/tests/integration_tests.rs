@@ -259,6 +259,21 @@ fn per_unit_multiplication_recovers_numerator() {
 }
 
 #[test]
+fn qtty_values_macro_builds_seconds_array() {
+    const DT: [Seconds; 3] = qtty::vec!(Seconds; 56.86, 63.83, 70.0);
+    assert_abs_diff_eq!(DT[0].value(), 56.86, epsilon = 1e-12);
+    assert_abs_diff_eq!(DT[1].value(), 63.83, epsilon = 1e-12);
+    assert_abs_diff_eq!(DT[2].value(), 70.0, epsilon = 1e-12);
+}
+
+#[test]
+fn qtty_values_macro_builds_seconds_vec() {
+    let dt: Vec<Seconds> = qtty::vec!(vec Seconds; 56.86, 63.83, 70.0);
+    assert_eq!(dt.len(), 3);
+    assert_abs_diff_eq!(dt[1].value(), 63.83, epsilon = 1e-12);
+}
+
+#[test]
 fn per_unit_division_creates_composite() {
     let d = Kilometers::new(100.0);
     let t = Seconds::new(10.0);
