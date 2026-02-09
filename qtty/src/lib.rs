@@ -179,14 +179,14 @@ pub use qtty_core::units::volume::*;
 /// ```
 /// use qtty::Seconds;
 ///
-/// const OFFSETS: [Seconds; 3] = qtty::vec!(Seconds; 56.86, 63.83, 70.0);
+/// const OFFSETS: [Seconds; 3] = qtty::qtty_vec!(Seconds; 56.86, 63.83, 70.0);
 /// assert_eq!(OFFSETS[1].value(), 63.83);
 ///
-/// let samples: Vec<Seconds> = qtty::vec!(vec Seconds; 1.0, 2.0, 3.0);
+/// let samples: Vec<Seconds> = qtty::qtty_vec!(vec Seconds; 1.0, 2.0, 3.0);
 /// assert_eq!(samples.len(), 3);
 /// ```
 #[macro_export]
-macro_rules! vec {
+macro_rules! qtty_vec {
     (vec $unit:ty; $($value:expr),* $(,)?) => {
         ::std::vec![$(<$unit>::new($value)),*]
     };
