@@ -4,6 +4,7 @@ use crate::dimension::{DimDiv, DimMul, Dimension};
 use crate::scalar::{Exact, Real, Scalar, Transcendental};
 use crate::unit::{Per, Prod, Unit};
 use core::cmp::Ordering;
+use core::iter::Sum;
 use core::marker::PhantomData;
 use core::ops::*;
 
@@ -691,6 +692,36 @@ impl<U: Unit, S: Scalar> From<S> for Quantity<U, S> {
     #[inline]
     fn from(value: S) -> Self {
         Self::new(value)
+    }
+}
+
+// Sum quantities into a quantity of the same unit/scalar.
+impl<U: Unit, S: Scalar> Sum for Quantity<U, S> {
+    #[inline]
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Self::zero(), |acc, q| acc + q)
+    }
+}
+
+impl<'a, U: Unit, S: Scalar> Sum<&'a Quantity<U, S>> for Quantity<U, S> {
+    #[inline]
+    fn sum<I: Iterator<Item = &'a Quantity<U, S>>>(iter: I) -> Self {
+        iter.fold(Self::zero(), |acc, q| acc + *q)
+    }
+}
+
+// Sum quantities directly into their raw scalar for ergonomic iterator use.
+impl<U: Unit> Sum<Quantity<U, f64>> for f64 {
+    #[inline]
+    fn sum<I: Iterator<Item = Quantity<U, f64>>>(iter: I) -> Self {
+        iter.fold(0.0, |acc, q| acc + q.value())
+    }
+}
+
+impl<'a, U: Unit> Sum<&'a Quantity<U, f64>> for f64 {
+    #[inline]
+    fn sum<I: Iterator<Item = &'a Quantity<U, f64>>>(iter: I) -> Self {
+        iter.fold(0.0, |acc, q| acc + q.value())
     }
 }
 
