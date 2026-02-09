@@ -154,6 +154,7 @@ fn f32_quantity_min_max() {
     let b = TU32::new(7.0);
     assert_eq!(a.min(b).value(), 3.0_f32);
     assert_eq!(a.max(b).value(), 7.0_f32);
+    assert_eq!(a.mean(b).value(), 5.0_f32);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
