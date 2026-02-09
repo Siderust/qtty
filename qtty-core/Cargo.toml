@@ -32,7 +32,7 @@ tiberius = { version = "0.12", default-features = false, optional = true }
 diesel = { version = "2.1", default-features = false, optional = true }
 libm = "0.2"
 typenum = "1.17"
-qtty-derive = { path = "../qtty-derive" }
+qtty-derive = { version = "0.3.0", path = "../qtty-derive" }
 
 [dev-dependencies]
 approx = "0.5"
