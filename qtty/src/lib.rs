@@ -164,3 +164,33 @@ pub use qtty_core::units::power::*;
 pub use qtty_core::units::time::*;
 pub use qtty_core::units::velocity::*;
 pub use qtty_core::units::volume::*;
+
+/// Build typed quantities from scalar literals without repeating `Unit::new(...)`.
+///
+/// # Forms
+///
+/// - Array (const-friendly):
+///   `qtty_values!(Seconds; 1.0, 2.0, 3.0)`
+/// - Vector:
+///   `qtty_values!(vec Seconds; 1.0, 2.0, 3.0)`
+///
+/// # Examples
+///
+/// ```
+/// use qtty::Seconds;
+///
+/// const OFFSETS: [Seconds; 3] = qtty::vec!(Seconds; 56.86, 63.83, 70.0);
+/// assert_eq!(OFFSETS[1].value(), 63.83);
+///
+/// let samples: Vec<Seconds> = qtty::vec!(vec Seconds; 1.0, 2.0, 3.0);
+/// assert_eq!(samples.len(), 3);
+/// ```
+#[macro_export]
+macro_rules! vec {
+    (vec $unit:ty; $($value:expr),* $(,)?) => {
+        ::std::vec![$(<$unit>::new($value)),*]
+    };
+    ($unit:ty; $($value:expr),* $(,)?) => {
+        [$(<$unit>::new($value)),*]
+    };
+}
