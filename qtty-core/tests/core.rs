@@ -374,6 +374,14 @@ fn test_max() {
 }
 
 #[test]
+fn test_mean() {
+    let a = TU::new(10.0);
+    let b = TU::new(14.0);
+    assert_eq!(a.mean(b).value(), 12.0);
+    assert_eq!(b.mean(a).value(), 12.0);
+}
+
+#[test]
 fn test_acos() {
     let ratio: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(0.5);
     let result = ratio.acos();
@@ -515,6 +523,7 @@ fn ord_integers_min_max() {
     let b: Quantity<TestUnit, i32> = Quantity::new(7);
     assert_eq!(a.min(b).value(), 3);
     assert_eq!(a.max(b).value(), 7);
+    assert_eq!(a.mean(b).value(), 5);
 }
 
 #[test]

@@ -87,6 +87,7 @@ fn test_i32_min_max() {
     let b = Quantity::<Meter, i32>::new(7);
     assert_eq!(a.min(b).value(), 3);
     assert_eq!(a.max(b).value(), 7);
+    assert_eq!(a.mean(b).value(), 5);
 }
 
 #[test]
