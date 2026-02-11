@@ -68,7 +68,8 @@
 //!
 //! - `f64` (default) - double precision floating point
 //! - `f32` - single precision floating point (use `qtty::f32::*`)
-//! - `i8`, `i16`, `i32`, `i64`, `i128` - signed integers (use `qtty::i32::*`, `qtty::i64::*`, etc.)
+//! - `i8`, `i16`, `i32`, `i64`, `i128` - signed integers
+//!   (use `qtty::i8::*`, `qtty::i16::*`, `qtty::i32::*`, `qtty::i64::*`, `qtty::i128::*`)
 //! - `Decimal` - exact decimal (feature `scalar-decimal`)
 //! - `Rational64` - exact rational (feature `scalar-rational`)
 //!
@@ -90,8 +91,11 @@
 //! - `qtty::frequency` (`Angular / Time` aliases)
 //! - `qtty::f32` (all units with `f32` scalar)
 //! - `qtty::f64` (all units with `f64` scalar - same as root)
+//! - `qtty::i8` (all units with `i8` scalar)
+//! - `qtty::i16` (all units with `i16` scalar)
 //! - `qtty::i32` (all units with `i32` scalar)
 //! - `qtty::i64` (all units with `i64` scalar)
+//! - `qtty::i128` (all units with `i128` scalar)
 //!
 //! # Feature flags
 //!
@@ -144,8 +148,11 @@ pub use qtty_derive::Unit;
 
 pub mod f32;
 pub mod f64;
+pub mod i128;
+pub mod i16;
 pub mod i32;
 pub mod i64;
+pub mod i8;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Unit modules (grouped by dimension)
