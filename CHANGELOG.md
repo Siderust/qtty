@@ -15,6 +15,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Sem
 - In pure `no_std` (without `alloc`), `qtty::qtty_vec!(vec ...)` now fails with a clear feature requirement message while array form continues to work. (see #10)
 - `qtty` crate docs now match the public integer module surface (`i8`, `i16`, `i32`, `i64`, `i128`) and include coverage for integer `to_lossy()` flows in facade integration tests. (see #11)
 - Unit-erasure conversion into `Quantity<Unitless>` is no longer limited to length units; time, mass, angular, and other supported non-dimensionless units now convert while preserving the raw scalar value (no normalization). (see #12)
+- Removed `DivAssign<Self>` for `Quantity` because `quantity /= quantity` is dimensionally unsound; `/=` is now scalar-only (`DivAssign<S>`). Migration: replace `q /= other_q` with `q = (q / other_q).simplify()` when you need a unitless ratio, or use explicit scalar division where appropriate. (see #14)
 
 ## [0.3.0] - 2026-02-09
 
