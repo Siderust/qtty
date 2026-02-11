@@ -28,6 +28,13 @@ Disable default features for `no_std` (uses `libm` behind the scenes):
 qtty = { version = "0.1.0", default-features = false }
 ```
 
+If you also need `qtty::qtty_vec!(vec ...)` in `no_std`, enable `alloc`:
+
+```toml
+[dependencies]
+qtty = { version = "0.1.0", default-features = false, features = ["alloc"] }
+```
+
 ## Quick start
 
 ```rust
@@ -41,6 +48,7 @@ assert!((r.value() - core::f64::consts::PI).abs() < 1e-12);
 ## Features
 
 - `std` (default): enables `std` support in `qtty-core`.
+- `alloc`: enables heap-backed helpers (including `qtty::qtty_vec!(vec ...)`) in `no_std`.
 - `serde`: serializes/deserializes `Quantity<U>` as bare `f64` values.
 - `pyo3`: enables PyO3 conversions for `Quantity<U>` and `#[pyclass]` interop.
 

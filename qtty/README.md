@@ -38,6 +38,13 @@ Disable default features for `no_std`:
 qtty = { version = "0.1.0", default-features = false }
 ```
 
+If you also need `qtty::qtty_vec!(vec ...)` in `no_std`, enable `alloc`:
+
+```toml
+[dependencies]
+qtty = { version = "0.1.0", default-features = false, features = ["alloc"] }
+```
+
 ## Quick start
 
 ```rust
@@ -61,6 +68,7 @@ assert!((v.value() - 10.0).abs() < 1e-12);
 ## Feature flags
 
 - `std` (default): enables `std` support in `qtty-core`.
+- `alloc`: enables heap-backed helpers (including `qtty::qtty_vec!(vec ...)`) in `no_std`.
 - `serde`: serializes/deserializes `Quantity<U>` as bare `f64` values (unit is encoded by the type).
 - `pyo3`: enables PyO3 conversions so `Quantity<U>` types convert to/from Python `float` and can be used
    directly as `#[pyclass]` fields (requires building with `--features pyo3` for `qtty-core`).
