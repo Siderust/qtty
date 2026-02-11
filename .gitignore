@@ -1,3 +1,7 @@
 /target
+/qtty/target/
+/qtty-core/target/
+/qtty-derive/target/
+/qtty-ffi/target/
 
 coverage.xml
