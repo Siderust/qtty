@@ -12,9 +12,10 @@ readme = "README.md"
 documentation = "https://docs.rs/qtty"
 
 [features]
-default = ["std"]
+default = ["std", "cross-unit-ops"]
 alloc = []
 std = ["alloc", "qtty-core/std"]
+cross-unit-ops = ["qtty-core/cross-unit-ops"]
 serde = ["qtty-core/serde"]
 
 # Scalar type support

@@ -48,6 +48,7 @@ assert!((r.value() - core::f64::consts::PI).abs() < 1e-12);
 ## Features
 
 - `std` (default): enables `std` support in `qtty-core`.
+- `cross-unit-ops` (default): enables direct cross-unit comparison operators (`==`, `<`, etc.) for built-in units.
 - `alloc`: enables heap-backed helpers (including `qtty::qtty_vec!(vec ...)`) in `no_std`.
 - `serde`: serializes/deserializes `Quantity<U>` as bare `f64` values.
 - `pyo3`: enables PyO3 conversions for `Quantity<U>` and `#[pyclass]` interop.
