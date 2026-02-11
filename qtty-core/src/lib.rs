@@ -60,6 +60,7 @@
 //! # Feature flags
 //!
 //! - `std` (default): enables `std` support.
+//! - `cross-unit-ops` (default): enables direct cross-unit comparison operators (`==`, `<`, etc.) for built-in unit catalogs.
 //! - `serde`: enables `serde` support for `Quantity<U>`; serialization is the raw `f64` value only.
 //! - `pyo3`: enables PyO3 bindings for Python interop via `#[pyclass]` and `#[pymethods]`.
 //!

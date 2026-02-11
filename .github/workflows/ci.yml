@@ -56,6 +56,42 @@ jobs:
       - run: cargo test --all-targets
       - run: cargo test --doc
 
+  no-cross-unit-ops:
+    name: No Cross-Unit Ops
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate conversions and eq_unit/cmp_unit in reduced mode
+        run: cargo test -p qtty-core --test core --test no_cross_unit_ops --no-default-features --features std
+      - name: Ensure direct cross-unit operators are disabled in reduced mode
+        run: |
+          tmpdir="$(mktemp -d)"
+          cat > "$tmpdir/Cargo.toml" <<EOF
+          [package]
+          name = "no-cross-unit-ops-check"
+          version = "0.0.0"
+          edition = "2021"
+
+          [dependencies]
+          qtty-core = { path = "$PWD/qtty-core", default-features = false, features = ["std"] }
+          EOF
+          mkdir -p "$tmpdir/src"
+          cat > "$tmpdir/src/main.rs" <<'EOF'
+          use qtty_core::length::{Kilometers, Meters};
+
+          fn main() {
+              let km = Kilometers::new(1.0);
+              let m = Meters::new(500.0);
+              let _ = km > m;
+          }
+          EOF
+
+          if cargo check --manifest-path "$tmpdir/Cargo.toml"; then
+            echo "cross-unit operators unexpectedly compiled with cross-unit-ops disabled"
+            exit 1
+          fi
+
   coverage:
     name: Test & Coverage
     if: ${{ github.event_name == 'push' || github.event.pull_request.draft == false }}

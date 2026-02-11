@@ -578,6 +578,7 @@ fn cross_unit_cmp_method() {
 }
 
 #[test]
+#[cfg(feature = "cross-unit-ops")]
 fn cross_unit_operators_via_macro() {
     use qtty_core::units::length::{Kilometer, Meter};
 
@@ -599,6 +600,7 @@ fn cross_unit_operators_via_macro() {
 }
 
 #[test]
+#[cfg(feature = "cross-unit-ops")]
 fn cross_unit_operators_f32() {
     use qtty_core::units::length::{Kilometer, Meter};
 
@@ -610,6 +612,7 @@ fn cross_unit_operators_f32() {
 }
 
 #[test]
+#[cfg(feature = "cross-unit-ops")]
 fn cross_unit_nan_comparison() {
     use qtty_core::units::length::{Kilometer, Meter};
 

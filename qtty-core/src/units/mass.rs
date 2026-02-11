@@ -194,8 +194,44 @@ pub type SolarMasses = Quantity<SolarMass>;
 /// One nominal solar mass.
 pub const MSUN: SolarMasses = SolarMasses::new(1.0);
 
-// Generate all bidirectional From implementations between mass units
-crate::impl_unit_conversions!(
+// Generate all bidirectional From implementations between mass units.
+crate::impl_unit_from_conversions!(
+    Gram,
+    Yoctogram,
+    Zeptogram,
+    Attogram,
+    Femtogram,
+    Picogram,
+    Nanogram,
+    Microgram,
+    Milligram,
+    Centigram,
+    Decigram,
+    Decagram,
+    Hectogram,
+    Kilogram,
+    Megagram,
+    Gigagram,
+    Teragram,
+    Petagram,
+    Exagram,
+    Zettagram,
+    Yottagram,
+    Tonne,
+    Carat,
+    Grain,
+    Pound,
+    Ounce,
+    Stone,
+    ShortTon,
+    LongTon,
+    AtomicMassUnit,
+    SolarMass
+);
+
+// Optional cross-unit operator support (`==`, `<`, etc.).
+#[cfg(feature = "cross-unit-ops")]
+crate::impl_unit_cross_unit_ops!(
     Gram,
     Yoctogram,
     Zeptogram,
