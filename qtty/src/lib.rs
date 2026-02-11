@@ -96,6 +96,7 @@
 //! # Feature flags
 //!
 //! - `std` (default): enables `std` support in `qtty-core`.
+//! - `alloc`: enables heap-backed helpers (like `qtty_vec!(vec ...)`) in `no_std` builds.
 //! - `serde`: enables `serde` support for `Quantity<U>`; serialization is the raw `f64` value only.
 //! - `scalar-decimal`: enables `rust_decimal::Decimal` as a scalar type.
 //! - `scalar-rational`: enables `num_rational::Rational64` as a scalar type.
@@ -105,6 +106,13 @@
 //! ```toml
 //! [dependencies]
 //! qtty = { version = "0.2.0", default-features = false }
+//! ```
+//!
+//! If you need `qtty_vec!(vec ...)` in `no_std`, enable `alloc`:
+//!
+//! ```toml
+//! [dependencies]
+//! qtty = { version = "0.2.0", default-features = false, features = ["alloc"] }
 //! ```
 //!
 //! # Panics and errors
@@ -118,6 +126,9 @@
 //! This workspace is currently `0.x`. Expect breaking changes between minor versions until `1.0`.
 #![cfg_attr(not(feature = "std"), no_std)]
 #![forbid(unsafe_code)]
+
+#[cfg(all(feature = "alloc", not(feature = "std")))]
+extern crate alloc;
 
 pub use qtty_core::*;
 
@@ -165,14 +176,22 @@ pub use qtty_core::units::time::*;
 pub use qtty_core::units::velocity::*;
 pub use qtty_core::units::volume::*;
 
+#[doc(hidden)]
+pub mod __private {
+    #[cfg(all(feature = "alloc", not(feature = "std")))]
+    pub use alloc::vec::Vec;
+    #[cfg(feature = "std")]
+    pub use std::vec::Vec;
+}
+
 /// Build typed quantities from scalar literals without repeating `Unit::new(...)`.
 ///
 /// # Forms
 ///
 /// - Array (const-friendly):
-///   `qtty_values!(Seconds; 1.0, 2.0, 3.0)`
+///   `qtty::qtty_vec!(Seconds; 1.0, 2.0, 3.0)`
 /// - Vector:
-///   `qtty_values!(vec Seconds; 1.0, 2.0, 3.0)`
+///   `qtty::qtty_vec!(vec Seconds; 1.0, 2.0, 3.0)` (requires `std` or `alloc`)
 ///
 /// # Examples
 ///
@@ -185,10 +204,25 @@ pub use qtty_core::units::volume::*;
 /// let samples: Vec<Seconds> = qtty::qtty_vec!(vec Seconds; 1.0, 2.0, 3.0);
 /// assert_eq!(samples.len(), 3);
 /// ```
+#[cfg(any(feature = "std", feature = "alloc"))]
 #[macro_export]
 macro_rules! qtty_vec {
     (vec $unit:ty; $($value:expr),* $(,)?) => {
-        ::std::vec![$(<$unit>::new($value)),*]
+        <$crate::__private::Vec<$unit>>::from([$(<$unit>::new($value)),*])
+    };
+    ($unit:ty; $($value:expr),* $(,)?) => {
+        [$(<$unit>::new($value)),*]
+    };
+}
+
+#[cfg(not(any(feature = "std", feature = "alloc")))]
+#[macro_export]
+macro_rules! qtty_vec {
+    (vec $unit:ty; $($value:expr),* $(,)?) => {
+        compile_error!(
+            "`qtty::qtty_vec!(vec ...)` requires the `std` or `alloc` feature. \
+Use `qtty::qtty_vec!(Unit; ...)` in pure `no_std` builds."
+        )
     };
     ($unit:ty; $($value:expr),* $(,)?) => {
         [$(<$unit>::new($value)),*]

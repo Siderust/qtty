@@ -1,0 +1,10 @@
+[package]
+name = "qtty-vec-no-std-fixture"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+qtty = { path = "../../..", default-features = false }
+
+[workspace]
