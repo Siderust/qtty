@@ -100,6 +100,7 @@
 //! # Feature flags
 //!
 //! - `std` (default): enables `std` support in `qtty-core`.
+//! - `cross-unit-ops` (default): enables direct cross-unit comparison operators (`==`, `<`, etc.) for built-in units.
 //! - `alloc`: enables heap-backed helpers (like `qtty_vec!(vec ...)`) in `no_std` builds.
 //! - `serde`: enables `serde` support for `Quantity<U>`; serialization is the raw `f64` value only.
 //! - `scalar-decimal`: enables `rust_decimal::Decimal` as a scalar type.

@@ -555,7 +555,9 @@ pub mod nominal {
     // Allow convenient conversions between selected nominal units and core
     // length units (e.g., SolarRadius <-> Kilometer) without polluting the
     // main length namespace with nominal types.
-    crate::impl_unit_conversions!(SolarRadius, Kilometer);
+    crate::impl_unit_from_conversions!(SolarRadius, Kilometer);
+    #[cfg(feature = "cross-unit-ops")]
+    crate::impl_unit_cross_unit_ops!(SolarRadius, Kilometer);
 }
 
 // Generate all bidirectional From implementations between length units.
@@ -563,7 +565,54 @@ pub mod nominal {
 // This single invocation ensures that any quantity measured in one length unit can be
 // converted into any other via `From`/`Into`, mirroring the previous behavior while
 // including the extended unit set.
-crate::impl_unit_conversions!(
+crate::impl_unit_from_conversions!(
+    Meter,
+    Decimeter,
+    Centimeter,
+    Millimeter,
+    Micrometer,
+    Nanometer,
+    Picometer,
+    Femtometer,
+    Attometer,
+    Zeptometer,
+    Yoctometer,
+    Decameter,
+    Hectometer,
+    Kilometer,
+    Megameter,
+    Gigameter,
+    Terameter,
+    Petameter,
+    Exameter,
+    Zettameter,
+    Yottameter,
+    AstronomicalUnit,
+    LightYear,
+    Parsec,
+    Kiloparsec,
+    Megaparsec,
+    Gigaparsec,
+    Inch,
+    Foot,
+    Yard,
+    Mile,
+    NauticalMile,
+    Chain,
+    Rod,
+    Link,
+    Fathom,
+    EarthMeridionalCircumference,
+    EarthEquatorialCircumference,
+    BohrRadius,
+    ClassicalElectronRadius,
+    PlanckLength,
+    ElectronReducedComptonWavelength
+);
+
+// Optional cross-unit operator support (`==`, `<`, etc.).
+#[cfg(feature = "cross-unit-ops")]
+crate::impl_unit_cross_unit_ops!(
     Meter,
     Decimeter,
     Centimeter,

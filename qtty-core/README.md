@@ -76,8 +76,18 @@ qtty-core = { version = "0.1.0", default-features = false }
 ## Feature flags
 
 - `std` (default): enables `std` support.
+- `cross-unit-ops` (default): enables direct cross-unit comparison operators (`==`, `<`, etc.) for built-in unit sets.
 - `serde`: serializes/deserializes `Quantity<U>` as bare `f64` values.
 - `pyo3`: enables PyO3 conversions for `Quantity<U>` and Python interop traits.
+
+## Compile-time timings
+
+Compare default vs reduced cross-unit-ops mode:
+
+```bash
+cargo +nightly check -p qtty --all-targets -Z timings
+cargo +nightly check -p qtty --all-targets --no-default-features --features std -Z timings
+```
 
 ## License
 
