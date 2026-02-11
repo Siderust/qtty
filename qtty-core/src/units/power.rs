@@ -111,8 +111,37 @@ pub type SolarLuminosities = Quantity<SolarLuminosity>;
 /// One solar luminosity.
 pub const L_SUN: SolarLuminosities = SolarLuminosities::new(1.0);
 
-// Generate all bidirectional From implementations between power units
-crate::impl_unit_conversions!(
+// Generate all bidirectional From implementations between power units.
+crate::impl_unit_from_conversions!(
+    Watt,
+    Yoctowatt,
+    Zeptowatt,
+    Attowatt,
+    Femtowatt,
+    Picowatt,
+    Nanowatt,
+    Microwatt,
+    Milliwatt,
+    Deciwatt,
+    Decawatt,
+    Hectowatt,
+    Kilowatt,
+    Megawatt,
+    Gigawatt,
+    Terawatt,
+    Petawatt,
+    Exawatt,
+    Zettawatt,
+    Yottawatt,
+    ErgPerSecond,
+    HorsepowerMetric,
+    HorsepowerElectric,
+    SolarLuminosity
+);
+
+// Optional cross-unit operator support (`==`, `<`, etc.).
+#[cfg(feature = "cross-unit-ops")]
+crate::impl_unit_cross_unit_ops!(
     Watt,
     Yoctowatt,
     Zeptowatt,

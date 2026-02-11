@@ -1,13 +1,8 @@
 //! Macros for defining units and conversions.
 
-/// Generates `From` trait implementations for all pairs of units within a dimension.
-///
-/// Also generates cross-unit `PartialEq` and `PartialOrd` trait implementations
-/// so that quantities of different units in the same dimension can be compared
-/// directly with `==`, `!=`, `<`, `>`, `<=`, `>=` operators. The right-hand side
-/// is converted to the left-hand side's unit before comparison.
+/// Generates bidirectional `From` trait implementations for all pairs of units within a dimension.
 #[macro_export]
-macro_rules! impl_unit_conversions {
+macro_rules! impl_unit_from_conversions {
     // Base case: single unit, no conversions needed
     ($unit:ty) => {};
 
@@ -26,6 +21,26 @@ macro_rules! impl_unit_conversions {
                 }
             }
 
+        )+
+
+        // Recurse with the rest of the units
+        $crate::impl_unit_from_conversions!($($rest),+);
+    };
+}
+
+/// Generates cross-unit `PartialEq` and `PartialOrd` implementations for all pairs of units.
+///
+/// This enables direct `==`, `!=`, `<`, `>`, `<=`, `>=` comparisons across
+/// different units in the same dimension by converting the right-hand side into
+/// the left-hand side unit before comparing.
+#[macro_export]
+macro_rules! impl_unit_cross_unit_ops {
+    // Base case: single unit, no cross-unit comparisons needed
+    ($unit:ty) => {};
+
+    // Recursive case: implement comparisons from first to all others, then recurse
+    ($first:ty, $($rest:ty),+ $(,)?) => {
+        $(
             // Cross-unit PartialEq: first == rest
             impl<S: $crate::scalar::Real> PartialEq<$crate::Quantity<$rest, S>> for $crate::Quantity<$first, S> {
                 #[inline]
@@ -60,6 +75,19 @@ macro_rules! impl_unit_conversions {
         )+
 
         // Recurse with the rest of the units
-        $crate::impl_unit_conversions!($($rest),+);
+        $crate::impl_unit_cross_unit_ops!($($rest),+);
+    };
+}
+
+/// Generates all pairwise conversions and cross-unit comparisons.
+///
+/// Prefer `impl_unit_from_conversions!` + optional `impl_unit_cross_unit_ops!`
+/// in large unit catalogs to avoid generating cross-unit comparison impls when
+/// they are not needed.
+#[macro_export]
+macro_rules! impl_unit_conversions {
+    ($($unit:ty),+ $(,)?) => {
+        $crate::impl_unit_from_conversions!($($unit),+);
+        $crate::impl_unit_cross_unit_ops!($($unit),+);
     };
 }
