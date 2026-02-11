@@ -360,8 +360,7 @@ fn test_i32_negative_quantities() {
 #[test]
 fn test_i32_div_assign() {
     let mut a = Quantity::<Meter, i32>::new(10);
-    let b = Quantity::<Meter, i32>::new(5);
-    a /= b;
+    a /= 5;
     assert_eq!(a.value(), 2);
 }
 

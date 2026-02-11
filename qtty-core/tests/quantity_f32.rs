@@ -261,7 +261,7 @@ fn f32_sub_assign() {
 #[test]
 fn f32_div_assign() {
     let mut q = TU32::new(20.0);
-    q /= TU32::new(4.0);
+    q /= 4.0_f32;
     assert_eq!(q.value(), 5.0_f32);
 }
 
