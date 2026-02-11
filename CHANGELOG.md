@@ -8,10 +8,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Sem
 ### Added
 - New `qtty` crate feature `alloc` for heap-backed helpers in `no_std` builds. (see #10)
 - Integration compile checks for `qtty::qtty_vec!` across `std`, `no_std + alloc`, and pure `no_std` modes. (see #10)
+- New integer scalar facade modules `qtty::i8`, `qtty::i16`, and `qtty::i128`, mirroring the unit aliases available in `qtty::i32`. (see #11)
 
 ### Fixed
 - `qtty::qtty_vec!(vec ...)` no longer hardcodes `std`; it now works with `alloc` in `no_std` builds. (see #10)
 - In pure `no_std` (without `alloc`), `qtty::qtty_vec!(vec ...)` now fails with a clear feature requirement message while array form continues to work. (see #10)
+- `qtty` crate docs now match the public integer module surface (`i8`, `i16`, `i32`, `i64`, `i128`) and include coverage for integer `to_lossy()` flows in facade integration tests. (see #11)
 
 ## [0.3.0] - 2026-02-09
 

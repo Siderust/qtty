@@ -412,3 +412,45 @@ fn smoke_test_f32_trig() {
     assert!((angle.sin() - 1.0).abs() < 1e-5);
     assert!(angle.cos().abs() < 1e-5);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Integer scalar module tests
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn smoke_test_i8_module_arithmetic_and_lossy_conversion() {
+    use qtty::i8::{Meters, Minutes, Seconds};
+
+    let a = Meters::new(50);
+    let b = Meters::new(20);
+    assert_eq!((a + b).value(), 70);
+    assert_eq!((a - b).value(), 30);
+
+    let sec = Seconds::new(125);
+    let min: Minutes = sec.to_lossy();
+    assert_eq!(min.value(), 2);
+}
+
+#[test]
+fn smoke_test_i16_module_arithmetic_and_lossy_conversion() {
+    use qtty::i16::{Kilometers, Meters};
+
+    let a = Meters::new(1_500);
+    let b = Meters::new(250);
+    assert_eq!((a + b).value(), 1_750);
+
+    let km: Kilometers = a.to_lossy();
+    assert_eq!(km.value(), 1);
+}
+
+#[test]
+fn smoke_test_i128_module_arithmetic_and_lossy_conversion() {
+    use qtty::i128::{Days, Seconds};
+
+    let a = Seconds::new(172_800);
+    let b = Seconds::new(3_600);
+    assert_eq!((a + b).value(), 176_400);
+
+    let days: Days = a.to_lossy();
+    assert_eq!(days.value(), 2);
+}
