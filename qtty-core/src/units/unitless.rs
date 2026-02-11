@@ -2,31 +2,61 @@
 //!
 //! This module contains small adapters for working with dimensionless values.
 //!
-//! The provided conversion from a length quantity to a unitless quantity is *lossy*: it drops the unit type without
-//! performing any normalization. The numeric value is preserved as-is.
+//! The provided conversion from a dimensioned quantity to a unitless quantity is *lossy*: it drops the unit type
+//! without performing any normalization. The numeric value is preserved as-is.
 //!
 //! ```rust
-//! use qtty_core::length::Kilometers;
+//! use qtty_core::time::Seconds;
 //! use qtty_core::{Quantity, Unitless};
 //!
-//! let km = Kilometers::new(3.0);
-//! let u: Quantity<Unitless> = km.into();
+//! let t = Seconds::new(3.0);
+//! let u: Quantity<Unitless> = t.into();
 //! assert_eq!(u.value(), 3.0);
 //! ```
 
-use crate::units::length::LengthUnit;
-use crate::{Quantity, Unitless};
+use crate::dimension::{
+    Acceleration, AmountOfSubstance, Angular, Area, Current, Energy, Force, FrequencyDim, Length,
+    LuminousIntensity, Mass, Power, Temperature, Time, VelocityDim, Volume,
+};
+use crate::scalar::Scalar;
+use crate::{Quantity, Unit, Unitless};
 
-impl<U: LengthUnit> From<Quantity<U>> for Quantity<Unitless> {
-    fn from(length: Quantity<U>) -> Self {
-        Self::new(length.value())
+trait SupportedDimension {}
+impl SupportedDimension for Length {}
+impl SupportedDimension for Time {}
+impl SupportedDimension for Mass {}
+impl SupportedDimension for Temperature {}
+impl SupportedDimension for Current {}
+impl SupportedDimension for AmountOfSubstance {}
+impl SupportedDimension for LuminousIntensity {}
+impl SupportedDimension for Angular {}
+impl SupportedDimension for Area {}
+impl SupportedDimension for Volume {}
+impl SupportedDimension for VelocityDim {}
+impl SupportedDimension for Acceleration {}
+impl SupportedDimension for Force {}
+impl SupportedDimension for Energy {}
+impl SupportedDimension for Power {}
+impl SupportedDimension for FrequencyDim {}
+
+trait DimensionedUnit: Unit {}
+impl<U: Unit> DimensionedUnit for U where U::Dim: SupportedDimension {}
+
+impl<U: DimensionedUnit, S: Scalar> From<Quantity<U, S>> for Quantity<Unitless, S> {
+    #[inline]
+    fn from(quantity: Quantity<U, S>) -> Self {
+        Self::new(quantity.value())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::units::angular::Degrees;
     use crate::units::length::Meters;
+    use crate::units::mass::Kilogram;
+    use crate::units::mass::Kilograms;
+    use crate::units::time::Seconds;
     use crate::Unit;
     use approx::assert_abs_diff_eq;
     use proptest::prelude::*;
@@ -66,7 +96,7 @@ mod tests {
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // Conversion from length
+    // Conversion from dimensioned quantities
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
@@ -74,6 +104,34 @@ mod tests {
         let m = Meters::new(42.0);
         let u: Quantity<Unitless> = m.into();
         assert_eq!(u.value(), 42.0);
+    }
+
+    #[test]
+    fn from_time() {
+        let t = Seconds::new(5.0);
+        let u: Quantity<Unitless> = t.into();
+        assert_eq!(u.value(), 5.0);
+    }
+
+    #[test]
+    fn from_mass() {
+        let m = Kilograms::new(2.5);
+        let u: Quantity<Unitless> = m.into();
+        assert_eq!(u.value(), 2.5);
+    }
+
+    #[test]
+    fn from_angular() {
+        let a = Degrees::new(90.0);
+        let u: Quantity<Unitless> = a.into();
+        assert_eq!(u.value(), 90.0);
+    }
+
+    #[test]
+    fn from_mass_preserves_non_default_scalar_type() {
+        let m: Quantity<Kilogram, i32> = Quantity::new(7);
+        let u: Quantity<Unitless, i32> = m.into();
+        assert_eq!(u.value(), 7);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -141,6 +199,13 @@ mod tests {
         fn prop_from_length_preserves_value(v in -1e6..1e6f64) {
             let m = Meters::new(v);
             let u: Quantity<Unitless> = m.into();
+            prop_assert!((u.value() - v).abs() < 1e-12);
+        }
+
+        #[test]
+        fn prop_from_time_preserves_value(v in -1e6..1e6f64) {
+            let t = Seconds::new(v);
+            let u: Quantity<Unitless> = t.into();
             prop_assert!((u.value() - v).abs() < 1e-12);
         }
     }
