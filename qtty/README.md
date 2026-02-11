@@ -68,6 +68,7 @@ assert!((v.value() - 10.0).abs() < 1e-12);
 ## Feature flags
 
 - `std` (default): enables `std` support in `qtty-core`.
+- `cross-unit-ops` (default): enables direct cross-unit comparison operators (`==`, `<`, etc.) for built-in units.
 - `alloc`: enables heap-backed helpers (including `qtty::qtty_vec!(vec ...)`) in `no_std`.
 - `serde`: serializes/deserializes `Quantity<U>` as bare `f64` values (unit is encoded by the type).
 - `pyo3`: enables PyO3 conversions so `Quantity<U>` types convert to/from Python `float` and can be used

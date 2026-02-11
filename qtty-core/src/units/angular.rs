@@ -398,8 +398,23 @@ impl Degrees {
     }
 }
 
-// Generate all bidirectional From implementations between angular units
-crate::impl_unit_conversions!(
+// Generate all bidirectional From implementations between angular units.
+crate::impl_unit_from_conversions!(
+    Degree,
+    Radian,
+    Milliradian,
+    Arcminute,
+    Arcsecond,
+    MilliArcsecond,
+    MicroArcsecond,
+    Gradian,
+    Turn,
+    HourAngle
+);
+
+// Optional cross-unit operator support (`==`, `<`, etc.).
+#[cfg(feature = "cross-unit-ops")]
+crate::impl_unit_cross_unit_ops!(
     Degree,
     Radian,
     Milliradian,
