@@ -3,6 +3,16 @@ All notable changes to this project are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- New `qtty` crate feature `alloc` for heap-backed helpers in `no_std` builds. (see #10)
+- Integration compile checks for `qtty::qtty_vec!` across `std`, `no_std + alloc`, and pure `no_std` modes. (see #10)
+
+### Fixed
+- `qtty::qtty_vec!(vec ...)` no longer hardcodes `std`; it now works with `alloc` in `no_std` builds. (see #10)
+- In pure `no_std` (without `alloc`), `qtty::qtty_vec!(vec ...)` now fails with a clear feature requirement message while array form continues to work. (see #10)
+
 ## [0.3.0] - 2026-02-09
 
 ### Added
