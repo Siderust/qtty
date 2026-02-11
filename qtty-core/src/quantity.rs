@@ -565,10 +565,26 @@ impl<U: Unit, S: Scalar> Div<S> for Quantity<U, S> {
     }
 }
 
-impl<U: Unit, S: Scalar> DivAssign<Self> for Quantity<U, S> {
+impl<U: Unit, S: Scalar> DivAssign<S> for Quantity<U, S> {
+    /// In-place scalar division.
+    ///
+    /// ```rust
+    /// use qtty_core::length::Meters;
+    ///
+    /// let mut d = Meters::new(120.0);
+    /// d /= 60.0;
+    /// assert_eq!(d.value(), 2.0);
+    /// ```
+    ///
+    /// ```compile_fail
+    /// use qtty_core::length::Meters;
+    ///
+    /// let mut d = Meters::new(120.0);
+    /// d /= Meters::new(60.0);
+    /// ```
     #[inline]
-    fn div_assign(&mut self, rhs: Self) {
-        self.0 /= rhs.0;
+    fn div_assign(&mut self, rhs: S) {
+        self.0 /= rhs;
     }
 }
 
