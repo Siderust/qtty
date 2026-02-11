@@ -190,7 +190,7 @@ fn iterator_sum_quantity_borrowed_to_f64() {
 #[test]
 fn operator_div_assign() {
     let mut q = TU::new(20.0);
-    q /= TU::new(4.0);
+    q /= 4.0;
     assert_eq!(q.value(), 5.0);
 }
 
