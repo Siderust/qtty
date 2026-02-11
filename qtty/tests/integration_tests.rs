@@ -61,6 +61,27 @@ fn smoke_test_unitless() {
 }
 
 #[test]
+fn smoke_test_unitless_from_time() {
+    let s = Seconds::new(5.0);
+    let u: Quantity<Unitless> = s.into();
+    assert_eq!(u.value(), 5.0);
+}
+
+#[test]
+fn smoke_test_unitless_from_mass() {
+    let kg = Kilograms::new(2.0);
+    let u: Quantity<Unitless> = kg.into();
+    assert_eq!(u.value(), 2.0);
+}
+
+#[test]
+fn smoke_test_unitless_from_angular() {
+    let deg = Degrees::new(15.0);
+    let u: Quantity<Unitless> = deg.into();
+    assert_eq!(u.value(), 15.0);
+}
+
+#[test]
 fn orbital_distance_calculation() {
     // Earth's orbital velocity ≈ 29.78 km/s
     let earth_velocity: velocity::Velocity<Kilometer, Second> = velocity::Velocity::new(29.78);
