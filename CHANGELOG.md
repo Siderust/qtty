@@ -12,6 +12,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Sem
 - New `cross-unit-ops` feature in `qtty-core` and `qtty` (enabled by default) to gate generation of direct cross-unit comparison operator impls (`==`, `<`, etc.). (see #15)
 - New reduced-mode CI profile (`No Cross-Unit Ops`) plus targeted compile checks validating `eq_unit`/`cmp_unit` and ensuring direct cross-unit operators are disabled when the feature is off. (see #15)
 - Documented compile-time benchmark commands (`cargo +nightly -Z timings`) for comparing default and reduced-mode builds. (see #15)
+- FFI JSON serialization: New FFI functions for serializing and deserializing QttyQuantity to/from JSON, including:
 
 ### Fixed
 - `qtty::qtty_vec!(vec ...)` no longer hardcodes `std`; it now works with `alloc` in `no_std` builds. (see #10)
@@ -20,6 +21,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Sem
 - Unit-erasure conversion into `Quantity<Unitless>` is no longer limited to length units; time, mass, angular, and other supported non-dimensionless units now convert while preserving the raw scalar value (no normalization). (see #12)
 - Removed `DivAssign<Self>` for `Quantity` because `quantity /= quantity` is dimensionally unsound; `/=` is now scalar-only (`DivAssign<S>`). Migration: replace `q /= other_q` with `q = (q / other_q).simplify()` when you need a unitless ratio, or use explicit scalar division where appropriate. (see #14)
 - Reduced quadratic impl bloat in built-in unit catalogs by splitting conversion generation from cross-unit comparison generation; reduced mode now keeps `From` conversions while omitting cross-unit operator impls. (see #15)
+- CI build now passes: missing FFI symbols for JSON serialization are implemented and properly feature-gated.
 
 ## [0.3.0] - 2026-02-09
 
