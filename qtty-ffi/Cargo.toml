@@ -16,9 +16,12 @@ crate-type = ["cdylib", "staticlib", "rlib"]
 [dependencies]
 qtty = { version = "0.3.0", path = "../qtty" }
 pyo3 = { version = "0.27.2", optional = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 
 [features]
 pyo3 = ["dep:pyo3"]
+qtty_serde = ["qtty/serde"]
 
 [build-dependencies]
 cbindgen = "0.29.2"

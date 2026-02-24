@@ -11,6 +11,7 @@
 //! values, but existing values must remain stable across all versions.
 
 use core::ffi::c_char;
+use serde::{Deserialize, Serialize};
 
 // =============================================================================
 // Status Codes
@@ -45,7 +46,7 @@ pub const QTTY_ERR_INVALID_VALUE: i32 = -4;
 /// **Discriminant values must never change.** New dimensions may be added with
 /// new explicit discriminant values.
 #[repr(u32)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum DimensionId {
     /// Length dimension (e.g., meters, kilometers).
     Length = 1,
@@ -133,7 +134,7 @@ impl UnitId {
 /// };
 /// ```
 #[repr(C)]
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct QttyQuantity {
     /// The numeric value of the quantity.
     pub value: f64,
@@ -312,7 +313,7 @@ impl Default for QttyQuantity {
 /// assert_eq!(velocity.denominator, UnitId::Second);
 /// ```
 #[repr(C)]
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct QttyDerivedQuantity {
     /// The numeric value of the derived quantity.
     pub value: f64,
