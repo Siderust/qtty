@@ -96,20 +96,11 @@
 
 // Core modules
 mod ffi;
-#[cfg(feature = "serde")]
-mod ffi_serde;
 pub mod helpers;
 #[macro_use]
 pub mod macros;
 pub mod registry;
 mod types;
-
-// Re-export JSON serialization FFI functions
-#[cfg(feature = "serde")]
-pub use ffi_serde::{
-    qtty_quantity_from_json, qtty_quantity_from_json_value, qtty_quantity_to_json,
-    qtty_quantity_to_json_value, qtty_string_free,
-};
 
 // Re-export FFI functions
 pub use ffi::{
