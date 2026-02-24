@@ -104,8 +104,11 @@ mod types;
 
 // Re-export FFI functions
 pub use ffi::{
-    qtty_ffi_version, qtty_quantity_convert, qtty_quantity_convert_value, qtty_quantity_make,
-    qtty_unit_dimension, qtty_unit_is_valid, qtty_unit_name, qtty_units_compatible,
+    qtty_derived_convert, qtty_derived_from_json, qtty_derived_make, qtty_derived_to_json,
+    qtty_ffi_version, qtty_quantity_convert, qtty_quantity_convert_value, qtty_quantity_from_json,
+    qtty_quantity_from_json_value, qtty_quantity_make, qtty_quantity_to_json,
+    qtty_quantity_to_json_value, qtty_string_free, qtty_unit_dimension, qtty_unit_is_valid,
+    qtty_unit_name, qtty_units_compatible,
 };
 
 // Re-export types

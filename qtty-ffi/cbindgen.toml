@@ -72,11 +72,12 @@ usize_is_size_t = true
 [defines]
 
 [export]
-include = ["UnitId", "DimensionId", "QttyQuantity"]
+include = ["UnitId", "DimensionId", "QttyQuantity", "QttyDerivedQuantity"]
 exclude = ["UnitMeta"]
 
 [export.rename]
 "QttyQuantity" = "qtty_quantity_t"
+"QttyDerivedQuantity" = "qtty_derived_quantity_t"
 
 [fn]
 rename_args = "SnakeCase"

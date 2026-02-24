@@ -20,9 +20,11 @@
 
 use crate::registry;
 use crate::types::{
-    DimensionId, QttyQuantity, UnitId, QTTY_ERR_NULL_OUT, QTTY_ERR_UNKNOWN_UNIT, QTTY_OK,
+    DimensionId, QttyDerivedQuantity, QttyQuantity, UnitId, QTTY_ERR_INCOMPATIBLE_DIM,
+    QTTY_ERR_INVALID_VALUE, QTTY_ERR_NULL_OUT, QTTY_ERR_UNKNOWN_UNIT, QTTY_OK,
 };
 use core::ffi::c_char;
+use std::ffi::{CStr, CString};
 
 // =============================================================================
 // Helper macro to catch panics
@@ -290,6 +292,286 @@ pub extern "C" fn qtty_unit_name(unit: UnitId) -> *const c_char {
         } else {
             core::ptr::null()
         }
+    })
+}
+
+// =============================================================================
+// JSON Serialization / Deserialization via serde_json
+//
+// These helpers use serde for robust JSON serialization/deserialization.
+// They produce/consume either a plain numeric value (e.g. "123.45") or an object
+// with `value` and `unit` fields: {"value":123.45,"unit":"Meter"}
+// =============================================================================
+
+/// Frees a string previously allocated by one of the `qtty_*_to_json*` functions.
+///
+/// # Safety
+///
+/// The pointer must have been returned by a `qtty_*_to_json*` function and must
+/// not have been freed previously. Passing a null pointer is safe (no-op).
+#[no_mangle]
+pub unsafe extern "C" fn qtty_string_free(s: *mut c_char) {
+    if s.is_null() {
+        return;
+    }
+    // Reclaim the CString to free the memory allocated by `into_raw`.
+    unsafe {
+        let _ = CString::from_raw(s);
+    }
+}
+
+/// Serializes a quantity's value as a plain JSON number string (e.g. "123.45").
+///
+/// # Safety
+///
+/// The caller must ensure that `out` points to valid, writable memory for a `*mut c_char`,
+/// or is null (in which case an error is returned). The returned string must be freed
+/// with [`qtty_string_free`].
+#[no_mangle]
+pub unsafe extern "C" fn qtty_quantity_to_json_value(
+    src: QttyQuantity,
+    out: *mut *mut c_char,
+) -> i32 {
+    catch_panic!(QTTY_ERR_UNKNOWN_UNIT, {
+        if out.is_null() {
+            return QTTY_ERR_NULL_OUT;
+        }
+        let s = serde_json::to_string(&src.value).unwrap_or_default();
+        let c = CString::new(s).unwrap_or_default();
+        unsafe {
+            *out = c.into_raw();
+        }
+        QTTY_OK
+    })
+}
+
+/// Deserializes a quantity from a plain JSON numeric string with an explicit unit.
+///
+/// # Safety
+///
+/// The caller must ensure that `json` points to a valid NUL-terminated C string,
+/// and `out` points to valid, writable memory for a `QttyQuantity`.
+#[no_mangle]
+pub unsafe extern "C" fn qtty_quantity_from_json_value(
+    unit: UnitId,
+    json: *const c_char,
+    out: *mut QttyQuantity,
+) -> i32 {
+    catch_panic!(QTTY_ERR_UNKNOWN_UNIT, {
+        if json.is_null() || out.is_null() {
+            return QTTY_ERR_NULL_OUT;
+        }
+        let cstr = unsafe { CStr::from_ptr(json) };
+        let s = match cstr.to_str() {
+            Ok(v) => v,
+            Err(_) => return QTTY_ERR_INVALID_VALUE,
+        };
+        let v: f64 = match serde_json::from_str(s) {
+            Ok(v) => v,
+            Err(_) => return QTTY_ERR_INVALID_VALUE,
+        };
+        if registry::meta(unit).is_none() {
+            return QTTY_ERR_UNKNOWN_UNIT;
+        }
+        unsafe {
+            *out = QttyQuantity::new(v, unit);
+        }
+        QTTY_OK
+    })
+}
+
+/// Serializes a quantity to a full JSON object: `{"value":123.45,"unit":"Meter"}`.
+///
+/// # Safety
+///
+/// The caller must ensure that `out` points to valid, writable memory for a `*mut c_char`,
+/// or is null (in which case an error is returned). The returned string must be freed
+/// with [`qtty_string_free`].
+#[no_mangle]
+pub unsafe extern "C" fn qtty_quantity_to_json(src: QttyQuantity, out: *mut *mut c_char) -> i32 {
+    catch_panic!(QTTY_ERR_UNKNOWN_UNIT, {
+        if out.is_null() {
+            return QTTY_ERR_NULL_OUT;
+        }
+        let s = match serde_json::to_string(&src) {
+            Ok(s) => s,
+            Err(_) => return QTTY_ERR_INVALID_VALUE,
+        };
+        let c = CString::new(s).unwrap_or_default();
+        unsafe {
+            *out = c.into_raw();
+        }
+        QTTY_OK
+    })
+}
+
+/// Deserializes a quantity from a JSON object: `{"value":123.45,"unit":"Meter"}`.
+///
+/// # Safety
+///
+/// The caller must ensure that `json` points to a valid NUL-terminated C string,
+/// and `out` points to valid, writable memory for a `QttyQuantity`.
+#[no_mangle]
+pub unsafe extern "C" fn qtty_quantity_from_json(
+    json: *const c_char,
+    out: *mut QttyQuantity,
+) -> i32 {
+    catch_panic!(QTTY_ERR_UNKNOWN_UNIT, {
+        if json.is_null() || out.is_null() {
+            return QTTY_ERR_NULL_OUT;
+        }
+        let cstr = unsafe { CStr::from_ptr(json) };
+        let s = match cstr.to_str() {
+            Ok(v) => v,
+            Err(_) => return QTTY_ERR_INVALID_VALUE,
+        };
+        let qty: QttyQuantity = match serde_json::from_str(s) {
+            Ok(v) => v,
+            Err(_) => return QTTY_ERR_INVALID_VALUE,
+        };
+        // Validate that the unit is known
+        if registry::meta(qty.unit).is_none() {
+            return QTTY_ERR_UNKNOWN_UNIT;
+        }
+        unsafe {
+            *out = qty;
+        }
+        QTTY_OK
+    })
+}
+
+// =============================================================================
+// Derived Quantity (Compound Unit) Functions
+// =============================================================================
+
+/// Creates a new derived quantity (compound unit like m/s).
+///
+/// # Safety
+///
+/// The caller must ensure that `out` points to valid, writable memory for a
+/// `QttyDerivedQuantity`, or is null (in which case an error is returned).
+#[no_mangle]
+pub unsafe extern "C" fn qtty_derived_make(
+    value: f64,
+    numerator: UnitId,
+    denominator: UnitId,
+    out: *mut QttyDerivedQuantity,
+) -> i32 {
+    catch_panic!(QTTY_ERR_UNKNOWN_UNIT, {
+        if out.is_null() {
+            return QTTY_ERR_NULL_OUT;
+        }
+        if registry::meta(numerator).is_none() || registry::meta(denominator).is_none() {
+            return QTTY_ERR_UNKNOWN_UNIT;
+        }
+        unsafe {
+            *out = QttyDerivedQuantity::new(value, numerator, denominator);
+        }
+        QTTY_OK
+    })
+}
+
+/// Converts a derived quantity to different units.
+///
+/// The numerator and denominator are converted independently while preserving
+/// the compound value. For example, 100 m/s → 360 km/h.
+///
+/// # Safety
+///
+/// The caller must ensure that `out` points to valid, writable memory for a
+/// `QttyDerivedQuantity`, or is null (in which case an error is returned).
+#[no_mangle]
+pub unsafe extern "C" fn qtty_derived_convert(
+    src: QttyDerivedQuantity,
+    target_num: UnitId,
+    target_den: UnitId,
+    out: *mut QttyDerivedQuantity,
+) -> i32 {
+    catch_panic!(QTTY_ERR_UNKNOWN_UNIT, {
+        if out.is_null() {
+            return QTTY_ERR_NULL_OUT;
+        }
+        match src.convert_to(target_num, target_den) {
+            Some(converted) => {
+                unsafe {
+                    *out = converted;
+                }
+                QTTY_OK
+            }
+            None => {
+                // Determine a more specific error code
+                if registry::meta(src.numerator).is_none()
+                    || registry::meta(src.denominator).is_none()
+                    || registry::meta(target_num).is_none()
+                    || registry::meta(target_den).is_none()
+                {
+                    QTTY_ERR_UNKNOWN_UNIT
+                } else {
+                    QTTY_ERR_INCOMPATIBLE_DIM
+                }
+            }
+        }
+    })
+}
+
+/// Serializes a derived quantity to a JSON object.
+///
+/// # Safety
+///
+/// The caller must ensure that `out` points to valid, writable memory for a `*mut c_char`.
+/// The returned string must be freed with [`qtty_string_free`].
+#[no_mangle]
+pub unsafe extern "C" fn qtty_derived_to_json(
+    src: QttyDerivedQuantity,
+    out: *mut *mut c_char,
+) -> i32 {
+    catch_panic!(QTTY_ERR_UNKNOWN_UNIT, {
+        if out.is_null() {
+            return QTTY_ERR_NULL_OUT;
+        }
+        let s = match serde_json::to_string(&src) {
+            Ok(s) => s,
+            Err(_) => return QTTY_ERR_INVALID_VALUE,
+        };
+        let c = CString::new(s).unwrap_or_default();
+        unsafe {
+            *out = c.into_raw();
+        }
+        QTTY_OK
+    })
+}
+
+/// Deserializes a derived quantity from a JSON object.
+///
+/// # Safety
+///
+/// The caller must ensure that `json` points to a valid NUL-terminated C string,
+/// and `out` points to valid, writable memory for a `QttyDerivedQuantity`.
+#[no_mangle]
+pub unsafe extern "C" fn qtty_derived_from_json(
+    json: *const c_char,
+    out: *mut QttyDerivedQuantity,
+) -> i32 {
+    catch_panic!(QTTY_ERR_UNKNOWN_UNIT, {
+        if json.is_null() || out.is_null() {
+            return QTTY_ERR_NULL_OUT;
+        }
+        let cstr = unsafe { CStr::from_ptr(json) };
+        let s = match cstr.to_str() {
+            Ok(v) => v,
+            Err(_) => return QTTY_ERR_INVALID_VALUE,
+        };
+        let qty: QttyDerivedQuantity = match serde_json::from_str(s) {
+            Ok(v) => v,
+            Err(_) => return QTTY_ERR_INVALID_VALUE,
+        };
+        if registry::meta(qty.numerator).is_none() || registry::meta(qty.denominator).is_none() {
+            return QTTY_ERR_UNKNOWN_UNIT;
+        }
+        unsafe {
+            *out = qty;
+        }
+        QTTY_OK
     })
 }
 
