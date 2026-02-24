@@ -477,4 +477,128 @@ mod tests {
             assert!(!unit.name().is_empty());
         }
     }
+
+    // ─── QttyQuantity method coverage ────────────────────────────────────────
+
+    #[test]
+    fn qtty_quantity_default() {
+        let q = QttyQuantity::default();
+        assert_eq!(q.value, 0.0);
+        assert_eq!(q.unit, UnitId::Meter);
+    }
+
+    #[test]
+    fn qtty_quantity_neg() {
+        let q = QttyQuantity::new(5.0, UnitId::Meter);
+        let n = q.neg();
+        assert_eq!(n.value, -5.0);
+        assert_eq!(n.unit, UnitId::Meter);
+    }
+
+    #[test]
+    fn qtty_quantity_mul_scalar() {
+        let q = QttyQuantity::new(4.0, UnitId::Kilometer);
+        let r = q.mul_scalar(2.5);
+        assert_eq!(r.value, 10.0);
+        assert_eq!(r.unit, UnitId::Kilometer);
+    }
+
+    #[test]
+    fn qtty_quantity_div_scalar() {
+        let q = QttyQuantity::new(15.0, UnitId::Second);
+        let r = q.div_scalar(3.0);
+        assert_eq!(r.value, 5.0);
+        assert_eq!(r.unit, UnitId::Second);
+    }
+
+    #[test]
+    fn qtty_quantity_dimension() {
+        let q = QttyQuantity::new(1.0, UnitId::Meter);
+        assert_eq!(q.dimension(), Some(DimensionId::Length));
+
+        let t = QttyQuantity::new(1.0, UnitId::Second);
+        assert_eq!(t.dimension(), Some(DimensionId::Time));
+    }
+
+    #[test]
+    fn qtty_quantity_compatible() {
+        let a = QttyQuantity::new(1.0, UnitId::Meter);
+        let b = QttyQuantity::new(1.0, UnitId::Kilometer);
+        let c = QttyQuantity::new(1.0, UnitId::Second);
+
+        assert!(a.compatible(&b));
+        assert!(!a.compatible(&c));
+    }
+
+    #[test]
+    fn qtty_quantity_add_incompatible_returns_none() {
+        let a = QttyQuantity::new(1.0, UnitId::Meter);
+        let b = QttyQuantity::new(1.0, UnitId::Second);
+        assert!(a.add(&b).is_none());
+    }
+
+    #[test]
+    fn qtty_quantity_sub_incompatible_returns_none() {
+        let a = QttyQuantity::new(1.0, UnitId::Meter);
+        let b = QttyQuantity::new(1.0, UnitId::Second);
+        assert!(a.sub(&b).is_none());
+    }
+
+    // ─── QttyDerivedQuantity method coverage ─────────────────────────────────
+
+    #[test]
+    fn qtty_derived_quantity_default() {
+        let d = QttyDerivedQuantity::default();
+        assert_eq!(d.value, 0.0);
+        assert_eq!(d.numerator, UnitId::Meter);
+        assert_eq!(d.denominator, UnitId::Second);
+    }
+
+    #[test]
+    fn qtty_derived_quantity_symbol() {
+        let d = QttyDerivedQuantity::new(1.0, UnitId::Meter, UnitId::Second);
+        let sym = d.symbol();
+        // format is "numerator_symbol/denominator_symbol"
+        assert!(sym.contains('/'), "symbol should contain '/'");
+        assert!(!sym.is_empty());
+        // Should look like "m/s"
+        assert_eq!(
+            sym,
+            format!("{}/{}", UnitId::Meter.symbol(), UnitId::Second.symbol())
+        );
+    }
+
+    #[test]
+    fn qtty_derived_quantity_mul_scalar() {
+        let d = QttyDerivedQuantity::new(10.0, UnitId::Meter, UnitId::Second);
+        let r = d.mul_scalar(3.0);
+        assert_eq!(r.value, 30.0);
+        assert_eq!(r.numerator, UnitId::Meter);
+        assert_eq!(r.denominator, UnitId::Second);
+    }
+
+    #[test]
+    fn qtty_derived_quantity_div_scalar() {
+        let d = QttyDerivedQuantity::new(30.0, UnitId::Kilometer, UnitId::Hour);
+        let r = d.div_scalar(2.0);
+        assert_eq!(r.value, 15.0);
+        assert_eq!(r.numerator, UnitId::Kilometer);
+        assert_eq!(r.denominator, UnitId::Hour);
+    }
+
+    #[test]
+    fn qtty_derived_quantity_neg() {
+        let d = QttyDerivedQuantity::new(5.0, UnitId::Meter, UnitId::Second);
+        let n = d.neg();
+        assert_eq!(n.value, -5.0);
+        assert_eq!(n.numerator, UnitId::Meter);
+        assert_eq!(n.denominator, UnitId::Second);
+    }
+
+    #[test]
+    fn qtty_derived_quantity_convert_to_incompatible_returns_none() {
+        // m/s → kg/h: numerator dimension mismatch
+        let d = QttyDerivedQuantity::new(1.0, UnitId::Meter, UnitId::Second);
+        assert!(d.convert_to(UnitId::Kilogram, UnitId::Hour).is_none());
+    }
 }
