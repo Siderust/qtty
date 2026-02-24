@@ -751,6 +751,312 @@ mod tests {
     }
 
     #[test]
+    fn test_unit_name_all_dimensions() {
+        // Each of: length, time, angle, mass, power
+        for unit in [
+            UnitId::Kilometer,
+            UnitId::Hour,
+            UnitId::Degree,
+            UnitId::Kilogram,
+            UnitId::Watt,
+        ] {
+            let ptr = qtty_unit_name(unit);
+            assert!(
+                !ptr.is_null(),
+                "unit_name should not be null for {:?}",
+                unit
+            );
+        }
+    }
+
+    #[test]
+    fn test_quantity_convert_value_incompatible() {
+        let mut out = 0.0;
+        let status =
+            unsafe { qtty_quantity_convert_value(1.0, UnitId::Meter, UnitId::Second, &mut out) };
+        assert_eq!(status, QTTY_ERR_INCOMPATIBLE_DIM);
+    }
+
+    // ─── qtty_string_free ────────────────────────────────────────────────────
+
+    #[test]
+    fn test_string_free_null_is_noop() {
+        // Must not crash
+        unsafe { qtty_string_free(std::ptr::null_mut()) };
+    }
+
+    #[test]
+    fn test_string_free_valid_ptr() {
+        // Allocate a string via to_json_value then free it
+        let src = QttyQuantity::new(1.0, UnitId::Meter);
+        let mut ptr: *mut std::ffi::c_char = std::ptr::null_mut();
+        let status = unsafe { qtty_quantity_to_json_value(src, &mut ptr) };
+        assert_eq!(status, QTTY_OK);
+        assert!(!ptr.is_null());
+        unsafe { qtty_string_free(ptr) }; // must not crash or leak
+    }
+
+    // ─── qtty_quantity_to_json_value / qtty_quantity_from_json_value ─────────
+
+    #[test]
+    fn test_quantity_to_json_value_success() {
+        let src = QttyQuantity::new(42.5, UnitId::Meter);
+        let mut ptr: *mut std::ffi::c_char = std::ptr::null_mut();
+        let status = unsafe { qtty_quantity_to_json_value(src, &mut ptr) };
+        assert_eq!(status, QTTY_OK);
+        assert!(!ptr.is_null());
+        let s = unsafe { std::ffi::CStr::from_ptr(ptr).to_str().unwrap() };
+        assert_eq!(s, "42.5");
+        unsafe { qtty_string_free(ptr) };
+    }
+
+    #[test]
+    fn test_quantity_to_json_value_null_out() {
+        let src = QttyQuantity::new(1.0, UnitId::Meter);
+        let status = unsafe { qtty_quantity_to_json_value(src, std::ptr::null_mut()) };
+        assert_eq!(status, QTTY_ERR_NULL_OUT);
+    }
+
+    #[test]
+    fn test_quantity_from_json_value_success() {
+        let json = std::ffi::CString::new("99.0").unwrap();
+        let mut out = QttyQuantity::default();
+        let status =
+            unsafe { qtty_quantity_from_json_value(UnitId::Second, json.as_ptr(), &mut out) };
+        assert_eq!(status, QTTY_OK);
+        assert_relative_eq!(out.value, 99.0);
+        assert_eq!(out.unit, UnitId::Second);
+    }
+
+    #[test]
+    fn test_quantity_from_json_value_null_json() {
+        let mut out = QttyQuantity::default();
+        let status =
+            unsafe { qtty_quantity_from_json_value(UnitId::Meter, std::ptr::null(), &mut out) };
+        assert_eq!(status, QTTY_ERR_NULL_OUT);
+    }
+
+    #[test]
+    fn test_quantity_from_json_value_null_out() {
+        let json = std::ffi::CString::new("1.0").unwrap();
+        let status = unsafe {
+            qtty_quantity_from_json_value(UnitId::Meter, json.as_ptr(), std::ptr::null_mut())
+        };
+        assert_eq!(status, QTTY_ERR_NULL_OUT);
+    }
+
+    #[test]
+    fn test_quantity_from_json_value_invalid_json() {
+        let json = std::ffi::CString::new("not_a_number").unwrap();
+        let mut out = QttyQuantity::default();
+        let status =
+            unsafe { qtty_quantity_from_json_value(UnitId::Meter, json.as_ptr(), &mut out) };
+        assert_eq!(status, QTTY_ERR_INVALID_VALUE);
+    }
+
+    #[test]
+    fn test_quantity_json_value_roundtrip() {
+        let src = QttyQuantity::new(1234.567, UnitId::Kilometer);
+        let mut ptr: *mut std::ffi::c_char = std::ptr::null_mut();
+        unsafe { qtty_quantity_to_json_value(src, &mut ptr) };
+        let mut out = QttyQuantity::default();
+        let status = unsafe { qtty_quantity_from_json_value(UnitId::Kilometer, ptr, &mut out) };
+        unsafe { qtty_string_free(ptr) };
+        assert_eq!(status, QTTY_OK);
+        assert_relative_eq!(out.value, 1234.567, epsilon = 1e-9);
+    }
+
+    // ─── qtty_quantity_to_json / qtty_quantity_from_json ─────────────────────
+
+    #[test]
+    fn test_quantity_to_json_success() {
+        let src = QttyQuantity::new(1.0, UnitId::Hour);
+        let mut ptr: *mut std::ffi::c_char = std::ptr::null_mut();
+        let status = unsafe { qtty_quantity_to_json(src, &mut ptr) };
+        assert_eq!(status, QTTY_OK);
+        assert!(!ptr.is_null());
+        let s = unsafe { std::ffi::CStr::from_ptr(ptr).to_str().unwrap() };
+        // Must include "value" and unit name
+        assert!(s.contains("value"));
+        assert!(s.contains("Hour"));
+        unsafe { qtty_string_free(ptr) };
+    }
+
+    #[test]
+    fn test_quantity_to_json_null_out() {
+        let src = QttyQuantity::new(1.0, UnitId::Meter);
+        let status = unsafe { qtty_quantity_to_json(src, std::ptr::null_mut()) };
+        assert_eq!(status, QTTY_ERR_NULL_OUT);
+    }
+
+    #[test]
+    fn test_quantity_from_json_success() {
+        // Serialize first to get correct format
+        let src = QttyQuantity::new(500.0, UnitId::Kilogram);
+        let mut ptr: *mut std::ffi::c_char = std::ptr::null_mut();
+        unsafe { qtty_quantity_to_json(src, &mut ptr) };
+
+        let mut out = QttyQuantity::default();
+        let status = unsafe { qtty_quantity_from_json(ptr, &mut out) };
+        unsafe { qtty_string_free(ptr) };
+
+        assert_eq!(status, QTTY_OK);
+        assert_relative_eq!(out.value, 500.0);
+        assert_eq!(out.unit, UnitId::Kilogram);
+    }
+
+    #[test]
+    fn test_quantity_from_json_null_json() {
+        let mut out = QttyQuantity::default();
+        let status = unsafe { qtty_quantity_from_json(std::ptr::null(), &mut out) };
+        assert_eq!(status, QTTY_ERR_NULL_OUT);
+    }
+
+    #[test]
+    fn test_quantity_from_json_null_out() {
+        let json = std::ffi::CString::new(r#"{"value":1.0,"unit":"Meter"}"#).unwrap();
+        let status = unsafe { qtty_quantity_from_json(json.as_ptr(), std::ptr::null_mut()) };
+        assert_eq!(status, QTTY_ERR_NULL_OUT);
+    }
+
+    #[test]
+    fn test_quantity_from_json_invalid_json() {
+        let json = std::ffi::CString::new("not valid json at all").unwrap();
+        let mut out = QttyQuantity::default();
+        let status = unsafe { qtty_quantity_from_json(json.as_ptr(), &mut out) };
+        assert_eq!(status, QTTY_ERR_INVALID_VALUE);
+    }
+
+    #[test]
+    fn test_quantity_json_object_roundtrip() {
+        let src = QttyQuantity::new(PI, UnitId::Radian);
+        let mut ptr: *mut std::ffi::c_char = std::ptr::null_mut();
+        unsafe { qtty_quantity_to_json(src, &mut ptr) };
+        let mut out = QttyQuantity::default();
+        let status = unsafe { qtty_quantity_from_json(ptr, &mut out) };
+        unsafe { qtty_string_free(ptr) };
+        assert_eq!(status, QTTY_OK);
+        assert_relative_eq!(out.value, PI, epsilon = 1e-12);
+        assert_eq!(out.unit, UnitId::Radian);
+    }
+
+    // ─── qtty_derived_make ───────────────────────────────────────────────────
+
+    #[test]
+    fn test_derived_make_success() {
+        let mut out = QttyDerivedQuantity::default();
+        let status = unsafe { qtty_derived_make(100.0, UnitId::Meter, UnitId::Second, &mut out) };
+        assert_eq!(status, QTTY_OK);
+        assert_relative_eq!(out.value, 100.0);
+        assert_eq!(out.numerator, UnitId::Meter);
+        assert_eq!(out.denominator, UnitId::Second);
+    }
+
+    #[test]
+    fn test_derived_make_null_out() {
+        let status =
+            unsafe { qtty_derived_make(1.0, UnitId::Meter, UnitId::Second, std::ptr::null_mut()) };
+        assert_eq!(status, QTTY_ERR_NULL_OUT);
+    }
+
+    // ─── qtty_derived_convert ────────────────────────────────────────────────
+
+    #[test]
+    fn test_derived_convert_success() {
+        // 100 m/s → 360 km/h
+        let src = QttyDerivedQuantity::new(100.0, UnitId::Meter, UnitId::Second);
+        let mut out = QttyDerivedQuantity::default();
+        let status =
+            unsafe { qtty_derived_convert(src, UnitId::Kilometer, UnitId::Hour, &mut out) };
+        assert_eq!(status, QTTY_OK);
+        assert_relative_eq!(out.value, 360.0, epsilon = 1e-9);
+        assert_eq!(out.numerator, UnitId::Kilometer);
+        assert_eq!(out.denominator, UnitId::Hour);
+    }
+
+    #[test]
+    fn test_derived_convert_null_out() {
+        let src = QttyDerivedQuantity::new(1.0, UnitId::Meter, UnitId::Second);
+        let status = unsafe {
+            qtty_derived_convert(src, UnitId::Kilometer, UnitId::Hour, std::ptr::null_mut())
+        };
+        assert_eq!(status, QTTY_ERR_NULL_OUT);
+    }
+
+    #[test]
+    fn test_derived_convert_incompatible_dim() {
+        // m/s → kg/h: incompatible numerator dimension
+        let src = QttyDerivedQuantity::new(1.0, UnitId::Meter, UnitId::Second);
+        let mut out = QttyDerivedQuantity::default();
+        let status = unsafe { qtty_derived_convert(src, UnitId::Kilogram, UnitId::Hour, &mut out) };
+        assert_eq!(status, QTTY_ERR_INCOMPATIBLE_DIM);
+    }
+
+    // ─── qtty_derived_to_json / qtty_derived_from_json ───────────────────────
+
+    #[test]
+    fn test_derived_to_json_success() {
+        let src = QttyDerivedQuantity::new(100.0, UnitId::Meter, UnitId::Second);
+        let mut ptr: *mut std::ffi::c_char = std::ptr::null_mut();
+        let status = unsafe { qtty_derived_to_json(src, &mut ptr) };
+        assert_eq!(status, QTTY_OK);
+        assert!(!ptr.is_null());
+        let s = unsafe { std::ffi::CStr::from_ptr(ptr).to_str().unwrap() };
+        assert!(s.contains("value"));
+        assert!(s.contains("Meter"));
+        assert!(s.contains("Second"));
+        unsafe { qtty_string_free(ptr) };
+    }
+
+    #[test]
+    fn test_derived_to_json_null_out() {
+        let src = QttyDerivedQuantity::new(1.0, UnitId::Meter, UnitId::Second);
+        let status = unsafe { qtty_derived_to_json(src, std::ptr::null_mut()) };
+        assert_eq!(status, QTTY_ERR_NULL_OUT);
+    }
+
+    #[test]
+    fn test_derived_from_json_success() {
+        // Roundtrip via to_json then from_json
+        let src = QttyDerivedQuantity::new(360.0, UnitId::Kilometer, UnitId::Hour);
+        let mut ptr: *mut std::ffi::c_char = std::ptr::null_mut();
+        unsafe { qtty_derived_to_json(src, &mut ptr) };
+
+        let mut out = QttyDerivedQuantity::default();
+        let status = unsafe { qtty_derived_from_json(ptr, &mut out) };
+        unsafe { qtty_string_free(ptr) };
+
+        assert_eq!(status, QTTY_OK);
+        assert_relative_eq!(out.value, 360.0);
+        assert_eq!(out.numerator, UnitId::Kilometer);
+        assert_eq!(out.denominator, UnitId::Hour);
+    }
+
+    #[test]
+    fn test_derived_from_json_null_json() {
+        let mut out = QttyDerivedQuantity::default();
+        let status = unsafe { qtty_derived_from_json(std::ptr::null(), &mut out) };
+        assert_eq!(status, QTTY_ERR_NULL_OUT);
+    }
+
+    #[test]
+    fn test_derived_from_json_null_out() {
+        let json =
+            std::ffi::CString::new(r#"{"value":1.0,"numerator":"Meter","denominator":"Second"}"#)
+                .unwrap();
+        let status = unsafe { qtty_derived_from_json(json.as_ptr(), std::ptr::null_mut()) };
+        assert_eq!(status, QTTY_ERR_NULL_OUT);
+    }
+
+    #[test]
+    fn test_derived_from_json_invalid_json() {
+        let json = std::ffi::CString::new("not json").unwrap();
+        let mut out = QttyDerivedQuantity::default();
+        let status = unsafe { qtty_derived_from_json(json.as_ptr(), &mut out) };
+        assert_eq!(status, QTTY_ERR_INVALID_VALUE);
+    }
+
+    #[test]
     fn test_ffi_version() {
         assert_eq!(qtty_ffi_version(), 1);
     }
