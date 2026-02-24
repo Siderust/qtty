@@ -19,6 +19,7 @@ fn main() {
     generate_unit_symbols(&units, &out_dir);
     generate_from_u32(&units, &out_dir);
     generate_registry(&units, &out_dir);
+    generate_unit_conversions(&units, &out_dir);
 
     eprintln!(
         "cargo:warning=Generated FFI bindings for {} units from units.csv",
@@ -36,6 +37,9 @@ struct UnitDef {
     dimension: String,
     discriminant: u32,
     ratio: String,
+    /// Optional Rust type path for auto-generating From/TryFrom impls.
+    /// When present, generates `impl_unit_ffi!(rust_type, UnitId::name)`.
+    rust_type: Option<String>,
 }
 
 fn parse_units_csv(crate_dir: &str) -> Vec<UnitDef> {
@@ -52,11 +56,23 @@ fn parse_units_csv(crate_dir: &str) -> Vec<UnitDef> {
             continue;
         }
 
-        let parts: Vec<&str> = line.split(',').collect();
-        if parts.len() != 5 {
+        let parts: Vec<&str> = line.splitn(6, ',').collect();
+        if parts.len() < 5 {
             eprintln!("cargo:warning=Skipping invalid line: {}", line);
             continue;
         }
+
+        // Optional 6th field: Rust type path for From/TryFrom generation
+        let rust_type = if parts.len() >= 6 {
+            let rt = parts[5].trim();
+            if rt.is_empty() {
+                None
+            } else {
+                Some(rt.to_string())
+            }
+        } else {
+            None
+        };
 
         units.push(UnitDef {
             discriminant: parts[0]
@@ -66,6 +82,7 @@ fn parse_units_csv(crate_dir: &str) -> Vec<UnitDef> {
             name: parts[2].to_string(),
             symbol: parts[3].to_string(),
             ratio: parts[4].to_string(),
+            rust_type,
         });
     }
 
@@ -81,7 +98,7 @@ fn generate_unit_enum(units: &[UnitDef], out_dir: &str) {
         "/// All discriminant values are explicitly assigned and are part of the ABI contract.\n",
     );
     code.push_str("#[repr(u32)]\n");
-    code.push_str("#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]\n");
+    code.push_str("#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]\n");
     code.push_str(
         "#[cfg_attr(feature = \"pyo3\", pyo3::pyclass(eq, eq_int, module = \"qtty\"))]\n",
     );
@@ -198,6 +215,33 @@ fn generate_registry(units: &[UnitDef], out_dir: &str) {
 
     let dest_path = PathBuf::from(out_dir).join("unit_registry.rs");
     fs::write(&dest_path, code).expect("Failed to write unit_registry.rs");
+}
+
+fn generate_unit_conversions(units: &[UnitDef], out_dir: &str) {
+    let mut code = String::from("// Auto-generated From/TryFrom impls from units.csv\n");
+    code.push_str("// Each `impl_unit_ffi!` invocation generates:\n");
+    code.push_str("//   impl From<RustType> for QttyQuantity\n");
+    code.push_str("//   impl TryFrom<QttyQuantity> for RustType\n\n");
+
+    let mut count = 0;
+    for unit in units {
+        if let Some(ref rust_type) = unit.rust_type {
+            code.push_str(&format!(
+                "crate::impl_unit_ffi!({}, crate::UnitId::{});\n",
+                rust_type, unit.name
+            ));
+            count += 1;
+        }
+    }
+
+    eprintln!(
+        "cargo:warning=Generated From/TryFrom impls for {} of {} units",
+        count,
+        units.len()
+    );
+
+    let dest_path = PathBuf::from(out_dir).join("unit_conversions.rs");
+    fs::write(&dest_path, code).expect("Failed to write unit_conversions.rs");
 }
 
 fn generate_c_header(crate_dir: &str) {
