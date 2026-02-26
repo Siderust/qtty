@@ -33,6 +33,50 @@
 //! let km = au.to::<Kilometer>();
 //! assert_eq!(km.value(), 149_597_870.7);
 //! ```
+//!
+//! ## All length units
+//!
+//! ```rust
+//! use qtty_core::length::*;
+//! use qtty_core::length::nominal::*;
+//!
+//! macro_rules! touch {
+//!     ($T:ty, $v:expr) => {{
+//!         let q = <$T>::new($v);
+//!         let _cloned = q;
+//!         assert!(q == q);
+//!     }};
+//! }
+//!
+//! // SI sub-meter
+//! touch!(Meters, 1.0); touch!(Decimeters, 1.0); touch!(Centimeters, 1.0);
+//! touch!(Millimeters, 1.0); touch!(Micrometers, 1.0); touch!(Nanometers, 1.0);
+//! touch!(Picometers, 1.0); touch!(Femtometers, 1.0); touch!(Attometers, 1.0);
+//! touch!(Zeptometers, 1.0); touch!(Yoctometers, 1.0);
+//! // SI super-meter
+//! touch!(Decameters, 1.0); touch!(Hectometers, 1.0); touch!(Kilometers, 1.0);
+//! touch!(Megameters, 1.0); touch!(Gigameters, 1.0); touch!(Terameters, 1.0);
+//! touch!(Petameters, 1.0); touch!(Exameters, 1.0); touch!(Zettameters, 1.0);
+//! touch!(Yottameters, 1.0);
+//! // Astronomical
+//! touch!(AstronomicalUnits, 1.0); touch!(LightYears, 1.0); touch!(Parsecs, 1.0);
+//! touch!(Kiloparsecs, 1.0); touch!(Megaparsecs, 1.0); touch!(Gigaparsecs, 1.0);
+//! // Imperial
+//! touch!(Inches, 1.0); touch!(Feet, 1.0); touch!(Yards, 1.0);
+//! touch!(Miles, 1.0); touch!(NauticalMiles, 1.0); touch!(Chains, 1.0);
+//! touch!(Rods, 1.0); touch!(Links, 1.0); touch!(Fathoms, 1.0);
+//! // Geodesy
+//! touch!(EarthMeridionalCircumferences, 1.0);
+//! touch!(EarthEquatorialCircumferences, 1.0);
+//! // Physics
+//! touch!(BohrRadii, 1.0); touch!(ClassicalElectronRadii, 1.0);
+//! touch!(PlanckLengths, 1.0); touch!(ElectronReducedComptonWavelengths, 1.0);
+//! // Nominal
+//! touch!(SolarRadiuses, 1.0); touch!(EarthRadii, 1.0);
+//! touch!(EarthEquatorialRadii, 1.0); touch!(EarthPolarRadii, 1.0);
+//! touch!(LunarRadii, 1.0); touch!(JupiterRadii, 1.0);
+//! touch!(LunarDistances, 1.0); touch!(SolarDiameters, 1.0);
+//! ```
 
 use crate::{Quantity, Unit};
 use core::f64::consts::PI;
@@ -911,5 +955,316 @@ mod tests {
             let scale = i.abs().max(1.0);
             prop_assert!((back.value() - original.value()).abs() < 1e-9 * scale);
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // SI sub-meter ladder
+    // ─────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn decimeter_to_meter() {
+        let q = Decimeters::new(10.0);
+        assert_relative_eq!(q.to::<Meter>().value(), 1.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn centimeter_to_meter() {
+        let q = Centimeters::new(100.0);
+        assert_relative_eq!(q.to::<Meter>().value(), 1.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn millimeter_to_centimeter() {
+        let q = Millimeters::new(10.0);
+        assert_relative_eq!(q.to::<Centimeter>().value(), 1.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn micrometer_to_millimeter() {
+        let q = Micrometers::new(1_000.0);
+        assert_relative_eq!(q.to::<Millimeter>().value(), 1.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn nanometer_to_micrometer() {
+        let q = Nanometers::new(1_000.0);
+        assert_relative_eq!(q.to::<Micrometer>().value(), 1.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn picometer_to_nanometer() {
+        let q = Picometers::new(1_000.0);
+        assert_relative_eq!(q.to::<Nanometer>().value(), 1.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn femtometer_to_picometer() {
+        let q = Femtometers::new(1_000.0);
+        assert_relative_eq!(q.to::<Picometer>().value(), 1.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn attometer_to_femtometer() {
+        let q = Attometers::new(1_000.0);
+        assert_relative_eq!(q.to::<Femtometer>().value(), 1.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn zeptometer_to_attometer() {
+        let q = Zeptometers::new(1_000.0);
+        assert_relative_eq!(q.to::<Attometer>().value(), 1.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn yoctometer_to_zeptometer() {
+        let q = Yoctometers::new(1_000.0);
+        assert_relative_eq!(q.to::<Zeptometer>().value(), 1.0, max_relative = 1e-15);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // SI super-meter ladder
+    // ─────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn decameter_to_meter() {
+        let q = Decameters::new(1.0);
+        assert_relative_eq!(q.to::<Meter>().value(), 10.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn hectometer_to_meter() {
+        let q = Hectometers::new(1.0);
+        assert_relative_eq!(q.to::<Meter>().value(), 100.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn megameter_to_kilometer() {
+        let q = Megameters::new(1.0);
+        assert_relative_eq!(q.to::<Kilometer>().value(), 1_000.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn gigameter_to_megameter() {
+        let q = Gigameters::new(1.0);
+        assert_relative_eq!(q.to::<Megameter>().value(), 1_000.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn terameter_to_gigameter() {
+        let q = Terameters::new(1.0);
+        assert_relative_eq!(q.to::<Gigameter>().value(), 1_000.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn petameter_to_terameter() {
+        let q = Petameters::new(1.0);
+        assert_relative_eq!(q.to::<Terameter>().value(), 1_000.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn exameter_to_petameter() {
+        let q = Exameters::new(1.0);
+        assert_relative_eq!(q.to::<Petameter>().value(), 1_000.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn zettameter_to_exameter() {
+        let q = Zettameters::new(1.0);
+        assert_relative_eq!(q.to::<Exameter>().value(), 1_000.0, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn yottameter_to_zettameter() {
+        let q = Yottameters::new(1.0);
+        assert_relative_eq!(q.to::<Zettameter>().value(), 1_000.0, max_relative = 1e-15);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Imperial / surveying units
+    // ─────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn foot_to_meter() {
+        let q = Feet::new(1.0);
+        // 1 ft = 0.3048 m exactly
+        assert_relative_eq!(q.to::<Meter>().value(), 0.3048, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn yard_to_meter() {
+        let q = Yards::new(1.0);
+        // 1 yd = 0.9144 m exactly
+        assert_relative_eq!(q.to::<Meter>().value(), 0.9144, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn mile_to_kilometer() {
+        let q = Miles::new(1.0);
+        // 1 mi = 1609.344 m exactly
+        assert_relative_eq!(q.to::<Kilometer>().value(), 1.609_344, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn fathom_to_foot() {
+        let q = Fathoms::new(1.0);
+        // 1 fathom = 6 ft
+        assert_relative_eq!(q.to::<Foot>().value(), 6.0, max_relative = 1e-14);
+    }
+
+    #[test]
+    fn chain_to_foot() {
+        let q = Chains::new(1.0);
+        // 1 chain = 66 ft
+        assert_relative_eq!(q.to::<Foot>().value(), 66.0, max_relative = 1e-14);
+    }
+
+    #[test]
+    fn rod_to_foot() {
+        let q = Rods::new(1.0);
+        // 1 rod = 16.5 ft
+        assert_relative_eq!(q.to::<Foot>().value(), 16.5, max_relative = 1e-14);
+    }
+
+    #[test]
+    fn link_to_foot() {
+        let q = Links::new(100.0);
+        // 100 links = 1 chain = 66 ft
+        assert_relative_eq!(q.to::<Foot>().value(), 66.0, max_relative = 1e-14);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Larger astronomical parsec multiples
+    // ─────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn megaparsec_to_kiloparsec() {
+        let q = Megaparsecs::new(1.0);
+        assert_relative_eq!(q.to::<Kiloparsec>().value(), 1_000.0, max_relative = 1e-12);
+    }
+
+    #[test]
+    fn gigaparsec_to_megaparsec() {
+        let q = Gigaparsecs::new(1.0);
+        assert_relative_eq!(q.to::<Megaparsec>().value(), 1_000.0, max_relative = 1e-12);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Geodesy
+    // ─────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn earth_meridional_circumference_to_km() {
+        let q = EarthMeridionalCircumferences::new(1.0);
+        // ≈ 40_007.863 km
+        assert_relative_eq!(q.to::<Kilometer>().value(), 40_007.863, max_relative = 1e-6);
+    }
+
+    #[test]
+    fn earth_equatorial_circumference_to_km() {
+        let q = EarthEquatorialCircumferences::new(1.0);
+        // ≈ 40_075.017 km
+        assert_relative_eq!(q.to::<Kilometer>().value(), 40_075.017, max_relative = 1e-6);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Physics lengths
+    // ─────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn bohr_radius_to_picometers() {
+        let q = BohrRadii::new(1.0);
+        // a0 ≈ 52.9177 pm
+        assert_relative_eq!(q.to::<Picometer>().value(), 52.917_72, max_relative = 1e-5);
+    }
+
+    #[test]
+    fn classical_electron_radius_to_femtometers() {
+        let q = ClassicalElectronRadii::new(1.0);
+        // re ≈ 2.81794 fm
+        assert_relative_eq!(
+            q.to::<Femtometer>().value(),
+            2.817_940_326_2,
+            max_relative = 1e-9
+        );
+    }
+
+    #[test]
+    fn planck_length_ratio() {
+        // Just check ratio round-trips without numeric overflow
+        let q = PlanckLengths::new(1.0);
+        let back = q.to::<Meter>().to::<PlanckLength>();
+        assert_relative_eq!(back.value(), 1.0, max_relative = 1e-9);
+    }
+
+    #[test]
+    fn electron_compton_wavelength_to_femtometers() {
+        let q = ElectronReducedComptonWavelengths::new(1.0);
+        // λ̄_e ≈ 386.159 fm
+        assert_relative_eq!(
+            q.to::<Femtometer>().value(),
+            386.159_267_96,
+            max_relative = 1e-7
+        );
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Nominal submodule
+    // ─────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn earth_radius_to_km() {
+        let q = nominal::EarthRadii::new(1.0);
+        assert_relative_eq!(q.to::<Kilometer>().value(), 6_371.0, max_relative = 1e-9);
+    }
+
+    #[test]
+    fn earth_equatorial_radius_to_km() {
+        let q = nominal::EarthEquatorialRadii::new(1.0);
+        assert_relative_eq!(q.to::<Kilometer>().value(), 6_378.137, max_relative = 1e-9);
+    }
+
+    #[test]
+    fn earth_polar_radius_to_km() {
+        let q = nominal::EarthPolarRadii::new(1.0);
+        assert_relative_eq!(
+            q.to::<Kilometer>().value(),
+            6_356.752_314_2,
+            max_relative = 1e-9
+        );
+    }
+
+    #[test]
+    fn lunar_radius_to_km() {
+        let q = nominal::LunarRadii::new(1.0);
+        assert_relative_eq!(q.to::<Kilometer>().value(), 1_737.4, max_relative = 1e-9);
+    }
+
+    #[test]
+    fn jupiter_radius_to_km() {
+        let q = nominal::JupiterRadii::new(1.0);
+        assert_relative_eq!(q.to::<Kilometer>().value(), 71_492.0, max_relative = 1e-9);
+    }
+
+    #[test]
+    fn lunar_distance_to_km() {
+        let q = nominal::LunarDistances::new(1.0);
+        assert_relative_eq!(q.to::<Kilometer>().value(), 384_400.0, max_relative = 1e-9);
+    }
+
+    #[test]
+    fn solar_diameter_to_solar_radius() {
+        let diameters = nominal::SolarDiameters::new(1.0);
+        let radii = diameters.to::<nominal::SolarRadius>();
+        assert_relative_eq!(radii.value(), 2.0, max_relative = 1e-14);
+    }
+
+    #[test]
+    fn symbols_are_correct() {
+        assert_eq!(Meter::SYMBOL, "m");
+        assert_eq!(Kilometer::SYMBOL, "km");
+        assert_eq!(Centimeter::SYMBOL, "cm");
+        assert_eq!(Inch::SYMBOL, "in");
+        assert_eq!(AstronomicalUnit::SYMBOL, "au");
+        assert_eq!(Parsec::SYMBOL, "pc");
     }
 }

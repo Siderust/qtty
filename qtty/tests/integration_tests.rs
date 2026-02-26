@@ -229,6 +229,58 @@ fn derive_macro_display_formatting() {
 }
 
 #[test]
+fn display_format_precision() {
+    let x = Seconds::new(1234.56789);
+    // {:.2} → two decimal places
+    assert_eq!(format!("{:.2}", x), "1234.57 s");
+    // {:.0} → no decimal places (rounded)
+    assert_eq!(format!("{:.0}", x), "1235 s");
+    // {:.5} → five decimal places
+    assert_eq!(format!("{:.5}", x), "1234.56789 s");
+}
+
+#[test]
+fn display_lower_exp_formatting() {
+    let x = Seconds::new(1234.56789);
+    // {:e} → default scientific notation (lower-case e)
+    assert_eq!(format!("{:e}", x), "1.23456789e3 s");
+    // {:.4e} → precision + scientific
+    assert_eq!(format!("{:.4e}", x), "1.2346e3 s");
+    // {:.0e} → zero decimal places
+    assert_eq!(format!("{:.0e}", x), "1e3 s");
+}
+
+#[test]
+fn display_upper_exp_formatting() {
+    let x = Seconds::new(1234.56789);
+    // {:E} → scientific notation upper-case E
+    assert_eq!(format!("{:E}", x), "1.23456789E3 s");
+    // {:.4E} → precision + upper-case scientific
+    assert_eq!(format!("{:.4E}", x), "1.2346E3 s");
+}
+
+#[test]
+fn display_format_annotations_per_unit() {
+    let v: velocity::Velocity<Kilometer, Second> = velocity::Velocity::new(1234.56789);
+    // Default
+    assert_eq!(format!("{}", v), "1234.56789 km/s");
+    // Precision
+    assert_eq!(format!("{:.2}", v), "1234.57 km/s");
+    // Scientific lower
+    assert_eq!(format!("{:.4e}", v), "1.2346e3 km/s");
+    // Scientific upper
+    assert_eq!(format!("{:.4E}", v), "1.2346E3 km/s");
+}
+
+#[test]
+fn display_sign_and_negative_values() {
+    let neg = Meters::new(-42.5);
+    assert_eq!(format!("{}", neg), "-42.5 m");
+    assert_eq!(format!("{:.1}", neg), "-42.5 m");
+    assert_eq!(format!("{:.2e}", neg), "-4.25e1 m");
+}
+
+#[test]
 fn quantity_basic_arithmetic() {
     let a = Meters::new(10.0);
     let b = Meters::new(5.0);
