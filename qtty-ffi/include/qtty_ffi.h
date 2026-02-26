@@ -79,22 +79,22 @@
 #define QTTY_ERR_INVALID_VALUE -4
 
 /*
- Error: the output buffer provided was too small to hold the formatted result.
+ Error: the provided output buffer is too small.
  */
 #define QTTY_ERR_BUFFER_TOO_SMALL -5
 
 /*
- Format flag: default decimal notation (e.g. "1234.568 m").
+ Format flag: default decimal notation (e.g. `"1234.57 m"`).
  */
 #define QTTY_FMT_DEFAULT 0
 
 /*
- Format flag: scientific notation with lowercase 'e' (e.g. "1.235e3 m").
+ Format flag: scientific notation with lowercase `e` (e.g. `"1.23e3 m"`).
  */
 #define QTTY_FMT_LOWER_EXP 1
 
 /*
- Format flag: scientific notation with uppercase 'E' (e.g. "1.235E3 m").
+ Format flag: scientific notation with uppercase `E` (e.g. `"1.23E3 m"`).
  */
 #define QTTY_FMT_UPPER_EXP 2
 
@@ -967,31 +967,40 @@ int32_t qtty_quantity_convert_value(double value,
 const char *qtty_unit_name(UnitId unit);
 
 /*
- Formats a physical quantity as a human-readable string.
+ Formats a quantity as a human-readable string into a caller-provided buffer.
 
- Writes the formatted representation of `qty` into the caller-supplied buffer
- `buf` of length `buf_len` bytes (including space for the NUL terminator).
+ Produces a string like `"1234.57 m"`, `"1.23e3 km"`, or `"1.23E3 km"` depending
+ on the `flags` parameter. The precision and format type mirror Rust's `{:.2}`,
+ `{:.4e}`, and `{:.4E}` format annotations, allowing callers to pass the same
+ format parameters that the Rust `Display`, `LowerExp`, and `UpperExp` trait impls
+ use internally.
 
  # Arguments
 
- * `qty`       - The quantity to format.
- * `precision` - Number of decimal digits, or -1 for default (shortest exact).
- * `flags`     - `QTTY_FMT_DEFAULT` (0), `QTTY_FMT_LOWER_EXP` (1), or `QTTY_FMT_UPPER_EXP` (2).
- * `buf`       - Caller-allocated output buffer.
+ * `qty`       - The quantity (`value + unit`) to format.
+ * `precision` - Number of decimal digits after the point.  Pass `-1` for the
+   default precision (shortest exact representation for floats).
+ * `flags`     - Selects the notation:
+   - `QTTY_FMT_DEFAULT`   (0): decimal notation, e.g. `"1234.568 m"`
+   - `QTTY_FMT_LOWER_EXP` (1): scientific with lowercase `e`, e.g. `"1.235e3 m"`
+   - `QTTY_FMT_UPPER_EXP` (2): scientific with uppercase `E`, e.g. `"1.235E3 m"`
+ * `buf`       - Caller-allocated output buffer (must be non-null).
  * `buf_len`   - Size of `buf` in bytes (must include space for the NUL terminator).
 
  # Returns
 
- `QTTY_OK` on success, `QTTY_ERR_NULL_OUT` if `buf` is null,
- `QTTY_ERR_UNKNOWN_UNIT` if the unit ID is invalid, or
- `QTTY_ERR_BUFFER_TOO_SMALL` if the result does not fit in `buf`.
+ * Non-negative: number of bytes written, **excluding** the NUL terminator.
+ * `QTTY_ERR_NULL_OUT`        if `buf` is null.
+ * `QTTY_ERR_UNKNOWN_UNIT`    if `qty.unit` is not a recognized unit ID.
+ * `QTTY_ERR_BUFFER_TOO_SMALL` if `buf_len` is too small; the formatted string
+   (including the NUL terminator) requires `-return_value` bytes.
 
  # Safety
 
- `buf` must point to at least `buf_len` bytes of writable memory.
- The string written is always NUL-terminated on success.
+ The caller must ensure that `buf` points to a writable allocation of at least
+ `buf_len` bytes.  The written string is always NUL-terminated on success.
  */
-int32_t qtty_quantity_format(qtty_quantity_t qty,
+int32_t qtty_quantity_format(struct qtty_quantity_t qty,
                              int32_t precision,
                              uint32_t flags,
                              char *buf,
@@ -1097,7 +1106,6 @@ int32_t qtty_derived_to_json(struct qtty_derived_quantity_t src, char **out);
  and `out` points to valid, writable memory for a `QttyDerivedQuantity`.
  */
 int32_t qtty_derived_from_json(const char *json, struct qtty_derived_quantity_t *out);
->>>>>>> main
 
 /*
  Returns the FFI ABI version.

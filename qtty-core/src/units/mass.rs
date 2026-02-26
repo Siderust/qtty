@@ -14,6 +14,21 @@
 //! let sm = m.to::<SolarMass>();
 //! assert!(sm.value() < 1.0);
 //! ```
+//!
+//! ## All mass units
+//!
+//! ```rust
+//! use qtty_core::mass::*;
+//!
+//! macro_rules! touch {
+//!     ($T:ty, $v:expr) => {{ let q = <$T>::new($v); let _c = q; assert!(q == q); }};
+//! }
+//!
+//! touch!(Grams, 1.0);     touch!(Tonnes, 1.0);   touch!(Carats, 1.0);
+//! touch!(Grains, 1.0);    touch!(Pounds, 1.0);   touch!(Ounces, 1.0);
+//! touch!(Stones, 1.0);    touch!(ShortTons, 1.0); touch!(LongTons, 1.0);
+//! touch!(AtomicMassUnits, 1.0); touch!(SolarMasses, 1.0);
+//! ```
 
 use crate::{Quantity, Unit};
 use qtty_derive::Unit;
@@ -372,5 +387,102 @@ mod tests {
             // 1000 g = 1 kg
             prop_assert!((grams.value() / kg.value() - 1000.0).abs() < 1e-9);
         }
+    }
+
+    // ─── Non-SI mass units ──────────────────────────────────────────────────
+
+    #[test]
+    fn tonne_to_kilogram() {
+        let t = Tonnes::new(1.0);
+        let kg = t.to::<Kilogram>();
+        assert_relative_eq!(kg.value(), 1_000.0, max_relative = 1e-12);
+    }
+
+    #[test]
+    fn carat_to_gram() {
+        let ct = Carats::new(5.0);
+        let g = ct.to::<Gram>();
+        // 1 ct = 0.2 g
+        assert_relative_eq!(g.value(), 1.0, max_relative = 1e-12);
+    }
+
+    #[test]
+    fn grain_to_milligram() {
+        let gr = Grains::new(1.0);
+        let mg = gr.to::<Milligram>();
+        // ratio in code: 6_479_891 / 1_000_000_000 g = 6.479891 mg
+        assert_relative_eq!(mg.value(), 6.479_891, max_relative = 1e-6);
+    }
+
+    #[test]
+    fn pound_to_gram() {
+        let lb = Pounds::new(1.0);
+        let g = lb.to::<Gram>();
+        // 1 lb = 453.59237 g
+        assert_relative_eq!(g.value(), 453.592_37, max_relative = 1e-9);
+    }
+
+    #[test]
+    fn ounce_to_gram() {
+        let oz = Ounces::new(16.0);
+        let g = oz.to::<Gram>();
+        // 16 oz = 1 lb = 453.59237 g
+        assert_relative_eq!(g.value(), 453.592_37, max_relative = 1e-9);
+    }
+
+    #[test]
+    fn stone_to_pound() {
+        let st = Stones::new(1.0);
+        let lb = st.to::<Pound>();
+        // 1 st = 14 lb
+        assert_relative_eq!(lb.value(), 14.0, max_relative = 1e-12);
+    }
+
+    #[test]
+    fn short_ton_to_pound() {
+        let ton = ShortTons::new(1.0);
+        let lb = ton.to::<Pound>();
+        // 1 US short ton = 2000 lb
+        assert_relative_eq!(lb.value(), 2000.0, max_relative = 1e-12);
+    }
+
+    #[test]
+    fn long_ton_to_pound() {
+        let ton = LongTons::new(1.0);
+        let lb = ton.to::<Pound>();
+        // 1 UK long ton = 2240 lb
+        assert_relative_eq!(lb.value(), 2240.0, max_relative = 1e-12);
+    }
+
+    #[test]
+    fn atomic_mass_unit_to_gram() {
+        // 1 u ≈ 1.660539e-24 g
+        let u = AtomicMassUnits::new(1.0);
+        let g = u.to::<Gram>();
+        assert_relative_eq!(g.value(), 1.660_539_068_92e-24, max_relative = 1e-6);
+    }
+
+    // ─── SI gram-prefix sampling ────────────────────────────────────────────
+
+    #[test]
+    fn milligram_to_gram() {
+        let mg = Milligrams::new(1000.0);
+        let g = mg.to::<Gram>();
+        assert_relative_eq!(g.value(), 1.0, max_relative = 1e-12);
+    }
+
+    #[test]
+    fn microgram_to_milligram() {
+        let ug = Micrograms::new(1000.0);
+        let mg = ug.to::<Milligram>();
+        assert_relative_eq!(mg.value(), 1.0, max_relative = 1e-12);
+    }
+
+    #[test]
+    fn symbols_are_correct() {
+        assert_eq!(Kilogram::SYMBOL, "kg");
+        assert_eq!(Gram::SYMBOL, "g");
+        assert_eq!(Pound::SYMBOL, "lb");
+        assert_eq!(Tonne::SYMBOL, "t");
     }
 }
