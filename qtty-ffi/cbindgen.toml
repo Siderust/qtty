@@ -73,7 +73,7 @@ usize_is_size_t = true
 
 [export]
 include = [
-    "UnitId", "DimensionId", "QttyQuantity",
+    "UnitId", "DimensionId", "QttyQuantity", "QttyDerivedQuantity",
     "QTTY_OK", "QTTY_ERR_UNKNOWN_UNIT", "QTTY_ERR_INCOMPATIBLE_DIM",
     "QTTY_ERR_NULL_OUT", "QTTY_ERR_INVALID_VALUE", "QTTY_ERR_BUFFER_TOO_SMALL",
     "QTTY_FMT_DEFAULT", "QTTY_FMT_LOWER_EXP", "QTTY_FMT_UPPER_EXP",
@@ -82,6 +82,7 @@ exclude = ["UnitMeta"]
 
 [export.rename]
 "QttyQuantity" = "qtty_quantity_t"
+"QttyDerivedQuantity" = "qtty_derived_quantity_t"
 
 [fn]
 rename_args = "SnakeCase"
