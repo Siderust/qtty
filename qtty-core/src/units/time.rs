@@ -21,6 +21,36 @@
 //! let two_hours = seconds.to::<Hour>();
 //! assert!((two_hours.value() - 0.5).abs() < 1e-12);
 //! ```
+//!
+//! ## All time units
+//!
+//! ```rust
+//! use qtty_core::time::*;
+//!
+//! macro_rules! touch {
+//!     ($T:ty, $v:expr) => {{
+//!         let q = <$T>::new($v);
+//!         let _cloned = q;
+//!         assert!(q == q);
+//!     }};
+//! }
+//!
+//! touch!(Attoseconds,  1.0); touch!(Femtoseconds, 1.0);
+//! touch!(Picoseconds,  1.0); touch!(Nanoseconds,  1.0);
+//! touch!(Microseconds, 1.0); touch!(Milliseconds, 1.0);
+//! touch!(Centiseconds, 1.0); touch!(Deciseconds,  1.0);
+//! touch!(Seconds,      1.0); touch!(Decaseconds,  1.0);
+//! touch!(Hectoseconds, 1.0); touch!(Kiloseconds,  1.0);
+//! touch!(Megaseconds,  1.0); touch!(Gigaseconds,  1.0);
+//! touch!(Teraseconds,  1.0); touch!(Minutes,      1.0);
+//! touch!(Hours,        1.0); touch!(Days,         1.0);
+//! touch!(Weeks,        1.0); touch!(Fortnights,   1.0);
+//! touch!(Years,        1.0); touch!(Decades,      1.0);
+//! touch!(Centuries,    1.0); touch!(Millennia,    1.0);
+//! touch!(JulianYears,  1.0); touch!(JulianCenturies, 1.0);
+//! touch!(SiderealDays, 1.0); touch!(SynodicMonths, 1.0);
+//! touch!(SiderealYears, 1.0);
+//! ```
 
 use crate::{Quantity, Unit};
 use qtty_derive::Unit;
@@ -478,5 +508,160 @@ mod tests {
             // 1 Julian year = 365.25 days
             prop_assert!((day.value() / jy.value() - 365.25).abs() < 1e-9);
         }
+    }
+
+    // ─── SI sub-second units ────────────────────────────────────────────────
+
+    #[test]
+    fn attosecond_to_second() {
+        let q = Attoseconds::new(1e18);
+        let s = q.to::<Second>();
+        assert_abs_diff_eq!(s.value(), 1.0, epsilon = 1e-9);
+    }
+
+    #[test]
+    fn femtosecond_to_second() {
+        let q = Femtoseconds::new(1e15);
+        let s = q.to::<Second>();
+        assert_abs_diff_eq!(s.value(), 1.0, epsilon = 1e-9);
+    }
+
+    #[test]
+    fn picosecond_to_second() {
+        let q = Picoseconds::new(1e12);
+        let s = q.to::<Second>();
+        assert_abs_diff_eq!(s.value(), 1.0, epsilon = 1e-9);
+    }
+
+    #[test]
+    fn nanosecond_to_second() {
+        let q = Nanoseconds::new(1e9);
+        let s = q.to::<Second>();
+        assert_abs_diff_eq!(s.value(), 1.0, epsilon = 1e-9);
+    }
+
+    #[test]
+    fn microsecond_to_second() {
+        let q = Microseconds::new(1e6);
+        let s = q.to::<Second>();
+        assert_abs_diff_eq!(s.value(), 1.0, epsilon = 1e-9);
+    }
+
+    #[test]
+    fn centisecond_to_second() {
+        let q = Centiseconds::new(100.0);
+        let s = q.to::<Second>();
+        assert_abs_diff_eq!(s.value(), 1.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn decisecond_to_second() {
+        let q = Deciseconds::new(10.0);
+        let s = q.to::<Second>();
+        assert_abs_diff_eq!(s.value(), 1.0, epsilon = 1e-12);
+    }
+
+    // ─── SI multi-second units ──────────────────────────────────────────────
+
+    #[test]
+    fn decasecond_to_second() {
+        let q = Decaseconds::new(1.0);
+        let s = q.to::<Second>();
+        assert_abs_diff_eq!(s.value(), 10.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn hectosecond_to_second() {
+        let q = Hectoseconds::new(1.0);
+        let s = q.to::<Second>();
+        assert_abs_diff_eq!(s.value(), 100.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn kilosecond_to_second() {
+        let q = Kiloseconds::new(1.0);
+        let s = q.to::<Second>();
+        assert_abs_diff_eq!(s.value(), 1_000.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn megasecond_to_second() {
+        let q = Megaseconds::new(1.0);
+        let s = q.to::<Second>();
+        assert_abs_diff_eq!(s.value(), 1e6, epsilon = 1.0);
+    }
+
+    #[test]
+    fn gigasecond_to_second() {
+        let q = Gigaseconds::new(1.0);
+        let s = q.to::<Second>();
+        assert_abs_diff_eq!(s.value(), 1e9, epsilon = 1e3);
+    }
+
+    #[test]
+    fn terasecond_to_second() {
+        let q = Teraseconds::new(1.0);
+        let s = q.to::<Second>();
+        assert_abs_diff_eq!(s.value(), 1e12, epsilon = 1e6);
+    }
+
+    // ─── Civil units ────────────────────────────────────────────────────────
+
+    #[test]
+    fn fortnight_to_days() {
+        let q = Fortnights::new(1.0);
+        let d = q.to::<Day>();
+        assert_abs_diff_eq!(d.value(), 14.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn decade_to_years() {
+        let q = Decades::new(1.0);
+        let y = q.to::<Year>();
+        assert_abs_diff_eq!(y.value(), 10.0, epsilon = 1e-9);
+    }
+
+    #[test]
+    fn millennium_to_years() {
+        let q = Millennia::new(1.0);
+        let y = q.to::<Year>();
+        assert_abs_diff_eq!(y.value(), 1000.0, epsilon = 1e-9);
+    }
+
+    // ─── Astronomical mean units ────────────────────────────────────────────
+
+    #[test]
+    fn sidereal_day_to_seconds() {
+        let q = SiderealDays::new(1.0);
+        let s = q.to::<Second>();
+        // 1 sidereal day ≈ 86164.0905 s
+        assert_abs_diff_eq!(s.value(), 86_164.090_5, epsilon = 1e-3);
+    }
+
+    #[test]
+    fn synodic_month_to_days() {
+        let q = SynodicMonths::new(1.0);
+        let d = q.to::<Day>();
+        // 1 synodic month ≈ 29.530588 d
+        assert_abs_diff_eq!(d.value(), 29.530_588, epsilon = 1e-6);
+    }
+
+    #[test]
+    fn sidereal_year_to_days() {
+        let q = SiderealYears::new(1.0);
+        let d = q.to::<Day>();
+        // 1 sidereal year ≈ 365.256363004 d
+        assert_abs_diff_eq!(d.value(), 365.256_363_004, epsilon = 1e-6);
+    }
+
+    // ─── Symbol checks ──────────────────────────────────────────────────────
+
+    #[test]
+    fn symbols_are_correct() {
+        assert_eq!(format!("{}", Attoseconds::new(1.0)), "1 as");
+        assert_eq!(format!("{}", Nanoseconds::new(1.0)), "1 ns");
+        assert_eq!(format!("{}", Kiloseconds::new(1.0)), "1 ks");
+        assert_eq!(format!("{}", Fortnights::new(1.0)), "1 fn");
+        assert_eq!(format!("{}", SiderealDays::new(1.0)), "1 sd");
     }
 }

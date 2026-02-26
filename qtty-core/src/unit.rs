@@ -217,3 +217,113 @@ where
         Quantity::new(self.value())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::units::length::{Kilometer, Meter, Meters};
+    use crate::units::time::{Hour, Second};
+    use crate::Quantity;
+
+    // ── Per: Display, LowerExp, UpperExp ──────────────────────────────────────
+
+    #[test]
+    fn per_display_formats_value_and_symbol() {
+        // 10 m/s with Display
+        let qty: Quantity<Per<Meter, Second>> = Quantity::new(10.0);
+        let s = format!("{qty}");
+        assert_eq!(s, "10 m/s");
+    }
+
+    #[test]
+    fn per_display_with_precision() {
+        let qty: Quantity<Per<Meter, Second>> = Quantity::new(1.5);
+        let s = format!("{qty:.2}");
+        assert_eq!(s, "1.50 m/s");
+    }
+
+    #[test]
+    fn per_lower_exp_formats_correctly() {
+        let qty: Quantity<Per<Meter, Second>> = Quantity::new(1000.0);
+        let s = format!("{qty:e}");
+        assert!(s.contains("e"), "Expected scientific notation, got: {s}");
+        assert!(s.ends_with("m/s"), "Expected 'm/s' suffix, got: {s}");
+    }
+
+    #[test]
+    fn per_upper_exp_formats_correctly() {
+        let qty: Quantity<Per<Meter, Second>> = Quantity::new(1000.0);
+        let s = format!("{qty:E}");
+        assert!(s.contains("E"), "Expected uppercase-E notation, got: {s}");
+        assert!(s.ends_with("m/s"), "Expected 'm/s' suffix, got: {s}");
+    }
+
+    // ── Prod: Display, LowerExp, UpperExp ─────────────────────────────────────
+
+    #[test]
+    fn prod_display_formats_value_and_symbol() {
+        let qty: Quantity<Prod<Meter, Second>> = Quantity::new(3.0);
+        let s = format!("{qty}");
+        assert_eq!(s, "3 m·s");
+    }
+
+    #[test]
+    fn prod_display_with_precision() {
+        let qty: Quantity<Prod<Meter, Second>> = Quantity::new(2.5);
+        let s = format!("{qty:.3}");
+        assert_eq!(s, "2.500 m·s");
+    }
+
+    #[test]
+    fn prod_lower_exp_formats_correctly() {
+        let qty: Quantity<Prod<Kilometer, Second>> = Quantity::new(5000.0);
+        let s = format!("{qty:.2e}");
+        assert!(s.contains("e"), "Expected scientific notation, got: {s}");
+        assert!(s.ends_with("km·s"), "Expected 'km·s' suffix, got: {s}");
+    }
+
+    #[test]
+    fn prod_upper_exp_formats_correctly() {
+        let qty: Quantity<Prod<Kilometer, Second>> = Quantity::new(5000.0);
+        let s = format!("{qty:.2E}");
+        assert!(s.contains("E"), "Expected uppercase-E notation, got: {s}");
+        assert!(s.ends_with("km·s"), "Expected 'km·s' suffix, got: {s}");
+    }
+
+    // ── Unitless: LowerExp, UpperExp ──────────────────────────────────────────
+
+    #[test]
+    fn unitless_lower_exp_formats_correctly() {
+        let qty: Quantity<Unitless> = Quantity::new(0.5);
+        let s = format!("{qty:e}");
+        assert!(s.contains("e"), "Expected scientific notation, got: {s}");
+        // No unit symbol for Unitless
+        assert!(!s.contains(' '), "Unitless should not have a space, got: {s}");
+    }
+
+    #[test]
+    fn unitless_upper_exp_formats_correctly() {
+        let qty: Quantity<Unitless> = Quantity::new(0.5);
+        let s = format!("{qty:E}");
+        assert!(s.contains("E"), "Expected uppercase-E notation, got: {s}");
+    }
+
+    // ── Simplify: Per<U, U> → Unitless ────────────────────────────────────────
+
+    #[test]
+    fn simplify_per_u_u_gives_unitless() {
+        let ratio = Meters::new(3.0) / Meters::new(6.0);
+        let unitless: Quantity<Unitless> = ratio.simplify();
+        assert!((unitless.value() - 0.5).abs() < 1e-12);
+    }
+
+    // ── Simplify: Per<N, Per<N, D>> → D ──────────────────────────────────────
+
+    #[test]
+    fn simplify_per_n_per_n_d_gives_d() {
+        // Quantity<Per<Meter, Per<Meter, Hour>>> should simplify to Quantity<Hour>
+        let q: Quantity<Per<Meter, Per<Meter, Hour>>> = Quantity::new(42.0);
+        let simplified: Quantity<Hour> = q.simplify();
+        assert!((simplified.value() - 42.0).abs() < 1e-12);
+    }
+}

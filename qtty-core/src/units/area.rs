@@ -21,6 +21,23 @@
 //! let area: SquareMeters = area_prod.to();          // Convert to named area unit
 //! assert!((area.value() - 25.0).abs() < 1e-12);
 //! ```
+//!
+//! ## All area units
+//!
+//! ```rust
+//! use qtty_core::area::*;
+//!
+//! macro_rules! touch {
+//!     ($T:ty, $v:expr) => {{ let q = <$T>::new($v); let _c = q; assert!(q == q); }};
+//! }
+//!
+//! touch!(SquareMeters, 1.0);     touch!(SquareKilometers, 1.0);
+//! touch!(SquareCentimeters, 1.0);touch!(SquareMillimeters, 1.0);
+//! touch!(Hectares, 1.0);         touch!(Ares, 1.0);
+//! touch!(SquareInches, 1.0);     touch!(SquareFeet, 1.0);
+//! touch!(SquareYards, 1.0);      touch!(SquareMiles, 1.0);
+//! touch!(Acres, 1.0);
+//! ```
 
 use crate::{Quantity, Unit};
 use qtty_derive::Unit;
@@ -170,5 +187,57 @@ mod tests {
         let a = SquareMiles::new(1.0);
         let b: SquareKilometers = a.to();
         assert_abs_diff_eq!(b.value(), 2.589_988_110_336, epsilon = 1e-6);
+    }
+
+    #[test]
+    fn sqcm_to_sqm() {
+        let a = SquareCentimeters::new(10_000.0);
+        let b: SquareMeters = a.to();
+        assert_abs_diff_eq!(b.value(), 1.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn sqmm_to_sqcm() {
+        let a = SquareMillimeters::new(100.0);
+        let b: SquareCentimeters = a.to();
+        assert_abs_diff_eq!(b.value(), 1.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn are_to_sqm() {
+        let a = Ares::new(1.0);
+        let b: SquareMeters = a.to();
+        assert_abs_diff_eq!(b.value(), 100.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn sqinch_to_sqcm() {
+        let a = SquareInches::new(1.0);
+        let b: SquareCentimeters = a.to();
+        // 1 in² = 6.4516 cm²
+        assert_abs_diff_eq!(b.value(), 6.4516, epsilon = 1e-9);
+    }
+
+    #[test]
+    fn sqyard_to_sqm() {
+        let a = SquareYards::new(1.0);
+        let b: SquareMeters = a.to();
+        assert_abs_diff_eq!(b.value(), 0.836_127_36, epsilon = 1e-9);
+    }
+
+    #[test]
+    fn roundtrip_sqcm_sqm() {
+        let original = SquareCentimeters::new(250.0);
+        let converted = original.to::<SquareMeter>();
+        let back = converted.to::<SquareCentimeter>();
+        assert_abs_diff_eq!(back.value(), original.value(), epsilon = 1e-10);
+    }
+
+    #[test]
+    fn symbols_are_correct() {
+        assert_eq!(SquareMeter::SYMBOL, "m²");
+        assert_eq!(Hectare::SYMBOL, "ha");
+        assert_eq!(Acre::SYMBOL, "ac");
+        assert_eq!(SquareInch::SYMBOL, "in²");
     }
 }
