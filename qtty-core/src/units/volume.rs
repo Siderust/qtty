@@ -23,6 +23,24 @@
 //! let vol: CubicMeters = vol_prod.to();
 //! assert!((vol.value() - 27.0).abs() < 1e-12);
 //! ```
+//!
+//! ## All volume units
+//!
+//! ```rust
+//! use qtty_core::volume::*;
+//!
+//! macro_rules! touch {
+//!     ($T:ty, $v:expr) => {{ let q = <$T>::new($v); let _c = q; assert!(q == q); }};
+//! }
+//!
+//! touch!(CubicMeters, 1.0);    touch!(CubicKilometers, 1.0);
+//! touch!(CubicCentimeters, 1.0); touch!(CubicMillimeters, 1.0);
+//! touch!(Liters, 1.0);         touch!(Milliliters, 1.0);
+//! touch!(Microliters, 1.0);    touch!(Centiliters, 1.0);
+//! touch!(Deciliters, 1.0);     touch!(CubicInches, 1.0);
+//! touch!(CubicFeet, 1.0);      touch!(UsGallons, 1.0);
+//! touch!(UsFluidOunces, 1.0);
+//! ```
 
 use crate::{Quantity, Unit};
 use qtty_derive::Unit;
@@ -195,5 +213,57 @@ mod tests {
         let ckm = CubicKilometers::new(1.0);
         let l: Liters = ckm.to();
         assert_abs_diff_eq!(l.value(), 1e12, epsilon = 1e3);
+    }
+
+    #[test]
+    fn cubic_mm_to_cubic_cm() {
+        let mm3 = CubicMillimeters::new(1000.0);
+        let cm3: CubicCentimeters = mm3.to();
+        assert_abs_diff_eq!(cm3.value(), 1.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn microliter_to_milliliter() {
+        let ul = Microliters::new(1000.0);
+        let ml: Milliliters = ul.to();
+        assert_abs_diff_eq!(ml.value(), 1.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn centiliter_to_liter() {
+        let cl = Centiliters::new(100.0);
+        let l: Liters = cl.to();
+        assert_abs_diff_eq!(l.value(), 1.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn deciliter_to_liter() {
+        let dl = Deciliters::new(10.0);
+        let l: Liters = dl.to();
+        assert_abs_diff_eq!(l.value(), 1.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn cubic_inch_to_cubic_cm() {
+        let cin = CubicInches::new(1.0);
+        let cc: CubicCentimeters = cin.to();
+        // 1 in³ = 16.387064 cm³
+        assert_abs_diff_eq!(cc.value(), 16.387_064, epsilon = 1e-4);
+    }
+
+    #[test]
+    fn us_fluid_ounce_to_milliliter() {
+        let floz = UsFluidOunces::new(1.0);
+        let ml: Milliliters = floz.to();
+        // 1 US fl oz ≈ 29.5735 mL
+        assert_abs_diff_eq!(ml.value(), 29.573_529_562_5, epsilon = 1e-6);
+    }
+
+    #[test]
+    fn symbols_are_correct() {
+        assert_eq!(CubicMeter::SYMBOL, "m³");
+        assert_eq!(Liter::SYMBOL, "L");
+        assert_eq!(Milliliter::SYMBOL, "mL");
+        assert_eq!(UsGallon::SYMBOL, "gal");
     }
 }
