@@ -5,7 +5,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Sem
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-02-24
+
 ### Added
+- New `qtty` crate feature `alloc` for heap-backed helpers in `no_std` builds. (see #10)
+- Integration compile checks for `qtty::qtty_vec!` across `std`, `no_std + alloc`, and pure `no_std` modes. (see #10)
+- New integer scalar facade modules `qtty::i8`, `qtty::i16`, and `qtty::i128`, mirroring the unit aliases available in `qtty::i32`. (see #11)
+- New `cross-unit-ops` feature in `qtty-core` and `qtty` (enabled by default) to gate generation of direct cross-unit comparison operator impls (`==`, `<`, etc.). (see #15)
+- New reduced-mode CI profile (`No Cross-Unit Ops`) plus targeted compile checks validating `eq_unit`/`cmp_unit` and ensuring direct cross-unit operators are disabled when the feature is off. (see #15)
+- Documented compile-time benchmark commands (`cargo +nightly -Z timings`) for comparing default and reduced-mode builds. (see #15)
+- FFI JSON serialization: New FFI functions for serializing and deserializing `QttyQuantity`/`QttyDerivedQuantity` to/from JSON:
+  - `qtty_quantity_to_json_value` / `qtty_quantity_from_json_value`
+  - `qtty_quantity_to_json` / `qtty_quantity_from_json`
+  - `qtty_derived_to_json` / `qtty_derived_from_json`
 
 ### Fixed
 

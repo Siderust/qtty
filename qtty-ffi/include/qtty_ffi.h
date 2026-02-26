@@ -767,6 +767,46 @@ typedef struct qtty_quantity_t {
   UnitId unit;
 } qtty_quantity_t;
 
+/*
+ A derived quantity representing a compound unit (numerator/denominator).
+
+ This is useful for quantities like velocity (m/s), frequency (rad/s), etc.
+
+ # ABI Stability
+
+ This struct has `#[repr(C)]` layout:
+ - `value` at offset 0 (8 bytes)
+ - `numerator` at offset 8 (4 bytes)
+ - `denominator` at offset 12 (4 bytes)
+ - Total size: 16 bytes
+
+ # Example
+
+ ```rust
+ use qtty_ffi::{QttyDerivedQuantity, UnitId};
+
+ // Create a velocity: 100 m/s
+ let velocity = QttyDerivedQuantity::new(100.0, UnitId::Meter, UnitId::Second);
+ assert_eq!(velocity.value, 100.0);
+ assert_eq!(velocity.numerator, UnitId::Meter);
+ assert_eq!(velocity.denominator, UnitId::Second);
+ ```
+ */
+typedef struct qtty_derived_quantity_t {
+  /*
+   The numeric value of the derived quantity.
+   */
+  double value;
+  /*
+   The numerator unit identifier.
+   */
+  UnitId numerator;
+  /*
+   The denominator unit identifier.
+   */
+  UnitId denominator;
+} qtty_derived_quantity_t;
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -956,6 +996,108 @@ int32_t qtty_quantity_format(qtty_quantity_t qty,
                              uint32_t flags,
                              char *buf,
                              size_t buf_len);
+
+/*
+ Frees a string previously allocated by one of the `qtty_*_to_json*` functions.
+
+ # Safety
+
+ The pointer must have been returned by a `qtty_*_to_json*` function and must
+ not have been freed previously. Passing a null pointer is safe (no-op).
+ */
+void qtty_string_free(char *s);
+
+/*
+ Serializes a quantity's value as a plain JSON number string (e.g. "123.45").
+
+ # Safety
+
+ The caller must ensure that `out` points to valid, writable memory for a `*mut c_char`,
+ or is null (in which case an error is returned). The returned string must be freed
+ with [`qtty_string_free`].
+ */
+int32_t qtty_quantity_to_json_value(struct qtty_quantity_t src, char **out);
+
+/*
+ Deserializes a quantity from a plain JSON numeric string with an explicit unit.
+
+ # Safety
+
+ The caller must ensure that `json` points to a valid NUL-terminated C string,
+ and `out` points to valid, writable memory for a `QttyQuantity`.
+ */
+int32_t qtty_quantity_from_json_value(UnitId unit, const char *json, struct qtty_quantity_t *out);
+
+/*
+ Serializes a quantity to a full JSON object: `{"value":123.45,"unit":"Meter"}`.
+
+ # Safety
+
+ The caller must ensure that `out` points to valid, writable memory for a `*mut c_char`,
+ or is null (in which case an error is returned). The returned string must be freed
+ with [`qtty_string_free`].
+ */
+int32_t qtty_quantity_to_json(struct qtty_quantity_t src, char **out);
+
+/*
+ Deserializes a quantity from a JSON object: `{"value":123.45,"unit":"Meter"}`.
+
+ # Safety
+
+ The caller must ensure that `json` points to a valid NUL-terminated C string,
+ and `out` points to valid, writable memory for a `QttyQuantity`.
+ */
+int32_t qtty_quantity_from_json(const char *json, struct qtty_quantity_t *out);
+
+/*
+ Creates a new derived quantity (compound unit like m/s).
+
+ # Safety
+
+ The caller must ensure that `out` points to valid, writable memory for a
+ `QttyDerivedQuantity`, or is null (in which case an error is returned).
+ */
+int32_t qtty_derived_make(double value,
+                          UnitId numerator,
+                          UnitId denominator,
+                          struct qtty_derived_quantity_t *out);
+
+/*
+ Converts a derived quantity to different units.
+
+ The numerator and denominator are converted independently while preserving
+ the compound value. For example, 100 m/s → 360 km/h.
+
+ # Safety
+
+ The caller must ensure that `out` points to valid, writable memory for a
+ `QttyDerivedQuantity`, or is null (in which case an error is returned).
+ */
+int32_t qtty_derived_convert(struct qtty_derived_quantity_t src,
+                             UnitId target_num,
+                             UnitId target_den,
+                             struct qtty_derived_quantity_t *out);
+
+/*
+ Serializes a derived quantity to a JSON object.
+
+ # Safety
+
+ The caller must ensure that `out` points to valid, writable memory for a `*mut c_char`.
+ The returned string must be freed with [`qtty_string_free`].
+ */
+int32_t qtty_derived_to_json(struct qtty_derived_quantity_t src, char **out);
+
+/*
+ Deserializes a derived quantity from a JSON object.
+
+ # Safety
+
+ The caller must ensure that `json` points to a valid NUL-terminated C string,
+ and `out` points to valid, writable memory for a `QttyDerivedQuantity`.
+ */
+int32_t qtty_derived_from_json(const char *json, struct qtty_derived_quantity_t *out);
+>>>>>>> main
 
 /*
  Returns the FFI ABI version.
