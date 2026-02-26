@@ -20,10 +20,9 @@
 
 use crate::registry;
 use crate::types::{
-    DimensionId, QttyDerivedQuantity, QttyQuantity, UnitId,
-    QTTY_ERR_BUFFER_TOO_SMALL, QTTY_ERR_INCOMPATIBLE_DIM, QTTY_ERR_INVALID_VALUE,
-    QTTY_ERR_NULL_OUT, QTTY_ERR_UNKNOWN_UNIT, QTTY_FMT_LOWER_EXP, QTTY_FMT_UPPER_EXP,
-    QTTY_OK,
+    DimensionId, QttyDerivedQuantity, QttyQuantity, UnitId, QTTY_ERR_BUFFER_TOO_SMALL,
+    QTTY_ERR_INCOMPATIBLE_DIM, QTTY_ERR_INVALID_VALUE, QTTY_ERR_NULL_OUT, QTTY_ERR_UNKNOWN_UNIT,
+    QTTY_FMT_LOWER_EXP, QTTY_FMT_UPPER_EXP, QTTY_OK,
 };
 use core::ffi::c_char;
 use std::ffi::{CStr, CString};
@@ -400,22 +399,22 @@ pub unsafe extern "C" fn qtty_quantity_format(
         }
 
         bytes.len() as i32
-        })
-    }
+    })
+}
 
-    // JSON Serialization / Deserialization via serde_json
-    //
-    // These helpers use serde for robust JSON serialization/deserialization.
-    // They produce/consume either a plain numeric value (e.g. "123.45") or an object
-    // with `value` and `unit` fields: {"value":123.45,"unit":"Meter"}
-    // =============================================================================
+// JSON Serialization / Deserialization via serde_json
+//
+// These helpers use serde for robust JSON serialization/deserialization.
+// They produce/consume either a plain numeric value (e.g. "123.45") or an object
+// with `value` and `unit` fields: {"value":123.45,"unit":"Meter"}
+// =============================================================================
 
-    /// Frees a string previously allocated by one of the `qtty_*_to_json*` functions.
-    ///
-    /// # Safety
-    ///
-    /// The pointer must have been returned by a `qtty_*_to_json*` function and must
-    /// not have been freed previously. Passing a null pointer is safe (no-op).
+/// Frees a string previously allocated by one of the `qtty_*_to_json*` functions.
+///
+/// # Safety
+///
+/// The pointer must have been returned by a `qtty_*_to_json*` function and must
+/// not have been freed previously. Passing a null pointer is safe (no-op).
 #[no_mangle]
 pub unsafe extern "C" fn qtty_string_free(s: *mut c_char) {
     if s.is_null() {
@@ -679,7 +678,6 @@ pub unsafe extern "C" fn qtty_derived_from_json(
             *out = qty;
         }
         QTTY_OK
->>>>>>> main
     })
 }
 
