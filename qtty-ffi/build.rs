@@ -205,6 +205,23 @@ fn generate_c_header(crate_dir: &str) {
         return;
     }
 
+    // Skip header regeneration on stable toolchain: cbindgen needs nightly
+    // (-Zunpretty=expanded) to see macro-generated items (e.g. UnitId enum).
+    // The header is maintained manually for stable builds.
+    let rustc = env::var("RUSTC").unwrap_or_else(|_| "rustc".to_string());
+    let is_nightly = std::process::Command::new(&rustc)
+        .arg("--version")
+        .output()
+        .map(|o| String::from_utf8_lossy(&o.stdout).contains("nightly"))
+        .unwrap_or(false);
+
+    if !is_nightly {
+        eprintln!("cargo:warning=Skipping cbindgen header regeneration (stable toolchain); header maintained manually.");
+        println!("cargo:rerun-if-changed=src/");
+        println!("cargo:rerun-if-changed=cbindgen.toml");
+        return;
+    }
+
     let out_dir = PathBuf::from(crate_dir).join("include");
 
     if let Err(e) = std::fs::create_dir_all(&out_dir) {

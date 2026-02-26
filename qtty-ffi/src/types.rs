@@ -31,6 +31,22 @@ pub const QTTY_ERR_NULL_OUT: i32 = -3;
 /// Error: the provided value is invalid (reserved for future use).
 pub const QTTY_ERR_INVALID_VALUE: i32 = -4;
 
+/// Error: the provided output buffer is too small.
+pub const QTTY_ERR_BUFFER_TOO_SMALL: i32 = -5;
+
+// =============================================================================
+// Format Flags (for qtty_quantity_format)
+// =============================================================================
+
+/// Format flag: default decimal notation (e.g. `"1234.57 m"`).
+pub const QTTY_FMT_DEFAULT: u32 = 0;
+
+/// Format flag: scientific notation with lowercase `e` (e.g. `"1.23e3 m"`).
+pub const QTTY_FMT_LOWER_EXP: u32 = 1;
+
+/// Format flag: scientific notation with uppercase `E` (e.g. `"1.23E3 m"`).
+pub const QTTY_FMT_UPPER_EXP: u32 = 2;
+
 // =============================================================================
 // Dimension Identifiers
 // =============================================================================

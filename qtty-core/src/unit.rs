@@ -3,7 +3,7 @@
 use crate::dimension::{DimDiv, DimMul, Dimension, Dimensionless};
 use crate::scalar::Scalar;
 use crate::Quantity;
-use core::fmt::{Debug, Display, Formatter, Result};
+use core::fmt::{Debug, Display, Formatter, LowerExp, Result, UpperExp};
 use core::marker::PhantomData;
 
 /// Trait implemented by every **unit** type.
@@ -57,7 +57,30 @@ where
     <N::Dim as DimDiv<D::Dim>>::Output: Dimension,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{} {}/{}", self.value(), N::SYMBOL, D::SYMBOL)
+        Display::fmt(&self.value(), f)?;
+        write!(f, " {}/{}", N::SYMBOL, D::SYMBOL)
+    }
+}
+
+impl<N: Unit, D: Unit, S: Scalar + LowerExp> LowerExp for Quantity<Per<N, D>, S>
+where
+    N::Dim: DimDiv<D::Dim>,
+    <N::Dim as DimDiv<D::Dim>>::Output: Dimension,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        LowerExp::fmt(&self.value(), f)?;
+        write!(f, " {}/{}", N::SYMBOL, D::SYMBOL)
+    }
+}
+
+impl<N: Unit, D: Unit, S: Scalar + UpperExp> UpperExp for Quantity<Per<N, D>, S>
+where
+    N::Dim: DimDiv<D::Dim>,
+    <N::Dim as DimDiv<D::Dim>>::Output: Dimension,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        UpperExp::fmt(&self.value(), f)?;
+        write!(f, " {}/{}", N::SYMBOL, D::SYMBOL)
     }
 }
 
@@ -85,7 +108,30 @@ where
     <A::Dim as DimMul<B::Dim>>::Output: Dimension,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{} {}·{}", self.value(), A::SYMBOL, B::SYMBOL)
+        Display::fmt(&self.value(), f)?;
+        write!(f, " {}·{}", A::SYMBOL, B::SYMBOL)
+    }
+}
+
+impl<A: Unit, B: Unit, S: Scalar + LowerExp> LowerExp for Quantity<Prod<A, B>, S>
+where
+    A::Dim: DimMul<B::Dim>,
+    <A::Dim as DimMul<B::Dim>>::Output: Dimension,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        LowerExp::fmt(&self.value(), f)?;
+        write!(f, " {}·{}", A::SYMBOL, B::SYMBOL)
+    }
+}
+
+impl<A: Unit, B: Unit, S: Scalar + UpperExp> UpperExp for Quantity<Prod<A, B>, S>
+where
+    A::Dim: DimMul<B::Dim>,
+    <A::Dim as DimMul<B::Dim>>::Output: Dimension,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        UpperExp::fmt(&self.value(), f)?;
+        write!(f, " {}·{}", A::SYMBOL, B::SYMBOL)
     }
 }
 
@@ -109,7 +155,19 @@ impl Unit for Unitless {
 
 impl<S: Scalar + Display> Display for Quantity<Unitless, S> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{}", self.value())
+        Display::fmt(&self.value(), f)
+    }
+}
+
+impl<S: Scalar + LowerExp> LowerExp for Quantity<Unitless, S> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        LowerExp::fmt(&self.value(), f)
+    }
+}
+
+impl<S: Scalar + UpperExp> UpperExp for Quantity<Unitless, S> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        UpperExp::fmt(&self.value(), f)
     }
 }
 
