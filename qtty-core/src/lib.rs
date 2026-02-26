@@ -320,6 +320,37 @@ mod tests {
         assert_eq!(b.min_const(a).value(), 3.0);
     }
 
+    #[test]
+    fn const_max() {
+        let a = TU::new(3.0);
+        let b = TU::new(5.0);
+        // When self < other, max_const returns other (the else branch)
+        assert_eq!(a.max_const(b).value(), 5.0);
+        // When self > other, max_const returns self (the if branch)
+        assert_eq!(b.max_const(a).value(), 5.0);
+    }
+
+    #[test]
+    fn sum_quantities_owned() {
+        let qs = vec![TU::new(1.0), TU::new(2.0), TU::new(3.0)];
+        let total: TU = qs.into_iter().sum();
+        assert_eq!(total.value(), 6.0);
+    }
+
+    #[test]
+    fn sum_quantities_by_ref() {
+        let qs = [TU::new(1.0), TU::new(2.0), TU::new(3.0)];
+        let total: TU = qs.iter().sum();
+        assert_eq!(total.value(), 6.0);
+    }
+
+    #[test]
+    fn sum_quantities_into_f64() {
+        let qs = vec![TU::new(1.0), TU::new(2.0), TU::new(3.0)];
+        let total: f64 = qs.into_iter().sum();
+        assert_eq!(total, 6.0);
+    }
+
     // ─────────────────────────────────────────────────────────────────────────────
     // Operator traits: Add, Sub, Mul, Div, Neg, Rem
     // ─────────────────────────────────────────────────────────────────────────────
@@ -502,6 +533,21 @@ mod tests {
         let q = TU::new(-99.9);
         let s = format!("{}", q);
         assert_eq!(s, "-99.9 tu");
+    }
+
+    #[test]
+    fn display_double_test_unit() {
+        let q = Dtu::new(2.5);
+        let s = format!("{}", q);
+        assert_eq!(s, "2.5 dtu");
+    }
+
+    #[test]
+    fn display_half_test_unit() {
+        type Htu = Quantity<HalfTestUnit>;
+        let q = Htu::new(3.0);
+        let s = format!("{}", q);
+        assert_eq!(s, "3 htu");
     }
 
     // ─────────────────────────────────────────────────────────────────────────────

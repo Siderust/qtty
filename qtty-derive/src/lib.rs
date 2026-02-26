@@ -66,7 +66,22 @@ fn derive_unit_impl(input: DeriveInput) -> syn::Result<TokenStream2> {
 
         impl<S: crate::scalar::Scalar + ::core::fmt::Display> ::core::fmt::Display for crate::Quantity<#name, S> {
             fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                write!(f, "{} {}", self.value(), <#name as crate::Unit>::SYMBOL)
+                ::core::fmt::Display::fmt(&self.value(), f)?;
+                write!(f, " {}", <#name as crate::Unit>::SYMBOL)
+            }
+        }
+
+        impl<S: crate::scalar::Scalar + ::core::fmt::LowerExp> ::core::fmt::LowerExp for crate::Quantity<#name, S> {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                ::core::fmt::LowerExp::fmt(&self.value(), f)?;
+                write!(f, " {}", <#name as crate::Unit>::SYMBOL)
+            }
+        }
+
+        impl<S: crate::scalar::Scalar + ::core::fmt::UpperExp> ::core::fmt::UpperExp for crate::Quantity<#name, S> {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                ::core::fmt::UpperExp::fmt(&self.value(), f)?;
+                write!(f, " {}", <#name as crate::Unit>::SYMBOL)
             }
         }
     };

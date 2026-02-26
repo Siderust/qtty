@@ -12,11 +12,10 @@ readme = "README.md"
 
 [lib]
 crate-type = ["cdylib", "staticlib", "rlib"]
-
 [dependencies]
-qtty = { version = "0.3.1", path = "../qtty" }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+qtty = { version = "0.4.0", path = "../qtty" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0" }
 pyo3 = { version = "0.27.2", optional = true }
 
 [features]

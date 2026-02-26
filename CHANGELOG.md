@@ -3,7 +3,21 @@ All notable changes to this project are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+
+## [0.4.0] - 2026-02-26
+
+### Added
+- Implemented `Display`, `LowerExp`, and `UpperExp` delegation for `Quantity<U, S>` so standard Rust format annotations (precision, scientific notation) are respected by all unit types.
+- Exposed a new FFI function `qtty_quantity_format(qtty_quantity_t, precision, flags, buf, buf_len)` plus format flag constants `QTTY_FMT_DEFAULT`, `QTTY_FMT_LOWER_EXP`, and `QTTY_FMT_UPPER_EXP` for C consumers to format quantities from Rust with the same options as Rust's formatters.
+- Added C++ convenience: `qtty::Quantity<UnitTag>::format(int precision, uint32_t flags)` that calls the FFI formatter, and a C++20 `std::formatter` specialization to integrate with `std::format` when available.
+- Added comprehensive C++ tests covering streaming `operator<<`, `format()`, and scientific/precision formatting modes.
+
+### Changed
+- cbindgen/header generation: `qtty-ffi` build now gracefully skips automatic cbindgen expansion on stable toolchains (nightly required for macro expansion); the shipped `qtty_ffi.h` is updated to include the new formatter API and constants.
+
+### Fixed
+- Corrected `Display` implementations to delegate formatting to the inner scalar so `{:.N}`, `{:e}`, and related annotations behave as expected for `Quantity` values.
+- Adjusted C++ helpers and tests to match C++ stream precision semantics and to ensure `format()` mirrors specified precision/flags.
 
 ## [0.3.1] - 2026-02-24
 
@@ -19,14 +33,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Sem
   - `qtty_quantity_to_json` / `qtty_quantity_from_json`
   - `qtty_derived_to_json` / `qtty_derived_from_json`
 
-### Fixed
-- `qtty::qtty_vec!(vec ...)` no longer hardcodes `std`; it now works with `alloc` in `no_std` builds. (see #10)
-- In pure `no_std` (without `alloc`), `qtty::qtty_vec!(vec ...)` now fails with a clear feature requirement message while array form continues to work. (see #10)
-- `qtty` crate docs now match the public integer module surface (`i8`, `i16`, `i32`, `i64`, `i128`) and include coverage for integer `to_lossy()` flows in facade integration tests. (see #11)
-- Unit-erasure conversion into `Quantity<Unitless>` is no longer limited to length units; time, mass, angular, and other supported non-dimensionless units now convert while preserving the raw scalar value (no normalization). (see #12)
-- Removed `DivAssign<Self>` for `Quantity` because `quantity /= quantity` is dimensionally unsound; `/=` is now scalar-only (`DivAssign<S>`). Migration: replace `q /= other_q` with `q = (q / other_q).simplify()` when you need a unitless ratio, or use explicit scalar division where appropriate. (see #14)
-- Reduced quadratic impl bloat in built-in unit catalogs by splitting conversion generation from cross-unit comparison generation; reduced mode now keeps `From` conversions while omitting cross-unit operator impls. (see #15)
-- CI build now passes: missing FFI symbols for JSON serialization are implemented and properly feature-gated.
 
 ## [0.3.0] - 2026-02-09
 
