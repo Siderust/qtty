@@ -597,6 +597,10 @@ fn cross_unit_operators_via_macro() {
     assert!(km == m_eq);
     assert!(km >= m_eq);
     assert!(km <= m_eq);
+    // Also test the reverse direction (rest == first) to cover all eq branches
+    assert!(m_eq == km);
+    assert!(m_eq >= km);
+    assert!(m_eq <= km);
 }
 
 #[test]

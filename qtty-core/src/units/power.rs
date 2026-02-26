@@ -14,6 +14,25 @@
 //! let w = sol.to::<Watt>();
 //! assert!((w.value() - 3.828e26).abs() < 1e18);
 //! ```
+//!
+//! ## All power units
+//!
+//! ```rust
+//! use qtty_core::power::*;
+//! use qtty_core::Quantity;
+//!
+//! macro_rules! touch {
+//!     ($T:ty, $v:expr) => {{ let q = <$T>::new($v); let _c = q; assert!(q == q); }};
+//! }
+//!
+//! touch!(Watts, 1.0);
+//! touch!(Kilowatts, 1.0);   touch!(Megawatts, 1.0);  touch!(Gigawatts, 1.0);
+//! touch!(Milliwatts, 1.0);  touch!(Microwatts, 1.0);
+//! touch!(HorsepowerMetrics, 1.0); touch!(HorsepowerElectrics, 1.0);
+//! touch!(SolarLuminosities, 1.0);
+//! let erg = Quantity::<ErgPerSecond>::new(1.0);
+//! assert!(erg == erg);
+//! ```
 
 use crate::{Quantity, Unit};
 use qtty_derive::Unit;
@@ -243,5 +262,63 @@ mod tests {
             let back = converted.to::<Watt>();
             prop_assert!((back.value() - original.value()).abs() / original.value() < 1e-12);
         }
+    }
+
+    // ─── SI-prefixed watt units ──────────────────────────────────────────────
+
+    #[test]
+    fn kilowatt_to_watt() {
+        let kw = Kilowatts::new(1.0);
+        let w = kw.to::<Watt>();
+        assert_relative_eq!(w.value(), 1_000.0, max_relative = 1e-12);
+    }
+
+    #[test]
+    fn megawatt_to_kilowatt() {
+        let mw = Megawatts::new(1.0);
+        let kw = mw.to::<Kilowatt>();
+        assert_relative_eq!(kw.value(), 1_000.0, max_relative = 1e-12);
+    }
+
+    #[test]
+    fn milliwatt_to_watt() {
+        let mw = Milliwatts::new(1000.0);
+        let w = mw.to::<Watt>();
+        assert_relative_eq!(w.value(), 1.0, max_relative = 1e-12);
+    }
+
+    // ─── Non-SI power units ──────────────────────────────────────────────────
+
+    #[test]
+    fn erg_per_second_to_watt() {
+        let erg_s = Quantity::<ErgPerSecond>::new(1e7);
+        let w = erg_s.to::<Watt>();
+        // 1e7 erg/s = 1 W
+        assert_relative_eq!(w.value(), 1.0, max_relative = 1e-9);
+    }
+
+    #[test]
+    fn metric_horsepower_to_watt() {
+        let ps = HorsepowerMetrics::new(1.0);
+        let w = ps.to::<Watt>();
+        // 1 PS = 735.49875 W
+        assert_relative_eq!(w.value(), 735.498_75, max_relative = 1e-9);
+    }
+
+    #[test]
+    fn electric_horsepower_to_watt() {
+        let hp = HorsepowerElectrics::new(1.0);
+        let w = hp.to::<Watt>();
+        // 1 hp_e = 746 W (exact)
+        assert_relative_eq!(w.value(), 746.0, max_relative = 1e-12);
+    }
+
+    #[test]
+    fn symbols_are_correct() {
+        assert_eq!(Watt::SYMBOL, "W");
+        assert_eq!(Kilowatt::SYMBOL, "kW");
+        assert_eq!(Megawatt::SYMBOL, "MW");
+        assert_eq!(HorsepowerMetric::SYMBOL, "PS");
+        assert_eq!(ErgPerSecond::SYMBOL, "erg/s");
     }
 }

@@ -142,8 +142,9 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       # Gate: fail if total LINE coverage < 95% (no extra test run needed)
+      # feature_diesel.rs requires a live SQL backend and intentionally excluded from coverage
       - name: Coverage gate (≥95% lines)
-        run: cargo +nightly llvm-cov --workspace --all-features --doctests --no-run --fail-under-lines 95
+        run: cargo +nightly llvm-cov --workspace --all-features --doctests --no-run --ignore-filename-regex "feature_diesel" --fail-under-lines 95
 
       - name: Upload coverage HTML
         if: always()
