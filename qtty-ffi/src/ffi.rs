@@ -20,7 +20,8 @@
 
 use crate::registry;
 use crate::types::{
-    DimensionId, QttyQuantity, UnitId, QTTY_ERR_NULL_OUT, QTTY_ERR_UNKNOWN_UNIT, QTTY_OK,
+    DimensionId, QttyQuantity, UnitId, QTTY_ERR_BUFFER_TOO_SMALL, QTTY_ERR_NULL_OUT,
+    QTTY_ERR_UNKNOWN_UNIT, QTTY_FMT_LOWER_EXP, QTTY_FMT_UPPER_EXP, QTTY_OK,
 };
 use core::ffi::c_char;
 
@@ -294,6 +295,112 @@ pub extern "C" fn qtty_unit_name(unit: UnitId) -> *const c_char {
 }
 
 // =============================================================================
+// String Formatting
+// =============================================================================
+
+/// Formats a quantity as a human-readable string into a caller-provided buffer.
+///
+/// Produces a string like `"1234.57 m"`, `"1.23e3 km"`, or `"1.23E3 km"` depending
+/// on the `flags` parameter. The precision and format type mirror Rust's `{:.2}`,
+/// `{:.4e}`, and `{:.4E}` format annotations, allowing callers to pass the same
+/// format parameters that the Rust `Display`, `LowerExp`, and `UpperExp` trait impls
+/// use internally.
+///
+/// # Arguments
+///
+/// * `qty`       - The quantity (`value + unit`) to format.
+/// * `precision` - Number of decimal digits after the point.  Pass `-1` for the
+///   default precision (shortest exact representation for floats).
+/// * `flags`     - Selects the notation:
+///   - `QTTY_FMT_DEFAULT`   (0): decimal notation, e.g. `"1234.568 m"`
+///   - `QTTY_FMT_LOWER_EXP` (1): scientific with lowercase `e`, e.g. `"1.235e3 m"`
+///   - `QTTY_FMT_UPPER_EXP` (2): scientific with uppercase `E`, e.g. `"1.235E3 m"`
+/// * `buf`       - Caller-allocated output buffer (must be non-null).
+/// * `buf_len`   - Size of `buf` in bytes (must include space for the NUL terminator).
+///
+/// # Returns
+///
+/// * Non-negative: number of bytes written, **excluding** the NUL terminator.
+/// * `QTTY_ERR_NULL_OUT`        if `buf` is null.
+/// * `QTTY_ERR_UNKNOWN_UNIT`    if `qty.unit` is not a recognized unit ID.
+/// * `QTTY_ERR_BUFFER_TOO_SMALL` if `buf_len` is too small; the formatted string
+///   (including the NUL terminator) requires `-return_value` bytes.
+///
+/// # Safety
+///
+/// The caller must ensure that `buf` points to a writable allocation of at least
+/// `buf_len` bytes.  The written string is always NUL-terminated on success.
+#[no_mangle]
+pub unsafe extern "C" fn qtty_quantity_format(
+    qty: QttyQuantity,
+    precision: i32,
+    flags: u32,
+    buf: *mut c_char,
+    buf_len: usize,
+) -> i32 {
+    catch_panic!(QTTY_ERR_UNKNOWN_UNIT, {
+        if buf.is_null() || buf_len == 0 {
+            return QTTY_ERR_NULL_OUT;
+        }
+
+        if crate::registry::meta(qty.unit).is_none() {
+            return QTTY_ERR_UNKNOWN_UNIT;
+        }
+
+        let symbol = qty.unit.symbol();
+        let formatted = match flags {
+            QTTY_FMT_LOWER_EXP => {
+                if precision >= 0 {
+                    format!(
+                        "{:.prec$e} {}",
+                        qty.value,
+                        symbol,
+                        prec = precision as usize
+                    )
+                } else {
+                    format!("{:e} {}", qty.value, symbol)
+                }
+            }
+            QTTY_FMT_UPPER_EXP => {
+                if precision >= 0 {
+                    format!(
+                        "{:.prec$E} {}",
+                        qty.value,
+                        symbol,
+                        prec = precision as usize
+                    )
+                } else {
+                    format!("{:E} {}", qty.value, symbol)
+                }
+            }
+            // QTTY_FMT_DEFAULT or any unrecognised flag → decimal notation
+            _ => {
+                if precision >= 0 {
+                    format!("{:.prec$} {}", qty.value, symbol, prec = precision as usize)
+                } else {
+                    format!("{} {}", qty.value, symbol)
+                }
+            }
+        };
+
+        let bytes = formatted.as_bytes();
+        let needed = bytes.len() + 1; // +1 for NUL terminator
+
+        if buf_len < needed {
+            return QTTY_ERR_BUFFER_TOO_SMALL;
+        }
+
+        // SAFETY: buf is non-null (checked above) and buf_len >= needed
+        unsafe {
+            core::ptr::copy_nonoverlapping(bytes.as_ptr() as *const c_char, buf, bytes.len());
+            *buf.add(bytes.len()) = 0; // NUL terminator
+        }
+
+        bytes.len() as i32
+    })
+}
+
+// =============================================================================
 // Version Info
 // =============================================================================
 
@@ -311,6 +418,7 @@ pub extern "C" fn qtty_ffi_version() -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::types::QTTY_FMT_DEFAULT;
     use crate::QTTY_ERR_INCOMPATIBLE_DIM;
     use approx::assert_relative_eq;
     use core::f64::consts::PI;
@@ -471,5 +579,86 @@ mod tests {
     #[test]
     fn test_ffi_version() {
         assert_eq!(qtty_ffi_version(), 1);
+    }
+
+    // -------------------------------------------------------------------------
+    // qtty_quantity_format tests
+    // -------------------------------------------------------------------------
+
+    fn format_qty(qty: QttyQuantity, precision: i32, flags: u32) -> String {
+        let mut buf = [0i8; 256];
+        let result =
+            unsafe { qtty_quantity_format(qty, precision, flags, buf.as_mut_ptr(), buf.len()) };
+        assert!(result >= 0, "qtty_quantity_format returned error {result}");
+        let c_str = unsafe { std::ffi::CStr::from_ptr(buf.as_ptr()) };
+        c_str.to_str().unwrap().to_owned()
+    }
+
+    #[test]
+    fn test_format_default_no_precision() {
+        let qty = QttyQuantity::new(1234.56789, UnitId::Second);
+        let s = format_qty(qty, -1, QTTY_FMT_DEFAULT);
+        assert_eq!(s, "1234.56789 s");
+    }
+
+    #[test]
+    fn test_format_default_two_decimal_places() {
+        let qty = QttyQuantity::new(1234.56789, UnitId::Second);
+        let s = format_qty(qty, 2, QTTY_FMT_DEFAULT);
+        assert_eq!(s, "1234.57 s");
+    }
+
+    #[test]
+    fn test_format_lower_exp_no_precision() {
+        let qty = QttyQuantity::new(1234.56789, UnitId::Second);
+        let s = format_qty(qty, -1, QTTY_FMT_LOWER_EXP);
+        assert_eq!(s, "1.23456789e3 s");
+    }
+
+    #[test]
+    fn test_format_lower_exp_four_decimal_places() {
+        let qty = QttyQuantity::new(1234.56789, UnitId::Second);
+        let s = format_qty(qty, 4, QTTY_FMT_LOWER_EXP);
+        assert_eq!(s, "1.2346e3 s");
+    }
+
+    #[test]
+    fn test_format_upper_exp_four_decimal_places() {
+        let qty = QttyQuantity::new(1234.56789, UnitId::Second);
+        let s = format_qty(qty, 4, QTTY_FMT_UPPER_EXP);
+        assert_eq!(s, "1.2346E3 s");
+    }
+
+    #[test]
+    fn test_format_meters_default() {
+        let qty = QttyQuantity::new(42.0, UnitId::Meter);
+        let s = format_qty(qty, -1, QTTY_FMT_DEFAULT);
+        assert_eq!(s, "42 m");
+    }
+
+    #[test]
+    fn test_format_null_buf() {
+        let qty = QttyQuantity::new(1.0, UnitId::Meter);
+        let result =
+            unsafe { qtty_quantity_format(qty, -1, QTTY_FMT_DEFAULT, core::ptr::null_mut(), 64) };
+        assert_eq!(result, QTTY_ERR_NULL_OUT);
+    }
+
+    #[test]
+    fn test_format_zero_buf_len() {
+        let qty = QttyQuantity::new(1.0, UnitId::Meter);
+        let mut buf = [0i8; 4];
+        let result =
+            unsafe { qtty_quantity_format(qty, -1, QTTY_FMT_DEFAULT, buf.as_mut_ptr(), 0) };
+        assert_eq!(result, QTTY_ERR_NULL_OUT);
+    }
+
+    #[test]
+    fn test_format_buffer_too_small() {
+        let qty = QttyQuantity::new(1234.56789, UnitId::Second);
+        let mut buf = [0i8; 4]; // way too small
+        let result =
+            unsafe { qtty_quantity_format(qty, 2, QTTY_FMT_DEFAULT, buf.as_mut_ptr(), buf.len()) };
+        assert_eq!(result, QTTY_ERR_BUFFER_TOO_SMALL);
     }
 }

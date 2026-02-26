@@ -85,6 +85,13 @@
 //! - [`QTTY_ERR_INCOMPATIBLE_DIM`] (-2): Dimension mismatch
 //! - [`QTTY_ERR_NULL_OUT`] (-3): Null output pointer
 //! - [`QTTY_ERR_INVALID_VALUE`] (-4): Invalid value (reserved)
+//! - [`QTTY_ERR_BUFFER_TOO_SMALL`] (-5): Output buffer too small
+//!
+//! Format flags for [`qtty_quantity_format`]:
+//!
+//! - [`QTTY_FMT_DEFAULT`] (0): decimal notation
+//! - [`QTTY_FMT_LOWER_EXP`] (1): scientific notation (lowercase `e`)
+//! - [`QTTY_FMT_UPPER_EXP`] (2): scientific notation (uppercase `E`)
 //!
 //! # Thread Safety
 //!
@@ -113,14 +120,16 @@ pub use ffi_serde::{
 
 // Re-export FFI functions
 pub use ffi::{
-    qtty_ffi_version, qtty_quantity_convert, qtty_quantity_convert_value, qtty_quantity_make,
-    qtty_unit_dimension, qtty_unit_is_valid, qtty_unit_name, qtty_units_compatible,
+    qtty_ffi_version, qtty_quantity_convert, qtty_quantity_convert_value, qtty_quantity_format,
+    qtty_quantity_make, qtty_unit_dimension, qtty_unit_is_valid, qtty_unit_name,
+    qtty_units_compatible,
 };
 
 // Re-export types
 pub use types::{
-    DimensionId, QttyDerivedQuantity, QttyQuantity, UnitId, QTTY_ERR_INCOMPATIBLE_DIM,
-    QTTY_ERR_INVALID_VALUE, QTTY_ERR_NULL_OUT, QTTY_ERR_UNKNOWN_UNIT, QTTY_OK,
+    DimensionId, QttyDerivedQuantity, QttyQuantity, UnitId, QTTY_ERR_BUFFER_TOO_SMALL,
+    QTTY_ERR_INCOMPATIBLE_DIM, QTTY_ERR_INVALID_VALUE, QTTY_ERR_NULL_OUT, QTTY_ERR_UNKNOWN_UNIT,
+    QTTY_FMT_DEFAULT, QTTY_FMT_LOWER_EXP, QTTY_FMT_UPPER_EXP, QTTY_OK,
 };
 
 // The impl_unit_ffi! macro is automatically exported at crate root by #[macro_export]

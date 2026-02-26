@@ -79,6 +79,26 @@
 #define QTTY_ERR_INVALID_VALUE -4
 
 /*
+ Error: the output buffer provided was too small to hold the formatted result.
+ */
+#define QTTY_ERR_BUFFER_TOO_SMALL -5
+
+/*
+ Format flag: default decimal notation (e.g. "1234.568 m").
+ */
+#define QTTY_FMT_DEFAULT 0
+
+/*
+ Format flag: scientific notation with lowercase 'e' (e.g. "1.235e3 m").
+ */
+#define QTTY_FMT_LOWER_EXP 1
+
+/*
+ Format flag: scientific notation with uppercase 'E' (e.g. "1.235E3 m").
+ */
+#define QTTY_FMT_UPPER_EXP 2
+
+/*
  Unit identifier for FFI.
 
  Each variant corresponds to a specific unit supported by the FFI layer.
@@ -905,6 +925,37 @@ int32_t qtty_quantity_convert_value(double value,
  of the program. The caller must not attempt to free or modify the returned string.
  */
 const char *qtty_unit_name(UnitId unit);
+
+/*
+ Formats a physical quantity as a human-readable string.
+
+ Writes the formatted representation of `qty` into the caller-supplied buffer
+ `buf` of length `buf_len` bytes (including space for the NUL terminator).
+
+ # Arguments
+
+ * `qty`       - The quantity to format.
+ * `precision` - Number of decimal digits, or -1 for default (shortest exact).
+ * `flags`     - `QTTY_FMT_DEFAULT` (0), `QTTY_FMT_LOWER_EXP` (1), or `QTTY_FMT_UPPER_EXP` (2).
+ * `buf`       - Caller-allocated output buffer.
+ * `buf_len`   - Size of `buf` in bytes (must include space for the NUL terminator).
+
+ # Returns
+
+ `QTTY_OK` on success, `QTTY_ERR_NULL_OUT` if `buf` is null,
+ `QTTY_ERR_UNKNOWN_UNIT` if the unit ID is invalid, or
+ `QTTY_ERR_BUFFER_TOO_SMALL` if the result does not fit in `buf`.
+
+ # Safety
+
+ `buf` must point to at least `buf_len` bytes of writable memory.
+ The string written is always NUL-terminated on success.
+ */
+int32_t qtty_quantity_format(qtty_quantity_t qty,
+                             int32_t precision,
+                             uint32_t flags,
+                             char *buf,
+                             size_t buf_len);
 
 /*
  Returns the FFI ABI version.
