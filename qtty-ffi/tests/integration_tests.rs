@@ -690,8 +690,9 @@ fn test_quantity_from_json_null_ptrs() {
 fn test_quantity_from_json_value_valid() {
     let json = b"123.4\0";
     let mut out = QttyQuantity::default();
-    let status =
-        unsafe { qtty_quantity_from_json_value(UnitId::Meter, json.as_ptr() as *const _, &mut out) };
+    let status = unsafe {
+        qtty_quantity_from_json_value(UnitId::Meter, json.as_ptr() as *const _, &mut out)
+    };
     assert_eq!(status, QTTY_OK);
     assert_relative_eq!(out.value, 123.4);
     assert_eq!(out.unit, UnitId::Meter);
@@ -701,8 +702,9 @@ fn test_quantity_from_json_value_valid() {
 fn test_quantity_from_json_value_invalid_number() {
     let json = b"not_a_number\0";
     let mut out = QttyQuantity::default();
-    let status =
-        unsafe { qtty_quantity_from_json_value(UnitId::Meter, json.as_ptr() as *const _, &mut out) };
+    let status = unsafe {
+        qtty_quantity_from_json_value(UnitId::Meter, json.as_ptr() as *const _, &mut out)
+    };
     assert_eq!(status, QTTY_ERR_INVALID_VALUE);
 }
 
@@ -721,8 +723,7 @@ fn test_quantity_from_json_value_null_json() {
 #[test]
 fn test_derived_make_basic() {
     let mut out = QttyDerivedQuantity::default();
-    let status =
-        unsafe { qtty_derived_make(100.0, UnitId::Meter, UnitId::Second, &mut out) };
+    let status = unsafe { qtty_derived_make(100.0, UnitId::Meter, UnitId::Second, &mut out) };
     assert_eq!(status, QTTY_OK);
     assert_relative_eq!(out.value, 100.0);
     assert_eq!(out.numerator, UnitId::Meter);
@@ -743,13 +744,11 @@ fn test_derived_make_null_out() {
 #[test]
 fn test_derived_convert_m_per_s_to_km_per_h() {
     let mut src = QttyDerivedQuantity::default();
-    let make_status =
-        unsafe { qtty_derived_make(100.0, UnitId::Meter, UnitId::Second, &mut src) };
+    let make_status = unsafe { qtty_derived_make(100.0, UnitId::Meter, UnitId::Second, &mut src) };
     assert_eq!(make_status, QTTY_OK);
 
     let mut out = QttyDerivedQuantity::default();
-    let status =
-        unsafe { qtty_derived_convert(src, UnitId::Kilometer, UnitId::Hour, &mut out) };
+    let status = unsafe { qtty_derived_convert(src, UnitId::Kilometer, UnitId::Hour, &mut out) };
     assert_eq!(status, QTTY_OK);
     assert_relative_eq!(out.value, 360.0, epsilon = 1e-9);
     assert_eq!(out.numerator, UnitId::Kilometer);
@@ -771,8 +770,7 @@ fn test_derived_convert_incompatible_dimension() {
 
     // Meter / Second cannot be converted to Kilogram / Second (numerator dim mismatch)
     let mut out = QttyDerivedQuantity::default();
-    let status =
-        unsafe { qtty_derived_convert(src, UnitId::Gram, UnitId::Second, &mut out) };
+    let status = unsafe { qtty_derived_convert(src, UnitId::Gram, UnitId::Second, &mut out) };
     assert_eq!(status, QTTY_ERR_INCOMPATIBLE_DIM);
 }
 

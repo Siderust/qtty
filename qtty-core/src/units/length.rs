@@ -1181,7 +1181,11 @@ mod tests {
     fn classical_electron_radius_to_femtometers() {
         let q = ClassicalElectronRadii::new(1.0);
         // re ≈ 2.81794 fm
-        assert_relative_eq!(q.to::<Femtometer>().value(), 2.817_940_326_2, max_relative = 1e-9);
+        assert_relative_eq!(
+            q.to::<Femtometer>().value(),
+            2.817_940_326_2,
+            max_relative = 1e-9
+        );
     }
 
     #[test]
@@ -1196,7 +1200,11 @@ mod tests {
     fn electron_compton_wavelength_to_femtometers() {
         let q = ElectronReducedComptonWavelengths::new(1.0);
         // λ̄_e ≈ 386.159 fm
-        assert_relative_eq!(q.to::<Femtometer>().value(), 386.159_267_96, max_relative = 1e-7);
+        assert_relative_eq!(
+            q.to::<Femtometer>().value(),
+            386.159_267_96,
+            max_relative = 1e-7
+        );
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -1218,7 +1226,11 @@ mod tests {
     #[test]
     fn earth_polar_radius_to_km() {
         let q = nominal::EarthPolarRadii::new(1.0);
-        assert_relative_eq!(q.to::<Kilometer>().value(), 6_356.752_314_2, max_relative = 1e-9);
+        assert_relative_eq!(
+            q.to::<Kilometer>().value(),
+            6_356.752_314_2,
+            max_relative = 1e-9
+        );
     }
 
     #[test]

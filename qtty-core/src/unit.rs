@@ -298,7 +298,10 @@ mod tests {
         let s = format!("{qty:e}");
         assert!(s.contains("e"), "Expected scientific notation, got: {s}");
         // No unit symbol for Unitless
-        assert!(!s.contains(' '), "Unitless should not have a space, got: {s}");
+        assert!(
+            !s.contains(' '),
+            "Unitless should not have a space, got: {s}"
+        );
     }
 
     #[test]
