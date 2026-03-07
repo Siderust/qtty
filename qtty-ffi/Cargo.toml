@@ -16,7 +16,7 @@ crate-type = ["cdylib", "staticlib", "rlib"]
 qtty = { version = "0.4.0", path = "../qtty" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
-pyo3 = { version = "0.27.2", optional = true }
+pyo3 = { version = "0.28.2", optional = true }
 
 [features]
 pyo3 = ["dep:pyo3"]
