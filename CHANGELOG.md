@@ -1,7 +1,8 @@
 # Changelog
-All notable changes to this project are documented here.
 
-Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+All notable changes to the vendored Rust workspace are documented here.
+
+Documentation references live under [`../doc/developers/changelog.md`](../doc/developers/changelog.md).
 
 
 ## [0.4.0] - 2026-02-26
