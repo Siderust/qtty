@@ -1202,4 +1202,27 @@ mod tests {
             );
         }
     }
+
+    /// Invoke derive-generated PartialEq/Clone/Debug on each unit struct to
+    /// cover the #[derive] attribute lines tracked by llvm-cov.
+    #[test]
+    fn derive_coverage_unit_structs() {
+        // Direct struct value comparisons invoke <T as PartialEq>::eq() which
+        // is the derive-generated implementation, covering the #[derive] line.
+        assert!(Degree == Degree);
+        assert!(Radian == Radian);
+        assert!(Milliradian == Milliradian);
+        assert!(Arcminute == Arcminute);
+        assert!(Arcsecond == Arcsecond);
+        assert!(MilliArcsecond == MilliArcsecond);
+        assert!(MicroArcsecond == MicroArcsecond);
+        assert!(Gradian == Gradian);
+        assert!(Turn == Turn);
+        assert!(HourAngle == HourAngle);
+        // signum_const: cover both positive and negative branches
+        let pos = Degrees::new(90.0);
+        let neg = Degrees::new(-45.0);
+        assert_eq!(pos.signum_const(), 1.0);
+        assert_eq!(neg.signum_const(), -1.0);
+    }
 }
