@@ -28,12 +28,12 @@ diesel = ["dep:diesel"]
 rust_decimal = { version = "1.36", optional = true, features = ["maths"] }
 num-rational = { version = "0.4", optional = true, default-features = false }
 serde = { version = "1.0", default-features = false, features = ["derive", "alloc"], optional = true }
-pyo3 = { version = "0.27.2", optional = true, features = ["auto-initialize"] }
+pyo3 = { version = "0.28.2", optional = true, features = ["auto-initialize"] }
 tiberius = { version = "0.12", default-features = false, optional = true }
 diesel = { version = "2.1", default-features = false, optional = true }
 libm = "0.2"
 typenum = "1.17"
-qtty-derive = { version = "0.3.1", path = "../qtty-derive" }
+qtty-derive = { version = "0.4.0", path = "../qtty-derive" }
 
 [dev-dependencies]
 approx = "0.5"

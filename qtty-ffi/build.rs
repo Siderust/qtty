@@ -100,7 +100,7 @@ fn generate_unit_enum(units: &[UnitDef], out_dir: &str) {
     code.push_str("#[repr(u32)]\n");
     code.push_str("#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]\n");
     code.push_str(
-        "#[cfg_attr(feature = \"pyo3\", pyo3::pyclass(eq, eq_int, module = \"qtty\"))]\n",
+        "#[cfg_attr(feature = \"pyo3\", pyo3::pyclass(eq, eq_int, from_py_object, module = \"qtty\"))]\n",
     );
     code.push_str("pub enum UnitId {\n");
 
@@ -124,6 +124,32 @@ fn generate_unit_enum(units: &[UnitDef], out_dir: &str) {
     code.push_str("    \n");
     code.push_str("    fn __getnewargs__(&self) -> (u32,) {\n");
     code.push_str("        (*self as u32,)\n");
+    code.push_str("    }\n");
+    code.push('\n');
+    code.push_str("    fn __hash__(&self) -> u64 {\n");
+    code.push_str("        *self as u64\n");
+    code.push_str("    }\n");
+    code.push('\n');
+    code.push_str("    fn __repr__(&self) -> String {\n");
+    code.push_str("        format!(\"Unit.{}\", self.name())\n");
+    code.push_str("    }\n");
+    code.push('\n');
+    // scalar * Unit → Quantity  (e.g. 9.58 * Unit.Second)
+    code.push_str("    /// Multiply a scalar by a unit to create a Quantity.\n");
+    code.push_str("    ///\n");
+    code.push_str("    /// Example: `9.58 * Unit.Second` → `Quantity(9.58, Unit.Second)`\n");
+    code.push_str("    fn __mul__<'py>(&self, py: pyo3::Python<'py>, scalar: f64) -> pyo3::PyResult<pyo3::Bound<'py, pyo3::PyAny>> {\n");
+    code.push_str("        use pyo3::types::PyAnyMethods;\n");
+    code.push_str("        let qtty = py.import(\"qtty\")?;\n");
+    code.push_str("        let cls = qtty.getattr(\"Quantity\")?;\n");
+    code.push_str("        cls.call1((scalar, *self))\n");
+    code.push_str("    }\n");
+    code.push('\n');
+    code.push_str(
+        "    /// Right multiplication: `Unit.Second * 9.58` → `Quantity(9.58, Unit.Second)`\n",
+    );
+    code.push_str("    fn __rmul__<'py>(&self, py: pyo3::Python<'py>, scalar: f64) -> pyo3::PyResult<pyo3::Bound<'py, pyo3::PyAny>> {\n");
+    code.push_str("        self.__mul__(py, scalar)\n");
     code.push_str("    }\n");
     code.push_str("}\n");
 
@@ -246,6 +272,23 @@ fn generate_unit_conversions(units: &[UnitDef], out_dir: &str) {
 
 fn generate_c_header(crate_dir: &str) {
     if env::var("DOCS_RS").is_ok() {
+        return;
+    }
+
+    // Skip header regeneration on stable toolchain: cbindgen needs nightly
+    // (-Zunpretty=expanded) to see macro-generated items (e.g. UnitId enum).
+    // The header is maintained manually for stable builds.
+    let rustc = env::var("RUSTC").unwrap_or_else(|_| "rustc".to_string());
+    let is_nightly = std::process::Command::new(&rustc)
+        .arg("--version")
+        .output()
+        .map(|o| String::from_utf8_lossy(&o.stdout).contains("nightly"))
+        .unwrap_or(false);
+
+    if !is_nightly {
+        eprintln!("cargo:warning=Skipping cbindgen header regeneration (stable toolchain); header maintained manually.");
+        println!("cargo:rerun-if-changed=src/");
+        println!("cargo:rerun-if-changed=cbindgen.toml");
         return;
     }
 
