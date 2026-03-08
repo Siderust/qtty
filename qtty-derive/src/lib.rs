@@ -66,7 +66,10 @@ fn derive_unit_impl(input: DeriveInput) -> syn::Result<TokenStream2> {
 
         impl<S: crate::scalar::Scalar + ::core::fmt::Display> ::core::fmt::Display for crate::Quantity<#name, S> {
             fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                write!(f, "{} {}", self.value(), <#name as crate::Unit>::SYMBOL)
+                // Forward all format flags (precision, width, fill, …) to the
+                // inner scalar so that e.g. `format!("{:.9}", my_au)` works.
+                ::core::fmt::Display::fmt(&self.value(), f)?;
+                write!(f, " {}", <#name as crate::Unit>::SYMBOL)
             }
         }
     };
