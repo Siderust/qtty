@@ -57,7 +57,8 @@ where
     <N::Dim as DimDiv<D::Dim>>::Output: Dimension,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{} {}/{}", self.value(), N::SYMBOL, D::SYMBOL)
+        Display::fmt(&self.value(), f)?;
+        write!(f, " {}/{}", N::SYMBOL, D::SYMBOL)
     }
 }
 
@@ -85,7 +86,8 @@ where
     <A::Dim as DimMul<B::Dim>>::Output: Dimension,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{} {}·{}", self.value(), A::SYMBOL, B::SYMBOL)
+        Display::fmt(&self.value(), f)?;
+        write!(f, " {}\u{00b7}{}", A::SYMBOL, B::SYMBOL)
     }
 }
 
