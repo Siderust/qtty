@@ -57,36 +57,36 @@ fn derive_unit_impl(input: DeriveInput) -> syn::Result<TokenStream2> {
     let dimension = &unit_attr.dimension;
     let ratio = &unit_attr.ratio;
 
-	    let expanded = quote! {
-	        impl crate::Unit for #name {
-	            const RATIO: f64 = #ratio;
-	            type Dim = #dimension;
-	            const SYMBOL: &'static str = #symbol;
-	        }
+    let expanded = quote! {
+        impl crate::Unit for #name {
+            const RATIO: f64 = #ratio;
+            type Dim = #dimension;
+            const SYMBOL: &'static str = #symbol;
+        }
 
-	        impl<S: crate::scalar::Scalar + ::core::fmt::Display> ::core::fmt::Display for crate::Quantity<#name, S> {
-	            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-	                // Forward all format flags (precision, width, fill, …) to the
-	                // inner scalar so that e.g. `format!("{:.9}", my_au)` works.
-	                ::core::fmt::Display::fmt(&self.value(), f)?;
-	                write!(f, " {}", <#name as crate::Unit>::SYMBOL)
-	            }
-	        }
+        impl<S: crate::scalar::Scalar + ::core::fmt::Display> ::core::fmt::Display for crate::Quantity<#name, S> {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                // Forward all format flags (precision, width, fill, …) to the
+                // inner scalar so that e.g. `format!("{:.9}", my_au)` works.
+                ::core::fmt::Display::fmt(&self.value(), f)?;
+                write!(f, " {}", <#name as crate::Unit>::SYMBOL)
+            }
+        }
 
-	        impl<S: crate::scalar::Scalar + ::core::fmt::LowerExp> ::core::fmt::LowerExp for crate::Quantity<#name, S> {
-	            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-	                ::core::fmt::LowerExp::fmt(&self.value(), f)?;
-	                write!(f, " {}", <#name as crate::Unit>::SYMBOL)
-	            }
-	        }
+        impl<S: crate::scalar::Scalar + ::core::fmt::LowerExp> ::core::fmt::LowerExp for crate::Quantity<#name, S> {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                ::core::fmt::LowerExp::fmt(&self.value(), f)?;
+                write!(f, " {}", <#name as crate::Unit>::SYMBOL)
+            }
+        }
 
-	        impl<S: crate::scalar::Scalar + ::core::fmt::UpperExp> ::core::fmt::UpperExp for crate::Quantity<#name, S> {
-	            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-	                ::core::fmt::UpperExp::fmt(&self.value(), f)?;
-	                write!(f, " {}", <#name as crate::Unit>::SYMBOL)
-	            }
-	        }
-	    };
+        impl<S: crate::scalar::Scalar + ::core::fmt::UpperExp> ::core::fmt::UpperExp for crate::Quantity<#name, S> {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                ::core::fmt::UpperExp::fmt(&self.value(), f)?;
+                write!(f, " {}", <#name as crate::Unit>::SYMBOL)
+            }
+        }
+    };
 
     Ok(expanded)
 }
