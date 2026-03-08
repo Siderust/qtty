@@ -1,8 +1,18 @@
 # Changelog
 
-All notable changes to the vendored Rust workspace are documented here.
+All notable changes to this project are documented here.
 
-Documentation references live under [`../doc/developers/changelog.md`](../doc/developers/changelog.md).
+Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.4.1] - 2026-03-08
+
+### Added
+- Added a new `qtty` example, `all_units`, that surveys the built-in dimensions, scalar families, dimensional arithmetic, and `qtty_vec!` usage in one runnable program.
+
+### Changed
+- Restored the workspace and facade crate READMEs as release-facing documentation instead of placeholder pointers to the repository `doc/` tree.
+- Updated optional `pyo3` dependencies across `qtty`, `qtty-core`, and `qtty-ffi` from `0.27.2` to `0.28.2`.
 
 
 ## [0.4.0] - 2026-02-26
