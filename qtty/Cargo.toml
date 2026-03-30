@@ -17,6 +17,7 @@ alloc = []
 std = ["alloc", "qtty-core/std"]
 cross-unit-ops = ["qtty-core/cross-unit-ops"]
 serde = ["qtty-core/serde"]
+ffi = ["qtty-core/ffi"]
 
 # Scalar type support
 scalar-decimal = ["qtty-core/scalar-decimal"]

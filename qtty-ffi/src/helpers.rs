@@ -176,8 +176,8 @@ pub fn try_into_degrees(q: QttyQuantity) -> Result<qtty::angular::Degrees, i32> 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::UnitId;
     use crate::types::QTTY_ERR_INCOMPATIBLE_DIM;
+    use crate::UnitId;
     use approx::assert_relative_eq;
     use core::f64::consts::PI;
 

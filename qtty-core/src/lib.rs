@@ -252,6 +252,19 @@ mod tests {
         assert_eq!(q.value(), 123.456);
     }
 
+    #[cfg(feature = "ffi")]
+    #[test]
+    fn quantity_has_scalar_layout_under_ffi_feature() {
+        assert_eq!(
+            core::mem::size_of::<Quantity<TestUnit>>(),
+            core::mem::size_of::<f64>()
+        );
+        assert_eq!(
+            core::mem::align_of::<Quantity<TestUnit>>(),
+            core::mem::align_of::<f64>()
+        );
+    }
+
     // ─────────────────────────────────────────────────────────────────────────────
     // Conversion via `to`
     // ─────────────────────────────────────────────────────────────────────────────
