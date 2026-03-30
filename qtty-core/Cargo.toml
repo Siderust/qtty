@@ -16,7 +16,6 @@ default = ["std", "cross-unit-ops"]
 std = []
 cross-unit-ops = []
 serde = ["dep:serde"]
-ffi = []
 
 # Optional support
 scalar-decimal = ["rust_decimal"]
