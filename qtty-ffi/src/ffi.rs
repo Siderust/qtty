@@ -136,11 +136,7 @@ pub unsafe extern "C" fn qtty_unit_dimension(unit_id: u32, out: *mut DimensionId
 ///
 /// `out` must be a valid, writable pointer to `bool`, or null.
 #[no_mangle]
-pub unsafe extern "C" fn qtty_units_compatible(
-    a_id: u32,
-    b_id: u32,
-    out: *mut bool,
-) -> QttyStatus {
+pub unsafe extern "C" fn qtty_units_compatible(a_id: u32, b_id: u32, out: *mut bool) -> QttyStatus {
     catch_panic!({
         if out.is_null() {
             return QttyStatus::NullOut;
@@ -360,14 +356,24 @@ pub unsafe extern "C" fn qtty_quantity_format(
         let formatted = match flags {
             QTTY_FMT_LOWER_EXP => {
                 if precision >= 0 {
-                    format!("{:.prec$e} {}", qty.value, symbol, prec = precision as usize)
+                    format!(
+                        "{:.prec$e} {}",
+                        qty.value,
+                        symbol,
+                        prec = precision as usize
+                    )
                 } else {
                     format!("{:e} {}", qty.value, symbol)
                 }
             }
             QTTY_FMT_UPPER_EXP => {
                 if precision >= 0 {
-                    format!("{:.prec$E} {}", qty.value, symbol, prec = precision as usize)
+                    format!(
+                        "{:.prec$E} {}",
+                        qty.value,
+                        symbol,
+                        prec = precision as usize
+                    )
                 } else {
                     format!("{:E} {}", qty.value, symbol)
                 }
@@ -412,7 +418,9 @@ pub unsafe extern "C" fn qtty_string_free(s: *mut c_char) {
     if s.is_null() {
         return;
     }
-    unsafe { let _ = CString::from_raw(s); }
+    unsafe {
+        let _ = CString::from_raw(s);
+    }
 }
 
 // =============================================================================
@@ -785,7 +793,8 @@ mod tests {
 
     #[test]
     fn test_quantity_make_null_out() {
-        let status = unsafe { qtty_quantity_make(1.0, UnitId::Meter as u32, core::ptr::null_mut()) };
+        let status =
+            unsafe { qtty_quantity_make(1.0, UnitId::Meter as u32, core::ptr::null_mut()) };
         assert_eq!(status, QttyStatus::NullOut);
     }
 
@@ -864,7 +873,13 @@ mod tests {
         let qty = QttyQuantity::new(1234.5, UnitId::Meter);
         let mut buf = [0u8; 64];
         let status = unsafe {
-            qtty_quantity_format(qty, 2, QTTY_FMT_DEFAULT, buf.as_mut_ptr() as *mut c_char, 64)
+            qtty_quantity_format(
+                qty,
+                2,
+                QTTY_FMT_DEFAULT,
+                buf.as_mut_ptr() as *mut c_char,
+                64,
+            )
         };
         assert_eq!(status, QttyStatus::Ok);
     }
@@ -911,12 +926,7 @@ mod tests {
         let src = QttyDerivedQuantity::new(100.0, UnitId::Meter, UnitId::Second);
         // kg/h is incompatible with m/s
         let status = unsafe {
-            qtty_derived_convert(
-                src,
-                UnitId::Kilogram as u32,
-                UnitId::Hour as u32,
-                &mut out,
-            )
+            qtty_derived_convert(src, UnitId::Kilogram as u32, UnitId::Hour as u32, &mut out)
         };
         assert_eq!(status, QttyStatus::IncompatibleDim);
     }
