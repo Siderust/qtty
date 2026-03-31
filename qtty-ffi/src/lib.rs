@@ -8,7 +8,7 @@
 //!
 //! - **ABI-stable types**: `#[repr(C)]` and `#[repr(u32)]` types safe for FFI
 //! - **Unit registry**: Mapping between FFI unit IDs and conversion factors
-//! - **C API**: `extern "C"` functions for quantity construction and conversion
+//! - **C API**: `extern "C"` functions for raw quantity construction, conversion, and formatting
 //! - **Rust helpers**: Macros and trait implementations for downstream integration
 //!
 //! # Quick Start (C/C++)
@@ -80,12 +80,12 @@
 //!
 //! All FFI functions return status codes:
 //!
-//! - [`QTTY_OK`] (0): Success
-//! - [`QTTY_ERR_UNKNOWN_UNIT`] (-1): Invalid unit ID
-//! - [`QTTY_ERR_INCOMPATIBLE_DIM`] (-2): Dimension mismatch
-//! - [`QTTY_ERR_NULL_OUT`] (-3): Null output pointer
-//! - [`QTTY_ERR_INVALID_VALUE`] (-4): Invalid value (reserved)
-//! - [`QTTY_ERR_BUFFER_TOO_SMALL`] (-5): Output buffer too small
+//! - [`QttyStatus::Ok`] (0): Success
+//! - [`QttyStatus::UnknownUnit`] (-1): Invalid unit ID
+//! - [`QttyStatus::IncompatibleDim`] (-2): Dimension mismatch
+//! - [`QttyStatus::NullOut`] (-3): Null output pointer
+//! - [`QttyStatus::BufferTooSmall`] (-4): Output buffer too small
+//! - [`QttyStatus::InternalPanic`] (-5): Rust panic caught at the FFI boundary
 //!
 //! Format flags for [`qtty_quantity_format`]:
 //!
@@ -111,18 +111,34 @@ mod types;
 
 // Re-export FFI functions
 pub use ffi::{
-    qtty_derived_convert, qtty_derived_from_json, qtty_derived_make, qtty_derived_to_json,
-    qtty_ffi_version, qtty_quantity_convert, qtty_quantity_convert_value, qtty_quantity_format,
-    qtty_quantity_from_json, qtty_quantity_from_json_value, qtty_quantity_make,
-    qtty_quantity_to_json, qtty_quantity_to_json_value, qtty_string_free, qtty_unit_dimension,
+    qtty_derived_convert, qtty_derived_make, qtty_ffi_version, qtty_quantity_convert,
+    qtty_quantity_convert_value, qtty_quantity_format, qtty_quantity_make, qtty_unit_dimension,
     qtty_unit_is_valid, qtty_unit_name, qtty_units_compatible,
 };
 
+// Named unit ID constants for C caller ergonomics — each is the u32 discriminant
+// of the corresponding UnitId variant.  These are stable ABI values.
+/// Raw unit ID constant: Meter (Length, SI).
+pub const QTTY_UNIT_METER: u32 = UnitId::Meter as u32;
+/// Raw unit ID constant: Kilometer (Length, SI).
+pub const QTTY_UNIT_KILOMETER: u32 = UnitId::Kilometer as u32;
+/// Raw unit ID constant: Second (Time, SI).
+pub const QTTY_UNIT_SECOND: u32 = UnitId::Second as u32;
+/// Raw unit ID constant: Minute (Time).
+pub const QTTY_UNIT_MINUTE: u32 = UnitId::Minute as u32;
+/// Raw unit ID constant: Hour (Time).
+pub const QTTY_UNIT_HOUR: u32 = UnitId::Hour as u32;
+/// Raw unit ID constant: Day (Time).
+pub const QTTY_UNIT_DAY: u32 = UnitId::Day as u32;
+/// Raw unit ID constant: Radian (Angle).
+pub const QTTY_UNIT_RADIAN: u32 = UnitId::Radian as u32;
+/// Raw unit ID constant: Degree (Angle).
+pub const QTTY_UNIT_DEGREE: u32 = UnitId::Degree as u32;
+
 // Re-export types
 pub use types::{
-    DimensionId, QttyDerivedQuantity, QttyQuantity, UnitId, QTTY_ERR_BUFFER_TOO_SMALL,
-    QTTY_ERR_INCOMPATIBLE_DIM, QTTY_ERR_INVALID_VALUE, QTTY_ERR_NULL_OUT, QTTY_ERR_UNKNOWN_UNIT,
-    QTTY_FMT_DEFAULT, QTTY_FMT_LOWER_EXP, QTTY_FMT_UPPER_EXP, QTTY_OK,
+    DimensionId, QttyDerivedQuantity, QttyQuantity, QttyStatus, UnitId, QTTY_FMT_DEFAULT,
+    QTTY_FMT_LOWER_EXP, QTTY_FMT_UPPER_EXP,
 };
 
 // The impl_unit_ffi! macro is automatically exported at crate root by #[macro_export]
@@ -140,90 +156,93 @@ mod tests {
     use super::*;
     use core::mem::{align_of, size_of};
 
-    /// Test that QttyQuantity has the expected size and alignment for FFI.
     #[test]
     fn test_qtty_quantity_layout() {
-        // QttyQuantity should be:
-        // - f64 (8 bytes) + UnitId (4 bytes) + padding (4 bytes) = 16 bytes
-        // - Aligned to 8 bytes (alignment of f64)
         assert_eq!(size_of::<QttyQuantity>(), 16);
         assert_eq!(align_of::<QttyQuantity>(), 8);
     }
 
-    /// Test that UnitId has the expected size.
     #[test]
     fn test_unit_id_layout() {
         assert_eq!(size_of::<UnitId>(), 4);
         assert_eq!(align_of::<UnitId>(), 4);
     }
 
-    /// Test that DimensionId has the expected size.
     #[test]
     fn test_dimension_id_layout() {
         assert_eq!(size_of::<DimensionId>(), 4);
         assert_eq!(align_of::<DimensionId>(), 4);
     }
 
-    /// Test known conversion: 1000 meters → 1 kilometer
+    #[test]
+    fn test_qtty_status_layout() {
+        assert_eq!(size_of::<QttyStatus>(), 4);
+        assert_eq!(align_of::<QttyStatus>(), 4);
+    }
+
     #[test]
     fn test_known_conversion_meters_to_kilometers() {
         let mut out = QttyQuantity::default();
         let src = QttyQuantity::new(1000.0, UnitId::Meter);
-
-        let status = unsafe { qtty_quantity_convert(src, UnitId::Kilometer, &mut out) };
-
-        assert_eq!(status, QTTY_OK);
+        let status = unsafe { qtty_quantity_convert(src, UnitId::Kilometer as u32, &mut out) };
+        assert_eq!(status, QttyStatus::Ok);
         assert!((out.value - 1.0).abs() < 1e-12);
         assert_eq!(out.unit, UnitId::Kilometer);
     }
 
-    /// Test known conversion: 3600 seconds → 1 hour
     #[test]
     fn test_known_conversion_seconds_to_hours() {
         let mut out = QttyQuantity::default();
         let src = QttyQuantity::new(3600.0, UnitId::Second);
-
-        let status = unsafe { qtty_quantity_convert(src, UnitId::Hour, &mut out) };
-
-        assert_eq!(status, QTTY_OK);
+        let status = unsafe { qtty_quantity_convert(src, UnitId::Hour as u32, &mut out) };
+        assert_eq!(status, QttyStatus::Ok);
         assert!((out.value - 1.0).abs() < 1e-12);
         assert_eq!(out.unit, UnitId::Hour);
     }
 
-    /// Test known conversion: 180 degrees → π radians
     #[test]
     fn test_known_conversion_degrees_to_radians() {
         use core::f64::consts::PI;
-
         let mut out = QttyQuantity::default();
         let src = QttyQuantity::new(180.0, UnitId::Degree);
-
-        let status = unsafe { qtty_quantity_convert(src, UnitId::Radian, &mut out) };
-
-        assert_eq!(status, QTTY_OK);
+        let status = unsafe { qtty_quantity_convert(src, UnitId::Radian as u32, &mut out) };
+        assert_eq!(status, QttyStatus::Ok);
         assert!((out.value - PI).abs() < 1e-12);
         assert_eq!(out.unit, UnitId::Radian);
     }
 
-    /// Test incompatible conversion: meters → seconds fails
     #[test]
     fn test_incompatible_conversion_fails() {
         let mut out = QttyQuantity::default();
         let src = QttyQuantity::new(100.0, UnitId::Meter);
-
-        let status = unsafe { qtty_quantity_convert(src, UnitId::Second, &mut out) };
-
-        assert_eq!(status, QTTY_ERR_INCOMPATIBLE_DIM);
+        let status = unsafe { qtty_quantity_convert(src, UnitId::Second as u32, &mut out) };
+        assert_eq!(status, QttyStatus::IncompatibleDim);
     }
 
-    /// Test null output pointer handling
     #[test]
     fn test_null_out_pointer() {
         let src = QttyQuantity::new(100.0, UnitId::Meter);
-
         let status =
-            unsafe { qtty_quantity_convert(src, UnitId::Kilometer, core::ptr::null_mut()) };
+            unsafe { qtty_quantity_convert(src, UnitId::Kilometer as u32, core::ptr::null_mut()) };
+        assert_eq!(status, QttyStatus::NullOut);
+    }
 
-        assert_eq!(status, QTTY_ERR_NULL_OUT);
+    #[test]
+    fn test_invalid_unit_id_rejected() {
+        let mut out = QttyQuantity::default();
+        let src = QttyQuantity::new(100.0, UnitId::Meter);
+        let status = unsafe { qtty_quantity_convert(src, 0, &mut out) };
+        assert_eq!(status, QttyStatus::UnknownUnit);
+    }
+
+    #[test]
+    fn test_unit_id_constants_match_enum_discriminants() {
+        assert_eq!(QTTY_UNIT_METER, UnitId::Meter as u32);
+        assert_eq!(QTTY_UNIT_KILOMETER, UnitId::Kilometer as u32);
+        assert_eq!(QTTY_UNIT_SECOND, UnitId::Second as u32);
+        assert_eq!(QTTY_UNIT_HOUR, UnitId::Hour as u32);
+        assert_eq!(QTTY_UNIT_DAY, UnitId::Day as u32);
+        assert_eq!(QTTY_UNIT_RADIAN, UnitId::Radian as u32);
+        assert_eq!(QTTY_UNIT_DEGREE, UnitId::Degree as u32);
     }
 }
