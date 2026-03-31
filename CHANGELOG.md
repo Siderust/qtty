@@ -5,6 +5,18 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Removed
+- Removed the string-based `qtty-ffi` JSON serialization entry points:
+  - `qtty_quantity_to_json_value` / `qtty_quantity_from_json_value`
+  - `qtty_quantity_to_json` / `qtty_quantity_from_json`
+  - `qtty_derived_to_json` / `qtty_derived_from_json`
+  - `qtty_string_free`
+
+### Changed
+- `qtty-ffi` now exposes a POD-only FFI surface for quantity carriers; callers should pass `qtty_quantity_t` and `qtty_derived_quantity_t` directly instead of string payloads.
+
 ## [0.4.1] - 2026-03-08
 
 ### Added
