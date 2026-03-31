@@ -66,28 +66,28 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-qtty = "0.4.1"
+qtty = "0.5.0"
 ```
 
 Minimal `no_std` build:
 
 ```toml
 [dependencies]
-qtty = { version = "0.4.1", default-features = false }
+qtty = { version = "0.5.0", default-features = false }
 ```
 
 `no_std` with heap-backed vectors/macros:
 
 ```toml
 [dependencies]
-qtty = { version = "0.4.1", default-features = false, features = ["alloc"] }
+qtty = { version = "0.5.0", default-features = false, features = ["alloc"] }
 ```
 
 Serde support:
 
 ```toml
 [dependencies]
-qtty = { version = "0.4.1", features = ["serde"] }
+qtty = { version = "0.5.0", features = ["serde"] }
 ```
 
 ---
