@@ -35,6 +35,7 @@ compile time while valid conversions stay explicit and cheap.
 | `cross-unit-ops` | ✔ | Direct cross-unit comparisons for compatible built-in units (`==`, `<`, `>=`, …) |
 | `alloc` | via `std` | Heap-backed helpers in `no_std`, including `qtty::qtty_vec!(vec ...)` |
 | `serde` |  | `Serialize` / `Deserialize` support for quantities |
+| `ffi` |  | Marks `Quantity<U, S>` as `repr(transparent)` for Rust-side FFI layout guarantees |
 | `scalar-decimal` |  | `rust_decimal::Decimal` scalar support |
 | `scalar-rational` |  | `num_rational::Rational64` scalar support |
 | `pyo3` |  | PyO3 conversions for Python-facing integrations |
@@ -55,7 +56,7 @@ compile time while valid conversions stay explicit and cheap.
 | **Broad Unit Catalog** | Built-in modules cover angular, time, length, mass, power, area, volume, velocity, frequency, and unitless quantities. |
 | **Astronomy-Friendly Units** | Includes `AstronomicalUnit`, `LightYear`, `Parsec`, `SolarMass`, `SolarLuminosity`, sidereal time units, and related helpers. |
 | **Multiple Scalar Families** | Use `f64`, `f32`, signed integers, and optional decimal/rational scalars depending on your precision model. |
-| **Interop Options** | Optional `serde`, `pyo3`, `diesel`, `tiberius`, plus a separate `qtty-ffi` crate for C-compatible consumers. |
+| **Interop Options** | Optional `serde`, `ffi`, `pyo3`, `diesel`, `tiberius`, plus a separate `qtty-ffi` crate for C-compatible consumers. |
 
 ---
 
@@ -65,28 +66,28 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-qtty = "0.4.1"
+qtty = "0.5.0"
 ```
 
 Minimal `no_std` build:
 
 ```toml
 [dependencies]
-qtty = { version = "0.4.1", default-features = false }
+qtty = { version = "0.5.0", default-features = false }
 ```
 
 `no_std` with heap-backed vectors/macros:
 
 ```toml
 [dependencies]
-qtty = { version = "0.4.1", default-features = false, features = ["alloc"] }
+qtty = { version = "0.5.0", default-features = false, features = ["alloc"] }
 ```
 
 Serde support:
 
 ```toml
 [dependencies]
-qtty = { version = "0.4.1", features = ["serde"] }
+qtty = { version = "0.5.0", features = ["serde"] }
 ```
 
 ---

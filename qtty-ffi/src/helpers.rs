@@ -44,11 +44,11 @@
 //!
 //! ```rust
 //! use qtty::length::Meters;
-//! use qtty_ffi::{QttyQuantity, UnitId, QTTY_ERR_INCOMPATIBLE_DIM};
+//! use qtty_ffi::{QttyQuantity, UnitId};
 //!
 //! let time_qty = QttyQuantity::new(60.0, UnitId::Second);
 //! let result: Result<Meters, i32> = time_qty.try_into();
-//! assert_eq!(result, Err(QTTY_ERR_INCOMPATIBLE_DIM));
+//! assert!(result.is_err());
 //! ```
 
 // Auto-generated From/TryFrom impls for all units with Rust type mappings.
@@ -176,8 +176,8 @@ pub fn try_into_degrees(q: QttyQuantity) -> Result<qtty::angular::Degrees, i32> 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::QttyStatus;
     use crate::UnitId;
-    use crate::QTTY_ERR_INCOMPATIBLE_DIM;
     use approx::assert_relative_eq;
     use core::f64::consts::PI;
 
@@ -234,7 +234,7 @@ mod tests {
         let meters = qtty::length::Meters::new(100.0);
         let ffi: QttyQuantity = meters.into();
         let result: Result<qtty::time::Seconds, i32> = ffi.try_into();
-        assert_eq!(result, Err(QTTY_ERR_INCOMPATIBLE_DIM));
+        assert_eq!(result, Err(QttyStatus::IncompatibleDim as i32));
     }
 
     #[test]

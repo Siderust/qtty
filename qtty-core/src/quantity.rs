@@ -40,6 +40,7 @@ use core::ops::*;
 /// let x: Quantity<Meter, f32> = Quantity::new(5.0_f32);
 /// assert_eq!(x.value(), 5.0_f32);
 /// ```
+#[repr(transparent)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Quantity<U: Unit, S: Scalar = f64>(S, PhantomData<U>);
 
