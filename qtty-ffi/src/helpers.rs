@@ -176,7 +176,7 @@ pub fn try_into_degrees(q: QttyQuantity) -> Result<qtty::angular::Degrees, i32> 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::QTTY_ERR_INCOMPATIBLE_DIM;
+    use crate::QttyStatus;
     use crate::UnitId;
     use approx::assert_relative_eq;
     use core::f64::consts::PI;
@@ -234,7 +234,7 @@ mod tests {
         let meters = qtty::length::Meters::new(100.0);
         let ffi: QttyQuantity = meters.into();
         let result: Result<qtty::time::Seconds, i32> = ffi.try_into();
-        assert_eq!(result, Err(QTTY_ERR_INCOMPATIBLE_DIM));
+        assert_eq!(result, Err(QttyStatus::IncompatibleDim as i32));
     }
 
     #[test]

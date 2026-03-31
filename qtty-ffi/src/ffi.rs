@@ -21,8 +21,8 @@
 
 use crate::registry;
 use crate::types::{
-    DimensionId, QttyDerivedQuantity, QttyQuantity, QttyStatus, UnitId, QTTY_ERR_INCOMPATIBLE_DIM,
-    QTTY_ERR_UNKNOWN_UNIT, QTTY_FMT_LOWER_EXP, QTTY_FMT_UPPER_EXP,
+    DimensionId, QttyDerivedQuantity, QttyQuantity, QttyStatus, UnitId, QTTY_FMT_LOWER_EXP,
+    QTTY_FMT_UPPER_EXP,
 };
 use core::ffi::c_char;
 use std::ffi::{CStr, CString};
@@ -231,8 +231,8 @@ pub unsafe extern "C" fn qtty_quantity_convert(
                 unsafe { *out = QttyQuantity::new(v, dst_unit) };
                 QttyStatus::Ok
             }
-            Err(QTTY_ERR_UNKNOWN_UNIT) => QttyStatus::UnknownUnit,
-            Err(QTTY_ERR_INCOMPATIBLE_DIM) => QttyStatus::IncompatibleDim,
+            Err(QttyStatus::UnknownUnit) => QttyStatus::UnknownUnit,
+            Err(QttyStatus::IncompatibleDim) => QttyStatus::IncompatibleDim,
             Err(_) => QttyStatus::UnknownUnit,
         }
     })
@@ -281,8 +281,8 @@ pub unsafe extern "C" fn qtty_quantity_convert_value(
                 unsafe { *out_value = converted };
                 QttyStatus::Ok
             }
-            Err(QTTY_ERR_UNKNOWN_UNIT) => QttyStatus::UnknownUnit,
-            Err(QTTY_ERR_INCOMPATIBLE_DIM) => QttyStatus::IncompatibleDim,
+            Err(QttyStatus::UnknownUnit) => QttyStatus::UnknownUnit,
+            Err(QttyStatus::IncompatibleDim) => QttyStatus::IncompatibleDim,
             Err(_) => QttyStatus::UnknownUnit,
         }
     })
