@@ -8,7 +8,7 @@
 //!
 //! - **ABI-stable types**: `#[repr(C)]` and `#[repr(u32)]` types safe for FFI
 //! - **Unit registry**: Mapping between FFI unit IDs and conversion factors
-//! - **C API**: `extern "C"` functions for quantity construction and conversion
+//! - **C API**: `extern "C"` functions for raw quantity construction, conversion, and formatting
 //! - **Rust helpers**: Macros and trait implementations for downstream integration
 //!
 //! # Quick Start (C/C++)
@@ -84,8 +84,8 @@
 //! - [`QttyStatus::UnknownUnit`] (-1): Invalid unit ID
 //! - [`QttyStatus::IncompatibleDim`] (-2): Dimension mismatch
 //! - [`QttyStatus::NullOut`] (-3): Null output pointer
-//! - [`QttyStatus::InvalidValue`] (-4): Invalid value
-//! - [`QttyStatus::BufferTooSmall`] (-5): Output buffer too small
+//! - [`QttyStatus::BufferTooSmall`] (-4): Output buffer too small
+//! - [`QttyStatus::InternalPanic`] (-5): Rust panic caught at the FFI boundary
 //!
 //! Format flags for [`qtty_quantity_format`]:
 //!
@@ -111,10 +111,8 @@ mod types;
 
 // Re-export FFI functions
 pub use ffi::{
-    qtty_derived_convert, qtty_derived_from_json, qtty_derived_make, qtty_derived_to_json,
-    qtty_ffi_version, qtty_quantity_convert, qtty_quantity_convert_value, qtty_quantity_format,
-    qtty_quantity_from_json, qtty_quantity_from_json_value, qtty_quantity_make,
-    qtty_quantity_to_json, qtty_quantity_to_json_value, qtty_string_free, qtty_unit_dimension,
+    qtty_derived_convert, qtty_derived_make, qtty_ffi_version, qtty_quantity_convert,
+    qtty_quantity_convert_value, qtty_quantity_format, qtty_quantity_make, qtty_unit_dimension,
     qtty_unit_is_valid, qtty_unit_name, qtty_units_compatible,
 };
 

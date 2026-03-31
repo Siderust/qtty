@@ -1,9 +1,13 @@
 # qtty-ffi crate
 
-Centralized documentation lives under the repository `doc/` tree.
+This crate's maintained documentation currently lives with the crate sources:
 
-- Architecture: [`../../doc/architecture/qtty-ffi.md`](../../doc/architecture/qtty-ffi.md)
-- Unit registry: [`../../doc/developers/unit-registry.md`](../../doc/developers/unit-registry.md)
-- Repository layout: [`../../doc/architecture/repository-layout.md`](../../doc/architecture/repository-layout.md)
+- Public ABI overview and examples: [`src/lib.rs`](src/lib.rs)
+- Exported C header: [`include/qtty_ffi.h`](include/qtty_ffi.h)
+- Registry source data: [`units.csv`](units.csv)
+- Registry format notes: [`units.csv.md`](units.csv.md)
 
-This README remains as the crate metadata entrypoint.
+The exported FFI surface is POD-oriented: callers exchange raw `qtty_quantity_t`
+and `qtty_derived_quantity_t` values directly instead of JSON/string payloads.
+
+This README remains the crate metadata entrypoint.

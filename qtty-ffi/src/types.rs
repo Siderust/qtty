@@ -37,16 +37,14 @@ pub enum QttyStatus {
     IncompatibleDim = -2,
     /// A required output pointer was null.
     NullOut = -3,
-    /// The provided value is invalid (e.g., non-UTF-8 JSON string).
-    InvalidValue = -4,
     /// The provided output buffer is too small.
-    BufferTooSmall = -5,
+    BufferTooSmall = -4,
     /// A Rust panic was caught at the FFI boundary.
     ///
     /// This indicates a bug in the underlying library; the panic payload is
     /// discarded.  Domain errors (`UnknownUnit`, `IncompatibleDim`, etc.) are
     /// never reported via this variant.
-    InternalPanic = -6,
+    InternalPanic = -5,
 }
 
 impl From<QttyStatus> for i32 {
@@ -55,7 +53,6 @@ impl From<QttyStatus> for i32 {
         s as i32
     }
 }
-
 
 // =============================================================================
 // Format Flags (for qtty_quantity_format)

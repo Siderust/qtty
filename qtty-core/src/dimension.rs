@@ -233,4 +233,3 @@ pub type Power = Dim<P2, N3, P1, Z0, Z0, Z0, Z0, Z0>;
 
 /// Frequency — angular per time (A¹ · T⁻¹).
 pub type FrequencyDim = Dim<Z0, N1, Z0, Z0, Z0, Z0, Z0, P1>;
-
