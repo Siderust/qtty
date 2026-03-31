@@ -21,9 +21,7 @@
 //! v_dst = v_src * (src.scale_to_canonical / dst.scale_to_canonical)
 //! ```
 
-use crate::types::{
-    DimensionId, UnitId, QTTY_ERR_INCOMPATIBLE_DIM, QTTY_ERR_UNKNOWN_UNIT, QTTY_OK,
-};
+use crate::types::{DimensionId, QttyStatus, UnitId};
 
 // =============================================================================
 // Unit Metadata
@@ -87,8 +85,8 @@ pub fn compatible(a: UnitId, b: UnitId) -> bool {
 /// # Returns
 ///
 /// * `Ok(converted_value)` on success
-/// * `Err(QTTY_ERR_UNKNOWN_UNIT)` if either unit is not recognized
-/// * `Err(QTTY_ERR_INCOMPATIBLE_DIM)` if units have different dimensions
+/// * `Err(QttyStatus::UnknownUnit)` if either unit is not recognized
+/// * `Err(QttyStatus::IncompatibleDim)` if units have different dimensions
 ///
 /// # Example
 ///
@@ -99,12 +97,12 @@ pub fn compatible(a: UnitId, b: UnitId) -> bool {
 /// assert!((meters.unwrap() - 1.0).abs() < 1e-12);
 /// ```
 #[inline]
-pub fn convert_value(v: f64, src: UnitId, dst: UnitId) -> Result<f64, i32> {
-    let src_meta = meta(src).ok_or(QTTY_ERR_UNKNOWN_UNIT)?;
-    let dst_meta = meta(dst).ok_or(QTTY_ERR_UNKNOWN_UNIT)?;
+pub fn convert_value(v: f64, src: UnitId, dst: UnitId) -> Result<f64, QttyStatus> {
+    let src_meta = meta(src).ok_or(QttyStatus::UnknownUnit)?;
+    let dst_meta = meta(dst).ok_or(QttyStatus::UnknownUnit)?;
 
     if src_meta.dim != dst_meta.dim {
-        return Err(QTTY_ERR_INCOMPATIBLE_DIM);
+        return Err(QttyStatus::IncompatibleDim);
     }
 
     // If same unit, no conversion needed
@@ -117,35 +115,6 @@ pub fn convert_value(v: f64, src: UnitId, dst: UnitId) -> Result<f64, i32> {
     let v_dst = v_canonical / dst_meta.scale_to_canonical;
 
     Ok(v_dst)
-}
-
-/// Converts a value from one unit to another, returning a status code.
-///
-/// This is a convenience function that returns `QTTY_OK` on success and
-/// the appropriate error code on failure. The converted value is stored
-/// in `result` (which must be initialized).
-///
-/// # Arguments
-///
-/// * `v` - The value to convert
-/// * `src` - The source unit
-/// * `dst` - The destination unit
-/// * `result` - Mutable reference to store the converted value
-///
-/// # Returns
-///
-/// * `QTTY_OK` on success
-/// * `QTTY_ERR_UNKNOWN_UNIT` if either unit is not recognized
-/// * `QTTY_ERR_INCOMPATIBLE_DIM` if units have different dimensions
-#[inline]
-pub fn convert_value_status(v: f64, src: UnitId, dst: UnitId, result: &mut f64) -> i32 {
-    match convert_value(v, src, dst) {
-        Ok(converted) => {
-            *result = converted;
-            QTTY_OK
-        }
-        Err(code) => code,
-    }
 }
 
 #[cfg(test)]
@@ -237,7 +206,7 @@ mod tests {
     #[test]
     fn test_convert_incompatible_dimensions() {
         let result = convert_value(1.0, UnitId::Meter, UnitId::Second);
-        assert_eq!(result, Err(QTTY_ERR_INCOMPATIBLE_DIM));
+        assert_eq!(result, Err(QttyStatus::IncompatibleDim));
     }
 
     #[test]
@@ -254,21 +223,5 @@ mod tests {
         let neg_inf_result =
             convert_value(f64::NEG_INFINITY, UnitId::Second, UnitId::Minute).unwrap();
         assert!(neg_inf_result.is_infinite() && neg_inf_result.is_sign_negative());
-    }
-
-    #[test]
-    fn test_convert_value_status_success() {
-        let mut out = 0.0;
-        let status = convert_value_status(2.0, UnitId::Hour, UnitId::Minute, &mut out);
-        assert_eq!(status, QTTY_OK);
-        assert_relative_eq!(out, 120.0, epsilon = 1e-12);
-    }
-
-    #[test]
-    fn test_convert_value_status_incompatible_dimension() {
-        let mut out = -1.0;
-        let status = convert_value_status(1.0, UnitId::Meter, UnitId::Second, &mut out);
-        assert_eq!(status, QTTY_ERR_INCOMPATIBLE_DIM);
-        assert_relative_eq!(out, -1.0, epsilon = 1e-12);
     }
 }

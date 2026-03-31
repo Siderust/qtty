@@ -80,12 +80,12 @@
 //!
 //! All FFI functions return status codes:
 //!
-//! - [`QTTY_OK`] (0): Success
-//! - [`QTTY_ERR_UNKNOWN_UNIT`] (-1): Invalid unit ID
-//! - [`QTTY_ERR_INCOMPATIBLE_DIM`] (-2): Dimension mismatch
-//! - [`QTTY_ERR_NULL_OUT`] (-3): Null output pointer
-//! - [`QTTY_ERR_INVALID_VALUE`] (-4): Invalid value (reserved)
-//! - [`QTTY_ERR_BUFFER_TOO_SMALL`] (-5): Output buffer too small
+//! - [`QttyStatus::Ok`] (0): Success
+//! - [`QttyStatus::UnknownUnit`] (-1): Invalid unit ID
+//! - [`QttyStatus::IncompatibleDim`] (-2): Dimension mismatch
+//! - [`QttyStatus::NullOut`] (-3): Null output pointer
+//! - [`QttyStatus::InvalidValue`] (-4): Invalid value
+//! - [`QttyStatus::BufferTooSmall`] (-5): Output buffer too small
 //!
 //! Format flags for [`qtty_quantity_format`]:
 //!

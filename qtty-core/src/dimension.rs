@@ -234,16 +234,3 @@ pub type Power = Dim<P2, N3, P1, Z0, Z0, Z0, Z0, Z0>;
 /// Frequency — angular per time (A¹ · T⁻¹).
 pub type FrequencyDim = Dim<Z0, N1, Z0, Z0, Z0, Z0, Z0, P1>;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Legacy compatibility alias
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Backward-compatible alias: `DivDim<N, D>` resolves to `<N as DimDiv<D>>::Output`.
-///
-/// This preserves source compatibility for code that previously used `DivDim<Length, Time>`.
-/// It now resolves to the same concrete type as the `Velocity` alias, since typenum
-/// arithmetic produces the identical `Dim<P1, N1, …>`.
-pub type DivDim<N, D> = <N as DimDiv<D>>::Output;
-
-/// Backward-compatible alias: `MulDim<A, B>` resolves to `<A as DimMul<B>>::Output`.
-pub type MulDim<A, B> = <A as DimMul<B>>::Output;

@@ -49,11 +49,13 @@ pub enum QttyStatus {
     InternalPanic = -6,
 }
 
-// Legacy i32 aliases used by registry::convert_value and convert_value_status internally.
-// These must NOT be re-exported to C callers; use QttyStatus instead.
-pub(crate) const QTTY_OK: i32 = 0;
-pub(crate) const QTTY_ERR_UNKNOWN_UNIT: i32 = -1;
-pub(crate) const QTTY_ERR_INCOMPATIBLE_DIM: i32 = -2;
+impl From<QttyStatus> for i32 {
+    #[inline]
+    fn from(s: QttyStatus) -> i32 {
+        s as i32
+    }
+}
+
 
 // =============================================================================
 // Format Flags (for qtty_quantity_format)
