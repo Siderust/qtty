@@ -74,14 +74,9 @@
 #define QTTY_ERR_NULL_OUT -3
 
 /*
- Error: the provided value is invalid (reserved for future use).
- */
-#define QTTY_ERR_INVALID_VALUE -4
-
-/*
  Error: the provided output buffer is too small.
  */
-#define QTTY_ERR_BUFFER_TOO_SMALL -5
+#define QTTY_ERR_BUFFER_TOO_SMALL -4
 
 /*
  Format flag: default decimal notation (e.g. `"1234.57 m"`).
@@ -1007,58 +1002,6 @@ int32_t qtty_quantity_format(struct qtty_quantity_t qty,
                              size_t buf_len);
 
 /*
- Frees a string previously allocated by one of the `qtty_*_to_json*` functions.
-
- # Safety
-
- The pointer must have been returned by a `qtty_*_to_json*` function and must
- not have been freed previously. Passing a null pointer is safe (no-op).
- */
-void qtty_string_free(char *s);
-
-/*
- Serializes a quantity's value as a plain JSON number string (e.g. "123.45").
-
- # Safety
-
- The caller must ensure that `out` points to valid, writable memory for a `*mut c_char`,
- or is null (in which case an error is returned). The returned string must be freed
- with [`qtty_string_free`].
- */
-int32_t qtty_quantity_to_json_value(struct qtty_quantity_t src, char **out);
-
-/*
- Deserializes a quantity from a plain JSON numeric string with an explicit unit.
-
- # Safety
-
- The caller must ensure that `json` points to a valid NUL-terminated C string,
- and `out` points to valid, writable memory for a `QttyQuantity`.
- */
-int32_t qtty_quantity_from_json_value(UnitId unit, const char *json, struct qtty_quantity_t *out);
-
-/*
- Serializes a quantity to a full JSON object: `{"value":123.45,"unit":"Meter"}`.
-
- # Safety
-
- The caller must ensure that `out` points to valid, writable memory for a `*mut c_char`,
- or is null (in which case an error is returned). The returned string must be freed
- with [`qtty_string_free`].
- */
-int32_t qtty_quantity_to_json(struct qtty_quantity_t src, char **out);
-
-/*
- Deserializes a quantity from a JSON object: `{"value":123.45,"unit":"Meter"}`.
-
- # Safety
-
- The caller must ensure that `json` points to a valid NUL-terminated C string,
- and `out` points to valid, writable memory for a `QttyQuantity`.
- */
-int32_t qtty_quantity_from_json(const char *json, struct qtty_quantity_t *out);
-
-/*
  Creates a new derived quantity (compound unit like m/s).
 
  # Safety
@@ -1088,32 +1031,12 @@ int32_t qtty_derived_convert(struct qtty_derived_quantity_t src,
                              struct qtty_derived_quantity_t *out);
 
 /*
- Serializes a derived quantity to a JSON object.
-
- # Safety
-
- The caller must ensure that `out` points to valid, writable memory for a `*mut c_char`.
- The returned string must be freed with [`qtty_string_free`].
- */
-int32_t qtty_derived_to_json(struct qtty_derived_quantity_t src, char **out);
-
-/*
- Deserializes a derived quantity from a JSON object.
-
- # Safety
-
- The caller must ensure that `json` points to a valid NUL-terminated C string,
- and `out` points to valid, writable memory for a `QttyDerivedQuantity`.
- */
-int32_t qtty_derived_from_json(const char *json, struct qtty_derived_quantity_t *out);
-
-/*
  Returns the FFI ABI version.
 
  This can be used by consumers to verify compatibility. The version is
  incremented when breaking changes are made to the ABI.
 
- Current version: 1
+ Current version: 600
  */
 uint32_t qtty_ffi_version(void);
 

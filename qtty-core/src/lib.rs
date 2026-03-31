@@ -117,14 +117,12 @@ pub use dimension::{
     DimMul,
     Dimension,
     Dimensionless,
-    DivDim,
     Energy,
     Force,
     FrequencyDim,
     Length,
     LuminousIntensity,
     Mass,
-    MulDim,
     Power,
     Temperature,
     Time,
@@ -250,6 +248,18 @@ mod tests {
     fn quantity_from_f64() {
         let q: TU = 123.456.into();
         assert_eq!(q.value(), 123.456);
+    }
+
+    #[test]
+    fn quantity_has_scalar_layout() {
+        assert_eq!(
+            core::mem::size_of::<Quantity<TestUnit>>(),
+            core::mem::size_of::<f64>()
+        );
+        assert_eq!(
+            core::mem::align_of::<Quantity<TestUnit>>(),
+            core::mem::align_of::<f64>()
+        );
     }
 
     // ─────────────────────────────────────────────────────────────────────────────

@@ -10,7 +10,7 @@
 //!   `Degree::RATIO == 1.0`, and all other angular units express how many *degrees* correspond to one of that unit.
 //!   For example, `Radian::RATIO == 180.0 / PI` because 1 radian = 180/π degrees.
 //! * **Associated constants:** The `AngularUnit` trait exposes precomputed constants (`FULL_TURN`, `HALF_TURN`,
-//!   `QUARTED_TURN`) expressed *in the receiving unit* for ergonomic range‑wrapping. These are derived from `τ`
+//!   `QUARTER_TURN`) expressed *in the receiving unit* for ergonomic range‑wrapping. These are derived from `τ`
 //!   radians and then converted to the target unit to avoid cumulative error from chained conversions.
 //! * **Trigonometry:** `sin`, `cos`, `tan`, and `sin_cos` methods are provided on angular quantities; they convert to
 //!   radians internally and then call the corresponding `f64` intrinsic.
@@ -79,15 +79,13 @@ pub use crate::dimension::Angular;
 /// They are computed via a compile-time conversion from `TAU` radians (i.e., a full revolution) and then scaled.
 /// This keeps all fractions derived from the same base value.
 ///
-/// > **Naming note:** The historical spelling `QUARTED_TURN` is retained for backward compatibility. It represents a
-/// > quarter turn (90°).
 pub trait AngularUnit: Unit<Dim = Angular> {
     /// One full revolution (τ radians / 360°) expressed in this unit.
     const FULL_TURN: f64;
     /// Half a revolution (π radians / 180°) expressed in this unit.
     const HALF_TURN: f64;
     /// A quarter revolution (π/2 radians / 90°) expressed in this unit.
-    const QUARTED_TURN: f64;
+    const QUARTER_TURN: f64;
 }
 impl<T: Unit<Dim = Angular>> AngularUnit for T {
     /// One full revolution (360°) expressed in T unit.
@@ -95,7 +93,7 @@ impl<T: Unit<Dim = Angular>> AngularUnit for T {
     /// Half a revolution (180°) expressed in T unit.
     const HALF_TURN: f64 = Radians::new(TAU).to_const::<T>().value() * 0.5;
     /// Quarter revolution (90°) expressed in T unit.
-    const QUARTED_TURN: f64 = Radians::new(TAU).to_const::<T>().value() * 0.25;
+    const QUARTER_TURN: f64 = Radians::new(TAU).to_const::<T>().value() * 0.25;
 }
 
 impl<U: AngularUnit + Copy> Quantity<U> {
@@ -108,7 +106,7 @@ impl<U: AngularUnit + Copy> Quantity<U> {
     /// Half a revolution (180°) expressed as `Quantity<U>`.
     pub const HALF_TURN: Quantity<U> = Quantity::<U>::new(U::HALF_TURN);
     /// Quarter revolution (90°) expressed as `Quantity<U>`.
-    pub const QUARTED_TURN: Quantity<U> = Quantity::<U>::new(U::QUARTED_TURN);
+    pub const QUARTER_TURN: Quantity<U> = Quantity::<U>::new(U::QUARTER_TURN);
 
     /// Sign of the *raw numeric* in this unit (same semantics as `f64::signum()`).
     #[inline]
@@ -454,16 +452,16 @@ mod tests {
 
     #[test]
     fn test_quarter_turn() {
-        assert_abs_diff_eq!(Radian::QUARTED_TURN, PI / 2.0, epsilon = 1e-12);
-        assert_eq!(Degree::QUARTED_TURN, 90.0);
-        assert_eq!(Arcsecond::QUARTED_TURN, 324_000.0);
+        assert_abs_diff_eq!(Radian::QUARTER_TURN, PI / 2.0, epsilon = 1e-12);
+        assert_eq!(Degree::QUARTER_TURN, 90.0);
+        assert_eq!(Arcsecond::QUARTER_TURN, 324_000.0);
     }
 
     #[test]
     fn test_quantity_constants() {
         assert_eq!(Degrees::FULL_TURN.value(), 360.0);
         assert_eq!(Degrees::HALF_TURN.value(), 180.0);
-        assert_eq!(Degrees::QUARTED_TURN.value(), 90.0);
+        assert_eq!(Degrees::QUARTER_TURN.value(), 90.0);
         assert_eq!(Degrees::TAU.value(), 360.0);
     }
 

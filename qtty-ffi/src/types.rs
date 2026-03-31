@@ -14,26 +14,45 @@ use core::ffi::c_char;
 use serde::{Deserialize, Serialize};
 
 // =============================================================================
-// Status Codes
+// Status Type
 // =============================================================================
 
-/// Success status code.
-pub const QTTY_OK: i32 = 0;
+/// Status codes returned by every qtty-ffi function.
+///
+/// Callers must inspect this value before reading any output parameters.
+///
+/// # ABI Contract
+///
+/// Discriminant values are frozen; new variants may be added only at the end.
+///
+/// cbindgen:prefix-with-name
+#[repr(i32)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum QttyStatus {
+    /// Operation completed successfully.
+    Ok = 0,
+    /// The provided unit ID is not recognized or valid.
+    UnknownUnit = -1,
+    /// Conversion requested between incompatible dimensions.
+    IncompatibleDim = -2,
+    /// A required output pointer was null.
+    NullOut = -3,
+    /// The provided output buffer is too small.
+    BufferTooSmall = -4,
+    /// A Rust panic was caught at the FFI boundary.
+    ///
+    /// This indicates a bug in the underlying library; the panic payload is
+    /// discarded.  Domain errors (`UnknownUnit`, `IncompatibleDim`, etc.) are
+    /// never reported via this variant.
+    InternalPanic = -5,
+}
 
-/// Error: the provided unit ID is not recognized/valid.
-pub const QTTY_ERR_UNKNOWN_UNIT: i32 = -1;
-
-/// Error: conversion requested between incompatible dimensions.
-pub const QTTY_ERR_INCOMPATIBLE_DIM: i32 = -2;
-
-/// Error: a required output pointer was null.
-pub const QTTY_ERR_NULL_OUT: i32 = -3;
-
-/// Error: the provided value is invalid (reserved for future use).
-pub const QTTY_ERR_INVALID_VALUE: i32 = -4;
-
-/// Error: the provided output buffer is too small.
-pub const QTTY_ERR_BUFFER_TOO_SMALL: i32 = -5;
+impl From<QttyStatus> for i32 {
+    #[inline]
+    fn from(s: QttyStatus) -> i32 {
+        s as i32
+    }
+}
 
 // =============================================================================
 // Format Flags (for qtty_quantity_format)
