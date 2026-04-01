@@ -410,6 +410,11 @@ impl QttyDerivedQuantity {
         let den_converted =
             crate::registry::convert_value(1.0, self.denominator, target_den).ok()?;
 
+        // Guard against degenerate conversion factor.
+        if den_converted == 0.0 || !den_converted.is_finite() {
+            return None;
+        }
+
         // Result = (num in new units) / (den scale factor)
         // 100 m = 0.1 km, 1 s = 1/3600 h
         // 100 m/s = 0.1 km / (1/3600 h) = 0.1 * 3600 km/h = 360 km/h
