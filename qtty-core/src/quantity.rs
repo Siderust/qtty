@@ -3,9 +3,9 @@
 
 //! Quantity type and its implementations.
 
-use crate::dimension::{DimDiv, DimMul, Dimension};
 use crate::scalar::{Exact, Real, Scalar, Transcendental};
-use crate::unit::{Per, Prod, Unit};
+use crate::unit::{Unit, Unitless};
+use crate::unit_arithmetic::{UnitDiv, UnitMul};
 use core::cmp::Ordering;
 use core::iter::Sum;
 use core::marker::PhantomData;
@@ -750,15 +750,14 @@ impl<'a, U: Unit> Sum<&'a Quantity<U, f64>> for f64 {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Division producing Per<N, D>
+// Division delegating to UnitDiv
 // ─────────────────────────────────────────────────────────────────────────────
 
 impl<N: Unit, D: Unit, S: Scalar> Div<Quantity<D, S>> for Quantity<N, S>
 where
-    N::Dim: DimDiv<D::Dim>,
-    <N::Dim as DimDiv<D::Dim>>::Output: Dimension,
+    N: UnitDiv<D>,
 {
-    type Output = Quantity<Per<N, D>, S>;
+    type Output = Quantity<<N as UnitDiv<D>>::Output, S>;
     #[inline]
     fn div(self, rhs: Quantity<D, S>) -> Self::Output {
         Quantity::new(self.0 / rhs.0)
@@ -766,35 +765,31 @@ where
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Multiplication producing Prod<A, B>
+// Multiplication delegating to UnitMul
 // ─────────────────────────────────────────────────────────────────────────────
 
 impl<A: Unit, B: Unit, S: Scalar> Mul<Quantity<B, S>> for Quantity<A, S>
 where
-    A::Dim: DimMul<B::Dim>,
-    <A::Dim as DimMul<B::Dim>>::Output: Dimension,
+    A: UnitMul<B>,
 {
-    type Output = Quantity<Prod<A, B>, S>;
+    type Output = Quantity<<A as UnitMul<B>>::Output, S>;
 
     #[inline]
     fn mul(self, rhs: Quantity<B, S>) -> Self::Output {
-        Quantity::<Prod<A, B>, S>::new(self.0 * rhs.0)
+        Quantity::new(self.0 * rhs.0)
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Special methods for Per<U, U> (unitless ratios)
+// Special methods for Unitless quantities
 // ─────────────────────────────────────────────────────────────────────────────
 
-impl<U: Unit, S: Transcendental> Quantity<Per<U, U>, S>
-where
-    U::Dim: DimDiv<U::Dim>,
-    <U::Dim as DimDiv<U::Dim>>::Output: Dimension,
-{
-    /// Arc sine of a unitless ratio.
+impl<S: Transcendental> Quantity<Unitless, S> {
+    /// Arc sine of a unitless quantity.
     ///
     /// ```rust
     /// use qtty_core::length::Meters;
+    /// // Same-unit division now directly yields Quantity<Unitless>.
     /// let ratio = Meters::new(1.0) / Meters::new(2.0);
     /// let angle_rad = ratio.asin();
     /// assert!((angle_rad - core::f64::consts::FRAC_PI_6).abs() < 1e-12);
@@ -804,13 +799,13 @@ where
         self.0.asin()
     }
 
-    /// Arc cosine of a unitless ratio.
+    /// Arc cosine of a unitless quantity.
     #[inline]
     pub fn acos(&self) -> S {
         self.0.acos()
     }
 
-    /// Arc tangent of a unitless ratio.
+    /// Arc tangent of a unitless quantity.
     #[inline]
     pub fn atan(&self) -> S {
         self.0.atan()

@@ -80,6 +80,7 @@
 #![deny(missing_docs)]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![forbid(unsafe_code)]
+#![recursion_limit = "512"]
 
 #[cfg(not(feature = "std"))]
 extern crate libm;
@@ -101,6 +102,8 @@ mod macros;
 mod quantity;
 pub mod scalar;
 mod unit;
+/// Stable unit arithmetic layer: [`UnitDiv`] and [`UnitMul`] traits.
+pub mod unit_arithmetic;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Public re-exports of core types
@@ -140,6 +143,7 @@ pub use quantity::{
 };
 pub use scalar::{Exact, IntegerScalar, Real, Scalar, Transcendental};
 pub use unit::{Per, Prod, Simplify, Unit, Unitless};
+pub use unit_arithmetic::{UnitDiv, UnitMul};
 
 #[cfg(feature = "scalar-rational")]
 pub use quantity::QuantityRational;
@@ -444,8 +448,19 @@ mod tests {
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // Division yielding Per<N, D>
+    // Division: same-unit yields Unitless, cross-unit yields Per<N, D>
     // ─────────────────────────────────────────────────────────────────────────────
+
+    // Register test units for arithmetic.
+    impl_unit_arithmetic_pairs!(TestUnit, DoubleTestUnit, HalfTestUnit);
+
+    #[test]
+    fn division_same_unit_gives_unitless() {
+        let a = TU::new(100.0);
+        let b = TU::new(20.0);
+        let ratio: Quantity<Unitless> = a / b;
+        assert!((ratio.value() - 5.0).abs() < 1e-12);
+    }
 
     #[test]
     fn division_creates_per_type() {
@@ -466,9 +481,8 @@ mod tests {
     fn per_multiplication_recovers_numerator() {
         let rate: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(5.0);
         let time = Dtu::new(4.0);
-        // Blanket Mul gives Quantity<Prod<Per<TU,DTU>, DTU>>; .to() converts back to TU
-        // because Prod<Per<TU,DTU>, DTU> has dimension Length (same as TU).
-        let result: TU = (rate * time).to();
+        // UnitMul: Per<TU, DTU> * DTU → TU (recovery impl)
+        let result: TU = rate * time;
         assert!((result.value() - 20.0).abs() < 1e-12);
     }
 
@@ -476,14 +490,21 @@ mod tests {
     fn per_multiplication_commutative() {
         let rate: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(5.0);
         let time = Dtu::new(4.0);
-        let result1: TU = (rate * time).to();
-        let result2: TU = (time * rate).to();
+        let result1: TU = rate * time;
+        let result2: TU = time * rate;
         assert!((result1.value() - result2.value()).abs() < 1e-12);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Simplify trait
     // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn simplify_unitless_is_identity() {
+        let u: Quantity<Unitless> = Quantity::new(1.23456);
+        let simplified: Quantity<Unitless> = u.simplify();
+        assert!((simplified.value() - 1.23456).abs() < 1e-12);
+    }
 
     #[test]
     fn simplify_per_u_u_to_unitless() {
@@ -500,26 +521,34 @@ mod tests {
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // Quantity<Per<U,U>>::asin()
+    // Quantity<Unitless>::asin / acos / atan
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
-    fn per_u_u_asin() {
-        let ratio: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(0.5);
+    fn unitless_asin() {
+        let ratio: Quantity<Unitless> = Quantity::new(0.5);
         let result = ratio.asin();
         assert!((result - 0.5_f64.asin()).abs() < 1e-12);
     }
 
     #[test]
-    fn per_u_u_asin_boundary_values() {
-        let one: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(1.0);
+    fn unitless_asin_boundary_values() {
+        let one: Quantity<Unitless> = Quantity::new(1.0);
         assert!((one.asin() - core::f64::consts::FRAC_PI_2).abs() < 1e-12);
 
-        let neg_one: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(-1.0);
+        let neg_one: Quantity<Unitless> = Quantity::new(-1.0);
         assert!((neg_one.asin() - (-core::f64::consts::FRAC_PI_2)).abs() < 1e-12);
 
-        let zero: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(0.0);
+        let zero: Quantity<Unitless> = Quantity::new(0.0);
         assert!((zero.asin() - 0.0).abs() < 1e-12);
+    }
+
+    #[test]
+    fn same_unit_ratio_asin() {
+        // Same-unit division now directly yields Unitless, so asin works.
+        let ratio = TU::new(1.0) / TU::new(2.0);
+        let result = ratio.asin();
+        assert!((result - 0.5_f64.asin()).abs() < 1e-12);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────

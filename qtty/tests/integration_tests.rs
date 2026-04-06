@@ -97,8 +97,8 @@ fn orbital_distance_calculation() {
     let time = Day::new(1.0);
     let time_sec: Second = time.to();
 
-    // Distance = velocity × time
-    let distance: Kilometer = (earth_velocity * time_sec).to();
+    // Distance = velocity × time (recovery: Per<Km, S> * S → Km)
+    let distance: Kilometer = earth_velocity * time_sec;
 
     // Earth travels about 2.57 million km per day
     assert_relative_eq!(distance.value(), 2_573_395.2, max_relative = 1e-3);
@@ -137,7 +137,8 @@ fn earth_rotation() {
 
     // After 6 hours (0.25 days)
     let time = Day::new(0.25);
-    let angle: Degree = (rotation_rate * time).to();
+    // Recovery: Per<Degree, Day> * Day → Degree
+    let angle: Degree = rotation_rate * time;
 
     assert_abs_diff_eq!(angle.value(), 90.0, epsilon = 1e-12);
 }
@@ -340,7 +341,8 @@ fn per_unit_multiplication_recovers_numerator() {
     let v: velocity::Velocity<qtty::unit::Kilometer, qtty::unit::Second> =
         velocity::Velocity::new(100.0);
     let t: Second = Second::new(3600.0);
-    let d: Kilometer = (v * t).to();
+    // UnitMul: Per<Km, S> * S → Km (recovery impl)
+    let d: Kilometer = v * t;
     assert_abs_diff_eq!(d.value(), 360_000.0, epsilon = 1e-6);
 }
 

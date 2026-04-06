@@ -12,7 +12,7 @@
 //! ```
 
 use qtty::velocity::Velocity;
-use qtty::{CubicMeter, Kilometer, Meter, Per, Quantity, Second, Simplify, SquareMeter, Unitless};
+use qtty::{CubicMeter, Kilometer, Meter, Second, SquareMeter, Unitless};
 
 fn main() {
     // ─────────────────────────────────────────────────────────────────────
@@ -44,9 +44,9 @@ fn main() {
     assert!((speed.value() - 100.0 / 3600.0).abs() < 1e-12);
 
     // ─────────────────────────────────────────────────────────────────────
-    // 4.  Velocity × Time → recovers Length  (via .to())
+    // 4.  Velocity × Time → recovers Length  (via recovery impl)
     // ─────────────────────────────────────────────────────────────────────
-    let recovered: Kilometer = (speed * time).to();
+    let recovered: Kilometer = speed * time;
     println!(
         "{:.6} km/s × 3600 s = {} km",
         speed.value(),
@@ -55,15 +55,13 @@ fn main() {
     assert!((recovered.value() - 100.0).abs() < 1e-9);
 
     // ─────────────────────────────────────────────────────────────────────
-    // 5.  Length / Length → dimensionless
+    // 5.  Length / Length → dimensionless (directly Unitless)
     // ─────────────────────────────────────────────────────────────────────
     let a = Meter::new(10.0);
     let b = Meter::new(4.0);
-    let ratio: Quantity<Per<qtty::unit::Meter, qtty::unit::Meter>> = a / b;
-    // Simplify to a plain f64 via Unitless:
-    let simplified: Unitless = ratio.simplify();
-    println!("10 m / 4 m = {} (dimensionless)", simplified.value());
-    assert!((simplified.value() - 2.5).abs() < 1e-12);
+    let ratio: Unitless = a / b;
+    println!("10 m / 4 m = {} (dimensionless)", ratio.value());
+    assert!((ratio.value() - 2.5).abs() < 1e-12);
 
     // ─────────────────────────────────────────────────────────────────────
     // 6.  Mixed units: km / m keeps the composite type

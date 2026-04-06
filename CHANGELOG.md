@@ -8,6 +8,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 ## [x.y.z] - yyyy-mm-dd
 
 ### Added
+- New **stable unit arithmetic layer** (`unit_arithmetic` module) with `UnitDiv` and `UnitMul` extension traits that control output types for quantity division and multiplication, replacing the previous blanket impls.
+- Generic recovery impls: `U / U → Unitless`, `N / Per<N, D> → D`, `Per<N, D> * D → N`, `D * Per<N, D> → N`.
+- Macro-generated fallback pair tables for all built-in unit marker types: cross-unit division produces `Per<A, B>`, multiplication produces `Prod<A, B>`.
+- Exported macros `impl_unit_division_pairs!`, `impl_unit_multiplication_pairs!`, and `impl_unit_arithmetic_pairs!` for downstream custom units to opt into the same generated arithmetic.
+- `asin`, `acos`, and `atan` methods on `Quantity<Unitless, S>` (moved from `Quantity<Per<U, U>>`) so same-unit ratios keep ergonomic trig behavior.
+- Identity `Simplify` impls for `Quantity<Unitless>` and commonly used built-in plain units as a compatibility bridge.
+- Comprehensive compile-time and runtime tests for unit arithmetic covering all recovery patterns, cross-unit pairs, custom-unit registration, and Simplify compatibility.
 - Added invalid-unit regression coverage for `qtty-ffi` quantity carriers so raw `u32` unit IDs from C callers are rejected cleanly instead of producing undefined behavior.
 - Added serde round-trip coverage for the Rust-side `qtty-ffi` carrier structs using their raw numeric unit IDs.
 
@@ -15,6 +22,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - Removed the `scalar-decimal` feature and `rust_decimal` scalar support from `qtty-core` and the `qtty` facade crate.
 
 ### Changed
+- **Breaking:** Same-unit division (`Meter / Meter`) now directly returns `Quantity<Unitless>` instead of `Quantity<Per<Meter, Meter>>`. Code that type-annotated the result as `Quantity<Per<U, U>>` must be updated. Explicit `Per<U, U>` values can still be `.simplify()`d as before.
+- **Breaking:** `Per<N, D> * D` and `D * Per<N, D>` now directly return the numerator quantity (e.g., `Quantity<Meter>`) instead of `Quantity<Prod<Per<N, D>, D>>`. The `.to()` call to recover the numerator is no longer needed.
+- **Breaking:** `N / Per<N, D>` now directly returns the denominator quantity (e.g., `Quantity<Second>`) instead of `Quantity<Per<N, Per<N, D>>>`.
+- **Breaking:** `asin`/`acos`/`atan` are now on `Quantity<Unitless>` instead of `Quantity<Per<U, U>>`. Since same-unit division now yields `Unitless` directly, this is transparent for `(a / b).asin()` patterns.
 - `qtty-ffi` quantity carrier fields and C-facing unit parameters now use raw `u32`/`uint32_t` unit IDs, and `qtty_ffi_version()` now reports ABI version `500`.
 - `Quantity::sqrt()` was renamed to `Quantity::scalar_sqrt()` to make it explicit that the operation returns the underlying scalar rather than a quantity with the original unit type.
 
