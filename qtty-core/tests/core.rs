@@ -30,6 +30,9 @@ impl Unit for HalfTestUnit {
     const SYMBOL: &'static str = "htu";
 }
 
+// Register test units for arithmetic.
+qtty_core::impl_unit_arithmetic_pairs!(TestUnit, DoubleTestUnit, HalfTestUnit);
+
 type TU = Quantity<TestUnit>;
 type Dtu = Quantity<DoubleTestUnit>;
 
@@ -205,6 +208,14 @@ fn partial_eq_f64() {
 }
 
 #[test]
+fn division_same_unit_gives_unitless() {
+    let a = TU::new(100.0);
+    let b = TU::new(20.0);
+    let ratio: Quantity<Unitless> = a / b;
+    assert!((ratio.value() - 5.0).abs() < 1e-12);
+}
+
+#[test]
 fn division_creates_per_type() {
     let num = TU::new(100.0);
     let den = Dtu::new(20.0);
@@ -223,7 +234,8 @@ fn per_ratio_conversion() {
 fn per_multiplication_recovers_numerator() {
     let rate: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(5.0);
     let time = Dtu::new(4.0);
-    let result: TU = (rate * time).to();
+    // UnitMul: Per<TU, DTU> * DTU → TU (recovery impl)
+    let result: TU = rate * time;
     assert!((result.value() - 20.0).abs() < 1e-12);
 }
 
@@ -231,8 +243,8 @@ fn per_multiplication_recovers_numerator() {
 fn per_multiplication_commutative() {
     let rate: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(5.0);
     let time = Dtu::new(4.0);
-    let result1: TU = (rate * time).to();
-    let result2: TU = (time * rate).to();
+    let result1: TU = rate * time;
+    let result2: TU = time * rate;
     assert!((result1.value() - result2.value()).abs() < 1e-12);
 }
 
@@ -251,21 +263,29 @@ fn simplify_per_n_per_n_d_to_d() {
 }
 
 #[test]
-fn per_u_u_asin() {
-    let ratio: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(0.5);
+fn unitless_asin() {
+    let ratio: Quantity<Unitless> = Quantity::new(0.5);
     let result = ratio.asin();
     assert!((result - 0.5_f64.asin()).abs() < 1e-12);
 }
 
 #[test]
-fn per_u_u_asin_boundary_values() {
-    let one: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(1.0);
+fn same_unit_ratio_asin() {
+    // Same-unit division now directly yields Unitless, so asin works.
+    let ratio = TU::new(1.0) / TU::new(2.0);
+    let result = ratio.asin();
+    assert!((result - 0.5_f64.asin()).abs() < 1e-12);
+}
+
+#[test]
+fn unitless_asin_boundary_values() {
+    let one: Quantity<Unitless> = Quantity::new(1.0);
     assert!((one.asin() - core::f64::consts::FRAC_PI_2).abs() < 1e-12);
 
-    let neg_one: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(-1.0);
+    let neg_one: Quantity<Unitless> = Quantity::new(-1.0);
     assert!((neg_one.asin() - (-core::f64::consts::FRAC_PI_2)).abs() < 1e-12);
 
-    let zero: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(0.0);
+    let zero: Quantity<Unitless> = Quantity::new(0.0);
     assert!((zero.asin() - 0.0).abs() < 1e-12);
 }
 
@@ -400,14 +420,14 @@ fn test_mean() {
 
 #[test]
 fn test_acos() {
-    let ratio: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(0.5);
+    let ratio: Quantity<Unitless> = Quantity::new(0.5);
     let result = ratio.acos();
     assert!((result - 0.5_f64.acos()).abs() < 1e-12);
 }
 
 #[test]
 fn test_atan() {
-    let ratio: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(1.0);
+    let ratio: Quantity<Unitless> = Quantity::new(1.0);
     let result = ratio.atan();
     assert!((result - core::f64::consts::FRAC_PI_4).abs() < 1e-12);
 }

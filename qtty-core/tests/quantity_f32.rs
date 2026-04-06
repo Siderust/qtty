@@ -24,6 +24,9 @@ impl Unit for DoubleTestUnit {
     const SYMBOL: &'static str = "dtu";
 }
 
+// Register test units for arithmetic.
+qtty_core::impl_unit_arithmetic_pairs!(TestUnit, DoubleTestUnit);
+
 type TU32 = Quantity<TestUnit, f32>;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -232,7 +235,8 @@ fn f32_division_creates_per() {
 fn f32_per_mul_recovers_numerator() {
     let rate: Quantity<Per<TestUnit, DoubleTestUnit>, f32> = Quantity::new(5.0);
     let den = Quantity::<DoubleTestUnit, f32>::new(4.0);
-    let result: TU32 = (rate * den).to();
+    // UnitMul: Per<TU, DTU> * DTU → TU (recovery impl)
+    let result: TU32 = rate * den;
     assert!((result.value() - 20.0).abs() < 1e-6);
 }
 
