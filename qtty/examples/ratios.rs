@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Derived-unit example: ratios and `Simplify` to recover `Unitless`.
 
 use qtty::{Meter, Second, Simplify, Unitless};

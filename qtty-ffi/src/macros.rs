@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Macros for implementing FFI conversions for qtty unit types.
 //!
 //! This module provides macros that make it easy to implement `From` and `TryFrom`

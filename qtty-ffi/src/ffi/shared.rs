@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 use crate::types::{QttyStatus, UnitId};
 
 /// Catches any panic and returns `InternalPanic` instead of unwinding across FFI.

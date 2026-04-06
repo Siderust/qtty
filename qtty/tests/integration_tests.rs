@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 #![cfg(feature = "std")]
 //! Integration-level smoke tests for the `qtty` facade crate.
 

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Unit registry and conversion logic for FFI.
 //!
 //! This module provides a Rust-only unit registry that maps [`UnitId`] values to their

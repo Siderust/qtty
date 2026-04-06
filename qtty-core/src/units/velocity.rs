@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Velocity unit aliases (`Length / Time`).
 //!
 //! This module defines velocity units as *pure type aliases* over [`Per`] using

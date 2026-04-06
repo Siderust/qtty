@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Re-exports of quantity types specialized to `f64` scalar (default).
 //!
 //! This module provides type aliases for all unit types using `f64` as the

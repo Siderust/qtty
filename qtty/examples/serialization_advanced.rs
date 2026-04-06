@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Advanced serialization examples showing edge cases and best practices.
 //!
 //! Run with: cargo run --example serialization_advanced --features serde

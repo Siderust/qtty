@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Tests for Quantity<U, f32> methods (coverage for quantity.rs f32 paths).
 
 use qtty_core::*;

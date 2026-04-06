@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Angular frequency unit aliases (`Angular / Time`).
 //!
 //! This module provides a **dimension alias** [`Frequency`].

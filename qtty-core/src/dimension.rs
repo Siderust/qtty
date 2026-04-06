@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Dimension types and traits.
 //!
 //! Dimensions are modelled as a single generic struct [`Dim`] parameterised by eight

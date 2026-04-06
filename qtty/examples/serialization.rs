@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Examples of serializing and deserializing quantities.
 //!
 //! This example demonstrates how to use serde to serialize and deserialize

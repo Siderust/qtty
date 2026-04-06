@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 use super::shared::{catch_panic, decode_unit, out_ptr};
 use crate::registry;
 use crate::types::{QttyDerivedQuantity, QttyStatus};
