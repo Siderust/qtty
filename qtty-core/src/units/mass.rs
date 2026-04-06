@@ -280,7 +280,7 @@ crate::impl_unit_cross_unit_ops!(
     SolarMass
 );
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
     use approx::{assert_abs_diff_eq, assert_relative_eq};

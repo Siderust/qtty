@@ -142,7 +142,8 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
     /// Returns the arithmetic mean (midpoint) of this quantity and another.
     ///
     /// For integer-backed quantities this uses integer division semantics
-    /// (truncation toward zero).
+    /// (truncation toward zero). The computation is overflow-safe for all
+    /// scalar types, including integers at their extremes.
     ///
     /// ```rust
     /// use qtty_core::length::Meters;
@@ -152,7 +153,12 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
     /// ```
     #[inline]
     pub fn mean(self, other: Self) -> Self {
-        Self::new((self.0 + other.0) / (S::ONE + S::ONE))
+        let two = S::ONE + S::ONE;
+        let half_a = self.0 / two;
+        let half_b = other.0 / two;
+        let rem_a = self.0 - half_a * two;
+        let rem_b = other.0 - half_b * two;
+        Self::new(half_a + half_b + (rem_a + rem_b) / two)
     }
 
     /// A constant representing the zero value for this quantity type.

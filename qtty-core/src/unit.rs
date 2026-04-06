@@ -218,7 +218,7 @@ where
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
     use crate::units::length::{Kilometer, Meter, Meters};

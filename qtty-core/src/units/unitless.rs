@@ -49,7 +49,7 @@ impl<U: DimensionedUnit, S: Scalar> From<Quantity<U, S>> for Quantity<Unitless, 
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
     use crate::units::angular::Degrees;

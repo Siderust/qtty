@@ -35,7 +35,7 @@ impl<T: Unit<Dim = FrequencyDim>> FrequencyUnit for T {}
 /// ```
 pub type Frequency<N, D> = Quantity<Per<N, D>>;
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
     use crate::units::angular::{Degree, Degrees, MilliArcsecond, Radian};
