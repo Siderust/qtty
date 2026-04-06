@@ -5,6 +5,23 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [x.y.z] - yyyy-mm-dd
+
+### Added
+- Added invalid-unit regression coverage for `qtty-ffi` quantity carriers so raw `u32` unit IDs from C callers are rejected cleanly instead of producing undefined behavior.
+- Added serde round-trip coverage for the Rust-side `qtty-ffi` carrier structs using their raw numeric unit IDs.
+
+### Removed
+- Removed the `scalar-decimal` feature and `rust_decimal` scalar support from `qtty-core` and the `qtty` facade crate.
+
+### Changed
+- `qtty-ffi` quantity carrier fields and C-facing unit parameters now use raw `u32`/`uint32_t` unit IDs, and `qtty_ffi_version()` now reports ABI version `500`.
+- `Quantity::sqrt()` was renamed to `Quantity::scalar_sqrt()` to make it explicit that the operation returns the underlying scalar rather than a quantity with the original unit type.
+
+### Fixed
+- Cleaned up stale `scalar-decimal` cfg gates, tests, and documentation left behind by the Decimal removal so current builds no longer emit `unexpected_cfgs` warnings.
+- Updated crate docs and README dependency snippets to the current `0.5.0` release line.
+
 ## [0.5.0] - 2026-03-31
 
 ### Removed

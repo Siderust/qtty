@@ -12,7 +12,7 @@
 //! - Prevents mixing incompatible dimensions (you can't add metres to seconds).
 //! - Makes unit conversion explicit and type-checked (`to::<TargetUnit>()`).
 //! - Provides a small set of astronomy-friendly units (AU, light-year, solar mass/luminosity, …).
-//! - Supports multiple scalar types (`f64`, `f32`, and optionally `Decimal`, `Rational64`, etc.).
+//! - Supports multiple scalar types (`f64`, `f32`, and optionally `Rational64`, etc.).
 //!
 //! # What this crate does not try to solve
 //!
@@ -70,7 +70,6 @@
 //! - `f32` - single precision floating point (use `qtty::f32::*`)
 //! - `i8`, `i16`, `i32`, `i64`, `i128` - signed integers
 //!   (use `qtty::i8::*`, `qtty::i16::*`, `qtty::i32::*`, `qtty::i64::*`, `qtty::i128::*`)
-//! - `Decimal` - exact decimal (feature `scalar-decimal`)
 //! - `Rational64` - exact rational (feature `scalar-rational`)
 //!
 //! Integer quantities provide compile-time unit safety for discrete values.
@@ -103,21 +102,20 @@
 //! - `cross-unit-ops` (default): enables direct cross-unit comparison operators (`==`, `<`, etc.) for built-in units.
 //! - `alloc`: enables heap-backed helpers (like `qtty_vec!(vec ...)`) in `no_std` builds.
 //! - `serde`: enables `serde` support for `Quantity<U>`; serialization is the raw `f64` value only.
-//! - `scalar-decimal`: enables `rust_decimal::Decimal` as a scalar type.
 //! - `scalar-rational`: enables `num_rational::Rational64` as a scalar type.
 //!
 //! Disable default features for `no_std`:
 //!
 //! ```toml
 //! [dependencies]
-//! qtty = { version = "0.2.0", default-features = false }
+//! qtty = { version = "0.5.0", default-features = false }
 //! ```
 //!
 //! If you need `qtty_vec!(vec ...)` in `no_std`, enable `alloc`:
 //!
 //! ```toml
 //! [dependencies]
-//! qtty = { version = "0.2.0", default-features = false, features = ["alloc"] }
+//! qtty = { version = "0.5.0", default-features = false, features = ["alloc"] }
 //! ```
 //!
 //! # Panics and errors

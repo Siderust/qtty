@@ -187,7 +187,7 @@ mod tests {
         let status = unsafe { qtty_quantity_convert(src, UnitId::Kilometer as u32, &mut out) };
         assert_eq!(status, QttyStatus::Ok);
         assert!((out.value - 1.0).abs() < 1e-12);
-        assert_eq!(out.unit, UnitId::Kilometer);
+        assert_eq!(out.unit, UnitId::Kilometer as u32);
     }
 
     #[test]
@@ -197,7 +197,7 @@ mod tests {
         let status = unsafe { qtty_quantity_convert(src, UnitId::Hour as u32, &mut out) };
         assert_eq!(status, QttyStatus::Ok);
         assert!((out.value - 1.0).abs() < 1e-12);
-        assert_eq!(out.unit, UnitId::Hour);
+        assert_eq!(out.unit, UnitId::Hour as u32);
     }
 
     #[test]
@@ -208,7 +208,7 @@ mod tests {
         let status = unsafe { qtty_quantity_convert(src, UnitId::Radian as u32, &mut out) };
         assert_eq!(status, QttyStatus::Ok);
         assert!((out.value - PI).abs() < 1e-12);
-        assert_eq!(out.unit, UnitId::Radian);
+        assert_eq!(out.unit, UnitId::Radian as u32);
     }
 
     #[test]
