@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Time units.
 //!
 //! The canonical scaling unit for this dimension is [`Second`] (`Second::RATIO == 1.0`). All other time unit ratios are

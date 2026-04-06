@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! C-compatible FFI bindings for `qtty` physical quantities and unit conversions.
 //!
 //! `qtty-ffi` provides a stable C ABI for `qtty`, enabling interoperability with C/C++ code

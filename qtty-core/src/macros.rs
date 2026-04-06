@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Macros for defining units and conversions.
 
 /// Generates bidirectional `From` trait implementations for all pairs of units within a dimension.

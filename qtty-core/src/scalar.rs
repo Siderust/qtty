@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Scalar traits for quantity values.
 //!
 //! This module defines the trait hierarchy for numeric types that can be used as the

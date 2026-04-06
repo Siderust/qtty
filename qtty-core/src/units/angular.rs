@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Angular quantities and utilities.
 //!
 //! This module defines the **`Angular` dimension**, a blanket [`AngularUnit`] trait that extends

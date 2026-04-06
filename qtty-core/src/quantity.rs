@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Quantity type and its implementations.
 
 use crate::dimension::{DimDiv, DimMul, Dimension};

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Minimal end-to-end example: convert angles and compute a velocity (length / time).
 
 use qtty::velocity::Velocity;

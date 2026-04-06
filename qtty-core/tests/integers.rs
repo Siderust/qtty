@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Integration tests for integer scalar support.
 //!
 //! Tests that Quantity<U, iNN> works correctly for i8, i16, i32, i64, i128

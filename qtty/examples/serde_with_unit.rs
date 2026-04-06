@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Example demonstrating the serde_with_unit helper module.
 //!
 //! This shows how to use #[serde(with = "qtty_core::serde_with_unit")] to preserve
