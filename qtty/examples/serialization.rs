@@ -11,7 +11,7 @@
 #[cfg(feature = "serde")]
 fn main() {
     use qtty::velocity::Velocity;
-    use qtty::{Kilograms, Kilometers, Meter, Meters, Second, Seconds, Watts};
+    use qtty::{Kilogram, Kilometer, Meter, Second, Watt};
     use serde::{Deserialize, Serialize};
     use serde_json;
 
@@ -19,15 +19,15 @@ fn main() {
 
     // Example 1: Basic serialization to JSON
     println!("1. Basic JSON Serialization:");
-    let distance = Meters::new(42.5);
+    let distance = Meter::new(42.5);
     let json = serde_json::to_string(&distance).unwrap();
     println!("   Distance: {} → JSON: {}", distance, json);
 
-    let time = Seconds::new(std::f64::consts::PI);
+    let time = Second::new(std::f64::consts::PI);
     let json = serde_json::to_string(&time).unwrap();
     println!("   Time: {} → JSON: {}", time, json);
 
-    let mass = Kilograms::new(100.0);
+    let mass = Kilogram::new(100.0);
     let json = serde_json::to_string(&mass).unwrap();
     println!("   Mass: {} → JSON: {}", mass, json);
     println!();
@@ -35,21 +35,23 @@ fn main() {
     // Example 2: Deserialization from JSON
     println!("2. JSON Deserialization:");
     let json_distance = "42.5";
-    let distance = serde_json::from_str::<Meters>(json_distance).unwrap();
+    let distance = serde_json::from_str::<Meter>(json_distance).unwrap();
     println!("   JSON: {} → {}", json_distance, distance);
 
     let json_time = "3.14";
-    let time = serde_json::from_str::<Seconds>(json_time).unwrap();
+    let time = serde_json::from_str::<Second>(json_time).unwrap();
     println!("   JSON: {} → {}", json_time, time);
     println!();
 
     // Example 3: Round-trip serialization
     println!("3. Round-trip Serialization:");
-    let original_distance = Meters::new(299792458.0);
-    let original_time = Seconds::new(1.0);
-    let original: Velocity<Meter, Second> = original_distance / original_time;
+    let original_distance = Meter::new(299792458.0);
+    let original_time = Second::new(1.0);
+    let original: Velocity<qtty::unit::Meter, qtty::unit::Second> =
+        original_distance / original_time;
     let json = serde_json::to_string(&original).unwrap();
-    let restored = serde_json::from_str::<Velocity<Meter, Second>>(&json).unwrap();
+    let restored =
+        serde_json::from_str::<Velocity<qtty::unit::Meter, qtty::unit::Second>>(&json).unwrap();
     println!("   Original: {}", original);
     println!("   JSON: {}", json);
     println!("   Restored: {}", restored);
@@ -62,16 +64,16 @@ fn main() {
     // Example 4: Serializing structs containing quantities
     #[derive(Serialize, Deserialize, Debug)]
     struct Measurement {
-        distance: Meters,
-        time: Seconds,
-        mass: Kilograms,
+        distance: Meter,
+        time: Second,
+        mass: Kilogram,
     }
 
     println!("4. Serializing Structs with Quantities:");
     let measurement = Measurement {
-        distance: Meters::new(100.0),
-        time: Seconds::new(9.58),
-        mass: Kilograms::new(75.0),
+        distance: Meter::new(100.0),
+        time: Second::new(9.58),
+        mass: Kilogram::new(75.0),
     };
 
     let json = serde_json::to_string_pretty(&measurement).unwrap();
@@ -83,11 +85,11 @@ fn main() {
 
     // Example 5: Serializing collections of quantities
     println!("5. Serializing Collections:");
-    let distances = vec![Meters::new(10.0), Meters::new(20.0), Meters::new(30.0)];
+    let distances = vec![Meter::new(10.0), Meter::new(20.0), Meter::new(30.0)];
     let json = serde_json::to_string(&distances).unwrap();
     println!("   Vec of distances → JSON: {}", json);
 
-    let restored: Vec<Meters> = serde_json::from_str(&json).unwrap();
+    let restored: Vec<Meter> = serde_json::from_str(&json).unwrap();
     println!("   Restored: {:?}", restored);
     println!();
 
@@ -96,16 +98,16 @@ fn main() {
     #[derive(Serialize, Deserialize)]
     struct Experiment {
         name: String,
-        height: Meters,
-        duration: Seconds,
-        velocity: Velocity<Meter, Second>,
+        height: Meter,
+        duration: Second,
+        velocity: Velocity<qtty::unit::Meter, qtty::unit::Second>,
     }
 
     let experiment = Experiment {
         name: "Free Fall Test".to_string(),
-        height: Meters::new(100.0),
-        duration: Seconds::new(4.52),
-        velocity: Meters::new(44.3) / Seconds::new(1.0),
+        height: Meter::new(100.0),
+        duration: Second::new(4.52),
+        velocity: Meter::new(44.3) / Second::new(1.0),
     };
 
     let json = serde_json::to_string_pretty(&experiment).unwrap();
@@ -114,16 +116,16 @@ fn main() {
 
     // Example 7: Handling conversion before serialization
     println!("7. Converting Units Before Serialization:");
-    let distance_km = Kilometers::new(5.0);
+    let distance_km = Kilometer::new(5.0);
     // Convert to base unit (meter) before serializing
-    let distance_m = distance_km.to::<Meter>();
+    let distance_m = distance_km.to::<qtty::unit::Meter>();
     let json = serde_json::to_string(&distance_m).unwrap();
     println!("   {} → {} → JSON: {}", distance_km, distance_m, json);
     println!();
 
     // Example 8: Derived quantities
     println!("8. Serializing Derived Quantities:");
-    let power = Watts::new(1500.0);
+    let power = Watt::new(1500.0);
     let json = serde_json::to_string(&power).unwrap();
     println!("   Power: {} → JSON: {}", power, json);
 

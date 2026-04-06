@@ -11,10 +11,10 @@
 //! # Example
 //!
 //! ```rust
-//! use qtty::i32::{Meters, Seconds};
+//! use qtty::i32::{Meter, Second};
 //!
-//! let distance: Meters = Meters::new(1500);
-//! let time: Seconds = Seconds::new(10);
+//! let distance: Meter = Meter::new(1500);
+//! let time: Second = Second::new(10);
 //! ```
 
 crate::scalar_aliases::define_scalar_aliases!(i32);

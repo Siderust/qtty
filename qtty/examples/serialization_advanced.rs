@@ -4,7 +4,7 @@
 
 #[cfg(feature = "serde")]
 fn main() {
-    use qtty::{Kilometers, Meters, Seconds};
+    use qtty::{Kilometer, Meter, Second};
     use serde::{Deserialize, Serialize};
     use serde_json;
 
@@ -12,15 +12,15 @@ fn main() {
 
     // Example 1: Handling zero and special values
     println!("1. Special Values:");
-    let zero = Meters::new(0.0);
+    let zero = Meter::new(0.0);
     let json = serde_json::to_string(&zero).unwrap();
     println!("   Zero: {} → {}", zero, json);
 
-    let negative = Meters::new(-42.5);
+    let negative = Meter::new(-42.5);
     let json = serde_json::to_string(&negative).unwrap();
     println!("   Negative: {} → {}", negative, json);
 
-    let large = Meters::new(1.23e15);
+    let large = Meter::new(1.23e15);
     let json = serde_json::to_string(&large).unwrap();
     println!("   Large number: {} → {}", large, json);
     println!();
@@ -35,17 +35,17 @@ fn main() {
 
     #[derive(Serialize, Deserialize, Debug)]
     struct Coordinates {
-        x: Meters,
-        y: Meters,
-        z: Meters,
+        x: Meter,
+        y: Meter,
+        z: Meter,
     }
 
     let location = Location {
         name: "Mount Everest".to_string(),
         coordinates: Coordinates {
-            x: Meters::new(86.925278),
-            y: Meters::new(27.988056),
-            z: Meters::new(8848.86),
+            x: Meter::new(86.925278),
+            y: Meter::new(27.988056),
+            z: Meter::new(8848.86),
         },
     };
 
@@ -60,16 +60,16 @@ fn main() {
     println!("3. Optional Quantities:");
     #[derive(Serialize, Deserialize, Debug)]
     struct Measurement {
-        required: Meters,
-        optional: Option<Meters>,
+        required: Meter,
+        optional: Option<Meter>,
         #[serde(skip_serializing_if = "Option::is_none")]
-        skipped_if_none: Option<Seconds>,
+        skipped_if_none: Option<Second>,
     }
 
     let with_value = Measurement {
-        required: Meters::new(100.0),
-        optional: Some(Meters::new(50.0)),
-        skipped_if_none: Some(Seconds::new(10.0)),
+        required: Meter::new(100.0),
+        optional: Some(Meter::new(50.0)),
+        skipped_if_none: Some(Second::new(10.0)),
     };
     println!(
         "   With values: {}",
@@ -77,7 +77,7 @@ fn main() {
     );
 
     let without_value = Measurement {
-        required: Meters::new(100.0),
+        required: Meter::new(100.0),
         optional: None,
         skipped_if_none: None,
     };
@@ -91,8 +91,8 @@ fn main() {
     println!("4. Unit Conversion During Serialization:");
     println!("   ⚠️  WARNING: Always convert to base units before serializing!");
 
-    let distance_km = Kilometers::new(5.0);
-    let distance_m = distance_km.to::<qtty::Meter>();
+    let distance_km = Kilometer::new(5.0);
+    let distance_m = distance_km.to::<qtty::unit::Meter>();
 
     let json_km = serde_json::to_string(&distance_km).unwrap();
     let json_m = serde_json::to_string(&distance_m).unwrap();
@@ -107,14 +107,14 @@ fn main() {
 
     // Invalid JSON
     let invalid_json = "not_a_number";
-    match serde_json::from_str::<Meters>(invalid_json) {
+    match serde_json::from_str::<Meter>(invalid_json) {
         Ok(_) => println!("   Unexpected success"),
         Err(e) => println!("   Expected error: {}", e),
     }
 
     // Empty string
     let empty = "";
-    match serde_json::from_str::<Meters>(empty) {
+    match serde_json::from_str::<Meter>(empty) {
         Ok(_) => println!("   Unexpected success"),
         Err(e) => println!("   Expected error: {}", e),
     }
@@ -124,13 +124,13 @@ fn main() {
     println!("6. Compact vs Pretty Printing:");
     #[derive(Serialize, Deserialize)]
     struct Data {
-        distances: Vec<Meters>,
-        times: Vec<Seconds>,
+        distances: Vec<Meter>,
+        times: Vec<Second>,
     }
 
     let data = Data {
-        distances: vec![Meters::new(1.0), Meters::new(2.0), Meters::new(3.0)],
-        times: vec![Seconds::new(0.1), Seconds::new(0.2), Seconds::new(0.3)],
+        distances: vec![Meter::new(1.0), Meter::new(2.0), Meter::new(3.0)],
+        times: vec![Second::new(0.1), Second::new(0.2), Second::new(0.3)],
     };
 
     let compact = serde_json::to_string(&data).unwrap();

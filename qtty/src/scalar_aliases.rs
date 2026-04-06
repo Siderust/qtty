@@ -6,359 +6,368 @@
 /// Generate type aliases for every built-in unit at a given scalar type.
 macro_rules! define_scalar_aliases {
     ($scalar:ty) => {
-        use $crate::Quantity;
-
         // ── Angular ──────────────────────────────────────────────────────
-        /// Degrees.
-        pub type Degrees = Quantity<$crate::angular::Degree, $scalar>;
-        /// Radians.
-        pub type Radians = Quantity<$crate::angular::Radian, $scalar>;
-        /// Arcminutes.
-        pub type Arcminutes = Quantity<$crate::angular::Arcminute, $scalar>;
-        /// Arcseconds.
-        pub type Arcseconds = Quantity<$crate::angular::Arcsecond, $scalar>;
-        /// Milliradians.
-        pub type Milliradians = Quantity<$crate::angular::Milliradian, $scalar>;
+        /// Degree.
+        pub type Degree<S = $scalar> = $crate::Quantity<$crate::unit::Degree, S>;
+        /// Radian.
+        pub type Radian<S = $scalar> = $crate::Quantity<$crate::unit::Radian, S>;
+        /// Arcminute.
+        pub type Arcminute<S = $scalar> = $crate::Quantity<$crate::unit::Arcminute, S>;
+        /// Arcsecond.
+        pub type Arcsecond<S = $scalar> = $crate::Quantity<$crate::unit::Arcsecond, S>;
+        /// Milliradian.
+        pub type Milliradian<S = $scalar> = $crate::Quantity<$crate::unit::Milliradian, S>;
         /// Milliarcseconds.
-        pub type MilliArcseconds = Quantity<$crate::angular::MilliArcsecond, $scalar>;
+        pub type MilliArcsecond<S = $scalar> = $crate::Quantity<$crate::unit::MilliArcsecond, S>;
         /// Microarcseconds.
-        pub type MicroArcseconds = Quantity<$crate::angular::MicroArcsecond, $scalar>;
-        /// Gradians.
-        pub type Gradians = Quantity<$crate::angular::Gradian, $scalar>;
-        /// Turns.
-        pub type Turns = Quantity<$crate::angular::Turn, $scalar>;
+        pub type MicroArcsecond<S = $scalar> = $crate::Quantity<$crate::unit::MicroArcsecond, S>;
+        /// Gradian.
+        pub type Gradian<S = $scalar> = $crate::Quantity<$crate::unit::Gradian, S>;
+        /// Turn.
+        pub type Turn<S = $scalar> = $crate::Quantity<$crate::unit::Turn, S>;
         /// Hour angles.
-        pub type HourAngles = Quantity<$crate::angular::HourAngle, $scalar>;
+        pub type HourAngle<S = $scalar> = $crate::Quantity<$crate::unit::HourAngle, S>;
 
         // ── Length ───────────────────────────────────────────────────────
-        /// Meters.
-        pub type Meters = Quantity<$crate::length::Meter, $scalar>;
-        /// Kilometers.
-        pub type Kilometers = Quantity<$crate::length::Kilometer, $scalar>;
-        /// Centimeters.
-        pub type Centimeters = Quantity<$crate::length::Centimeter, $scalar>;
-        /// Millimeters.
-        pub type Millimeters = Quantity<$crate::length::Millimeter, $scalar>;
-        /// Micrometers.
-        pub type Micrometers = Quantity<$crate::length::Micrometer, $scalar>;
-        /// Nanometers.
-        pub type Nanometers = Quantity<$crate::length::Nanometer, $scalar>;
-        /// Picometers.
-        pub type Picometers = Quantity<$crate::length::Picometer, $scalar>;
-        /// Femtometers.
-        pub type Femtometers = Quantity<$crate::length::Femtometer, $scalar>;
-        /// Attometers.
-        pub type Attometers = Quantity<$crate::length::Attometer, $scalar>;
-        /// Zeptometers.
-        pub type Zeptometers = Quantity<$crate::length::Zeptometer, $scalar>;
-        /// Yoctometers.
-        pub type Yoctometers = Quantity<$crate::length::Yoctometer, $scalar>;
-        /// Megameters.
-        pub type Megameters = Quantity<$crate::length::Megameter, $scalar>;
-        /// Decimeters.
-        pub type Decimeters = Quantity<$crate::length::Decimeter, $scalar>;
-        /// Decameters.
-        pub type Decameters = Quantity<$crate::length::Decameter, $scalar>;
-        /// Hectometers.
-        pub type Hectometers = Quantity<$crate::length::Hectometer, $scalar>;
-        /// Gigameters.
-        pub type Gigameters = Quantity<$crate::length::Gigameter, $scalar>;
-        /// Terameters.
-        pub type Terameters = Quantity<$crate::length::Terameter, $scalar>;
-        /// Petameters.
-        pub type Petameters = Quantity<$crate::length::Petameter, $scalar>;
-        /// Exameters.
-        pub type Exameters = Quantity<$crate::length::Exameter, $scalar>;
-        /// Zettameters.
-        pub type Zettameters = Quantity<$crate::length::Zettameter, $scalar>;
-        /// Yottameters.
-        pub type Yottameters = Quantity<$crate::length::Yottameter, $scalar>;
+        /// Meter.
+        pub type Meter<S = $scalar> = $crate::Quantity<$crate::unit::Meter, S>;
+        /// Kilometer.
+        pub type Kilometer<S = $scalar> = $crate::Quantity<$crate::unit::Kilometer, S>;
+        /// Centimeter.
+        pub type Centimeter<S = $scalar> = $crate::Quantity<$crate::unit::Centimeter, S>;
+        /// Millimeter.
+        pub type Millimeter<S = $scalar> = $crate::Quantity<$crate::unit::Millimeter, S>;
+        /// Micrometer.
+        pub type Micrometer<S = $scalar> = $crate::Quantity<$crate::unit::Micrometer, S>;
+        /// Nanometer.
+        pub type Nanometer<S = $scalar> = $crate::Quantity<$crate::unit::Nanometer, S>;
+        /// Picometer.
+        pub type Picometer<S = $scalar> = $crate::Quantity<$crate::unit::Picometer, S>;
+        /// Femtometer.
+        pub type Femtometer<S = $scalar> = $crate::Quantity<$crate::unit::Femtometer, S>;
+        /// Attometer.
+        pub type Attometer<S = $scalar> = $crate::Quantity<$crate::unit::Attometer, S>;
+        /// Zeptometer.
+        pub type Zeptometer<S = $scalar> = $crate::Quantity<$crate::unit::Zeptometer, S>;
+        /// Yoctometer.
+        pub type Yoctometer<S = $scalar> = $crate::Quantity<$crate::unit::Yoctometer, S>;
+        /// Megameter.
+        pub type Megameter<S = $scalar> = $crate::Quantity<$crate::unit::Megameter, S>;
+        /// Decimeter.
+        pub type Decimeter<S = $scalar> = $crate::Quantity<$crate::unit::Decimeter, S>;
+        /// Decameter.
+        pub type Decameter<S = $scalar> = $crate::Quantity<$crate::unit::Decameter, S>;
+        /// Hectometer.
+        pub type Hectometer<S = $scalar> = $crate::Quantity<$crate::unit::Hectometer, S>;
+        /// Gigameter.
+        pub type Gigameter<S = $scalar> = $crate::Quantity<$crate::unit::Gigameter, S>;
+        /// Terameter.
+        pub type Terameter<S = $scalar> = $crate::Quantity<$crate::unit::Terameter, S>;
+        /// Petameter.
+        pub type Petameter<S = $scalar> = $crate::Quantity<$crate::unit::Petameter, S>;
+        /// Exameter.
+        pub type Exameter<S = $scalar> = $crate::Quantity<$crate::unit::Exameter, S>;
+        /// Zettameter.
+        pub type Zettameter<S = $scalar> = $crate::Quantity<$crate::unit::Zettameter, S>;
+        /// Yottameter.
+        pub type Yottameter<S = $scalar> = $crate::Quantity<$crate::unit::Yottameter, S>;
         /// Astronomical units.
-        pub type AstronomicalUnits = Quantity<$crate::length::AstronomicalUnit, $scalar>;
+        pub type AstronomicalUnit<S = $scalar> =
+            $crate::Quantity<$crate::unit::AstronomicalUnit, S>;
         /// Light years.
-        pub type LightYears = Quantity<$crate::length::LightYear, $scalar>;
-        /// Parsecs.
-        pub type Parsecs = Quantity<$crate::length::Parsec, $scalar>;
-        /// Kiloparsecs.
-        pub type Kiloparsecs = Quantity<$crate::length::Kiloparsec, $scalar>;
-        /// Megaparsecs.
-        pub type Megaparsecs = Quantity<$crate::length::Megaparsec, $scalar>;
-        /// Gigaparsecs.
-        pub type Gigaparsecs = Quantity<$crate::length::Gigaparsec, $scalar>;
-        /// Inches.
-        pub type Inches = Quantity<$crate::length::Inch, $scalar>;
-        /// Feet.
-        pub type Feet = Quantity<$crate::length::Foot, $scalar>;
-        /// Yards.
-        pub type Yards = Quantity<$crate::length::Yard, $scalar>;
-        /// Miles.
-        pub type Miles = Quantity<$crate::length::Mile, $scalar>;
+        pub type LightYear<S = $scalar> = $crate::Quantity<$crate::unit::LightYear, S>;
+        /// Parsec.
+        pub type Parsec<S = $scalar> = $crate::Quantity<$crate::unit::Parsec, S>;
+        /// Kiloparsec.
+        pub type Kiloparsec<S = $scalar> = $crate::Quantity<$crate::unit::Kiloparsec, S>;
+        /// Megaparsec.
+        pub type Megaparsec<S = $scalar> = $crate::Quantity<$crate::unit::Megaparsec, S>;
+        /// Gigaparsec.
+        pub type Gigaparsec<S = $scalar> = $crate::Quantity<$crate::unit::Gigaparsec, S>;
+        /// Inch.
+        pub type Inch<S = $scalar> = $crate::Quantity<$crate::unit::Inch, S>;
+        /// Foot.
+        pub type Foot<S = $scalar> = $crate::Quantity<$crate::unit::Foot, S>;
+        /// Yard.
+        pub type Yard<S = $scalar> = $crate::Quantity<$crate::unit::Yard, S>;
+        /// Mile.
+        pub type Mile<S = $scalar> = $crate::Quantity<$crate::unit::Mile, S>;
         /// Nautical miles.
-        pub type NauticalMiles = Quantity<$crate::length::NauticalMile, $scalar>;
-        /// Chains.
-        pub type Chains = Quantity<$crate::length::Chain, $scalar>;
-        /// Rods.
-        pub type Rods = Quantity<$crate::length::Rod, $scalar>;
-        /// Links.
-        pub type Links = Quantity<$crate::length::Link, $scalar>;
-        /// Fathoms.
-        pub type Fathoms = Quantity<$crate::length::Fathom, $scalar>;
+        pub type NauticalMile<S = $scalar> = $crate::Quantity<$crate::unit::NauticalMile, S>;
+        /// Chain.
+        pub type Chain<S = $scalar> = $crate::Quantity<$crate::unit::Chain, S>;
+        /// Rod.
+        pub type Rod<S = $scalar> = $crate::Quantity<$crate::unit::Rod, S>;
+        /// Link.
+        pub type Link<S = $scalar> = $crate::Quantity<$crate::unit::Link, S>;
+        /// Fathom.
+        pub type Fathom<S = $scalar> = $crate::Quantity<$crate::unit::Fathom, S>;
         /// Earth meridional circumferences.
-        pub type EarthMeridionalCircumferences = Quantity<$crate::length::EarthMeridionalCircumference, $scalar>;
+        pub type EarthMeridionalCircumference<S = $scalar> =
+            $crate::Quantity<$crate::unit::EarthMeridionalCircumference, S>;
         /// Earth equatorial circumferences.
-        pub type EarthEquatorialCircumferences = Quantity<$crate::length::EarthEquatorialCircumference, $scalar>;
+        pub type EarthEquatorialCircumference<S = $scalar> =
+            $crate::Quantity<$crate::unit::EarthEquatorialCircumference, S>;
         /// Bohr radii.
-        pub type BohrRadii = Quantity<$crate::length::BohrRadius, $scalar>;
+        pub type BohrRadius<S = $scalar> = $crate::Quantity<$crate::unit::BohrRadius, S>;
         /// Classical electron radii.
-        pub type ClassicalElectronRadii = Quantity<$crate::length::ClassicalElectronRadius, $scalar>;
+        pub type ClassicalElectronRadius<S = $scalar> =
+            $crate::Quantity<$crate::unit::ClassicalElectronRadius, S>;
         /// Planck lengths.
-        pub type PlanckLengths = Quantity<$crate::length::PlanckLength, $scalar>;
+        pub type PlanckLength<S = $scalar> = $crate::Quantity<$crate::unit::PlanckLength, S>;
         /// Electron reduced Compton wavelengths.
-        pub type ElectronReducedComptonWavelengths = Quantity<$crate::length::ElectronReducedComptonWavelength, $scalar>;
+        pub type ElectronReducedComptonWavelength<S = $scalar> =
+            $crate::Quantity<$crate::unit::ElectronReducedComptonWavelength, S>;
 
         // ── Length: nominal ──────────────────────────────────────────────
         /// Solar radiuses (nominal).
-        pub type SolarRadiuses = Quantity<$crate::length::nominal::SolarRadius, $scalar>;
+        pub type SolarRadius<S = $scalar> = $crate::Quantity<$crate::unit::SolarRadius, S>;
         /// Earth radii (nominal).
-        pub type EarthRadii = Quantity<$crate::length::nominal::EarthRadius, $scalar>;
+        pub type EarthRadius<S = $scalar> = $crate::Quantity<$crate::unit::EarthRadius, S>;
         /// Earth equatorial radii (nominal).
-        pub type EarthEquatorialRadii = Quantity<$crate::length::nominal::EarthEquatorialRadius, $scalar>;
+        pub type EarthEquatorialRadius<S = $scalar> =
+            $crate::Quantity<$crate::unit::EarthEquatorialRadius, S>;
         /// Earth polar radii (nominal).
-        pub type EarthPolarRadii = Quantity<$crate::length::nominal::EarthPolarRadius, $scalar>;
+        pub type EarthPolarRadius<S = $scalar> =
+            $crate::Quantity<$crate::unit::EarthPolarRadius, S>;
         /// Lunar radii (nominal).
-        pub type LunarRadii = Quantity<$crate::length::nominal::LunarRadius, $scalar>;
+        pub type LunarRadius<S = $scalar> = $crate::Quantity<$crate::unit::LunarRadius, S>;
         /// Jupiter radii (nominal).
-        pub type JupiterRadii = Quantity<$crate::length::nominal::JupiterRadius, $scalar>;
+        pub type JupiterRadius<S = $scalar> = $crate::Quantity<$crate::unit::JupiterRadius, S>;
         /// Lunar distances (nominal).
-        pub type LunarDistances = Quantity<$crate::length::nominal::LunarDistance, $scalar>;
+        pub type LunarDistance<S = $scalar> = $crate::Quantity<$crate::unit::LunarDistance, S>;
         /// Solar diameters (nominal).
-        pub type SolarDiameters = Quantity<$crate::length::nominal::SolarDiameter, $scalar>;
+        pub type SolarDiameter<S = $scalar> = $crate::Quantity<$crate::unit::SolarDiameter, S>;
 
         // ── Time ─────────────────────────────────────────────────────────
-        /// Attoseconds.
-        pub type Attoseconds = Quantity<$crate::time::Attosecond, $scalar>;
-        /// Femtoseconds.
-        pub type Femtoseconds = Quantity<$crate::time::Femtosecond, $scalar>;
-        /// Picoseconds.
-        pub type Picoseconds = Quantity<$crate::time::Picosecond, $scalar>;
-        /// Nanoseconds.
-        pub type Nanoseconds = Quantity<$crate::time::Nanosecond, $scalar>;
-        /// Microseconds.
-        pub type Microseconds = Quantity<$crate::time::Microsecond, $scalar>;
-        /// Milliseconds.
-        pub type Milliseconds = Quantity<$crate::time::Millisecond, $scalar>;
-        /// Centiseconds.
-        pub type Centiseconds = Quantity<$crate::time::Centisecond, $scalar>;
-        /// Deciseconds.
-        pub type Deciseconds = Quantity<$crate::time::Decisecond, $scalar>;
-        /// Seconds.
-        pub type Seconds = Quantity<$crate::time::Second, $scalar>;
-        /// Decaseconds.
-        pub type Decaseconds = Quantity<$crate::time::Decasecond, $scalar>;
-        /// Hectoseconds.
-        pub type Hectoseconds = Quantity<$crate::time::Hectosecond, $scalar>;
-        /// Kiloseconds.
-        pub type Kiloseconds = Quantity<$crate::time::Kilosecond, $scalar>;
-        /// Megaseconds.
-        pub type Megaseconds = Quantity<$crate::time::Megasecond, $scalar>;
-        /// Gigaseconds.
-        pub type Gigaseconds = Quantity<$crate::time::Gigasecond, $scalar>;
-        /// Teraseconds.
-        pub type Teraseconds = Quantity<$crate::time::Terasecond, $scalar>;
-        /// Minutes.
-        pub type Minutes = Quantity<$crate::time::Minute, $scalar>;
-        /// Hours.
-        pub type Hours = Quantity<$crate::time::Hour, $scalar>;
-        /// Days.
-        pub type Days = Quantity<$crate::time::Day, $scalar>;
-        /// Weeks.
-        pub type Weeks = Quantity<$crate::time::Week, $scalar>;
-        /// Fortnights.
-        pub type Fortnights = Quantity<$crate::time::Fortnight, $scalar>;
-        /// Years.
-        pub type Years = Quantity<$crate::time::Year, $scalar>;
-        /// Decades.
-        pub type Decades = Quantity<$crate::time::Decade, $scalar>;
-        /// Centuries.
-        pub type Centuries = Quantity<$crate::time::Century, $scalar>;
-        /// Millennia.
-        pub type Millennia = Quantity<$crate::time::Millennium, $scalar>;
+        /// Attosecond.
+        pub type Attosecond<S = $scalar> = $crate::Quantity<$crate::unit::Attosecond, S>;
+        /// Femtosecond.
+        pub type Femtosecond<S = $scalar> = $crate::Quantity<$crate::unit::Femtosecond, S>;
+        /// Picosecond.
+        pub type Picosecond<S = $scalar> = $crate::Quantity<$crate::unit::Picosecond, S>;
+        /// Nanosecond.
+        pub type Nanosecond<S = $scalar> = $crate::Quantity<$crate::unit::Nanosecond, S>;
+        /// Microsecond.
+        pub type Microsecond<S = $scalar> = $crate::Quantity<$crate::unit::Microsecond, S>;
+        /// Millisecond.
+        pub type Millisecond<S = $scalar> = $crate::Quantity<$crate::unit::Millisecond, S>;
+        /// Centisecond.
+        pub type Centisecond<S = $scalar> = $crate::Quantity<$crate::unit::Centisecond, S>;
+        /// Decisecond.
+        pub type Decisecond<S = $scalar> = $crate::Quantity<$crate::unit::Decisecond, S>;
+        /// Second.
+        pub type Second<S = $scalar> = $crate::Quantity<$crate::unit::Second, S>;
+        /// Decasecond.
+        pub type Decasecond<S = $scalar> = $crate::Quantity<$crate::unit::Decasecond, S>;
+        /// Hectosecond.
+        pub type Hectosecond<S = $scalar> = $crate::Quantity<$crate::unit::Hectosecond, S>;
+        /// Kilosecond.
+        pub type Kilosecond<S = $scalar> = $crate::Quantity<$crate::unit::Kilosecond, S>;
+        /// Megasecond.
+        pub type Megasecond<S = $scalar> = $crate::Quantity<$crate::unit::Megasecond, S>;
+        /// Gigasecond.
+        pub type Gigasecond<S = $scalar> = $crate::Quantity<$crate::unit::Gigasecond, S>;
+        /// Terasecond.
+        pub type Terasecond<S = $scalar> = $crate::Quantity<$crate::unit::Terasecond, S>;
+        /// Minute.
+        pub type Minute<S = $scalar> = $crate::Quantity<$crate::unit::Minute, S>;
+        /// Hour.
+        pub type Hour<S = $scalar> = $crate::Quantity<$crate::unit::Hour, S>;
+        /// Day.
+        pub type Day<S = $scalar> = $crate::Quantity<$crate::unit::Day, S>;
+        /// Week.
+        pub type Week<S = $scalar> = $crate::Quantity<$crate::unit::Week, S>;
+        /// Fortnight.
+        pub type Fortnight<S = $scalar> = $crate::Quantity<$crate::unit::Fortnight, S>;
+        /// Year.
+        pub type Year<S = $scalar> = $crate::Quantity<$crate::unit::Year, S>;
+        /// Decade.
+        pub type Decade<S = $scalar> = $crate::Quantity<$crate::unit::Decade, S>;
+        /// Century.
+        pub type Century<S = $scalar> = $crate::Quantity<$crate::unit::Century, S>;
+        /// Millennium.
+        pub type Millennium<S = $scalar> = $crate::Quantity<$crate::unit::Millennium, S>;
         /// Julian years.
-        pub type JulianYears = Quantity<$crate::time::JulianYear, $scalar>;
+        pub type JulianYear<S = $scalar> = $crate::Quantity<$crate::unit::JulianYear, S>;
         /// Julian centuries.
-        pub type JulianCenturies = Quantity<$crate::time::JulianCentury, $scalar>;
+        pub type JulianCentury<S = $scalar> = $crate::Quantity<$crate::unit::JulianCentury, S>;
         /// Sidereal days.
-        pub type SiderealDays = Quantity<$crate::time::SiderealDay, $scalar>;
+        pub type SiderealDay<S = $scalar> = $crate::Quantity<$crate::unit::SiderealDay, S>;
         /// Synodic months.
-        pub type SynodicMonths = Quantity<$crate::time::SynodicMonth, $scalar>;
+        pub type SynodicMonth<S = $scalar> = $crate::Quantity<$crate::unit::SynodicMonth, S>;
         /// Sidereal years.
-        pub type SiderealYears = Quantity<$crate::time::SiderealYear, $scalar>;
+        pub type SiderealYear<S = $scalar> = $crate::Quantity<$crate::unit::SiderealYear, S>;
 
         // ── Mass ─────────────────────────────────────────────────────────
-        /// Grams.
-        pub type Grams = Quantity<$crate::mass::Gram, $scalar>;
-        /// Yoctograms.
-        pub type Yoctograms = Quantity<$crate::mass::Yoctogram, $scalar>;
-        /// Zeptograms.
-        pub type Zeptograms = Quantity<$crate::mass::Zeptogram, $scalar>;
-        /// Attograms.
-        pub type Attograms = Quantity<$crate::mass::Attogram, $scalar>;
-        /// Femtograms.
-        pub type Femtograms = Quantity<$crate::mass::Femtogram, $scalar>;
-        /// Picograms.
-        pub type Picograms = Quantity<$crate::mass::Picogram, $scalar>;
-        /// Nanograms.
-        pub type Nanograms = Quantity<$crate::mass::Nanogram, $scalar>;
-        /// Micrograms.
-        pub type Micrograms = Quantity<$crate::mass::Microgram, $scalar>;
-        /// Milligrams.
-        pub type Milligrams = Quantity<$crate::mass::Milligram, $scalar>;
-        /// Centigrams.
-        pub type Centigrams = Quantity<$crate::mass::Centigram, $scalar>;
-        /// Decigrams.
-        pub type Decigrams = Quantity<$crate::mass::Decigram, $scalar>;
-        /// Decagrams.
-        pub type Decagrams = Quantity<$crate::mass::Decagram, $scalar>;
-        /// Hectograms.
-        pub type Hectograms = Quantity<$crate::mass::Hectogram, $scalar>;
-        /// Kilograms.
-        pub type Kilograms = Quantity<$crate::mass::Kilogram, $scalar>;
-        /// Megagrams.
-        pub type Megagrams = Quantity<$crate::mass::Megagram, $scalar>;
-        /// Gigagrams.
-        pub type Gigagrams = Quantity<$crate::mass::Gigagram, $scalar>;
-        /// Teragrams.
-        pub type Teragrams = Quantity<$crate::mass::Teragram, $scalar>;
-        /// Petagrams.
-        pub type Petagrams = Quantity<$crate::mass::Petagram, $scalar>;
-        /// Exagrams.
-        pub type Exagrams = Quantity<$crate::mass::Exagram, $scalar>;
-        /// Zettagrams.
-        pub type Zettagrams = Quantity<$crate::mass::Zettagram, $scalar>;
-        /// Yottagrams.
-        pub type Yottagrams = Quantity<$crate::mass::Yottagram, $scalar>;
-        /// Tonnes (metric tons).
-        pub type Tonnes = Quantity<$crate::mass::Tonne, $scalar>;
-        /// Carats.
-        pub type Carats = Quantity<$crate::mass::Carat, $scalar>;
-        /// Grains.
-        pub type Grains = Quantity<$crate::mass::Grain, $scalar>;
-        /// Pounds.
-        pub type Pounds = Quantity<$crate::mass::Pound, $scalar>;
-        /// Ounces.
-        pub type Ounces = Quantity<$crate::mass::Ounce, $scalar>;
-        /// Stones.
-        pub type Stones = Quantity<$crate::mass::Stone, $scalar>;
+        /// Gram.
+        pub type Gram<S = $scalar> = $crate::Quantity<$crate::unit::Gram, S>;
+        /// Yoctogram.
+        pub type Yoctogram<S = $scalar> = $crate::Quantity<$crate::unit::Yoctogram, S>;
+        /// Zeptogram.
+        pub type Zeptogram<S = $scalar> = $crate::Quantity<$crate::unit::Zeptogram, S>;
+        /// Attogram.
+        pub type Attogram<S = $scalar> = $crate::Quantity<$crate::unit::Attogram, S>;
+        /// Femtogram.
+        pub type Femtogram<S = $scalar> = $crate::Quantity<$crate::unit::Femtogram, S>;
+        /// Picogram.
+        pub type Picogram<S = $scalar> = $crate::Quantity<$crate::unit::Picogram, S>;
+        /// Nanogram.
+        pub type Nanogram<S = $scalar> = $crate::Quantity<$crate::unit::Nanogram, S>;
+        /// Microgram.
+        pub type Microgram<S = $scalar> = $crate::Quantity<$crate::unit::Microgram, S>;
+        /// Milligram.
+        pub type Milligram<S = $scalar> = $crate::Quantity<$crate::unit::Milligram, S>;
+        /// Centigram.
+        pub type Centigram<S = $scalar> = $crate::Quantity<$crate::unit::Centigram, S>;
+        /// Decigram.
+        pub type Decigram<S = $scalar> = $crate::Quantity<$crate::unit::Decigram, S>;
+        /// Decagram.
+        pub type Decagram<S = $scalar> = $crate::Quantity<$crate::unit::Decagram, S>;
+        /// Hectogram.
+        pub type Hectogram<S = $scalar> = $crate::Quantity<$crate::unit::Hectogram, S>;
+        /// Kilogram.
+        pub type Kilogram<S = $scalar> = $crate::Quantity<$crate::unit::Kilogram, S>;
+        /// Megagram.
+        pub type Megagram<S = $scalar> = $crate::Quantity<$crate::unit::Megagram, S>;
+        /// Gigagram.
+        pub type Gigagram<S = $scalar> = $crate::Quantity<$crate::unit::Gigagram, S>;
+        /// Teragram.
+        pub type Teragram<S = $scalar> = $crate::Quantity<$crate::unit::Teragram, S>;
+        /// Petagram.
+        pub type Petagram<S = $scalar> = $crate::Quantity<$crate::unit::Petagram, S>;
+        /// Exagram.
+        pub type Exagram<S = $scalar> = $crate::Quantity<$crate::unit::Exagram, S>;
+        /// Zettagram.
+        pub type Zettagram<S = $scalar> = $crate::Quantity<$crate::unit::Zettagram, S>;
+        /// Yottagram.
+        pub type Yottagram<S = $scalar> = $crate::Quantity<$crate::unit::Yottagram, S>;
+        /// Tonne (metric tons).
+        pub type Tonne<S = $scalar> = $crate::Quantity<$crate::unit::Tonne, S>;
+        /// Carat.
+        pub type Carat<S = $scalar> = $crate::Quantity<$crate::unit::Carat, S>;
+        /// Grain.
+        pub type Grain<S = $scalar> = $crate::Quantity<$crate::unit::Grain, S>;
+        /// Pound.
+        pub type Pound<S = $scalar> = $crate::Quantity<$crate::unit::Pound, S>;
+        /// Ounce.
+        pub type Ounce<S = $scalar> = $crate::Quantity<$crate::unit::Ounce, S>;
+        /// Stone.
+        pub type Stone<S = $scalar> = $crate::Quantity<$crate::unit::Stone, S>;
         /// Short tons (US tons).
-        pub type ShortTons = Quantity<$crate::mass::ShortTon, $scalar>;
+        pub type ShortTon<S = $scalar> = $crate::Quantity<$crate::unit::ShortTon, S>;
         /// Long tons (Imperial tons).
-        pub type LongTons = Quantity<$crate::mass::LongTon, $scalar>;
+        pub type LongTon<S = $scalar> = $crate::Quantity<$crate::unit::LongTon, S>;
         /// Atomic mass units (daltons).
-        pub type AtomicMassUnits = Quantity<$crate::mass::AtomicMassUnit, $scalar>;
+        pub type AtomicMassUnit<S = $scalar> = $crate::Quantity<$crate::unit::AtomicMassUnit, S>;
         /// Solar masses.
-        pub type SolarMasses = Quantity<$crate::mass::SolarMass, $scalar>;
+        pub type SolarMass<S = $scalar> = $crate::Quantity<$crate::unit::SolarMass, S>;
 
         // ── Power ────────────────────────────────────────────────────────
-        /// Watts.
-        pub type Watts = Quantity<$crate::power::Watt, $scalar>;
-        /// Yoctowatts.
-        pub type Yoctowatts = Quantity<$crate::power::Yoctowatt, $scalar>;
-        /// Zeptowatts.
-        pub type Zeptowatts = Quantity<$crate::power::Zeptowatt, $scalar>;
-        /// Attowatts.
-        pub type Attowatts = Quantity<$crate::power::Attowatt, $scalar>;
-        /// Femtowatts.
-        pub type Femtowatts = Quantity<$crate::power::Femtowatt, $scalar>;
-        /// Picowatts.
-        pub type Picowatts = Quantity<$crate::power::Picowatt, $scalar>;
-        /// Nanowatts.
-        pub type Nanowatts = Quantity<$crate::power::Nanowatt, $scalar>;
-        /// Microwatts.
-        pub type Microwatts = Quantity<$crate::power::Microwatt, $scalar>;
-        /// Milliwatts.
-        pub type Milliwatts = Quantity<$crate::power::Milliwatt, $scalar>;
-        /// Deciwatts.
-        pub type Deciwatts = Quantity<$crate::power::Deciwatt, $scalar>;
-        /// Decawatts.
-        pub type Decawatts = Quantity<$crate::power::Decawatt, $scalar>;
-        /// Hectowatts.
-        pub type Hectowatts = Quantity<$crate::power::Hectowatt, $scalar>;
-        /// Kilowatts.
-        pub type Kilowatts = Quantity<$crate::power::Kilowatt, $scalar>;
-        /// Megawatts.
-        pub type Megawatts = Quantity<$crate::power::Megawatt, $scalar>;
-        /// Gigawatts.
-        pub type Gigawatts = Quantity<$crate::power::Gigawatt, $scalar>;
-        /// Terawatts.
-        pub type Terawatts = Quantity<$crate::power::Terawatt, $scalar>;
-        /// Petawatts.
-        pub type Petawatts = Quantity<$crate::power::Petawatt, $scalar>;
-        /// Exawatts.
-        pub type Exawatts = Quantity<$crate::power::Exawatt, $scalar>;
-        /// Zettawatts.
-        pub type Zettawatts = Quantity<$crate::power::Zettawatt, $scalar>;
-        /// Yottawatts.
-        pub type Yottawatts = Quantity<$crate::power::Yottawatt, $scalar>;
+        /// Watt.
+        pub type Watt<S = $scalar> = $crate::Quantity<$crate::unit::Watt, S>;
+        /// Yoctowatt.
+        pub type Yoctowatt<S = $scalar> = $crate::Quantity<$crate::unit::Yoctowatt, S>;
+        /// Zeptowatt.
+        pub type Zeptowatt<S = $scalar> = $crate::Quantity<$crate::unit::Zeptowatt, S>;
+        /// Attowatt.
+        pub type Attowatt<S = $scalar> = $crate::Quantity<$crate::unit::Attowatt, S>;
+        /// Femtowatt.
+        pub type Femtowatt<S = $scalar> = $crate::Quantity<$crate::unit::Femtowatt, S>;
+        /// Picowatt.
+        pub type Picowatt<S = $scalar> = $crate::Quantity<$crate::unit::Picowatt, S>;
+        /// Nanowatt.
+        pub type Nanowatt<S = $scalar> = $crate::Quantity<$crate::unit::Nanowatt, S>;
+        /// Microwatt.
+        pub type Microwatt<S = $scalar> = $crate::Quantity<$crate::unit::Microwatt, S>;
+        /// Milliwatt.
+        pub type Milliwatt<S = $scalar> = $crate::Quantity<$crate::unit::Milliwatt, S>;
+        /// Deciwatt.
+        pub type Deciwatt<S = $scalar> = $crate::Quantity<$crate::unit::Deciwatt, S>;
+        /// Decawatt.
+        pub type Decawatt<S = $scalar> = $crate::Quantity<$crate::unit::Decawatt, S>;
+        /// Hectowatt.
+        pub type Hectowatt<S = $scalar> = $crate::Quantity<$crate::unit::Hectowatt, S>;
+        /// Kilowatt.
+        pub type Kilowatt<S = $scalar> = $crate::Quantity<$crate::unit::Kilowatt, S>;
+        /// Megawatt.
+        pub type Megawatt<S = $scalar> = $crate::Quantity<$crate::unit::Megawatt, S>;
+        /// Gigawatt.
+        pub type Gigawatt<S = $scalar> = $crate::Quantity<$crate::unit::Gigawatt, S>;
+        /// Terawatt.
+        pub type Terawatt<S = $scalar> = $crate::Quantity<$crate::unit::Terawatt, S>;
+        /// Petawatt.
+        pub type Petawatt<S = $scalar> = $crate::Quantity<$crate::unit::Petawatt, S>;
+        /// Exawatt.
+        pub type Exawatt<S = $scalar> = $crate::Quantity<$crate::unit::Exawatt, S>;
+        /// Zettawatt.
+        pub type Zettawatt<S = $scalar> = $crate::Quantity<$crate::unit::Zettawatt, S>;
+        /// Yottawatt.
+        pub type Yottawatt<S = $scalar> = $crate::Quantity<$crate::unit::Yottawatt, S>;
         /// Ergs per second.
-        pub type ErgsPerSecond = Quantity<$crate::power::ErgPerSecond, $scalar>;
+        pub type ErgPerSecond<S = $scalar> = $crate::Quantity<$crate::unit::ErgPerSecond, S>;
         /// Horsepower (metric).
-        pub type HorsepowerMetrics = Quantity<$crate::power::HorsepowerMetric, $scalar>;
+        pub type HorsepowerMetric<S = $scalar> =
+            $crate::Quantity<$crate::unit::HorsepowerMetric, S>;
         /// Horsepower (electric).
-        pub type HorsepowerElectrics = Quantity<$crate::power::HorsepowerElectric, $scalar>;
+        pub type HorsepowerElectric<S = $scalar> =
+            $crate::Quantity<$crate::unit::HorsepowerElectric, S>;
         /// Solar luminosities.
-        pub type SolarLuminosities = Quantity<$crate::power::SolarLuminosity, $scalar>;
+        pub type SolarLuminosity<S = $scalar> = $crate::Quantity<$crate::unit::SolarLuminosity, S>;
 
         // ── Area ─────────────────────────────────────────────────────────
         /// Square meters.
-        pub type SquareMeters = Quantity<$crate::area::SquareMeter, $scalar>;
+        pub type SquareMeter<S = $scalar> = $crate::Quantity<$crate::unit::SquareMeter, S>;
         /// Square kilometers.
-        pub type SquareKilometers = Quantity<$crate::area::SquareKilometer, $scalar>;
+        pub type SquareKilometer<S = $scalar> = $crate::Quantity<$crate::unit::SquareKilometer, S>;
         /// Square centimeters.
-        pub type SquareCentimeters = Quantity<$crate::area::SquareCentimeter, $scalar>;
+        pub type SquareCentimeter<S = $scalar> =
+            $crate::Quantity<$crate::unit::SquareCentimeter, S>;
         /// Square millimeters.
-        pub type SquareMillimeters = Quantity<$crate::area::SquareMillimeter, $scalar>;
-        /// Hectares.
-        pub type Hectares = Quantity<$crate::area::Hectare, $scalar>;
-        /// Ares.
-        pub type Ares = Quantity<$crate::area::Are, $scalar>;
+        pub type SquareMillimeter<S = $scalar> =
+            $crate::Quantity<$crate::unit::SquareMillimeter, S>;
+        /// Hectare.
+        pub type Hectare<S = $scalar> = $crate::Quantity<$crate::unit::Hectare, S>;
+        /// Are.
+        pub type Are<S = $scalar> = $crate::Quantity<$crate::unit::Are, S>;
         /// Square inches.
-        pub type SquareInches = Quantity<$crate::area::SquareInch, $scalar>;
+        pub type SquareInch<S = $scalar> = $crate::Quantity<$crate::unit::SquareInch, S>;
         /// Square feet.
-        pub type SquareFeet = Quantity<$crate::area::SquareFoot, $scalar>;
+        pub type SquareFoot<S = $scalar> = $crate::Quantity<$crate::unit::SquareFoot, S>;
         /// Square yards.
-        pub type SquareYards = Quantity<$crate::area::SquareYard, $scalar>;
+        pub type SquareYard<S = $scalar> = $crate::Quantity<$crate::unit::SquareYard, S>;
         /// Square miles.
-        pub type SquareMiles = Quantity<$crate::area::SquareMile, $scalar>;
-        /// Acres.
-        pub type Acres = Quantity<$crate::area::Acre, $scalar>;
+        pub type SquareMile<S = $scalar> = $crate::Quantity<$crate::unit::SquareMile, S>;
+        /// Acre.
+        pub type Acre<S = $scalar> = $crate::Quantity<$crate::unit::Acre, S>;
 
         // ── Volume ───────────────────────────────────────────────────────
         /// Cubic meters.
-        pub type CubicMeters = Quantity<$crate::volume::CubicMeter, $scalar>;
+        pub type CubicMeter<S = $scalar> = $crate::Quantity<$crate::unit::CubicMeter, S>;
         /// Cubic kilometers.
-        pub type CubicKilometers = Quantity<$crate::volume::CubicKilometer, $scalar>;
+        pub type CubicKilometer<S = $scalar> = $crate::Quantity<$crate::unit::CubicKilometer, S>;
         /// Cubic centimeters.
-        pub type CubicCentimeters = Quantity<$crate::volume::CubicCentimeter, $scalar>;
+        pub type CubicCentimeter<S = $scalar> = $crate::Quantity<$crate::unit::CubicCentimeter, S>;
         /// Cubic millimeters.
-        pub type CubicMillimeters = Quantity<$crate::volume::CubicMillimeter, $scalar>;
-        /// Liters.
-        pub type Liters = Quantity<$crate::volume::Liter, $scalar>;
-        /// Milliliters.
-        pub type Milliliters = Quantity<$crate::volume::Milliliter, $scalar>;
-        /// Microliters.
-        pub type Microliters = Quantity<$crate::volume::Microliter, $scalar>;
-        /// Centiliters.
-        pub type Centiliters = Quantity<$crate::volume::Centiliter, $scalar>;
-        /// Deciliters.
-        pub type Deciliters = Quantity<$crate::volume::Deciliter, $scalar>;
+        pub type CubicMillimeter<S = $scalar> = $crate::Quantity<$crate::unit::CubicMillimeter, S>;
+        /// Liter.
+        pub type Liter<S = $scalar> = $crate::Quantity<$crate::unit::Liter, S>;
+        /// Milliliter.
+        pub type Milliliter<S = $scalar> = $crate::Quantity<$crate::unit::Milliliter, S>;
+        /// Microliter.
+        pub type Microliter<S = $scalar> = $crate::Quantity<$crate::unit::Microliter, S>;
+        /// Centiliter.
+        pub type Centiliter<S = $scalar> = $crate::Quantity<$crate::unit::Centiliter, S>;
+        /// Deciliter.
+        pub type Deciliter<S = $scalar> = $crate::Quantity<$crate::unit::Deciliter, S>;
         /// Cubic inches.
-        pub type CubicInches = Quantity<$crate::volume::CubicInch, $scalar>;
+        pub type CubicInch<S = $scalar> = $crate::Quantity<$crate::unit::CubicInch, S>;
         /// Cubic feet.
-        pub type CubicFeet = Quantity<$crate::volume::CubicFoot, $scalar>;
+        pub type CubicFoot<S = $scalar> = $crate::Quantity<$crate::unit::CubicFoot, S>;
         /// US gallons.
-        pub type UsGallons = Quantity<$crate::volume::UsGallon, $scalar>;
+        pub type UsGallon<S = $scalar> = $crate::Quantity<$crate::unit::UsGallon, S>;
         /// US fluid ounces.
-        pub type UsFluidOunces = Quantity<$crate::volume::UsFluidOunce, $scalar>;
+        pub type UsFluidOunce<S = $scalar> = $crate::Quantity<$crate::unit::UsFluidOunce, S>;
     };
 }
 
