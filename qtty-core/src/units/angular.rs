@@ -358,7 +358,7 @@ impl HourAngles {
     /// ```
     pub const fn from_hms(hours: i32, minutes: u32, seconds: f64) -> Self {
         let sign = if hours < 0 { -1.0 } else { 1.0 };
-        let h_abs = if hours < 0 { -hours } else { hours } as f64;
+        let h_abs = if hours < 0 { -(hours as f64) } else { hours as f64 };
         let m = minutes as f64 / 60.0;
         let s = seconds / 3600.0;
         let total_hours = sign * (h_abs + m + s);
@@ -379,7 +379,7 @@ impl Degrees {
     /// ```
     pub const fn from_dms(deg: i32, min: u32, sec: f64) -> Self {
         let sign = if deg < 0 { -1.0 } else { 1.0 };
-        let d_abs = if deg < 0 { -deg } else { deg } as f64;
+        let d_abs = if deg < 0 { -(deg as f64) } else { deg as f64 };
         let m = min as f64 / 60.0;
         let s = sec / 3600.0;
         let total = sign * (d_abs + m + s);
@@ -425,12 +425,12 @@ crate::impl_unit_cross_unit_ops!(
     HourAngle
 );
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
     use approx::{assert_abs_diff_eq, assert_relative_eq};
     use proptest::prelude::*;
-    use std::f64::consts::{PI, TAU};
+    use core::f64::consts::{PI, TAU};
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Angular unit constants

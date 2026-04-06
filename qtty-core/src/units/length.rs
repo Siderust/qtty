@@ -701,7 +701,7 @@ crate::impl_unit_cross_unit_ops!(
     ElectronReducedComptonWavelength
 );
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::nominal::SolarRadiuses;
     use super::*;

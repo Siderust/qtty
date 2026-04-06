@@ -58,7 +58,7 @@ impl<T: Unit<Dim = VelocityDim>> VelocityUnit for T {}
 /// ```
 pub type Velocity<N, D> = Quantity<Per<N, D>>;
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
     use crate::units::length::{Au, Kilometer, Kilometers, Meter};
