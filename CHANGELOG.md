@@ -20,6 +20,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ### Fixed
 - Cleaned up stale `scalar-decimal` cfg gates, tests, and documentation left behind by the Decimal removal so current builds no longer emit `unexpected_cfgs` warnings.
+- Made `Quantity::mean()` overflow-safe for integer-backed quantities by avoiding addition before division.
+- Made `Degrees::from_dms()` and `HourAngles::from_hms()` safe for `i32::MIN` inputs by avoiding signed integer negation before widening.
+- Fixed `qtty-core` pure `no_std` test builds by gating std-dependent internal test modules behind the `std` feature.
+- Fixed `qtty` pure `no_std` test/example target checks by gating std-only integration tests and the `all_units` example.
+- Generalized generated pairwise unit `From`/`Into` conversions across `Real` scalar types so non-default scalar modules such as `qtty::f32` get the same conversion ergonomics as the default `f64` surface.
 - Updated crate docs and README dependency snippets to the current `0.5.0` release line.
 
 ## [0.5.0] - 2026-03-31

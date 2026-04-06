@@ -141,7 +141,7 @@ pub use unit::{Per, Prod, Simplify, Unit, Unitless};
 #[cfg(feature = "scalar-rational")]
 pub use quantity::QuantityRational;
 
-#[cfg(feature = "serde")]
+#[cfg(all(feature = "serde", feature = "std"))]
 pub use feature_serde::serde_with_unit;
 
 #[cfg(feature = "serde")]

@@ -154,11 +154,21 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
     #[inline]
     pub fn mean(self, other: Self) -> Self {
         let two = S::ONE + S::ONE;
-        let half_a = self.0 / two;
-        let half_b = other.0 / two;
-        let rem_a = self.0 - half_a * two;
-        let rem_b = other.0 - half_b * two;
-        Self::new(half_a + half_b + (rem_a + rem_b) / two)
+        let a = self.0;
+        let b = other.0;
+        // When both values have the same sign, their sum may overflow.
+        // Use a split-half formula that is safe for same-sign operands.
+        // When signs differ, the direct sum never overflows (for integers
+        // it stays within the type's range; for floats it is always fine).
+        if (a >= S::ZERO) == (b >= S::ZERO) {
+            let ha = a / two;
+            let hb = b / two;
+            let ra = a - ha * two;
+            let rb = b - hb * two;
+            Self::new(ha + hb + (ra + rb) / two)
+        } else {
+            Self::new((a + b) / two)
+        }
     }
 
     /// A constant representing the zero value for this quantity type.

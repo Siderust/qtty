@@ -376,7 +376,7 @@ impl Scalar for f64 {
         {
             let r = libm::fmod(self, rhs);
             if r < 0.0 {
-                r + rhs
+                r + libm::fabs(rhs)
             } else {
                 r
             }
@@ -844,7 +844,7 @@ impl Scalar for f32 {
         {
             let r = libm::fmodf(self, rhs);
             if r < 0.0 {
-                r + rhs
+                r + libm::fabsf(rhs)
             } else {
                 r
             }
