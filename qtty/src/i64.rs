@@ -11,10 +11,10 @@
 //! # Example
 //!
 //! ```rust
-//! use qtty::i64::{Meters, Nanoseconds};
+//! use qtty::i64::{Meter, Nanosecond};
 //!
-//! let distance: Meters = Meters::new(1_000_000);
-//! let time: Nanoseconds = Nanoseconds::new(500_000_000);
+//! let distance: Meter = Meter::new(1_000_000);
+//! let time: Nanosecond = Nanosecond::new(500_000_000);
 //! ```
 
 crate::scalar_aliases::define_scalar_aliases!(i64);

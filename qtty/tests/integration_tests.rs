@@ -7,92 +7,95 @@ use approx::{assert_abs_diff_eq, assert_relative_eq};
 
 #[test]
 fn smoke_test_angular() {
-    let deg = Degrees::new(180.0);
-    let rad: Radians = deg.to();
+    let deg = Degree::new(180.0);
+    let rad: Radian = deg.to();
     assert_abs_diff_eq!(rad.value(), std::f64::consts::PI, epsilon = 1e-12);
 }
 
 #[test]
 fn smoke_test_time() {
-    let day = Days::new(1.0);
-    let sec: Seconds = day.to();
+    let day = Day::new(1.0);
+    let sec: Second = day.to();
     assert_abs_diff_eq!(sec.value(), 86400.0, epsilon = 1e-9);
 }
 
 #[test]
 fn smoke_test_length() {
-    let km = Kilometers::new(1.0);
-    let m: Meters = km.to();
+    let km = Kilometer::new(1.0);
+    let m: Meter = km.to();
     assert_abs_diff_eq!(m.value(), 1000.0, epsilon = 1e-9);
 }
 
 #[test]
 fn smoke_test_mass() {
-    let kg = Kilograms::new(1000.0);
-    let g: Grams = kg.to();
+    let kg = Kilogram::new(1000.0);
+    let g: Gram = kg.to();
     assert_abs_diff_eq!(g.value(), 1_000_000.0, epsilon = 1e-6);
 }
 
 #[test]
 fn smoke_test_power() {
-    let sol = SolarLuminosities::new(1.0);
-    let w: Watts = sol.to();
+    let sol = SolarLuminosity::new(1.0);
+    let w: Watt = sol.to();
     assert_relative_eq!(w.value(), 3.828e26, max_relative = 1e-9);
 }
 
 #[test]
 fn smoke_test_velocity() {
-    let v: velocity::Velocity<Kilometer, Second> = velocity::Velocity::new(1.0);
-    let v_mps: velocity::Velocity<Meter, Second> = v.to();
+    let v: velocity::Velocity<qtty::unit::Kilometer, qtty::unit::Second> =
+        velocity::Velocity::new(1.0);
+    let v_mps: velocity::Velocity<qtty::unit::Meter, qtty::unit::Second> = v.to();
     assert_abs_diff_eq!(v_mps.value(), 1000.0, epsilon = 1e-9);
 }
 
 #[test]
 fn smoke_test_frequency() {
-    let f: frequency::Frequency<Degree, Day> = frequency::Frequency::new(360.0);
-    let f_rad: frequency::Frequency<Radian, Day> = f.to();
+    let f: frequency::Frequency<qtty::unit::Degree, qtty::unit::Day> =
+        frequency::Frequency::new(360.0);
+    let f_rad: frequency::Frequency<qtty::unit::Radian, qtty::unit::Day> = f.to();
     assert_abs_diff_eq!(f_rad.value(), 2.0 * std::f64::consts::PI, epsilon = 1e-12);
 }
 
 #[test]
 fn smoke_test_unitless() {
-    let m = Meters::new(42.0);
-    let u: Quantity<Unitless> = m.into();
+    let m = Meter::new(42.0);
+    let u: Unitless = m.into();
     assert_eq!(u.value(), 42.0);
 }
 
 #[test]
 fn smoke_test_unitless_from_time() {
-    let s = Seconds::new(5.0);
-    let u: Quantity<Unitless> = s.into();
+    let s = Second::new(5.0);
+    let u: Unitless = s.into();
     assert_eq!(u.value(), 5.0);
 }
 
 #[test]
 fn smoke_test_unitless_from_mass() {
-    let kg = Kilograms::new(2.0);
-    let u: Quantity<Unitless> = kg.into();
+    let kg = Kilogram::new(2.0);
+    let u: Unitless = kg.into();
     assert_eq!(u.value(), 2.0);
 }
 
 #[test]
 fn smoke_test_unitless_from_angular() {
-    let deg = Degrees::new(15.0);
-    let u: Quantity<Unitless> = deg.into();
+    let deg = Degree::new(15.0);
+    let u: Unitless = deg.into();
     assert_eq!(u.value(), 15.0);
 }
 
 #[test]
 fn orbital_distance_calculation() {
     // Earth's orbital velocity ≈ 29.78 km/s
-    let earth_velocity: velocity::Velocity<Kilometer, Second> = velocity::Velocity::new(29.78);
+    let earth_velocity: velocity::Velocity<qtty::unit::Kilometer, qtty::unit::Second> =
+        velocity::Velocity::new(29.78);
 
     // Time: 1 day
-    let time = Days::new(1.0);
-    let time_sec: Seconds = time.to();
+    let time = Day::new(1.0);
+    let time_sec: Second = time.to();
 
     // Distance = velocity × time
-    let distance: Kilometers = (earth_velocity * time_sec).to();
+    let distance: Kilometer = (earth_velocity * time_sec).to();
 
     // Earth travels about 2.57 million km per day
     assert_relative_eq!(distance.value(), 2_573_395.2, max_relative = 1e-3);
@@ -101,10 +104,10 @@ fn orbital_distance_calculation() {
 #[test]
 fn proxima_centauri_distance() {
     // Proxima Centauri is about 4.24 light years away
-    let distance_ly = LightYears::new(4.24);
+    let distance_ly = LightYear::new(4.24);
 
     // Convert to AU
-    let distance_au: AstronomicalUnits = distance_ly.to();
+    let distance_au: AstronomicalUnit = distance_ly.to();
 
     // Should be about 268,000 AU
     assert_relative_eq!(distance_au.value(), 268_000.0, max_relative = 0.01);
@@ -113,8 +116,8 @@ fn proxima_centauri_distance() {
 #[test]
 fn angular_separation() {
     // Two stars at different positions
-    let star1_ra = Degrees::new(45.0);
-    let star2_ra = Degrees::new(350.0);
+    let star1_ra = Degree::new(45.0);
+    let star2_ra = Degree::new(350.0);
 
     // Separation should wrap around
     let sep = star1_ra.abs_separation(star2_ra);
@@ -126,19 +129,20 @@ fn angular_separation() {
 #[test]
 fn earth_rotation() {
     // Earth rotates 360° per sidereal day (~23h 56m)
-    let rotation_rate: frequency::Frequency<Degree, Day> = frequency::Frequency::new(360.0);
+    let rotation_rate: frequency::Frequency<qtty::unit::Degree, qtty::unit::Day> =
+        frequency::Frequency::new(360.0);
 
     // After 6 hours (0.25 days)
-    let time = Days::new(0.25);
-    let angle: Degrees = (rotation_rate * time).to();
+    let time = Day::new(0.25);
+    let angle: Degree = (rotation_rate * time).to();
 
     assert_abs_diff_eq!(angle.value(), 90.0, epsilon = 1e-12);
 }
 
 #[test]
 fn sun_mass() {
-    let sun = SolarMasses::new(1.0);
-    let kg: Kilograms = sun.to();
+    let sun = SolarMass::new(1.0);
+    let kg: Kilogram = sun.to();
 
     // Sun's mass is about 2e30 kg
     assert_relative_eq!(kg.value(), 1.988416e30, max_relative = 1e-5);
@@ -146,8 +150,8 @@ fn sun_mass() {
 
 #[test]
 fn sun_luminosity() {
-    let sun = SolarLuminosities::new(1.0);
-    let watts: Watts = sun.to();
+    let sun = SolarLuminosity::new(1.0);
+    let watts: Watt = sun.to();
 
     // Sun's luminosity is about 3.828e26 W
     assert_relative_eq!(watts.value(), 3.828e26, max_relative = 1e-9);
@@ -156,15 +160,16 @@ fn sun_luminosity() {
 #[test]
 fn calculate_velocity_from_distance_time() {
     // Light year to km
-    let distance = LightYears::new(1.0);
-    let distance_km: Kilometers = distance.to();
+    let distance = LightYear::new(1.0);
+    let distance_km: Kilometer = distance.to();
 
     // Julian year to seconds
-    let time = JulianYears::new(1.0);
-    let time_sec: Seconds = time.to();
+    let time = JulianYear::new(1.0);
+    let time_sec: Second = time.to();
 
     // Velocity = distance / time
-    let velocity: velocity::Velocity<Kilometer, Second> = distance_km / time_sec;
+    let velocity: velocity::Velocity<qtty::unit::Kilometer, qtty::unit::Second> =
+        distance_km / time_sec;
 
     // Should be approximately speed of light (299,792 km/s)
     assert_relative_eq!(velocity.value(), 299_792.458, max_relative = 0.001);
@@ -173,10 +178,11 @@ fn calculate_velocity_from_distance_time() {
 #[test]
 fn mean_motion_conversion() {
     // Earth's mean motion ≈ 0.9856°/day
-    let mean_motion: frequency::Frequency<Degree, Day> = frequency::Frequency::new(0.9856);
+    let mean_motion: frequency::Frequency<qtty::unit::Degree, qtty::unit::Day> =
+        frequency::Frequency::new(0.9856);
 
     // Convert to degrees per year
-    let per_year: frequency::Frequency<Degree, Year> = mean_motion.to();
+    let per_year: frequency::Frequency<qtty::unit::Degree, qtty::unit::Year> = mean_motion.to();
 
     // Should be about 360°/year
     assert_relative_eq!(per_year.value(), 360.0, max_relative = 0.01);
@@ -185,7 +191,7 @@ fn mean_motion_conversion() {
 #[test]
 fn trigonometric_calculation() {
     // 30° angle
-    let angle = Degrees::new(30.0);
+    let angle = Degree::new(30.0);
 
     // sin(30°) = 0.5
     assert_abs_diff_eq!(angle.sin(), 0.5, epsilon = 1e-12);
@@ -200,38 +206,38 @@ fn trigonometric_calculation() {
 #[test]
 fn derive_macro_produces_correct_symbol() {
     // Verify that units defined with derive macro have correct symbols
-    assert_eq!(Meter::SYMBOL, "m");
-    assert_eq!(Kilometer::SYMBOL, "km");
-    assert_eq!(Second::SYMBOL, "s");
-    assert_eq!(Day::SYMBOL, "d");
-    assert_eq!(Degree::SYMBOL, "°");
-    assert_eq!(Radian::SYMBOL, "rad");
+    assert_eq!(qtty::unit::Meter::SYMBOL, "m");
+    assert_eq!(qtty::unit::Kilometer::SYMBOL, "km");
+    assert_eq!(qtty::unit::Second::SYMBOL, "s");
+    assert_eq!(qtty::unit::Day::SYMBOL, "d");
+    assert_eq!(qtty::unit::Degree::SYMBOL, "°");
+    assert_eq!(qtty::unit::Radian::SYMBOL, "rad");
 }
 
 #[test]
 fn derive_macro_produces_correct_ratio() {
     // Verify ratios are correct
-    assert_eq!(Meter::RATIO, 1.0);
-    assert_eq!(Kilometer::RATIO, 1000.0);
-    assert_eq!(Second::RATIO, 1.0);
-    assert_eq!(Degree::RATIO, 1.0);
+    assert_eq!(qtty::unit::Meter::RATIO, 1.0);
+    assert_eq!(qtty::unit::Kilometer::RATIO, 1000.0);
+    assert_eq!(qtty::unit::Second::RATIO, 1.0);
+    assert_eq!(qtty::unit::Degree::RATIO, 1.0);
 }
 
 #[test]
 fn derive_macro_display_formatting() {
-    let m = Meters::new(42.0);
+    let m = Meter::new(42.0);
     assert_eq!(format!("{}", m), "42 m");
 
-    let km = Kilometers::new(1.5);
+    let km = Kilometer::new(1.5);
     assert_eq!(format!("{}", km), "1.5 km");
 
-    let deg = Degrees::new(90.0);
+    let deg = Degree::new(90.0);
     assert_eq!(format!("{}", deg), "90 °");
 }
 
 #[test]
 fn display_format_precision() {
-    let x = Seconds::new(1234.56789);
+    let x = Second::new(1234.56789);
     // {:.2} → two decimal places
     assert_eq!(format!("{:.2}", x), "1234.57 s");
     // {:.0} → no decimal places (rounded)
@@ -242,7 +248,7 @@ fn display_format_precision() {
 
 #[test]
 fn display_lower_exp_formatting() {
-    let x = Seconds::new(1234.56789);
+    let x = Second::new(1234.56789);
     // {:e} → default scientific notation (lower-case e)
     assert_eq!(format!("{:e}", x), "1.23456789e3 s");
     // {:.4e} → precision + scientific
@@ -253,7 +259,7 @@ fn display_lower_exp_formatting() {
 
 #[test]
 fn display_upper_exp_formatting() {
-    let x = Seconds::new(1234.56789);
+    let x = Second::new(1234.56789);
     // {:E} → scientific notation upper-case E
     assert_eq!(format!("{:E}", x), "1.23456789E3 s");
     // {:.4E} → precision + upper-case scientific
@@ -262,7 +268,8 @@ fn display_upper_exp_formatting() {
 
 #[test]
 fn display_format_annotations_per_unit() {
-    let v: velocity::Velocity<Kilometer, Second> = velocity::Velocity::new(1234.56789);
+    let v: velocity::Velocity<qtty::unit::Kilometer, qtty::unit::Second> =
+        velocity::Velocity::new(1234.56789);
     // Default
     assert_eq!(format!("{}", v), "1234.56789 km/s");
     // Precision
@@ -275,7 +282,7 @@ fn display_format_annotations_per_unit() {
 
 #[test]
 fn display_sign_and_negative_values() {
-    let neg = Meters::new(-42.5);
+    let neg = Meter::new(-42.5);
     assert_eq!(format!("{}", neg), "-42.5 m");
     assert_eq!(format!("{:.1}", neg), "-42.5 m");
     assert_eq!(format!("{:.2e}", neg), "-4.25e1 m");
@@ -283,8 +290,8 @@ fn display_sign_and_negative_values() {
 
 #[test]
 fn quantity_basic_arithmetic() {
-    let a = Meters::new(10.0);
-    let b = Meters::new(5.0);
+    let a = Meter::new(10.0);
+    let b = Meter::new(5.0);
 
     assert_eq!((a + b).value(), 15.0);
     assert_eq!((a - b).value(), 5.0);
@@ -295,46 +302,48 @@ fn quantity_basic_arithmetic() {
 #[test]
 fn quantity_conversion_chain() {
     // Convert through multiple units
-    let au = AstronomicalUnits::new(1.0);
-    let km: Kilometers = au.to();
-    let m: Meters = km.to();
+    let au = AstronomicalUnit::new(1.0);
+    let km: Kilometer = au.to();
+    let m: Meter = km.to();
 
     // Direct conversion should match
-    let m_direct: Meters = au.to();
+    let m_direct: Meter = au.to();
     assert_abs_diff_eq!(m.value(), m_direct.value(), epsilon = 1e-3);
 }
 
 #[test]
 fn quantity_negation() {
-    let pos = Degrees::new(45.0);
+    let pos = Degree::new(45.0);
     let neg = -pos;
     assert_eq!(neg.value(), -45.0);
 }
 
 #[test]
 fn quantity_abs() {
-    let neg = Degrees::new(-45.0);
+    let neg = Degree::new(-45.0);
     assert_eq!(neg.abs().value(), 45.0);
 }
 
 #[test]
 fn per_unit_display() {
-    let v: velocity::Velocity<Kilometer, Second> = velocity::Velocity::new(10.0);
+    let v: velocity::Velocity<qtty::unit::Kilometer, qtty::unit::Second> =
+        velocity::Velocity::new(10.0);
     let s = format!("{}", v);
     assert_eq!(s, "10 km/s");
 }
 
 #[test]
 fn per_unit_multiplication_recovers_numerator() {
-    let v: velocity::Velocity<Kilometer, Second> = velocity::Velocity::new(100.0);
-    let t: Seconds = Seconds::new(3600.0);
-    let d: Kilometers = (v * t).to();
+    let v: velocity::Velocity<qtty::unit::Kilometer, qtty::unit::Second> =
+        velocity::Velocity::new(100.0);
+    let t: Second = Second::new(3600.0);
+    let d: Kilometer = (v * t).to();
     assert_abs_diff_eq!(d.value(), 360_000.0, epsilon = 1e-6);
 }
 
 #[test]
 fn qtty_values_macro_builds_seconds_array() {
-    const DT: [Seconds; 3] = qtty::qtty_vec!(Seconds; 56.86, 63.83, 70.0);
+    const DT: [Second; 3] = qtty::qtty_vec!(Second; 56.86, 63.83, 70.0);
     assert_abs_diff_eq!(DT[0].value(), 56.86, epsilon = 1e-12);
     assert_abs_diff_eq!(DT[1].value(), 63.83, epsilon = 1e-12);
     assert_abs_diff_eq!(DT[2].value(), 70.0, epsilon = 1e-12);
@@ -342,16 +351,16 @@ fn qtty_values_macro_builds_seconds_array() {
 
 #[test]
 fn qtty_values_macro_builds_seconds_vec() {
-    let dt: Vec<Seconds> = qtty::qtty_vec!(vec Seconds; 56.86, 63.83, 70.0);
+    let dt: Vec<Second> = qtty::qtty_vec!(vec Second; 56.86, 63.83, 70.0);
     assert_eq!(dt.len(), 3);
     assert_abs_diff_eq!(dt[1].value(), 63.83, epsilon = 1e-12);
 }
 
 #[test]
 fn per_unit_division_creates_composite() {
-    let d = Kilometers::new(100.0);
-    let t = Seconds::new(10.0);
-    let v: velocity::Velocity<Kilometer, Second> = d / t;
+    let d = Kilometer::new(100.0);
+    let t = Second::new(10.0);
+    let v: velocity::Velocity<qtty::unit::Kilometer, qtty::unit::Second> = d / t;
     assert_abs_diff_eq!(v.value(), 10.0, epsilon = 1e-12);
 }
 
@@ -381,19 +390,18 @@ fn macro_generated_conversions() {
     // These weren't manually implemented before
 
     // Meter -> AstronomicalUnit (AU is exactly 149,597,870,700 m)
-    let m = Meters::new(149_597_870_700.0);
-    let au: AstronomicalUnits = m.into();
+    let m = Meter::new(149_597_870_700.0);
+    let au: AstronomicalUnit = m.into();
     assert_relative_eq!(au.value(), 1.0, max_relative = 1e-12);
 
     // Nominal SolarRadius -> Kilometer
-    use qtty_core::length::nominal::SolarRadiuses;
-    let sr = SolarRadiuses::new(1.0);
-    let km: Kilometers = sr.into();
+    let sr = SolarRadius::new(1.0);
+    let km: Kilometer = sr.into();
     assert_abs_diff_eq!(km.value(), 695_700.0, epsilon = 1e-6);
 
     // Parsec -> AstronomicalUnit
-    let pc = Parsecs::new(1.0);
-    let au: AstronomicalUnits = pc.into();
+    let pc = Parsec::new(1.0);
+    let au: AstronomicalUnit = pc.into();
     // 1 pc = au * 648000 / π
     let expected = 648_000.0 / core::f64::consts::PI;
     assert_relative_eq!(au.value(), expected, max_relative = 1e-12);
@@ -404,32 +412,32 @@ fn new_angular_units() {
     // Test the new angular units added via impl_unit_conversions! macro
 
     // Arcminute conversions
-    let deg = Degrees::new(1.0);
-    let arcm: Arcminutes = deg.into();
+    let deg = Degree::new(1.0);
+    let arcm: Arcminute = deg.into();
     assert_abs_diff_eq!(arcm.value(), 60.0, epsilon = 1e-12);
 
     // Microarcsecond conversions
-    let arcs = Arcseconds::new(1.0);
-    let uas: MicroArcseconds = arcs.into();
+    let arcs = Arcsecond::new(1.0);
+    let uas: MicroArcsecond = arcs.into();
     assert_abs_diff_eq!(uas.value(), 1_000_000.0, epsilon = 1e-6);
 
     // Gradian conversions (1 full turn = 400 gradians)
-    let turn = Turns::new(1.0);
-    let gon: Gradians = turn.into();
+    let turn = Turn::new(1.0);
+    let gon: Gradian = turn.into();
     assert_abs_diff_eq!(gon.value(), 400.0, epsilon = 1e-12);
 
     // Turn conversions
-    let deg = Degrees::new(180.0);
-    let turn: Turns = deg.into();
+    let deg = Degree::new(180.0);
+    let turn: Turn = deg.into();
     assert_abs_diff_eq!(turn.value(), 0.5, epsilon = 1e-12);
 
     // Test trig functions work with new units
-    let right_angle = Gradians::new(100.0); // 90 degrees
+    let right_angle = Gradian::new(100.0); // 90 degrees
     assert_abs_diff_eq!(right_angle.sin(), 1.0, epsilon = 1e-12);
     assert_abs_diff_eq!(right_angle.cos(), 0.0, epsilon = 1e-12);
 
     // Test wrapping with new units
-    let turn = Turns::new(2.7);
+    let turn = Turn::new(2.7);
     let wrapped = turn.wrap_pos();
     assert_abs_diff_eq!(wrapped.value(), 0.7, epsilon = 1e-12);
 }
@@ -440,37 +448,37 @@ fn new_angular_units() {
 
 #[test]
 fn smoke_test_f32_angular() {
-    use qtty::f32::{Degrees, Radians};
+    use qtty::f32::{Degree, Radian};
 
-    let deg = Degrees::new(180.0_f32);
-    let rad: Radians = deg.to();
+    let deg = Degree::new(180.0_f32);
+    let rad: Radian = deg.to();
     assert!((rad.value() - core::f32::consts::PI).abs() < 1e-5);
 }
 
 #[test]
 fn smoke_test_f32_length() {
-    use qtty::f32::{Kilometers, Meters};
+    use qtty::f32::{Kilometer, Meter};
 
-    let km = Kilometers::new(1.0_f32);
-    let m: Meters = km.to();
+    let km = Kilometer::new(1.0_f32);
+    let m: Meter = km.to();
     assert!((m.value() - 1000.0).abs() < 1e-4);
 }
 
 #[test]
 fn smoke_test_f32_time() {
-    use qtty::f32::{Days, Seconds};
+    use qtty::f32::{Day, Second};
 
-    let day = Days::new(1.0_f32);
-    let sec: Seconds = day.to();
+    let day = Day::new(1.0_f32);
+    let sec: Second = day.to();
     assert!((sec.value() - 86400.0).abs() < 1.0);
 }
 
 #[test]
 fn smoke_test_f32_arithmetic() {
-    use qtty::f32::Meters;
+    use qtty::f32::Meter;
 
-    let a = Meters::new(10.0_f32);
-    let b = Meters::new(5.0_f32);
+    let a = Meter::new(10.0_f32);
+    let b = Meter::new(5.0_f32);
     let sum = a + b;
     let diff = a - b;
 
@@ -480,9 +488,9 @@ fn smoke_test_f32_arithmetic() {
 
 #[test]
 fn smoke_test_f32_trig() {
-    use qtty::f32::Degrees;
+    use qtty::f32::Degree;
 
-    let angle = Degrees::new(90.0_f32);
+    let angle = Degree::new(90.0_f32);
     assert!((angle.sin() - 1.0).abs() < 1e-5);
     assert!(angle.cos().abs() < 1e-5);
 }
@@ -493,38 +501,38 @@ fn smoke_test_f32_trig() {
 
 #[test]
 fn smoke_test_i8_module_arithmetic_and_lossy_conversion() {
-    use qtty::i8::{Meters, Minutes, Seconds};
+    use qtty::i8::{Meter, Minute, Second};
 
-    let a = Meters::new(50);
-    let b = Meters::new(20);
+    let a = Meter::new(50);
+    let b = Meter::new(20);
     assert_eq!((a + b).value(), 70);
     assert_eq!((a - b).value(), 30);
 
-    let sec = Seconds::new(125);
-    let min: Minutes = sec.to_lossy();
+    let sec = Second::new(125);
+    let min: Minute = sec.to_lossy();
     assert_eq!(min.value(), 2);
 }
 
 #[test]
 fn smoke_test_i16_module_arithmetic_and_lossy_conversion() {
-    use qtty::i16::{Kilometers, Meters};
+    use qtty::i16::{Kilometer, Meter};
 
-    let a = Meters::new(1_500);
-    let b = Meters::new(250);
+    let a = Meter::new(1_500);
+    let b = Meter::new(250);
     assert_eq!((a + b).value(), 1_750);
 
-    let km: Kilometers = a.to_lossy();
+    let km: Kilometer = a.to_lossy();
     assert_eq!(km.value(), 1);
 }
 
 #[test]
 fn smoke_test_i128_module_arithmetic_and_lossy_conversion() {
-    use qtty::i128::{Days, Seconds};
+    use qtty::i128::{Day, Second};
 
-    let a = Seconds::new(172_800);
-    let b = Seconds::new(3_600);
+    let a = Second::new(172_800);
+    let b = Second::new(3_600);
     assert_eq!((a + b).value(), 176_400);
 
-    let days: Days = a.to_lossy();
+    let days: Day = a.to_lossy();
     assert_eq!(days.value(), 2);
 }

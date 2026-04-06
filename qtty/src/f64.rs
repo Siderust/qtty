@@ -7,17 +7,11 @@
 //! # Example
 //!
 //! ```rust
-//! use qtty::f64::{Degrees, Meters, Seconds};
+//! use qtty::f64::{Degree, Meter, Second};
 //!
-//! let angle: Degrees = Degrees::new(90.0);
-//! let distance: Meters = Meters::new(100.0);
-//! let time: Seconds = Seconds::new(10.0);
+//! let angle: Degree = Degree::new(90.0);
+//! let distance: Meter = Meter::new(100.0);
+//! let time: Second = Second::new(10.0);
 //! ```
 
-pub use crate::angular::*;
-pub use crate::area::*;
-pub use crate::length::*;
-pub use crate::mass::*;
-pub use crate::power::*;
-pub use crate::time::*;
-pub use crate::volume::*;
+crate::scalar_aliases::define_scalar_aliases!(f64);
