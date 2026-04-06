@@ -54,10 +54,6 @@ pub type Quantity64<U> = Quantity<U, f64>;
 /// A quantity backed by `f32`.
 pub type Quantity32<U> = Quantity<U, f32>;
 
-/// A quantity backed by `rust_decimal::Decimal`.
-#[cfg(feature = "scalar-decimal")]
-pub type QuantityDecimal<U> = Quantity<U, rust_decimal::Decimal>;
-
 /// A quantity backed by `num_rational::Rational64`.
 #[cfg(feature = "scalar-rational")]
 pub type QuantityRational<U> = Quantity<U, num_rational::Rational64>;
@@ -173,13 +169,14 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Real-specific implementations (f32, f64, Decimal, etc.)
+// Real-specific implementations (f32, f64, etc.)
 // ─────────────────────────────────────────────────────────────────────────────
 
 impl<U: Unit, S: Real> Quantity<U, S> {
     /// A constant representing NaN for this quantity type.
     ///
-    /// Note: For types without NaN (like `Decimal`), this may not be a true NaN.
+    /// Note: For scalar types without a NaN representation, this may be an
+    /// approximation rather than a true IEEE-754 NaN.
     ///
     /// ```rust
     /// use qtty_core::length::Meters;
@@ -255,14 +252,15 @@ impl<U: Unit, S: Real> Quantity<U, S> {
         self.0.signum()
     }
 
-    /// Returns the square root.
+    /// Returns the square root of the underlying scalar value.
     ///
-    /// Note: This returns the scalar square root of the value. The resulting
-    /// quantity still has the same unit type, which may not be physically
-    /// meaningful in all contexts.
+    /// This returns the raw scalar `S` rather than `Quantity<U, S>`, because
+    /// the square root of a dimensional quantity does not in general carry the
+    /// same dimension (e.g. √(m²) = m, not m²).  If you need a quantity
+    /// result, wrap it explicitly with the correct unit type.
     #[inline]
-    pub fn sqrt(self) -> Self {
-        Self::new(self.0.sqrt())
+    pub fn scalar_sqrt(self) -> S {
+        self.0.sqrt()
     }
 
     /// Returns the smallest integer quantity greater than or equal to this value.
@@ -611,16 +609,6 @@ impl<U: Unit> Mul<Quantity<U, f32>> for f32 {
     type Output = Quantity<U, f32>;
     #[inline]
     fn mul(self, rhs: Quantity<U, f32>) -> Self::Output {
-        rhs * self
-    }
-}
-
-// Multiplication for Decimal (feature-gated)
-#[cfg(feature = "scalar-decimal")]
-impl<U: Unit> Mul<Quantity<U, rust_decimal::Decimal>> for rust_decimal::Decimal {
-    type Output = Quantity<U, rust_decimal::Decimal>;
-    #[inline]
-    fn mul(self, rhs: Quantity<U, rust_decimal::Decimal>) -> Self::Output {
         rhs * self
     }
 }

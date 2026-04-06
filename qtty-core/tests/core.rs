@@ -366,10 +366,10 @@ fn test_signum() {
 }
 
 #[test]
-fn test_sqrt() {
+fn test_scalar_sqrt() {
     let q = TU::new(16.0);
-    let sqrt_q = q.sqrt();
-    assert!((sqrt_q.value() - 4.0).abs() < 1e-12);
+    let sqrt_val = q.scalar_sqrt();
+    assert!((sqrt_val - 4.0).abs() < 1e-12);
 }
 
 #[test]

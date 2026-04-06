@@ -19,7 +19,6 @@ cross-unit-ops = ["qtty-core/cross-unit-ops"]
 serde = ["qtty-core/serde"]
 
 # Scalar type support
-scalar-decimal = ["qtty-core/scalar-decimal"]
 scalar-rational = ["qtty-core/scalar-rational"]
 pyo3 = ["qtty-core/pyo3", "dep:pyo3"]
 tiberius = ["qtty-core/tiberius"]

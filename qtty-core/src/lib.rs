@@ -112,9 +112,6 @@ pub use dimension::{
     Angular,
     Area,
     Current,
-    Dim,
-    DimDiv,
-    DimMul,
     Dimension,
     Dimensionless,
     Energy,
@@ -129,15 +126,17 @@ pub use dimension::{
     VelocityDim,
     Volume,
 };
+
+// Implementation machinery — public for advanced downstream use but not part
+// of the recommended API surface.
+#[doc(hidden)]
+pub use dimension::{Dim, DimDiv, DimMul};
 pub use quantity::{
     Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16, QuantityI32, QuantityI64,
     QuantityI8,
 };
 pub use scalar::{Exact, IntegerScalar, Real, Scalar, Transcendental};
 pub use unit::{Per, Prod, Simplify, Unit, Unitless};
-
-#[cfg(feature = "scalar-decimal")]
-pub use quantity::QuantityDecimal;
 
 #[cfg(feature = "scalar-rational")]
 pub use quantity::QuantityRational;
