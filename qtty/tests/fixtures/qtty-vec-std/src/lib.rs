@@ -1,5 +1,5 @@
-use qtty::Seconds;
+use qtty::Second;
 
-pub fn build_samples() -> Vec<Seconds> {
-    qtty::qtty_vec!(vec Seconds; 1.0, 2.0, 3.0)
+pub fn build_samples() -> Vec<Second> {
+    qtty::qtty_vec!(vec Second; 1.0, 2.0, 3.0)
 }

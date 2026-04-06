@@ -7,7 +7,7 @@
 
 #[cfg(feature = "serde")]
 fn main() {
-    use qtty::{Kilometers, Meters, Seconds};
+    use qtty::{Kilometer, Meter, Second};
     use serde::{Deserialize, Serialize};
     use serde_json;
 
@@ -22,20 +22,20 @@ fn main() {
     struct SensorData {
         // This field will serialize WITH unit information
         #[serde(with = "qtty_core::serde_with_unit")]
-        max_range: Meters,
+        max_range: Meter,
 
         // This field uses default (compact) serialization
-        current_distance: Meters,
+        current_distance: Meter,
 
         // Another field with unit info
         #[serde(with = "qtty_core::serde_with_unit")]
-        timestamp: Seconds,
+        timestamp: Second,
     }
 
     let data = SensorData {
-        max_range: Meters::new(100.0),
-        current_distance: Meters::new(42.5),
-        timestamp: Seconds::new(1702562400.0),
+        max_range: Meter::new(100.0),
+        current_distance: Meter::new(42.5),
+        timestamp: Second::new(1702562400.0),
     };
 
     let json = serde_json::to_string_pretty(&data).unwrap();
@@ -58,20 +58,20 @@ fn main() {
         station_id: String,
 
         #[serde(with = "qtty_core::serde_with_unit")]
-        temperature_celsius: Meters, // Using Meters as example
+        temperature_celsius: Meter, // Using Meter as example
 
         #[serde(with = "qtty_core::serde_with_unit")]
-        wind_speed: Meters,
+        wind_speed: Meter,
 
         #[serde(with = "qtty_core::serde_with_unit")]
-        visibility: Kilometers,
+        visibility: Kilometer,
     }
 
     let report = WeatherReport {
         station_id: "KJFK".to_string(),
-        temperature_celsius: Meters::new(22.0),
-        wind_speed: Meters::new(5.5),
-        visibility: Kilometers::new(10.0),
+        temperature_celsius: Meter::new(22.0),
+        wind_speed: Meter::new(5.5),
+        visibility: Kilometer::new(10.0),
     };
 
     let json = serde_json::to_string_pretty(&report).unwrap();
@@ -88,24 +88,24 @@ fn main() {
 
         // Document the units in config files
         #[serde(with = "qtty_core::serde_with_unit")]
-        max_speed: Meters,
+        max_speed: Meter,
 
         #[serde(with = "qtty_core::serde_with_unit")]
-        safe_distance: Meters,
+        safe_distance: Meter,
 
         #[serde(with = "qtty_core::serde_with_unit")]
-        timeout: Seconds,
+        timeout: Second,
 
         // Internal value doesn't need unit documentation
-        calibration_offset: Meters,
+        calibration_offset: Meter,
     }
 
     let config = RobotConfig {
         name: "R2D2".to_string(),
-        max_speed: Meters::new(2.5),
-        safe_distance: Meters::new(0.5),
-        timeout: Seconds::new(30.0),
-        calibration_offset: Meters::new(0.001),
+        max_speed: Meter::new(2.5),
+        safe_distance: Meter::new(0.5),
+        timeout: Second::new(30.0),
+        calibration_offset: Meter::new(0.001),
     };
 
     let json = serde_json::to_string_pretty(&config).unwrap();
@@ -120,7 +120,7 @@ fn main() {
     #[derive(Serialize, Deserialize, Debug)]
     struct SingleValue {
         #[serde(with = "qtty_core::serde_with_unit")]
-        distance: Meters,
+        distance: Meter,
     }
 
     let valid_json = r#"{"distance": {"value": 100.0, "unit": "m"}}"#;
@@ -152,21 +152,21 @@ fn main() {
         id: u32,
 
         #[serde(with = "qtty_core::serde_with_unit")]
-        value: Meters,
+        value: Meter,
     }
 
     let measurements = vec![
         Measurement {
             id: 1,
-            value: Meters::new(10.0),
+            value: Meter::new(10.0),
         },
         Measurement {
             id: 2,
-            value: Meters::new(20.0),
+            value: Meter::new(20.0),
         },
         Measurement {
             id: 3,
-            value: Meters::new(30.0),
+            value: Meter::new(30.0),
         },
     ];
 
@@ -187,21 +187,21 @@ fn main() {
     #[derive(Serialize, Deserialize, Debug)]
     struct Coordinates {
         #[serde(with = "qtty_core::serde_with_unit")]
-        x: Meters,
+        x: Meter,
 
         #[serde(with = "qtty_core::serde_with_unit")]
-        y: Meters,
+        y: Meter,
 
         #[serde(with = "qtty_core::serde_with_unit")]
-        z: Meters,
+        z: Meter,
     }
 
     let location = Location {
         name: "Observatory".to_string(),
         coordinates: Coordinates {
-            x: Meters::new(100.0),
-            y: Meters::new(200.0),
-            z: Meters::new(50.0),
+            x: Meter::new(100.0),
+            y: Meter::new(200.0),
+            z: Meter::new(50.0),
         },
     };
 

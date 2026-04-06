@@ -7,11 +7,11 @@
 //! # Example
 //!
 //! ```rust
-//! use qtty::f32::{Degrees, Meters, Seconds};
+//! use qtty::f32::{Degree, Meter, Second};
 //!
-//! let angle: Degrees = Degrees::new(90.0_f32);
-//! let distance: Meters = Meters::new(100.0_f32);
-//! let time: Seconds = Seconds::new(10.0_f32);
+//! let angle: Degree = Degree::new(90.0_f32);
+//! let distance: Meter = Meter::new(100.0_f32);
+//! let time: Second = Second::new(10.0_f32);
 //! ```
 
 crate::scalar_aliases::define_scalar_aliases!(f32);

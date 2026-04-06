@@ -1,7 +1,7 @@
 #![no_std]
 
-use qtty::Seconds;
+use qtty::Second;
 
 pub fn build_samples() {
-    let _samples = qtty::qtty_vec!(vec Seconds; 1.0, 2.0, 3.0);
+    let _samples = qtty::qtty_vec!(vec Second; 1.0, 2.0, 3.0);
 }
