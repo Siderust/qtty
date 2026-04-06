@@ -344,7 +344,7 @@ pub type SiderealYears = Quantity<SiderealYear>;
 /// A constant representing one sidereal year.
 pub const SIDEREAL_YEAR: SiderealYears = SiderealYears::new(1.0);
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
     use approx::assert_abs_diff_eq;

@@ -168,7 +168,7 @@ pub use units::unitless;
 pub use units::velocity;
 pub use units::volume;
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
 

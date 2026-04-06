@@ -1,3 +1,4 @@
+#![cfg(feature = "std")]
 //! Integration-level smoke tests for the `qtty` facade crate.
 
 use qtty::*;

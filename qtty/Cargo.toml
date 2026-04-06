@@ -38,3 +38,7 @@ serde_json = "1.0"
 [[example]]
 name = "python_integration"
 required-features = ["pyo3"]
+
+[[example]]
+name = "all_units"
+required-features = ["std"]

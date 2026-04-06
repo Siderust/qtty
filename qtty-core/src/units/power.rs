@@ -187,7 +187,7 @@ crate::impl_unit_cross_unit_ops!(
     SolarLuminosity
 );
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
     use approx::assert_relative_eq;
