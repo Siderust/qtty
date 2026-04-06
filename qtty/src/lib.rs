@@ -137,8 +137,8 @@ pub use qtty_core::{
     Acceleration, AmountOfSubstance, Angular, Area, Current, Dimension, Dimensionless, Energy,
     Exact, Force, FrequencyDim, IntegerScalar, Length, LuminousIntensity, Mass, Per, Power, Prod,
     Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16, QuantityI32, QuantityI64,
-    QuantityI8, Real, Scalar, Simplify, Temperature, Time, Transcendental, Unit, VelocityDim,
-    Volume,
+    QuantityI8, Real, Scalar, Simplify, Temperature, Time, Transcendental, Unit, UnitDiv, UnitMul,
+    VelocityDim, Volume,
 };
 
 #[doc(hidden)]
@@ -179,6 +179,16 @@ pub mod i64;
 pub mod i8;
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Dimension modules (re-exported from qtty-core)
+// ─────────────────────────────────────────────────────────────────────────────
+
+pub use qtty_core::units::angular;
+pub use qtty_core::units::length;
+pub use qtty_core::units::mass;
+pub use qtty_core::units::power;
+pub use qtty_core::units::time;
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Type-level unit markers
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -188,7 +198,7 @@ pub mod i8;
 /// [`Second`]. Use this module when generic code needs the unit marker itself,
 /// for example `Quantity<unit::Meter, S>` or `to::<unit::Kilometer>()`.
 pub mod unit {
-    pub use qtty_core::{Per, Prod, Unit, Unitless};
+    pub use qtty_core::{Per, Prod, Unit, UnitDiv, UnitMul, Unitless};
 
     pub use qtty_core::units::angular::{
         AngularUnit, Arcminute, Arcsecond, Degree, Gradian, HourAngle, MicroArcsecond,

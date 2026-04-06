@@ -195,10 +195,11 @@ where
     type Scalar = S;
     type Out = Unitless;
     /// ```rust
-    /// use qtty_core::length::Meters;
-    /// use qtty_core::{Quantity, Simplify, Unitless};
+    /// use qtty_core::{Quantity, Per, Simplify, Unitless};
+    /// use qtty_core::length::Meter;
     ///
-    /// let ratio = Meters::new(1.0) / Meters::new(2.0);
+    /// // A Per<U,U> value constructed manually can still be simplified:
+    /// let ratio: Quantity<Per<Meter, Meter>> = Quantity::new(0.5);
     /// let unitless: Quantity<Unitless> = ratio.simplify();
     /// assert!((unitless.value() - 0.5).abs() < 1e-12);
     /// ```
@@ -220,6 +221,64 @@ where
         Quantity::new(self.value())
     }
 }
+
+/// Identity `Simplify` for `Quantity<Unitless>`: already simplified.
+impl<S: Scalar> Simplify for Quantity<Unitless, S> {
+    type Scalar = S;
+    type Out = Unitless;
+    fn simplify(self) -> Quantity<Unitless, S> {
+        self
+    }
+}
+
+/// Macro to generate an identity `Simplify` impl for a plain unit type.
+///
+/// Used internally to provide compatibility for code that calls `.simplify()`
+/// on quantities whose unit is already a simple marker type.
+macro_rules! impl_identity_simplify {
+    ($($unit:ty),+ $(,)?) => {
+        $(
+            impl<S: Scalar> Simplify for Quantity<$unit, S> {
+                type Scalar = S;
+                type Out = $unit;
+                fn simplify(self) -> Quantity<$unit, S> {
+                    self
+                }
+            }
+        )+
+    };
+}
+
+impl_identity_simplify!(
+    // Length
+    crate::units::length::Meter,
+    crate::units::length::Kilometer,
+    crate::units::length::Centimeter,
+    crate::units::length::Millimeter,
+    crate::units::length::AstronomicalUnit,
+    crate::units::length::LightYear,
+    crate::units::length::Parsec,
+    // Time
+    crate::units::time::Second,
+    crate::units::time::Minute,
+    crate::units::time::Hour,
+    crate::units::time::Day,
+    crate::units::time::Year,
+    crate::units::time::JulianYear,
+    // Mass
+    crate::units::mass::Gram,
+    crate::units::mass::Kilogram,
+    // Angular
+    crate::units::angular::Degree,
+    crate::units::angular::Radian,
+    // Power
+    crate::units::power::Watt,
+    // Area
+    crate::units::area::SquareMeter,
+    crate::units::area::SquareKilometer,
+    // Volume
+    crate::units::volume::CubicMeter,
+);
 
 #[cfg(all(test, feature = "std"))]
 mod tests {
