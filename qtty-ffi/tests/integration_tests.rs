@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Integration tests for qtty-ffi (vNext ABI).
 //!
 //! All FFI function calls use raw `u32` unit IDs and check `QttyStatus` return values.

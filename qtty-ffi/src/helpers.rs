@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Helper functions and trait implementations for downstream crate integration.
 //!
 //! This module provides pre-implemented conversions between `qtty` types and [`QttyQuantity`],

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Angle helpers example: wrapping and separation in a single unit type.
 
 use qtty::{Arcsecond, Degree};

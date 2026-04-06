@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! ABI-stable FFI types for `qtty` quantities.
 //!
 //! This module defines the `#[repr(C)]` and `#[repr(u32)]` types that form the stable C ABI

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Internal macro for generating scalar-specific type aliases.
 //!
 //! This module is not public; each `f32`/`i8`/… module invokes the macro to

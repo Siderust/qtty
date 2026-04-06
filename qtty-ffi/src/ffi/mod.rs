@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Extern "C" API for FFI consumers.
 //!
 //! This module tree exposes `#[no_mangle] pub extern "C"` functions that form the stable C ABI
