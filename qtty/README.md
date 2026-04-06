@@ -20,21 +20,21 @@ code without giving up ergonomics.
 
 ```toml
 [dependencies]
-qtty = "0.4.1"
+qtty = "0.5.0"
 ```
 
 Disable default features for `no_std`:
 
 ```toml
 [dependencies]
-qtty = { version = "0.4.1", default-features = false }
+qtty = { version = "0.5.0", default-features = false }
 ```
 
 Enable heap-backed helpers in `no_std`:
 
 ```toml
 [dependencies]
-qtty = { version = "0.4.1", default-features = false, features = ["alloc"] }
+qtty = { version = "0.5.0", default-features = false, features = ["alloc"] }
 ```
 
 ## Quick start
@@ -63,7 +63,6 @@ assert!((speed.value() - 10.0).abs() < 1e-12);
 - `cross-unit-ops` (default): enables direct cross-unit comparison operators for compatible built-in units
 - `alloc`: enables heap-backed helpers such as `qtty::qtty_vec!(vec ...)` in `no_std`
 - `serde`: enables serialization helpers for quantities
-- `scalar-decimal`: enables `rust_decimal::Decimal`
 - `scalar-rational`: enables `num_rational::Rational64`
 - `pyo3`: enables PyO3 conversions and Python-facing helpers
 - `tiberius`: enables SQL Server integration helpers

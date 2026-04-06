@@ -151,10 +151,17 @@ impl UnitId {
 /// It is `#[repr(C)]` to ensure a stable, predictable memory layout across
 /// language boundaries.
 ///
+/// # ABI Safety
+///
+/// The `unit` field is a raw `u32` rather than a [`UnitId`] enum so that C
+/// callers can never construct a value with an invalid discriminant (which
+/// would be instant UB in Rust).  Use [`unit_id()`](Self::unit_id) to
+/// validate and decode the field on the Rust side.
+///
 /// # Memory Layout
 ///
 /// - `value`: 8 bytes (f64)
-/// - `unit`: 4 bytes (u32 via UnitId)
+/// - `unit`: 4 bytes (u32)
 /// - Padding: 4 bytes (for alignment)
 /// - Total: 16 bytes on most platforms
 ///
@@ -165,7 +172,7 @@ impl UnitId {
 ///
 /// let q = QttyQuantity {
 ///     value: 1000.0,
-///     unit: UnitId::Meter,
+///     unit: UnitId::Meter as u32,
 /// };
 /// ```
 #[repr(C)]
@@ -173,18 +180,41 @@ impl UnitId {
 pub struct QttyQuantity {
     /// The numeric value of the quantity.
     pub value: f64,
-    /// The unit identifier for this quantity.
-    pub unit: UnitId,
+    /// Raw unit identifier.  Use [`unit_id()`](Self::unit_id) to validate.
+    pub unit: u32,
 }
 
 impl QttyQuantity {
-    /// Creates a new quantity with the given value and unit.
+    /// Creates a new quantity from a validated [`UnitId`].
     #[inline]
     pub const fn new(value: f64, unit: UnitId) -> Self {
+        Self {
+            value,
+            unit: unit as u32,
+        }
+    }
+
+    /// Creates a new quantity from a raw `u32` unit identifier.
+    ///
+    /// This does **not** validate the unit ID.  Use [`unit_id()`](Self::unit_id)
+    /// to check validity before relying on the value.
+    #[inline]
+    pub const fn from_raw(value: f64, unit: u32) -> Self {
         Self { value, unit }
     }
 
+    /// Validates and returns the unit as a [`UnitId`].
+    ///
+    /// Returns `None` if the raw `unit` field does not correspond to a known
+    /// unit.
+    #[inline]
+    pub fn unit_id(&self) -> Option<UnitId> {
+        UnitId::from_u32(self.unit)
+    }
+
     /// Checks if this quantity is compatible with another (same dimension).
+    ///
+    /// Returns `false` if either unit is invalid.
     ///
     /// # Example
     ///
@@ -200,18 +230,23 @@ impl QttyQuantity {
     /// ```
     #[inline]
     pub fn compatible(&self, other: &Self) -> bool {
-        crate::registry::compatible(self.unit, other.unit)
+        match (self.unit_id(), other.unit_id()) {
+            (Some(a), Some(b)) => crate::registry::compatible(a, b),
+            _ => false,
+        }
     }
 
     /// Returns the dimension of this quantity.
+    ///
+    /// Returns `None` if the unit is invalid.
     #[inline]
     pub fn dimension(&self) -> Option<DimensionId> {
-        crate::registry::dimension(self.unit)
+        self.unit_id().and_then(crate::registry::dimension)
     }
 
     /// Converts this quantity to a different unit.
     ///
-    /// Returns `None` if the units are incompatible (different dimensions).
+    /// Returns `None` if either unit is invalid or the units are incompatible.
     ///
     /// # Example
     ///
@@ -221,18 +256,20 @@ impl QttyQuantity {
     /// let meters = QttyQuantity::new(1000.0, UnitId::Meter);
     /// let km = meters.convert_to(UnitId::Kilometer).unwrap();
     /// assert!((km.value - 1.0).abs() < 1e-12);
-    /// assert_eq!(km.unit, UnitId::Kilometer);
+    /// assert_eq!(km.unit, UnitId::Kilometer as u32);
     /// ```
     #[inline]
     pub fn convert_to(&self, target: UnitId) -> Option<Self> {
-        crate::registry::convert_value(self.value, self.unit, target)
+        let src = self.unit_id()?;
+        crate::registry::convert_value(self.value, src, target)
             .ok()
             .map(|v| Self::new(v, target))
     }
 
     /// Adds two quantities, returning result in the left operand's unit.
     ///
-    /// Returns `None` if the quantities have different dimensions.
+    /// Returns `None` if either unit is invalid or the quantities have different
+    /// dimensions.
     ///
     /// # Example
     ///
@@ -243,17 +280,19 @@ impl QttyQuantity {
     /// let b = QttyQuantity::new(500.0, UnitId::Meter);
     /// let sum = a.add(&b).unwrap();
     /// assert!((sum.value - 1.5).abs() < 1e-12);
-    /// assert_eq!(sum.unit, UnitId::Kilometer);
+    /// assert_eq!(sum.unit, UnitId::Kilometer as u32);
     /// ```
     #[inline]
     pub fn add(&self, other: &Self) -> Option<Self> {
-        let other_converted = other.convert_to(self.unit)?;
-        Some(Self::new(self.value + other_converted.value, self.unit))
+        let self_unit = self.unit_id()?;
+        let other_converted = other.convert_to(self_unit)?;
+        Some(Self::new(self.value + other_converted.value, self_unit))
     }
 
     /// Subtracts another quantity from this one, returning result in this quantity's unit.
     ///
-    /// Returns `None` if the quantities have different dimensions.
+    /// Returns `None` if either unit is invalid or the quantities have different
+    /// dimensions.
     ///
     /// # Example
     ///
@@ -264,12 +303,13 @@ impl QttyQuantity {
     /// let b = QttyQuantity::new(500.0, UnitId::Meter);
     /// let diff = a.sub(&b).unwrap();
     /// assert!((diff.value - 1.5).abs() < 1e-12);
-    /// assert_eq!(diff.unit, UnitId::Kilometer);
+    /// assert_eq!(diff.unit, UnitId::Kilometer as u32);
     /// ```
     #[inline]
     pub fn sub(&self, other: &Self) -> Option<Self> {
-        let other_converted = other.convert_to(self.unit)?;
-        Some(Self::new(self.value - other_converted.value, self.unit))
+        let self_unit = self.unit_id()?;
+        let other_converted = other.convert_to(self_unit)?;
+        Some(Self::new(self.value - other_converted.value, self_unit))
     }
 
     /// Multiplies the quantity by a scalar value.
@@ -285,7 +325,7 @@ impl QttyQuantity {
     /// ```
     #[inline]
     pub const fn mul_scalar(&self, scalar: f64) -> Self {
-        Self::new(self.value * scalar, self.unit)
+        Self::from_raw(self.value * scalar, self.unit)
     }
 
     /// Divides the quantity by a scalar value.
@@ -301,13 +341,13 @@ impl QttyQuantity {
     /// ```
     #[inline]
     pub const fn div_scalar(&self, scalar: f64) -> Self {
-        Self::new(self.value / scalar, self.unit)
+        Self::from_raw(self.value / scalar, self.unit)
     }
 
     /// Negates the quantity value.
     #[inline]
     pub const fn neg(&self) -> Self {
-        Self::new(-self.value, self.unit)
+        Self::from_raw(-self.value, self.unit)
     }
 }
 
@@ -315,7 +355,7 @@ impl Default for QttyQuantity {
     fn default() -> Self {
         Self {
             value: 0.0,
-            unit: UnitId::Meter,
+            unit: UnitId::Meter as u32,
         }
     }
 }
@@ -327,6 +367,11 @@ impl Default for QttyQuantity {
 /// A derived quantity representing a compound unit (numerator/denominator).
 ///
 /// This is useful for quantities like velocity (m/s), frequency (rad/s), etc.
+///
+/// # ABI Safety
+///
+/// Like [`QttyQuantity`], the unit fields are raw `u32` values to prevent UB
+/// from invalid enum discriminants constructed by C callers.
 ///
 /// # ABI Stability
 ///
@@ -344,24 +389,36 @@ impl Default for QttyQuantity {
 /// // Create a velocity: 100 m/s
 /// let velocity = QttyDerivedQuantity::new(100.0, UnitId::Meter, UnitId::Second);
 /// assert_eq!(velocity.value, 100.0);
-/// assert_eq!(velocity.numerator, UnitId::Meter);
-/// assert_eq!(velocity.denominator, UnitId::Second);
+/// assert_eq!(velocity.numerator, UnitId::Meter as u32);
+/// assert_eq!(velocity.denominator, UnitId::Second as u32);
 /// ```
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct QttyDerivedQuantity {
     /// The numeric value of the derived quantity.
     pub value: f64,
-    /// The numerator unit identifier.
-    pub numerator: UnitId,
-    /// The denominator unit identifier.
-    pub denominator: UnitId,
+    /// Raw numerator unit identifier.
+    pub numerator: u32,
+    /// Raw denominator unit identifier.
+    pub denominator: u32,
 }
 
 impl QttyDerivedQuantity {
-    /// Creates a new derived quantity with the given value and units.
+    /// Creates a new derived quantity from validated [`UnitId`] values.
     #[inline]
     pub const fn new(value: f64, numerator: UnitId, denominator: UnitId) -> Self {
+        Self {
+            value,
+            numerator: numerator as u32,
+            denominator: denominator as u32,
+        }
+    }
+
+    /// Creates a new derived quantity from raw `u32` unit identifiers.
+    ///
+    /// Does **not** validate the unit IDs.
+    #[inline]
+    pub const fn from_raw(value: f64, numerator: u32, denominator: u32) -> Self {
         Self {
             value,
             numerator,
@@ -369,15 +426,32 @@ impl QttyDerivedQuantity {
         }
     }
 
-    /// Returns the symbol string for this derived quantity (e.g., "m/s").
+    /// Validates and returns the numerator as a [`UnitId`].
     #[inline]
-    pub fn symbol(&self) -> String {
-        format!("{}/{}", self.numerator.symbol(), self.denominator.symbol())
+    pub fn numerator_id(&self) -> Option<UnitId> {
+        UnitId::from_u32(self.numerator)
+    }
+
+    /// Validates and returns the denominator as a [`UnitId`].
+    #[inline]
+    pub fn denominator_id(&self) -> Option<UnitId> {
+        UnitId::from_u32(self.denominator)
+    }
+
+    /// Returns the symbol string for this derived quantity (e.g., "m/s").
+    ///
+    /// Returns `None` if either unit ID is invalid.
+    #[inline]
+    pub fn symbol(&self) -> Option<String> {
+        let num = self.numerator_id()?;
+        let den = self.denominator_id()?;
+        Some(format!("{}/{}", num.symbol(), den.symbol()))
     }
 
     /// Converts this derived quantity to different units.
     ///
-    /// Returns `None` if the numerator or denominator dimensions are incompatible.
+    /// Returns `None` if any unit ID is invalid or the numerator/denominator
+    /// dimensions are incompatible.
     ///
     /// # Example
     ///
@@ -391,9 +465,12 @@ impl QttyDerivedQuantity {
     /// assert!((converted.value - 360.0).abs() < 1e-9);
     /// ```
     pub fn convert_to(&self, target_num: UnitId, target_den: UnitId) -> Option<Self> {
+        let src_num = self.numerator_id()?;
+        let src_den = self.denominator_id()?;
+
         // Check dimensional compatibility
-        let num_dim = crate::registry::dimension(self.numerator)?;
-        let den_dim = crate::registry::dimension(self.denominator)?;
+        let num_dim = crate::registry::dimension(src_num)?;
+        let den_dim = crate::registry::dimension(src_den)?;
         let target_num_dim = crate::registry::dimension(target_num)?;
         let target_den_dim = crate::registry::dimension(target_den)?;
 
@@ -402,13 +479,11 @@ impl QttyDerivedQuantity {
         }
 
         // Convert numerator: e.g., 100 m -> ? km
-        let num_converted =
-            crate::registry::convert_value(self.value, self.numerator, target_num).ok()?;
+        let num_converted = crate::registry::convert_value(self.value, src_num, target_num).ok()?;
 
         // Convert denominator scale: e.g., 1 s -> ? h (0.000278 h)
         // If 1 s = 0.000278 h, then dividing by that gives us the factor
-        let den_converted =
-            crate::registry::convert_value(1.0, self.denominator, target_den).ok()?;
+        let den_converted = crate::registry::convert_value(1.0, src_den, target_den).ok()?;
 
         // Guard against degenerate conversion factor.
         if den_converted == 0.0 || !den_converted.is_finite() {
@@ -426,19 +501,19 @@ impl QttyDerivedQuantity {
     /// Multiplies the derived quantity by a scalar.
     #[inline]
     pub const fn mul_scalar(&self, scalar: f64) -> Self {
-        Self::new(self.value * scalar, self.numerator, self.denominator)
+        Self::from_raw(self.value * scalar, self.numerator, self.denominator)
     }
 
     /// Divides the derived quantity by a scalar.
     #[inline]
     pub const fn div_scalar(&self, scalar: f64) -> Self {
-        Self::new(self.value / scalar, self.numerator, self.denominator)
+        Self::from_raw(self.value / scalar, self.numerator, self.denominator)
     }
 
     /// Negates the derived quantity.
     #[inline]
     pub const fn neg(&self) -> Self {
-        Self::new(-self.value, self.numerator, self.denominator)
+        Self::from_raw(-self.value, self.numerator, self.denominator)
     }
 }
 
@@ -446,8 +521,8 @@ impl Default for QttyDerivedQuantity {
     fn default() -> Self {
         Self {
             value: 0.0,
-            numerator: UnitId::Meter,
-            denominator: UnitId::Second,
+            numerator: UnitId::Meter as u32,
+            denominator: UnitId::Second as u32,
         }
     }
 }
@@ -524,7 +599,16 @@ mod tests {
     fn qtty_quantity_default() {
         let q = QttyQuantity::default();
         assert_eq!(q.value, 0.0);
-        assert_eq!(q.unit, UnitId::Meter);
+        assert_eq!(q.unit, UnitId::Meter as u32);
+    }
+
+    #[test]
+    fn qtty_quantity_unit_id() {
+        let q = QttyQuantity::new(1.0, UnitId::Meter);
+        assert_eq!(q.unit_id(), Some(UnitId::Meter));
+
+        let bad = QttyQuantity::from_raw(1.0, 0);
+        assert_eq!(bad.unit_id(), None);
     }
 
     #[test]
@@ -532,7 +616,7 @@ mod tests {
         let q = QttyQuantity::new(5.0, UnitId::Meter);
         let n = q.neg();
         assert_eq!(n.value, -5.0);
-        assert_eq!(n.unit, UnitId::Meter);
+        assert_eq!(n.unit, UnitId::Meter as u32);
     }
 
     #[test]
@@ -540,7 +624,7 @@ mod tests {
         let q = QttyQuantity::new(4.0, UnitId::Kilometer);
         let r = q.mul_scalar(2.5);
         assert_eq!(r.value, 10.0);
-        assert_eq!(r.unit, UnitId::Kilometer);
+        assert_eq!(r.unit, UnitId::Kilometer as u32);
     }
 
     #[test]
@@ -548,7 +632,7 @@ mod tests {
         let q = QttyQuantity::new(15.0, UnitId::Second);
         let r = q.div_scalar(3.0);
         assert_eq!(r.value, 5.0);
-        assert_eq!(r.unit, UnitId::Second);
+        assert_eq!(r.unit, UnitId::Second as u32);
     }
 
     #[test]
@@ -558,6 +642,12 @@ mod tests {
 
         let t = QttyQuantity::new(1.0, UnitId::Second);
         assert_eq!(t.dimension(), Some(DimensionId::Time));
+    }
+
+    #[test]
+    fn qtty_quantity_dimension_invalid_returns_none() {
+        let bad = QttyQuantity::from_raw(1.0, 0);
+        assert_eq!(bad.dimension(), None);
     }
 
     #[test]
@@ -571,10 +661,26 @@ mod tests {
     }
 
     #[test]
+    fn qtty_quantity_compatible_invalid_returns_false() {
+        let good = QttyQuantity::new(1.0, UnitId::Meter);
+        let bad = QttyQuantity::from_raw(1.0, 0);
+        assert!(!good.compatible(&bad));
+        assert!(!bad.compatible(&good));
+    }
+
+    #[test]
     fn qtty_quantity_add_incompatible_returns_none() {
         let a = QttyQuantity::new(1.0, UnitId::Meter);
         let b = QttyQuantity::new(1.0, UnitId::Second);
         assert!(a.add(&b).is_none());
+    }
+
+    #[test]
+    fn qtty_quantity_add_invalid_unit_returns_none() {
+        let good = QttyQuantity::new(1.0, UnitId::Meter);
+        let bad = QttyQuantity::from_raw(1.0, 0);
+        assert!(good.add(&bad).is_none());
+        assert!(bad.add(&good).is_none());
     }
 
     #[test]
@@ -584,20 +690,37 @@ mod tests {
         assert!(a.sub(&b).is_none());
     }
 
+    #[test]
+    fn qtty_quantity_convert_to_invalid_src_returns_none() {
+        let bad = QttyQuantity::from_raw(1.0, 0);
+        assert!(bad.convert_to(UnitId::Meter).is_none());
+    }
+
     // ─── QttyDerivedQuantity method coverage ─────────────────────────────────
 
     #[test]
     fn qtty_derived_quantity_default() {
         let d = QttyDerivedQuantity::default();
         assert_eq!(d.value, 0.0);
-        assert_eq!(d.numerator, UnitId::Meter);
-        assert_eq!(d.denominator, UnitId::Second);
+        assert_eq!(d.numerator, UnitId::Meter as u32);
+        assert_eq!(d.denominator, UnitId::Second as u32);
+    }
+
+    #[test]
+    fn qtty_derived_quantity_unit_id_accessors() {
+        let d = QttyDerivedQuantity::new(1.0, UnitId::Meter, UnitId::Second);
+        assert_eq!(d.numerator_id(), Some(UnitId::Meter));
+        assert_eq!(d.denominator_id(), Some(UnitId::Second));
+
+        let bad = QttyDerivedQuantity::from_raw(1.0, 0, 0);
+        assert_eq!(bad.numerator_id(), None);
+        assert_eq!(bad.denominator_id(), None);
     }
 
     #[test]
     fn qtty_derived_quantity_symbol() {
         let d = QttyDerivedQuantity::new(1.0, UnitId::Meter, UnitId::Second);
-        let sym = d.symbol();
+        let sym = d.symbol().expect("valid units should produce a symbol");
         // format is "numerator_symbol/denominator_symbol"
         assert!(sym.contains('/'), "symbol should contain '/'");
         assert!(!sym.is_empty());
@@ -609,12 +732,18 @@ mod tests {
     }
 
     #[test]
+    fn qtty_derived_quantity_symbol_invalid_returns_none() {
+        let bad = QttyDerivedQuantity::from_raw(1.0, 0, UnitId::Second as u32);
+        assert!(bad.symbol().is_none());
+    }
+
+    #[test]
     fn qtty_derived_quantity_mul_scalar() {
         let d = QttyDerivedQuantity::new(10.0, UnitId::Meter, UnitId::Second);
         let r = d.mul_scalar(3.0);
         assert_eq!(r.value, 30.0);
-        assert_eq!(r.numerator, UnitId::Meter);
-        assert_eq!(r.denominator, UnitId::Second);
+        assert_eq!(r.numerator, UnitId::Meter as u32);
+        assert_eq!(r.denominator, UnitId::Second as u32);
     }
 
     #[test]
@@ -622,8 +751,8 @@ mod tests {
         let d = QttyDerivedQuantity::new(30.0, UnitId::Kilometer, UnitId::Hour);
         let r = d.div_scalar(2.0);
         assert_eq!(r.value, 15.0);
-        assert_eq!(r.numerator, UnitId::Kilometer);
-        assert_eq!(r.denominator, UnitId::Hour);
+        assert_eq!(r.numerator, UnitId::Kilometer as u32);
+        assert_eq!(r.denominator, UnitId::Hour as u32);
     }
 
     #[test]
@@ -631,8 +760,8 @@ mod tests {
         let d = QttyDerivedQuantity::new(5.0, UnitId::Meter, UnitId::Second);
         let n = d.neg();
         assert_eq!(n.value, -5.0);
-        assert_eq!(n.numerator, UnitId::Meter);
-        assert_eq!(n.denominator, UnitId::Second);
+        assert_eq!(n.numerator, UnitId::Meter as u32);
+        assert_eq!(n.denominator, UnitId::Second as u32);
     }
 
     #[test]
@@ -640,5 +769,41 @@ mod tests {
         // m/s → kg/h: numerator dimension mismatch
         let d = QttyDerivedQuantity::new(1.0, UnitId::Meter, UnitId::Second);
         assert!(d.convert_to(UnitId::Kilogram, UnitId::Hour).is_none());
+    }
+
+    #[test]
+    fn qtty_derived_quantity_convert_to_invalid_src_returns_none() {
+        let bad = QttyDerivedQuantity::from_raw(1.0, 0, UnitId::Second as u32);
+        assert!(bad.convert_to(UnitId::Kilometer, UnitId::Hour).is_none());
+    }
+
+    #[test]
+    fn qtty_quantity_serde_uses_raw_unit_ids() {
+        let q = QttyQuantity::new(1.0, UnitId::Meter);
+        let json = serde_json::to_string(&q).unwrap();
+        assert_eq!(
+            json,
+            format!(r#"{{"value":1.0,"unit":{}}}"#, UnitId::Meter as u32)
+        );
+
+        let roundtrip: QttyQuantity = serde_json::from_str(&json).unwrap();
+        assert_eq!(roundtrip, q);
+    }
+
+    #[test]
+    fn qtty_derived_quantity_serde_uses_raw_unit_ids() {
+        let q = QttyDerivedQuantity::new(2.0, UnitId::Meter, UnitId::Second);
+        let json = serde_json::to_string(&q).unwrap();
+        assert_eq!(
+            json,
+            format!(
+                r#"{{"value":2.0,"numerator":{},"denominator":{}}}"#,
+                UnitId::Meter as u32,
+                UnitId::Second as u32
+            )
+        );
+
+        let roundtrip: QttyDerivedQuantity = serde_json::from_str(&json).unwrap();
+        assert_eq!(roundtrip, q);
     }
 }

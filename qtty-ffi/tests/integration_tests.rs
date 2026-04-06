@@ -140,7 +140,7 @@ fn test_conversion_1000_meters_to_1_kilometer() {
     let status = unsafe { qtty_quantity_convert(src, UnitId::Kilometer as u32, &mut dst) };
     assert_eq!(status, QttyStatus::Ok);
     assert_relative_eq!(dst.value, 1.0, epsilon = 1e-12);
-    assert_eq!(dst.unit, UnitId::Kilometer);
+    assert_eq!(dst.unit, UnitId::Kilometer as u32);
 }
 
 #[test]
@@ -150,7 +150,7 @@ fn test_conversion_3600_seconds_to_1_hour() {
     let status = unsafe { qtty_quantity_convert(src, UnitId::Hour as u32, &mut dst) };
     assert_eq!(status, QttyStatus::Ok);
     assert_relative_eq!(dst.value, 1.0, epsilon = 1e-12);
-    assert_eq!(dst.unit, UnitId::Hour);
+    assert_eq!(dst.unit, UnitId::Hour as u32);
 }
 
 #[test]
@@ -160,7 +160,7 @@ fn test_conversion_180_degrees_to_pi_radians() {
     let status = unsafe { qtty_quantity_convert(src, UnitId::Radian as u32, &mut dst) };
     assert_eq!(status, QttyStatus::Ok);
     assert_relative_eq!(dst.value, PI, epsilon = 1e-12);
-    assert_eq!(dst.unit, UnitId::Radian);
+    assert_eq!(dst.unit, UnitId::Radian as u32);
 }
 
 #[test]
@@ -346,8 +346,8 @@ fn test_unit_name_invalid_id_returns_null() {
 
 #[test]
 fn test_ffi_version() {
-    // 0.4.1 → 401
-    assert_eq!(qtty_ffi_version(), 401);
+    // 0.5.0 → 500
+    assert_eq!(qtty_ffi_version(), 500);
 }
 
 // =============================================================================
@@ -360,7 +360,7 @@ fn test_rust_helpers_meters_to_kilometers() {
     let meters = Meters::new(1000.0);
     let ffi: QttyQuantity = meters.into();
     assert_relative_eq!(ffi.value, 1000.0);
-    assert_eq!(ffi.unit, UnitId::Meter);
+    assert_eq!(ffi.unit, UnitId::Meter as u32);
     let km: Kilometers = ffi.try_into().unwrap();
     assert_relative_eq!(km.value(), 1.0, epsilon = 1e-12);
 }
@@ -371,7 +371,7 @@ fn test_rust_helpers_hours_to_seconds() {
     let hours = Hours::new(2.0);
     let ffi: QttyQuantity = hours.into();
     assert_relative_eq!(ffi.value, 2.0);
-    assert_eq!(ffi.unit, UnitId::Hour);
+    assert_eq!(ffi.unit, UnitId::Hour as u32);
     let secs: Seconds = ffi.try_into().unwrap();
     assert_relative_eq!(secs.value(), 7200.0, epsilon = 1e-12);
 }
@@ -462,7 +462,7 @@ fn test_qtty_quantity_convert_to() {
     assert!(converted.is_some());
     let conv = converted.unwrap();
     assert_relative_eq!(conv.value, 1.0, epsilon = 1e-12);
-    assert_eq!(conv.unit, UnitId::Kilometer);
+    assert_eq!(conv.unit, UnitId::Kilometer as u32);
 }
 
 #[test]
@@ -480,7 +480,7 @@ fn test_qtty_quantity_add() {
     assert!(result.is_some());
     let sum = result.unwrap();
     assert_relative_eq!(sum.value, 600.0, epsilon = 1e-10);
-    assert_eq!(sum.unit, UnitId::Meter);
+    assert_eq!(sum.unit, UnitId::Meter as u32);
 }
 
 #[test]
@@ -498,7 +498,7 @@ fn test_qtty_quantity_sub() {
     assert!(result.is_some());
     let diff = result.unwrap();
     assert_relative_eq!(diff.value, 0.5, epsilon = 1e-10);
-    assert_eq!(diff.unit, UnitId::Kilometer);
+    assert_eq!(diff.unit, UnitId::Kilometer as u32);
 }
 
 #[test]
@@ -506,7 +506,7 @@ fn test_qtty_quantity_mul_scalar() {
     let q = QttyQuantity::new(100.0, UnitId::Meter);
     let result = q.mul_scalar(2.5);
     assert_relative_eq!(result.value, 250.0);
-    assert_eq!(result.unit, UnitId::Meter);
+    assert_eq!(result.unit, UnitId::Meter as u32);
 }
 
 #[test]
@@ -514,7 +514,7 @@ fn test_qtty_quantity_div_scalar() {
     let q = QttyQuantity::new(100.0, UnitId::Meter);
     let result = q.div_scalar(4.0);
     assert_relative_eq!(result.value, 25.0);
-    assert_eq!(result.unit, UnitId::Meter);
+    assert_eq!(result.unit, UnitId::Meter as u32);
 }
 
 // =============================================================================
@@ -605,8 +605,8 @@ fn test_derived_make_basic() {
         unsafe { qtty_derived_make(100.0, UnitId::Meter as u32, UnitId::Second as u32, &mut out) };
     assert_eq!(status, QttyStatus::Ok);
     assert_relative_eq!(out.value, 100.0);
-    assert_eq!(out.numerator, UnitId::Meter);
-    assert_eq!(out.denominator, UnitId::Second);
+    assert_eq!(out.numerator, UnitId::Meter as u32);
+    assert_eq!(out.denominator, UnitId::Second as u32);
 }
 
 #[test]
@@ -653,8 +653,8 @@ fn test_derived_convert_m_per_s_to_km_per_h() {
     };
     assert_eq!(status, QttyStatus::Ok);
     assert_relative_eq!(out.value, 360.0, epsilon = 1e-9);
-    assert_eq!(out.numerator, UnitId::Kilometer);
-    assert_eq!(out.denominator, UnitId::Hour);
+    assert_eq!(out.numerator, UnitId::Kilometer as u32);
+    assert_eq!(out.denominator, UnitId::Hour as u32);
 }
 
 #[test]
@@ -698,4 +698,91 @@ fn test_derived_convert_invalid_target_den() {
     let mut out = QttyDerivedQuantity::default();
     let status = unsafe { qtty_derived_convert(src, UnitId::Kilometer as u32, 9999, &mut out) };
     assert_eq!(status, QttyStatus::UnknownUnit);
+}
+
+// =============================================================================
+// Invalid Discriminant Tests (ABI hardening)
+// =============================================================================
+// These tests construct `QttyQuantity` and `QttyDerivedQuantity` with raw
+// invalid `u32` unit IDs — something only possible now that the fields are
+// raw `u32` instead of `UnitId` enums.  Before the ABI hardening this would
+// have been instant UB.
+
+#[test]
+fn test_convert_with_invalid_src_unit_in_struct() {
+    // C caller could fill the struct with any u32
+    let src = QttyQuantity::from_raw(100.0, 0xDEAD);
+    let mut dst = QttyQuantity::default();
+    let status = unsafe { qtty_quantity_convert(src, UnitId::Kilometer as u32, &mut dst) };
+    assert_eq!(status, QttyStatus::UnknownUnit);
+}
+
+#[test]
+fn test_convert_with_zero_src_unit_in_struct() {
+    let src = QttyQuantity::from_raw(1.0, 0);
+    let mut dst = QttyQuantity::default();
+    let status = unsafe { qtty_quantity_convert(src, UnitId::Meter as u32, &mut dst) };
+    assert_eq!(status, QttyStatus::UnknownUnit);
+}
+
+#[test]
+fn test_convert_with_u32_max_src_unit_in_struct() {
+    let src = QttyQuantity::from_raw(1.0, u32::MAX);
+    let mut dst = QttyQuantity::default();
+    let status = unsafe { qtty_quantity_convert(src, UnitId::Meter as u32, &mut dst) };
+    assert_eq!(status, QttyStatus::UnknownUnit);
+}
+
+#[test]
+fn test_format_with_invalid_unit_in_struct() {
+    let qty = QttyQuantity::from_raw(1.0, 0xBAD);
+    let mut buf = [0i8; 64];
+    let status = unsafe { qtty_quantity_format(qty, -1, 0, buf.as_mut_ptr(), 64) };
+    assert_eq!(status, QttyStatus::UnknownUnit);
+}
+
+#[test]
+fn test_derived_convert_with_invalid_src_numerator_in_struct() {
+    let src = QttyDerivedQuantity::from_raw(100.0, 0xDEAD, UnitId::Second as u32);
+    let mut out = QttyDerivedQuantity::default();
+    let status = unsafe {
+        qtty_derived_convert(src, UnitId::Kilometer as u32, UnitId::Hour as u32, &mut out)
+    };
+    assert_eq!(status, QttyStatus::UnknownUnit);
+}
+
+#[test]
+fn test_derived_convert_with_invalid_src_denominator_in_struct() {
+    let src = QttyDerivedQuantity::from_raw(100.0, UnitId::Meter as u32, 0xDEAD);
+    let mut out = QttyDerivedQuantity::default();
+    let status = unsafe {
+        qtty_derived_convert(src, UnitId::Kilometer as u32, UnitId::Hour as u32, &mut out)
+    };
+    assert_eq!(status, QttyStatus::UnknownUnit);
+}
+
+#[test]
+fn test_quantity_methods_with_invalid_unit() {
+    let bad = QttyQuantity::from_raw(1.0, 0xDEAD);
+    let good = QttyQuantity::new(1.0, UnitId::Meter);
+
+    // All methods should gracefully return None/false instead of UB
+    assert_eq!(bad.unit_id(), None);
+    assert_eq!(bad.dimension(), None);
+    assert!(!bad.compatible(&good));
+    assert!(!good.compatible(&bad));
+    assert!(bad.convert_to(UnitId::Meter).is_none());
+    assert!(bad.add(&good).is_none());
+    assert!(bad.sub(&good).is_none());
+    assert!(good.add(&bad).is_none());
+    assert!(good.sub(&bad).is_none());
+}
+
+#[test]
+fn test_derived_quantity_methods_with_invalid_unit() {
+    let bad = QttyDerivedQuantity::from_raw(1.0, 0xDEAD, UnitId::Second as u32);
+
+    assert_eq!(bad.numerator_id(), None);
+    assert!(bad.symbol().is_none());
+    assert!(bad.convert_to(UnitId::Kilometer, UnitId::Hour).is_none());
 }

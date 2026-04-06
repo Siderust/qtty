@@ -8,8 +8,9 @@
 //! - `f64` - maps to SQL DOUBLE PRECISION
 //! - `f32` - maps to SQL REAL (FLOAT)
 //!
-//! Note: Decimal and Rational scalar types are not supported for Diesel integration as they
-//! don't have direct SQL type representations. Use f64 or f32 for database storage.
+//! Note: Rational scalar types are not supported for Diesel integration because
+//! they don't have direct SQL type representations. Use `f64` or `f32` for
+//! database storage.
 //!
 //! # Supported Operations
 //!

@@ -117,9 +117,9 @@ fn f32_quantity_signum() {
 }
 
 #[test]
-fn f32_quantity_sqrt() {
+fn f32_quantity_scalar_sqrt() {
     let q = TU32::new(16.0);
-    assert!((q.sqrt().value() - 4.0).abs() < 1e-6);
+    assert!((q.scalar_sqrt() - 4.0).abs() < 1e-6);
 }
 
 #[test]
