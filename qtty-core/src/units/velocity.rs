@@ -64,8 +64,12 @@ pub type Velocity<N, D> = Quantity<Per<N, D>>;
 #[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
-    use crate::units::length::{Au, Kilometer, Kilometers, Meter};
-    use crate::units::time::{Day, Hour, Second, Seconds};
+    #[cfg(feature = "astro")]
+    use crate::units::length::Au;
+    use crate::units::length::{Kilometer, Kilometers, Meter};
+    #[cfg(feature = "astro")]
+    use crate::units::time::Day;
+    use crate::units::time::{Hour, Second, Seconds};
     use crate::Per;
     use approx::{assert_abs_diff_eq, assert_relative_eq};
     use proptest::prelude::*;
@@ -105,6 +109,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn au_per_day_to_km_per_s() {
         let v: Velocity<Au, Day> = Velocity::new(1.0);
         let v_kps: Velocity<Kilometer, Second> = v.to();

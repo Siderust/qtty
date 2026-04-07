@@ -25,7 +25,7 @@
 //! assert!((area.value() - 25.0).abs() < 1e-12);
 //! ```
 //!
-//! ## All area units
+//! ## All area units (default)
 //!
 //! ```rust
 //! use qtty_core::area::*;
@@ -36,10 +36,6 @@
 //!
 //! touch!(SquareMeters, 1.0);     touch!(SquareKilometers, 1.0);
 //! touch!(SquareCentimeters, 1.0);touch!(SquareMillimeters, 1.0);
-//! touch!(Hectares, 1.0);         touch!(Ares, 1.0);
-//! touch!(SquareInches, 1.0);     touch!(SquareFeet, 1.0);
-//! touch!(SquareYards, 1.0);      touch!(SquareMiles, 1.0);
-//! touch!(Acres, 1.0);
 //! ```
 
 use crate::{Quantity, Unit};
@@ -51,6 +47,15 @@ pub use crate::dimension::Area;
 /// Marker trait for any [`Unit`] whose dimension is [`Area`].
 pub trait AreaUnit: Unit<Dim = Area> {}
 impl<T: Unit<Dim = Area>> AreaUnit for T {}
+
+#[cfg(feature = "land-area")]
+mod land_area;
+#[cfg(feature = "land-area")]
+pub use land_area::*;
+#[cfg(feature = "customary")]
+mod customary;
+#[cfg(feature = "customary")]
+pub use customary::*;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SI / metric area units
@@ -85,91 +90,25 @@ pub struct SquareMillimeter;
 pub type SquareMillimeters = Quantity<SquareMillimeter>;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Land measurement
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Hectare (`10 000 m²`).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "ha", dimension = Area, ratio = 1e4)]
-pub struct Hectare;
-/// A quantity measured in hectares.
-pub type Hectares = Quantity<Hectare>;
-
-/// Are (`100 m²`).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "a", dimension = Area, ratio = 100.0)]
-pub struct Are;
-/// A quantity measured in ares.
-pub type Ares = Quantity<Are>;
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Imperial / US customary area units
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Square inch (`6.4516e-4 m²`, exact: `0.0254² m²`).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "in²", dimension = Area, ratio = 6.4516e-4)]
-pub struct SquareInch;
-/// A quantity measured in square inches.
-pub type SquareInches = Quantity<SquareInch>;
-
-/// Square foot (`0.09290304 m²`, exact: `0.3048² m²`).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "ft²", dimension = Area, ratio = 0.09290304)]
-pub struct SquareFoot;
-/// A quantity measured in square feet.
-pub type SquareFeet = Quantity<SquareFoot>;
-
-/// Square yard (`0.83612736 m²`, exact: `0.9144² m²`).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "yd²", dimension = Area, ratio = 0.83612736)]
-pub struct SquareYard;
-/// A quantity measured in square yards.
-pub type SquareYards = Quantity<SquareYard>;
-
-/// Square mile (`2_589_988.110336 m²`, exact: `1609.344² m²`).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "mi²", dimension = Area, ratio = 2_589_988.110_336)]
-pub struct SquareMile;
-/// A quantity measured in square miles.
-pub type SquareMiles = Quantity<SquareMile>;
-
-/// Acre (exactly `4046.8564224 m²`).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "ac", dimension = Area, ratio = 4_046.856_422_4)]
-pub struct Acre;
-/// A quantity measured in acres.
-pub type Acres = Quantity<Acre>;
-
-// Generate all bidirectional From implementations between area units.
+// ─────────────────────────────────────────────────────────────────────────────
+// From conversions: default (metric) units
+// ─────────────────────────────────────────────────────────────────────────────
 crate::impl_unit_from_conversions!(
     SquareMeter,
     SquareKilometer,
     SquareCentimeter,
-    SquareMillimeter,
-    Hectare,
-    Are,
-    SquareInch,
-    SquareFoot,
-    SquareYard,
-    SquareMile,
-    Acre
+    SquareMillimeter
 );
 
-// Optional cross-unit operator support (`==`, `<`, etc.).
 #[cfg(feature = "cross-unit-ops")]
 crate::impl_unit_cross_unit_ops!(
     SquareMeter,
     SquareKilometer,
     SquareCentimeter,
-    SquareMillimeter,
-    Hectare,
-    Are,
-    SquareInch,
-    SquareFoot,
-    SquareYard,
-    SquareMile,
-    Acre
+    SquareMillimeter
 );
 
 #[cfg(test)]
@@ -185,6 +124,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "land-area")]
     fn hectare_to_sqm() {
         let a = Hectares::new(1.0);
         let b: SquareMeters = a.to();
@@ -192,6 +132,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "land-area")]
     fn acre_to_hectare() {
         let a = Acres::new(1.0);
         let b: Hectares = a.to();
@@ -199,6 +140,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn sqft_to_sqm() {
         let a = SquareFeet::new(1.0);
         let b: SquareMeters = a.to();
@@ -217,6 +159,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn sqmile_to_sqkm() {
         let a = SquareMiles::new(1.0);
         let b: SquareKilometers = a.to();
@@ -238,6 +181,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "land-area")]
     fn are_to_sqm() {
         let a = Ares::new(1.0);
         let b: SquareMeters = a.to();
@@ -245,6 +189,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn sqinch_to_sqcm() {
         let a = SquareInches::new(1.0);
         let b: SquareCentimeters = a.to();
@@ -253,6 +198,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn sqyard_to_sqm() {
         let a = SquareYards::new(1.0);
         let b: SquareMeters = a.to();
@@ -270,8 +216,11 @@ mod tests {
     #[test]
     fn symbols_are_correct() {
         assert_eq!(SquareMeter::SYMBOL, "m²");
+        #[cfg(feature = "land-area")]
         assert_eq!(Hectare::SYMBOL, "ha");
+        #[cfg(feature = "land-area")]
         assert_eq!(Acre::SYMBOL, "ac");
+        #[cfg(feature = "customary")]
         assert_eq!(SquareInch::SYMBOL, "in²");
     }
 }

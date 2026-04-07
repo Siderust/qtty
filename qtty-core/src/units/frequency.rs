@@ -41,7 +41,9 @@ pub type Frequency<N, D> = Quantity<Per<N, D>>;
 #[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
-    use crate::units::angular::{Degree, Degrees, MilliArcsecond, Radian};
+    #[cfg(feature = "astro")]
+    use crate::units::angular::MilliArcsecond;
+    use crate::units::angular::{Degree, Degrees, Radian};
     use crate::units::time::{Day, Days, Year};
     use crate::Per;
     use approx::{assert_abs_diff_eq, assert_relative_eq};
@@ -83,6 +85,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn mas_per_day_to_deg_per_day() {
         let f: Frequency<MilliArcsecond, Day> = Frequency::new(3_600_000.0);
         let f_deg: Frequency<Degree, Day> = f.to();
