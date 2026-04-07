@@ -5,16 +5,39 @@
 //!
 //! This module contains small adapters for working with dimensionless values.
 //!
-//! The provided conversion from a dimensioned quantity to a unitless quantity is *lossy*: it drops the unit type
-//! without performing any normalization. The numeric value is preserved as-is.
+//! # Warning: unit erasure preserves the raw stored number
+//!
+//! The provided conversion from a dimensioned quantity to a unitless quantity is *lossy*: it drops
+//! the unit type **without performing any normalization to the canonical (SI) unit**. The numeric
+//! value is preserved as-is, which means the result depends on which unit the source quantity was
+//! stored in.
 //!
 //! ```rust
 //! use qtty_core::time::Seconds;
+//! use qtty_core::length::{Meters, Kilometers};
 //! use qtty_core::{Quantity, Unitless};
 //!
+//! // Canonical unit: value matches SI.
 //! let t = Seconds::new(3.0);
 //! let u: Quantity<Unitless> = t.into();
 //! assert_eq!(u.value(), 3.0);
+//!
+//! // Non-canonical unit: value is NOT converted to metres first!
+//! let km = Kilometers::new(1.0);
+//! let u: Quantity<Unitless> = km.into();
+//! assert_eq!(u.value(), 1.0); // NOT 1000.0
+//! ```
+//!
+//! If you need the value in canonical (SI base) units before erasing, convert first:
+//!
+//! ```rust
+//! use qtty_core::length::{Meter, Kilometers};
+//! use qtty_core::{Quantity, Unitless};
+//!
+//! let km = Kilometers::new(1.0);
+//! let m = km.to::<Meter>();
+//! let u: Quantity<Unitless> = m.into();
+//! assert_eq!(u.value(), 1000.0);
 //! ```
 
 use crate::dimension::{
@@ -107,6 +130,16 @@ mod tests {
         let m = Meters::new(42.0);
         let u: Quantity<Unitless> = m.into();
         assert_eq!(u.value(), 42.0);
+    }
+
+    #[test]
+    fn from_non_canonical_unit_preserves_raw_value() {
+        use crate::units::length::Kilometers;
+        // Kilometers::new(1.0) → unitless should give 1.0, NOT 1000.0.
+        // This verifies the documented behavior: no SI normalization on erasure.
+        let km = Kilometers::new(1.0);
+        let u: Quantity<Unitless> = km.into();
+        assert_eq!(u.value(), 1.0);
     }
 
     #[test]
