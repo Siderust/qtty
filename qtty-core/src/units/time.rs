@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Time units.
 //!
 //! The canonical scaling unit for this dimension is [`Second`] (`Second::RATIO == 1.0`). All other time unit ratios are
@@ -344,7 +347,7 @@ pub type SiderealYears = Quantity<SiderealYear>;
 /// A constant representing one sidereal year.
 pub const SIDEREAL_YEAR: SiderealYears = SiderealYears::new(1.0);
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
     use approx::assert_abs_diff_eq;

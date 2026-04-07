@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Dimensionless helpers.
 //!
 //! This module contains small adapters for working with dimensionless values.
@@ -49,7 +52,7 @@ impl<U: DimensionedUnit, S: Scalar> From<Quantity<U, S>> for Quantity<Unitless, 
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
     use crate::units::angular::Degrees;

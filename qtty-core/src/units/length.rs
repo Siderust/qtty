@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Length units.
 //!
 //! The canonical scaling unit for this dimension is [`Meter`] (`Meter::RATIO == 1.0`). All other
@@ -701,7 +704,7 @@ crate::impl_unit_cross_unit_ops!(
     ElectronReducedComptonWavelength
 );
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::nominal::SolarRadiuses;
     use super::*;

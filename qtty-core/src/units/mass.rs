@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Mass units.
 //!
 //! The canonical scaling unit for this dimension is [`Gram`] (`Gram::RATIO == 1.0`).
@@ -280,7 +283,7 @@ crate::impl_unit_cross_unit_ops!(
     SolarMass
 );
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
     use approx::{assert_abs_diff_eq, assert_relative_eq};

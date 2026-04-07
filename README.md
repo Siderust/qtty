@@ -95,21 +95,21 @@ qtty = { version = "0.5.0", features = ["serde"] }
 ## Quick Start
 
 ```rust
-use qtty::{Degrees, Radian};
+use qtty::{Degree, Radian};
 
-let angle = Degrees::new(180.0);
-let radians = angle.to::<Radian>();
+let angle = Degree::new(180.0);
+let radians = angle.to::<qtty::unit::Radian>();
 
 assert!((radians.value() - core::f64::consts::PI).abs() < 1e-12);
 ```
 
 ```rust
-use qtty::{Kilometer, Kilometers, Second, Seconds};
+use qtty::{Kilometer, Second};
 use qtty::velocity::Velocity;
 
-let distance = Kilometers::new(1_000.0);
-let elapsed = Seconds::new(100.0);
-let speed: Velocity<Kilometer, Second> = distance / elapsed;
+let distance = Kilometer::new(1_000.0);
+let elapsed = Second::new(100.0);
+let speed: Velocity<qtty::unit::Kilometer, qtty::unit::Second> = distance / elapsed;
 
 assert!((speed.value() - 10.0).abs() < 1e-12);
 ```
@@ -117,10 +117,10 @@ assert!((speed.value() - 10.0).abs() < 1e-12);
 Type errors happen at compile time:
 
 ```rust,compile_fail
-use qtty::{Kilometers, Seconds};
+use qtty::{Kilometer, Second};
 
-let distance = Kilometers::new(1.0);
-let time = Seconds::new(1.0);
+let distance = Kilometer::new(1.0);
+let time = Second::new(1.0);
 let _ = distance + time;
 ```
 

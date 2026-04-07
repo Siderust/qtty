@@ -1,31 +1,34 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Serde support for `Quantity` types (feature-gated).
 //!
 //! This module is enabled by the `serde` feature. It provides serialization and deserialization
 //! for `Quantity<U, S>` types, including helper modules for different serialization formats.
 
-use crate::scalar::{Real, Scalar};
+use crate::scalar::Scalar;
 use crate::{Quantity, Unit};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-// Default serde: serialize as f64 (backward compatible)
-impl<U: Unit, S: Real> Serialize for Quantity<U, S> {
+// Default serde: serialize the raw scalar value directly.
+// For `Real` types (f64, f32) this serializes the float;
+// for integer types (i8..i128) it serializes the integer.
+impl<U: Unit, S: Scalar + Serialize> Serialize for Quantity<U, S> {
     fn serialize<Ser>(&self, serializer: Ser) -> core::result::Result<Ser::Ok, Ser::Error>
     where
         Ser: Serializer,
     {
-        // Strategy A: Always serialize as f64 for backward compatibility
-        self.value().to_f64().serialize(serializer)
+        self.value().serialize(serializer)
     }
 }
 
-impl<'de, U: Unit, S: Real> Deserialize<'de> for Quantity<U, S> {
+impl<'de, U: Unit, S: Scalar + Deserialize<'de>> Deserialize<'de> for Quantity<U, S> {
     fn deserialize<D>(deserializer: D) -> core::result::Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
-        // Strategy A: Deserialize from f64 and convert
-        let value = f64::deserialize(deserializer)?;
-        Ok(Quantity::new(S::from_f64(value)))
+        let value = S::deserialize(deserializer)?;
+        Ok(Quantity::new(value))
     }
 }
 
@@ -103,6 +106,7 @@ pub mod serde_with_unit {
     use alloc::string::String;
 
     use super::*;
+    use crate::scalar::Real;
     use serde::de::{self, Deserializer, MapAccess, Visitor};
     use serde::ser::{SerializeStruct, Serializer};
 

@@ -1,18 +1,21 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Example demonstrating how `Quantity` fields work in `#[pyclass]` structures
 //! when the `qtty-core` crate is built with the `pyo3` feature.
 
 #[cfg(feature = "pyo3")]
 use pyo3::prelude::*;
 #[cfg(feature = "pyo3")]
-use qtty::Degrees;
+use qtty::Degree;
 
 #[cfg(feature = "pyo3")]
 #[pyclass]
 pub struct DegreeRange {
     #[pyo3(get, set)]
-    pub min: Degrees,
+    pub min: Degree,
     #[pyo3(get, set)]
-    pub max: Degrees,
+    pub max: Degree,
 }
 
 #[cfg(feature = "pyo3")]
@@ -21,8 +24,8 @@ impl DegreeRange {
     #[new]
     fn new(min: f64, max: f64) -> Self {
         Self {
-            min: Degrees::new(min),
-            max: Degrees::new(max),
+            min: Degree::new(min),
+            max: Degree::new(max),
         }
     }
 

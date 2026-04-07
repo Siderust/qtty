@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Tests for f64 Real trait methods (coverage for scalar.rs).
 
 use qtty_core::scalar::{Real, Scalar, Transcendental};
