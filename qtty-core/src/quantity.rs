@@ -1,8 +1,11 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Quantity type and its implementations.
 
-use crate::dimension::{DimDiv, DimMul, Dimension};
 use crate::scalar::{Exact, Real, Scalar, Transcendental};
-use crate::unit::{Per, Prod, Unit};
+use crate::unit::{Unit, Unitless};
+use crate::unit_arithmetic::{UnitDiv, UnitMul};
 use core::cmp::Ordering;
 use core::iter::Sum;
 use core::marker::PhantomData;
@@ -53,10 +56,6 @@ pub type Quantity64<U> = Quantity<U, f64>;
 
 /// A quantity backed by `f32`.
 pub type Quantity32<U> = Quantity<U, f32>;
-
-/// A quantity backed by `rust_decimal::Decimal`.
-#[cfg(feature = "scalar-decimal")]
-pub type QuantityDecimal<U> = Quantity<U, rust_decimal::Decimal>;
 
 /// A quantity backed by `num_rational::Rational64`.
 #[cfg(feature = "scalar-rational")]
@@ -146,7 +145,8 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
     /// Returns the arithmetic mean (midpoint) of this quantity and another.
     ///
     /// For integer-backed quantities this uses integer division semantics
-    /// (truncation toward zero).
+    /// (truncation toward zero). The computation is overflow-safe for all
+    /// scalar types, including integers at their extremes.
     ///
     /// ```rust
     /// use qtty_core::length::Meters;
@@ -156,7 +156,22 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
     /// ```
     #[inline]
     pub fn mean(self, other: Self) -> Self {
-        Self::new((self.0 + other.0) / (S::ONE + S::ONE))
+        let two = S::ONE + S::ONE;
+        let a = self.0;
+        let b = other.0;
+        // When both values have the same sign, their sum may overflow.
+        // Use a split-half formula that is safe for same-sign operands.
+        // When signs differ, the direct sum never overflows (for integers
+        // it stays within the type's range; for floats it is always fine).
+        if (a >= S::ZERO) == (b >= S::ZERO) {
+            let ha = a / two;
+            let hb = b / two;
+            let ra = a - ha * two;
+            let rb = b - hb * two;
+            Self::new(ha + hb + (ra + rb) / two)
+        } else {
+            Self::new((a + b) / two)
+        }
     }
 
     /// A constant representing the zero value for this quantity type.
@@ -173,13 +188,14 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Real-specific implementations (f32, f64, Decimal, etc.)
+// Real-specific implementations (f32, f64, etc.)
 // ─────────────────────────────────────────────────────────────────────────────
 
 impl<U: Unit, S: Real> Quantity<U, S> {
     /// A constant representing NaN for this quantity type.
     ///
-    /// Note: For types without NaN (like `Decimal`), this may not be a true NaN.
+    /// Note: For scalar types without a NaN representation, this may be an
+    /// approximation rather than a true IEEE-754 NaN.
     ///
     /// ```rust
     /// use qtty_core::length::Meters;
@@ -255,14 +271,15 @@ impl<U: Unit, S: Real> Quantity<U, S> {
         self.0.signum()
     }
 
-    /// Returns the square root.
+    /// Returns the square root of the underlying scalar value.
     ///
-    /// Note: This returns the scalar square root of the value. The resulting
-    /// quantity still has the same unit type, which may not be physically
-    /// meaningful in all contexts.
+    /// This returns the raw scalar `S` rather than `Quantity<U, S>`, because
+    /// the square root of a dimensional quantity does not in general carry the
+    /// same dimension (e.g. √(m²) = m, not m²).  If you need a quantity
+    /// result, wrap it explicitly with the correct unit type.
     #[inline]
-    pub fn sqrt(self) -> Self {
-        Self::new(self.0.sqrt())
+    pub fn scalar_sqrt(self) -> S {
+        self.0.sqrt()
     }
 
     /// Returns the smallest integer quantity greater than or equal to this value.
@@ -615,16 +632,6 @@ impl<U: Unit> Mul<Quantity<U, f32>> for f32 {
     }
 }
 
-// Multiplication for Decimal (feature-gated)
-#[cfg(feature = "scalar-decimal")]
-impl<U: Unit> Mul<Quantity<U, rust_decimal::Decimal>> for rust_decimal::Decimal {
-    type Output = Quantity<U, rust_decimal::Decimal>;
-    #[inline]
-    fn mul(self, rhs: Quantity<U, rust_decimal::Decimal>) -> Self::Output {
-        rhs * self
-    }
-}
-
 // Multiplication for Rational64 (feature-gated)
 #[cfg(feature = "scalar-rational")]
 impl<U: Unit> Mul<Quantity<U, num_rational::Rational64>> for num_rational::Rational64 {
@@ -743,15 +750,14 @@ impl<'a, U: Unit> Sum<&'a Quantity<U, f64>> for f64 {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Division producing Per<N, D>
+// Division delegating to UnitDiv
 // ─────────────────────────────────────────────────────────────────────────────
 
 impl<N: Unit, D: Unit, S: Scalar> Div<Quantity<D, S>> for Quantity<N, S>
 where
-    N::Dim: DimDiv<D::Dim>,
-    <N::Dim as DimDiv<D::Dim>>::Output: Dimension,
+    N: UnitDiv<D>,
 {
-    type Output = Quantity<Per<N, D>, S>;
+    type Output = Quantity<<N as UnitDiv<D>>::Output, S>;
     #[inline]
     fn div(self, rhs: Quantity<D, S>) -> Self::Output {
         Quantity::new(self.0 / rhs.0)
@@ -759,35 +765,31 @@ where
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Multiplication producing Prod<A, B>
+// Multiplication delegating to UnitMul
 // ─────────────────────────────────────────────────────────────────────────────
 
 impl<A: Unit, B: Unit, S: Scalar> Mul<Quantity<B, S>> for Quantity<A, S>
 where
-    A::Dim: DimMul<B::Dim>,
-    <A::Dim as DimMul<B::Dim>>::Output: Dimension,
+    A: UnitMul<B>,
 {
-    type Output = Quantity<Prod<A, B>, S>;
+    type Output = Quantity<<A as UnitMul<B>>::Output, S>;
 
     #[inline]
     fn mul(self, rhs: Quantity<B, S>) -> Self::Output {
-        Quantity::<Prod<A, B>, S>::new(self.0 * rhs.0)
+        Quantity::new(self.0 * rhs.0)
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Special methods for Per<U, U> (unitless ratios)
+// Special methods for Unitless quantities
 // ─────────────────────────────────────────────────────────────────────────────
 
-impl<U: Unit, S: Transcendental> Quantity<Per<U, U>, S>
-where
-    U::Dim: DimDiv<U::Dim>,
-    <U::Dim as DimDiv<U::Dim>>::Output: Dimension,
-{
-    /// Arc sine of a unitless ratio.
+impl<S: Transcendental> Quantity<Unitless, S> {
+    /// Arc sine of a unitless quantity.
     ///
     /// ```rust
     /// use qtty_core::length::Meters;
+    /// // Same-unit division now directly yields Quantity<Unitless>.
     /// let ratio = Meters::new(1.0) / Meters::new(2.0);
     /// let angle_rad = ratio.asin();
     /// assert!((angle_rad - core::f64::consts::FRAC_PI_6).abs() < 1e-12);
@@ -797,13 +799,13 @@ where
         self.0.asin()
     }
 
-    /// Arc cosine of a unitless ratio.
+    /// Arc cosine of a unitless quantity.
     #[inline]
     pub fn acos(&self) -> S {
         self.0.acos()
     }
 
-    /// Arc tangent of a unitless ratio.
+    /// Arc tangent of a unitless quantity.
     #[inline]
     pub fn atan(&self) -> S {
         self.0.atan()

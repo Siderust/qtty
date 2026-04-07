@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Angular frequency unit aliases (`Angular / Time`).
 //!
 //! This module provides a **dimension alias** [`Frequency`].
@@ -35,7 +38,7 @@ impl<T: Unit<Dim = FrequencyDim>> FrequencyUnit for T {}
 /// ```
 pub type Frequency<N, D> = Quantity<Per<N, D>>;
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
     use crate::units::angular::{Degree, Degrees, MilliArcsecond, Radian};

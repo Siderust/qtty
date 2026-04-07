@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Scalar traits for quantity values.
 //!
 //! This module defines the trait hierarchy for numeric types that can be used as the
@@ -13,7 +16,7 @@
 //!    │      │
 //!    │      └── Transcendental (sin, cos, sqrt, etc. - requires std or libm)
 //!    │
-//!    └── Exact (rational/decimal types - no floating-only ops)
+//!    └── Exact (exact scalar families - no floating-only ops)
 //! ```
 //!
 //! # Supported Scalar Types
@@ -23,7 +26,6 @@
 //! - `f32` - implements `Scalar`, `Real`, `Transcendental`
 //!
 //! **Feature-gated:**
-//! - `rust_decimal::Decimal` (`scalar-decimal`) - implements `Scalar`, `Real`
 //! - `num_rational::Rational64` (`scalar-rational`) - implements `Scalar`, `Exact`
 //! - `num_rational::Rational32` (`scalar-rational`) - implements `Scalar`, `Exact`
 //!
@@ -58,9 +60,6 @@ mod private {
     impl Sealed for i32 {}
     impl Sealed for i64 {}
     impl Sealed for i128 {}
-
-    #[cfg(feature = "scalar-decimal")]
-    impl Sealed for rust_decimal::Decimal {}
 
     #[cfg(feature = "scalar-rational")]
     impl Sealed for num_rational::Rational64 {}
@@ -130,8 +129,8 @@ pub trait Scalar:
 ///
 /// # Conversion Guarantees
 ///
-/// - `from_f64` should produce a reasonable approximation when exact representation
-///   is not possible (e.g., for `Decimal` or `f32`).
+/// - `from_f64` should produce a reasonable approximation when exact
+///   representation is not possible (e.g., for `f32`).
 /// - `to_f64` should produce the closest `f64` representation.
 ///
 /// This trait is sealed and cannot be implemented outside this crate.
@@ -243,8 +242,8 @@ pub trait Real: Scalar + Display + Rem<Output = Self> {
 ///
 /// # Note
 ///
-/// Exact numeric types like `Decimal` or `Rational` typically do not implement
-/// this trait because trigonometric functions produce irrational results.
+/// Exact numeric types like rationals typically do not implement this trait
+/// because trigonometric functions produce irrational results.
 ///
 /// This trait is sealed and cannot be implemented outside this crate.
 pub trait Transcendental: Real {
@@ -292,12 +291,12 @@ pub trait Transcendental: Real {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Exact trait (for rational/decimal types)
+// Exact trait (for exact scalar types)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Trait for exact numeric types that avoid floating-point rounding.
 ///
-/// Types implementing this trait (e.g., `Rational64`, `Decimal`, signed integers)
+/// Types implementing this trait (e.g., `Rational64`, `Rational32`, signed integers)
 /// provide exact arithmetic but typically do not support transcendental functions.
 ///
 /// The `to_f64_approx` and `from_f64_approx` methods enable lossy unit conversion
@@ -320,8 +319,8 @@ pub trait Exact: Scalar {
 /// Marker trait for integer scalar types.
 ///
 /// This is implemented only by signed integer types (`i8`, `i16`, `i32`, `i64`, `i128`).
-/// It is used to provide non-overlapping `Display` implementations for integer quantities,
-/// since `Decimal` implements both [`Real`] and [`Exact`].
+/// It is used to provide non-overlapping `Display` implementations for integer
+/// quantities while leaving room for other non-integer [`Exact`] scalar families.
 ///
 /// This trait is sealed and cannot be implemented outside this crate.
 pub trait IntegerScalar: Exact + Display {}
@@ -380,7 +379,7 @@ impl Scalar for f64 {
         {
             let r = libm::fmod(self, rhs);
             if r < 0.0 {
-                r + rhs
+                r + libm::fabs(rhs)
             } else {
                 r
             }
@@ -848,7 +847,7 @@ impl Scalar for f32 {
         {
             let r = libm::fmodf(self, rhs);
             if r < 0.0 {
-                r + rhs
+                r + libm::fabsf(rhs)
             } else {
                 r
             }
@@ -1258,206 +1257,6 @@ impl Transcendental for f32 {
         #[cfg(not(feature = "std"))]
         {
             libm::atanhf(self)
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Decimal implementation (feature-gated)
-// ─────────────────────────────────────────────────────────────────────────────
-
-#[cfg(feature = "scalar-decimal")]
-mod decimal_impl {
-    use super::*;
-    use rust_decimal::Decimal;
-
-    impl Scalar for Decimal {
-        const ZERO: Self = Decimal::ZERO;
-        const ONE: Self = Decimal::ONE;
-
-        #[inline]
-        fn abs(self) -> Self {
-            Decimal::abs(&self)
-        }
-
-        #[inline]
-        fn min(self, other: Self) -> Self {
-            Decimal::min(self, other)
-        }
-
-        #[inline]
-        fn max(self, other: Self) -> Self {
-            Decimal::max(self, other)
-        }
-
-        #[inline]
-        fn rem_euclid(self, rhs: Self) -> Self {
-            let r = self % rhs;
-            if r < Decimal::ZERO {
-                r + rhs.abs()
-            } else {
-                r
-            }
-        }
-    }
-
-    impl Exact for Decimal {
-        #[inline]
-        fn to_f64_approx(self) -> f64 {
-            use rust_decimal::prelude::ToPrimitive;
-            ToPrimitive::to_f64(&self).unwrap_or(0.0)
-        }
-
-        #[inline]
-        fn from_f64_approx(value: f64) -> Self {
-            Decimal::try_from(value).unwrap_or(Decimal::ZERO)
-        }
-    }
-
-    // Note: Decimal implements a limited Real interface.
-    // Transcendental functions are not available.
-    impl Real for Decimal {
-        const PI: Self = Decimal::PI;
-        const TAU: Self = Decimal::TWO_PI;
-        const E: Self = Decimal::E;
-        // Decimal doesn't have infinity/NaN, use MAX/MIN as approximations
-        const INFINITY: Self = Decimal::MAX;
-        const NEG_INFINITY: Self = Decimal::MIN;
-        const NAN: Self = Decimal::ZERO; // No NaN representation
-
-        #[inline]
-        fn from_f64(value: f64) -> Self {
-            Decimal::try_from(value).unwrap_or(Decimal::ZERO)
-        }
-
-        #[inline]
-        fn to_f64(self) -> f64 {
-            use rust_decimal::prelude::ToPrimitive;
-            ToPrimitive::to_f64(&self).unwrap_or(0.0)
-        }
-
-        #[inline]
-        fn signum(self) -> Self {
-            if self > Decimal::ZERO {
-                Decimal::ONE
-            } else if self < Decimal::ZERO {
-                Decimal::NEGATIVE_ONE
-            } else {
-                Decimal::ZERO
-            }
-        }
-
-        #[inline]
-        fn is_nan(self) -> bool {
-            false // Decimal has no NaN
-        }
-
-        #[inline]
-        fn is_infinite(self) -> bool {
-            false // Decimal has no infinity
-        }
-
-        #[inline]
-        fn is_finite(self) -> bool {
-            true // Decimal is always finite
-        }
-
-        #[inline]
-        fn mul_add(self, a: Self, b: Self) -> Self {
-            self * a + b
-        }
-
-        #[inline]
-        fn floor(self) -> Self {
-            Decimal::floor(&self)
-        }
-
-        #[inline]
-        fn ceil(self) -> Self {
-            Decimal::ceil(&self)
-        }
-
-        #[inline]
-        fn round(self) -> Self {
-            Decimal::round(&self)
-        }
-
-        #[inline]
-        fn trunc(self) -> Self {
-            Decimal::trunc(&self)
-        }
-
-        #[inline]
-        fn fract(self) -> Self {
-            Decimal::fract(&self)
-        }
-
-        #[inline]
-        fn powf(self, exp: Self) -> Self {
-            // Decimal::powd may panic for non-integer exponents
-            // Fall back to conversion through f64
-            Self::from_f64(self.to_f64().powf(exp.to_f64()))
-        }
-
-        #[inline]
-        fn powi(self, exp: i32) -> Self {
-            use rust_decimal::MathematicalOps;
-            MathematicalOps::powi(&self, exp as i64)
-        }
-
-        #[inline]
-        fn sqrt(self) -> Self {
-            use rust_decimal::MathematicalOps;
-            MathematicalOps::sqrt(&self).unwrap_or(Decimal::ZERO)
-        }
-
-        #[inline]
-        fn cbrt(self) -> Self {
-            // No native cbrt, use powf
-            Self::from_f64(self.to_f64().cbrt())
-        }
-
-        #[inline]
-        fn ln(self) -> Self {
-            use rust_decimal::MathematicalOps;
-            MathematicalOps::ln(&self)
-        }
-
-        #[inline]
-        fn log10(self) -> Self {
-            use rust_decimal::MathematicalOps;
-            MathematicalOps::log10(&self)
-        }
-
-        #[inline]
-        fn log2(self) -> Self {
-            use rust_decimal::MathematicalOps;
-            // No native log2, compute as ln(self) / ln(2)
-            MathematicalOps::ln(&self) / MathematicalOps::ln(&Decimal::TWO)
-        }
-
-        #[inline]
-        fn log(self, base: Self) -> Self {
-            use rust_decimal::MathematicalOps;
-            MathematicalOps::ln(&self) / MathematicalOps::ln(&base)
-        }
-
-        #[inline]
-        fn exp(self) -> Self {
-            use rust_decimal::MathematicalOps;
-            MathematicalOps::exp(&self)
-        }
-
-        #[inline]
-        fn exp2(self) -> Self {
-            use rust_decimal::MathematicalOps;
-            // 2^self = exp(self * ln(2))
-            MathematicalOps::exp(&(self * MathematicalOps::ln(&Decimal::TWO)))
-        }
-
-        #[inline]
-        fn hypot(self, other: Self) -> Self {
-            (self * self + other * other).sqrt()
         }
     }
 }

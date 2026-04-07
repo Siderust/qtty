@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Velocity unit aliases (`Length / Time`).
 //!
 //! This module defines velocity units as *pure type aliases* over [`Per`] using
@@ -58,7 +61,7 @@ impl<T: Unit<Dim = VelocityDim>> VelocityUnit for T {}
 /// ```
 pub type Velocity<N, D> = Quantity<Per<N, D>>;
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
     use crate::units::length::{Au, Kilometer, Kilometers, Meter};

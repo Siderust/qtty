@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Tiberius SQL Server support for `Quantity` types (feature-gated).
 //!
 //! This module is enabled by the `tiberius` feature. It provides SQL Server database
