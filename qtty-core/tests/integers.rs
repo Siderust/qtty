@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Integration tests for integer scalar support.
 //!
 //! Tests that Quantity<U, iNN> works correctly for i8, i16, i32, i64, i128
@@ -6,7 +9,7 @@
 use qtty_core::length::{Kilometer, Meter};
 use qtty_core::scalar::{Exact, IntegerScalar};
 use qtty_core::time::Second;
-use qtty_core::{Per, Quantity, QuantityI32, QuantityI64, Simplify, Unitless};
+use qtty_core::{Per, Quantity, QuantityI32, QuantityI64, Unitless};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Basic construction and value access
@@ -204,15 +207,14 @@ fn test_i32_per_display() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Simplify (Per<U,U> -> Unitless)
+// Same-unit division
 // ─────────────────────────────────────────────────────────────────────────────
 
 #[test]
-fn test_i32_simplify() {
+fn test_i32_same_unit_division_gives_unitless() {
     let a = Quantity::<Meter, i32>::new(10);
     let b = Quantity::<Meter, i32>::new(2);
-    let ratio = a / b;
-    let unitless: Quantity<Unitless, i32> = ratio.simplify();
+    let unitless: Quantity<Unitless, i32> = a / b;
     assert_eq!(unitless.value(), 5);
 }
 

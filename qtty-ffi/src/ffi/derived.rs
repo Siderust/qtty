@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 use super::shared::{catch_panic, decode_unit, out_ptr};
 use crate::registry;
 use crate::types::{QttyDerivedQuantity, QttyStatus};
@@ -66,15 +69,23 @@ pub unsafe extern "C" fn qtty_derived_convert(
             Err(err) => return err,
         };
 
+        // Validate source unit IDs from the struct (could be arbitrary u32 from C)
+        let src_num = match decode_unit(src.numerator) {
+            Ok(u) => u,
+            Err(err) => return err,
+        };
+        let src_den = match decode_unit(src.denominator) {
+            Ok(u) => u,
+            Err(err) => return err,
+        };
+
         match src.convert_to(target_num, target_den) {
             Some(converted) => {
                 unsafe { *out.as_mut() = converted };
                 QttyStatus::Ok
             }
             None => {
-                if registry::meta(src.numerator).is_none()
-                    || registry::meta(src.denominator).is_none()
-                {
+                if registry::meta(src_num).is_none() || registry::meta(src_den).is_none() {
                     QttyStatus::UnknownUnit
                 } else {
                     QttyStatus::IncompatibleDim

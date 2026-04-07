@@ -1,6 +1,12 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Macros for defining units and conversions.
 
 /// Generates bidirectional `From` trait implementations for all pairs of units within a dimension.
+///
+/// The generated impls are generic over any [`Real`](crate::scalar::Real) scalar,
+/// so they work for `f64`, `f32`, and any future `Real` type.
 #[macro_export]
 macro_rules! impl_unit_from_conversions {
     // Base case: single unit, no conversions needed
@@ -9,14 +15,14 @@ macro_rules! impl_unit_from_conversions {
     // Recursive case: implement conversions from first to all others, then recurse
     ($first:ty, $($rest:ty),+ $(,)?) => {
         $(
-            impl From<$crate::Quantity<$first>> for $crate::Quantity<$rest> {
-                fn from(value: $crate::Quantity<$first>) -> Self {
+            impl<S: $crate::scalar::Real> From<$crate::Quantity<$first, S>> for $crate::Quantity<$rest, S> {
+                fn from(value: $crate::Quantity<$first, S>) -> Self {
                     value.to::<$rest>()
                 }
             }
 
-            impl From<$crate::Quantity<$rest>> for $crate::Quantity<$first> {
-                fn from(value: $crate::Quantity<$rest>) -> Self {
+            impl<S: $crate::scalar::Real> From<$crate::Quantity<$rest, S>> for $crate::Quantity<$first, S> {
+                fn from(value: $crate::Quantity<$rest, S>) -> Self {
                     value.to::<$first>()
                 }
             }

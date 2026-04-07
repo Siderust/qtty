@@ -20,40 +20,40 @@ code without giving up ergonomics.
 
 ```toml
 [dependencies]
-qtty = "0.4.1"
+qtty = "0.5.0"
 ```
 
 Disable default features for `no_std`:
 
 ```toml
 [dependencies]
-qtty = { version = "0.4.1", default-features = false }
+qtty = { version = "0.5.0", default-features = false }
 ```
 
 Enable heap-backed helpers in `no_std`:
 
 ```toml
 [dependencies]
-qtty = { version = "0.4.1", default-features = false, features = ["alloc"] }
+qtty = { version = "0.5.0", default-features = false, features = ["alloc"] }
 ```
 
 ## Quick start
 
 ```rust
-use qtty::{Degrees, Radian};
+use qtty::{Degree, Radian};
 
-let angle = Degrees::new(90.0);
-let radians = angle.to::<Radian>();
+let angle = Degree::new(90.0);
+let radians = angle.to::<qtty::unit::Radian>();
 assert!((radians.value() - core::f64::consts::FRAC_PI_2).abs() < 1e-12);
 ```
 
 ```rust
-use qtty::{Kilometer, Kilometers, Second, Seconds};
+use qtty::{Kilometer, Second};
 use qtty::velocity::Velocity;
 
-let distance = Kilometers::new(1_000.0);
-let elapsed = Seconds::new(100.0);
-let speed: Velocity<Kilometer, Second> = distance / elapsed;
+let distance = Kilometer::new(1_000.0);
+let elapsed = Second::new(100.0);
+let speed: Velocity<qtty::unit::Kilometer, qtty::unit::Second> = distance / elapsed;
 assert!((speed.value() - 10.0).abs() < 1e-12);
 ```
 
@@ -63,7 +63,6 @@ assert!((speed.value() - 10.0).abs() < 1e-12);
 - `cross-unit-ops` (default): enables direct cross-unit comparison operators for compatible built-in units
 - `alloc`: enables heap-backed helpers such as `qtty::qtty_vec!(vec ...)` in `no_std`
 - `serde`: enables serialization helpers for quantities
-- `scalar-decimal`: enables `rust_decimal::Decimal`
 - `scalar-rational`: enables `num_rational::Rational64`
 - `pyo3`: enables PyO3 conversions and Python-facing helpers
 - `tiberius`: enables SQL Server integration helpers

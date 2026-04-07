@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 /**
  * @file qtty_ffi.h
  * @brief C-compatible FFI bindings for qtty physical quantities and unit conversions.
@@ -77,6 +80,14 @@
  Error: the provided output buffer is too small.
  */
 #define QTTY_ERR_BUFFER_TOO_SMALL -4
+
+/*
+ Error: a Rust panic was caught at the FFI boundary.
+ This indicates a bug in the underlying library; the panic payload is discarded.
+ Domain errors (UNKNOWN_UNIT, INCOMPATIBLE_DIM, etc.) are never reported via
+ this code.
+ */
+#define QTTY_ERR_INTERNAL_PANIC -5
 
 /*
  Format flag: default decimal notation (e.g. `"1234.57 m"`).
@@ -757,9 +768,9 @@ typedef struct qtty_quantity_t {
    */
   double value;
   /*
-   The unit identifier for this quantity.
+   Raw unit identifier.  Pass one of the UNIT_ID_* constants.
    */
-  UnitId unit;
+  uint32_t unit;
 } qtty_quantity_t;
 
 /*
@@ -793,13 +804,13 @@ typedef struct qtty_derived_quantity_t {
    */
   double value;
   /*
-   The numerator unit identifier.
+   Raw numerator unit identifier.  Pass one of the UNIT_ID_* constants.
    */
-  UnitId numerator;
+  uint32_t numerator;
   /*
-   The denominator unit identifier.
+   Raw denominator unit identifier.  Pass one of the UNIT_ID_* constants.
    */
-  UnitId denominator;
+  uint32_t denominator;
 } qtty_derived_quantity_t;
 
 #ifdef __cplusplus
@@ -821,7 +832,7 @@ extern "C" {
 
  This function is safe to call from any context.
  */
-bool qtty_unit_is_valid(UnitId unit);
+bool qtty_unit_is_valid(uint32_t unit);
 
 /*
  Gets the dimension of a unit.
@@ -842,7 +853,7 @@ bool qtty_unit_is_valid(UnitId unit);
  The caller must ensure that `out` points to valid, writable memory for a `DimensionId`,
  or is null (in which case an error is returned).
  */
-int32_t qtty_unit_dimension(UnitId unit, DimensionId *out);
+int32_t qtty_unit_dimension(uint32_t unit, DimensionId *out);
 
 /*
  Checks if two units are compatible (same dimension).
@@ -864,7 +875,7 @@ int32_t qtty_unit_dimension(UnitId unit, DimensionId *out);
  The caller must ensure that `out` points to valid, writable memory for a `bool`,
  or is null (in which case an error is returned).
  */
-int32_t qtty_units_compatible(UnitId a, UnitId b, bool *out);
+int32_t qtty_units_compatible(uint32_t a, uint32_t b, bool *out);
 
 /*
  Creates a new quantity with the given value and unit.
@@ -886,7 +897,7 @@ int32_t qtty_units_compatible(UnitId a, UnitId b, bool *out);
  The caller must ensure that `out` points to valid, writable memory for a `QttyQuantity`,
  or is null (in which case an error is returned).
  */
-int32_t qtty_quantity_make(double value, UnitId unit, struct qtty_quantity_t *out);
+int32_t qtty_quantity_make(double value, uint32_t unit, struct qtty_quantity_t *out);
 
 /*
  Converts a quantity to a different unit.
@@ -910,7 +921,7 @@ int32_t qtty_quantity_make(double value, UnitId unit, struct qtty_quantity_t *ou
  or is null (in which case an error is returned).
  */
 int32_t qtty_quantity_convert(struct qtty_quantity_t src,
-                              UnitId dst_unit,
+                              uint32_t dst_unit,
                               struct qtty_quantity_t *out);
 
 /*
@@ -938,8 +949,8 @@ int32_t qtty_quantity_convert(struct qtty_quantity_t src,
  or is null (in which case an error is returned).
  */
 int32_t qtty_quantity_convert_value(double value,
-                                    UnitId src_unit,
-                                    UnitId dst_unit,
+                                    uint32_t src_unit,
+                                    uint32_t dst_unit,
                                     double *out_value);
 
 /*
@@ -959,7 +970,7 @@ int32_t qtty_quantity_convert_value(double value,
  The returned pointer points to static memory and is valid for the lifetime
  of the program. The caller must not attempt to free or modify the returned string.
  */
-const char *qtty_unit_name(UnitId unit);
+const char *qtty_unit_name(uint32_t unit);
 
 /*
  Formats a quantity as a human-readable string into a caller-provided buffer.
@@ -1010,8 +1021,8 @@ int32_t qtty_quantity_format(struct qtty_quantity_t qty,
  `QttyDerivedQuantity`, or is null (in which case an error is returned).
  */
 int32_t qtty_derived_make(double value,
-                          UnitId numerator,
-                          UnitId denominator,
+                          uint32_t numerator,
+                          uint32_t denominator,
                           struct qtty_derived_quantity_t *out);
 
 /*
@@ -1026,8 +1037,8 @@ int32_t qtty_derived_make(double value,
  `QttyDerivedQuantity`, or is null (in which case an error is returned).
  */
 int32_t qtty_derived_convert(struct qtty_derived_quantity_t src,
-                             UnitId target_num,
-                             UnitId target_den,
+                             uint32_t target_num,
+                             uint32_t target_den,
                              struct qtty_derived_quantity_t *out);
 
 /*
@@ -1036,7 +1047,7 @@ int32_t qtty_derived_convert(struct qtty_derived_quantity_t src,
  This can be used by consumers to verify compatibility. The version is
  incremented when breaking changes are made to the ABI.
 
- Current version: 600
+ Current version: 500
  */
 uint32_t qtty_ffi_version(void);
 

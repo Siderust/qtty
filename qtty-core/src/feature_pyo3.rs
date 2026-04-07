@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! PyO3 trait implementations for `Quantity` types (feature-gated).
 //!
 //! This module is enabled by the `pyo3` feature. It provides `IntoPyObject` and `FromPyObject`

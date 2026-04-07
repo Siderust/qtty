@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Macros for implementing FFI conversions for qtty unit types.
 //!
 //! This module provides macros that make it easy to implement `From` and `TryFrom`
@@ -107,13 +110,16 @@ macro_rules! impl_unit_ffi {
 
             #[inline]
             fn try_from(qty: $crate::QttyQuantity) -> Result<Self, Self::Error> {
+                let src_unit = $crate::UnitId::from_u32(qty.unit)
+                    .ok_or($crate::QttyStatus::UnknownUnit as i32)?;
+
                 // If already the right unit, just wrap
-                if qty.unit == $unit_id {
+                if src_unit == $unit_id {
                     return Ok(<$qty_type>::new(qty.value));
                 }
 
                 // Otherwise, try to convert
-                let converted = $crate::registry::convert_value(qty.value, qty.unit, $unit_id)?;
+                let converted = $crate::registry::convert_value(qty.value, src_unit, $unit_id)?;
                 Ok(<$qty_type>::new(converted))
             }
         }

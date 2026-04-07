@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Tests for Quantity<U, f32> methods (coverage for quantity.rs f32 paths).
 
 use qtty_core::*;
@@ -20,6 +23,9 @@ impl Unit for DoubleTestUnit {
     type Dim = TestDim;
     const SYMBOL: &'static str = "dtu";
 }
+
+// Register test units for arithmetic.
+qtty_core::impl_unit_arithmetic_pairs!(TestUnit, DoubleTestUnit);
 
 type TU32 = Quantity<TestUnit, f32>;
 
@@ -117,9 +123,9 @@ fn f32_quantity_signum() {
 }
 
 #[test]
-fn f32_quantity_sqrt() {
+fn f32_quantity_scalar_sqrt() {
     let q = TU32::new(16.0);
-    assert!((q.sqrt().value() - 4.0).abs() < 1e-6);
+    assert!((q.scalar_sqrt() - 4.0).abs() < 1e-6);
 }
 
 #[test]
@@ -229,14 +235,16 @@ fn f32_division_creates_per() {
 fn f32_per_mul_recovers_numerator() {
     let rate: Quantity<Per<TestUnit, DoubleTestUnit>, f32> = Quantity::new(5.0);
     let den = Quantity::<DoubleTestUnit, f32>::new(4.0);
-    let result: TU32 = (rate * den).to();
+    // UnitMul: Per<TU, DTU> * DTU → TU (recovery impl)
+    let result: TU32 = rate * den;
     assert!((result.value() - 20.0).abs() < 1e-6);
 }
 
 #[test]
-fn f32_simplify() {
-    let ratio: Quantity<Per<TestUnit, TestUnit>, f32> = Quantity::new(2.5);
-    let unitless: Quantity<Unitless, f32> = ratio.simplify();
+fn f32_same_unit_division_gives_unitless() {
+    let a = Quantity::<TestUnit, f32>::new(5.0);
+    let b = Quantity::<TestUnit, f32>::new(2.0);
+    let unitless: Quantity<Unitless, f32> = a / b;
     assert!((unitless.value() - 2.5).abs() < 1e-6);
 }
 

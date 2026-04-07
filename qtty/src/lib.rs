@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 //! Strongly typed physical quantities and conversions.
 //!
 //! `qtty` is the user-facing crate in this workspace. It re-exports the full API from `qtty-core` plus a curated set
@@ -12,7 +15,7 @@
 //! - Prevents mixing incompatible dimensions (you can't add metres to seconds).
 //! - Makes unit conversion explicit and type-checked (`to::<TargetUnit>()`).
 //! - Provides a small set of astronomy-friendly units (AU, light-year, solar mass/luminosity, …).
-//! - Supports multiple scalar types (`f64`, `f32`, and optionally `Decimal`, `Rational64`, etc.).
+//! - Supports multiple scalar types (`f64`, `f32`, and optionally `Rational64`, etc.).
 //!
 //! # What this crate does not try to solve
 //!
@@ -24,41 +27,41 @@
 //! Convert degrees to radians:
 //!
 //! ```rust
-//! use qtty::{Degrees, Radian};
+//! use qtty::{Degree, Radian};
 //!
-//! let a = Degrees::new(180.0);
-//! let r = a.to::<Radian>();
+//! let a = Degree::new(180.0);
+//! let r = a.to::<qtty::unit::Radian>();
 //! assert!((r.value() - core::f64::consts::PI).abs() < 1e-12);
 //! ```
 //!
 //! Compose and use derived units (velocity = length / time):
 //!
 //! ```rust
-//! use qtty::{Kilometer, Kilometers, Second, Seconds};
+//! use qtty::{Kilometer, Second};
 //! use qtty::velocity::Velocity;
 //!
-//! let d = Kilometers::new(1_000.0);
-//! let t = Seconds::new(100.0);
-//! let v: Velocity<Kilometer, Second> = d / t;
+//! let d = Kilometer::new(1_000.0);
+//! let t = Second::new(100.0);
+//! let v: Velocity<qtty::unit::Kilometer, qtty::unit::Second> = d / t;
 //! assert!((v.value() - 10.0).abs() < 1e-12);
 //! ```
 //!
 //! Using `f32` for memory efficiency:
 //!
 //! ```rust
-//! use qtty::f32::{Degrees, Meters};
+//! use qtty::f32::{Degree, Meter};
 //!
-//! let angle: Degrees = Degrees::new(45.0_f32);
-//! let distance: Meters = Meters::new(100.0_f32);
+//! let angle: Degree = Degree::new(45.0_f32);
+//! let distance: Meter = Meter::new(100.0_f32);
 //! ```
 //!
 //! # Incorrect usage (type error)
 //!
 //! ```compile_fail
-//! use qtty::{Kilometers, Seconds};
+//! use qtty::{Kilometer, Second};
 //!
-//! let d = Kilometers::new(1.0);
-//! let t = Seconds::new(1.0);
+//! let d = Kilometer::new(1.0);
+//! let t = Second::new(1.0);
 //! let _ = d + t; // cannot add different unit types
 //! ```
 //!
@@ -70,7 +73,6 @@
 //! - `f32` - single precision floating point (use `qtty::f32::*`)
 //! - `i8`, `i16`, `i32`, `i64`, `i128` - signed integers
 //!   (use `qtty::i8::*`, `qtty::i16::*`, `qtty::i32::*`, `qtty::i64::*`, `qtty::i128::*`)
-//! - `Decimal` - exact decimal (feature `scalar-decimal`)
 //! - `Rational64` - exact rational (feature `scalar-rational`)
 //!
 //! Integer quantities provide compile-time unit safety for discrete values.
@@ -80,15 +82,12 @@
 //!
 //! # Modules
 //!
-//! Units are grouped by dimension under modules (also re-exported at the crate root for convenience):
+//! Quantity aliases are exported at the crate root. Unit markers live under
+//! `qtty::unit` for generic APIs such as `Quantity<U, S>` and `Velocity<N, D>`:
 //!
-//! - `qtty::angular` (degrees, radians, arcseconds, wrapping/trigonometry helpers)
-//! - `qtty::time` (seconds, days, years, …)
-//! - `qtty::length` (metres, kilometres, AU, light-year, …)
-//! - `qtty::mass` (grams, kilograms, solar mass)
-//! - `qtty::power` (watts, solar luminosity)
 //! - `qtty::velocity` (`Length / Time` aliases)
 //! - `qtty::frequency` (`Angular / Time` aliases)
+//! - `qtty::unit` (type-level unit markers)
 //! - `qtty::f32` (all units with `f32` scalar)
 //! - `qtty::f64` (all units with `f64` scalar - same as root)
 //! - `qtty::i8` (all units with `i8` scalar)
@@ -103,21 +102,20 @@
 //! - `cross-unit-ops` (default): enables direct cross-unit comparison operators (`==`, `<`, etc.) for built-in units.
 //! - `alloc`: enables heap-backed helpers (like `qtty_vec!(vec ...)`) in `no_std` builds.
 //! - `serde`: enables `serde` support for `Quantity<U>`; serialization is the raw `f64` value only.
-//! - `scalar-decimal`: enables `rust_decimal::Decimal` as a scalar type.
 //! - `scalar-rational`: enables `num_rational::Rational64` as a scalar type.
 //!
 //! Disable default features for `no_std`:
 //!
 //! ```toml
 //! [dependencies]
-//! qtty = { version = "0.2.0", default-features = false }
+//! qtty = { version = "0.5.0", default-features = false }
 //! ```
 //!
 //! If you need `qtty_vec!(vec ...)` in `no_std`, enable `alloc`:
 //!
 //! ```toml
 //! [dependencies]
-//! qtty = { version = "0.2.0", default-features = false, features = ["alloc"] }
+//! qtty = { version = "0.5.0", default-features = false, features = ["alloc"] }
 //! ```
 //!
 //! # Panics and errors
@@ -135,13 +133,38 @@
 #[cfg(all(feature = "alloc", not(feature = "std")))]
 extern crate alloc;
 
-pub use qtty_core::*;
+pub use qtty_core::{
+    Acceleration, AmountOfSubstance, Angular, Area, Current, Dimension, Dimensionless, Energy,
+    Exact, Force, FrequencyDim, IntegerScalar, Length, LuminousIntensity, Mass, Per, Power, Prod,
+    Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16, QuantityI32, QuantityI64,
+    QuantityI8, Real, Scalar, Temperature, Time, Transcendental, Unit, UnitDiv, UnitMul,
+    VelocityDim, Volume,
+};
+
+#[doc(hidden)]
+pub use qtty_core::{Dim, DimDiv, DimMul};
+
+#[cfg(feature = "scalar-rational")]
+pub use qtty_core::QuantityRational;
+
+#[cfg(all(feature = "serde", feature = "std"))]
+pub use qtty_core::serde_with_unit;
+
+#[cfg(feature = "serde")]
+pub use qtty_core::serde_scalar;
 
 /// Derive macro used by `qtty-core` to define unit marker types.
 ///
 /// This macro expands in terms of `crate::Unit` and `crate::Quantity`, so it is intended for use inside `qtty-core`
 /// (or crates exposing the same crate-root API). Most users should not need this.
 pub use qtty_derive::Unit;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Internal macro for scalar-specific modules
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[macro_use]
+mod scalar_aliases;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Scalar-specific modules
@@ -156,33 +179,98 @@ pub mod i64;
 pub mod i8;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Unit modules (grouped by dimension)
+// Dimension modules (re-exported from qtty-core)
 // ─────────────────────────────────────────────────────────────────────────────
 
 pub use qtty_core::units::angular;
-pub use qtty_core::units::area;
-pub use qtty_core::units::frequency;
 pub use qtty_core::units::length;
 pub use qtty_core::units::mass;
 pub use qtty_core::units::power;
 pub use qtty_core::units::time;
-pub use qtty_core::units::unitless;
-pub use qtty_core::units::velocity;
-pub use qtty_core::units::volume;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Convenience re-exports (default f64 types)
+// Type-level unit markers
 // ─────────────────────────────────────────────────────────────────────────────
 
-pub use qtty_core::units::angular::*;
-pub use qtty_core::units::area::*;
-pub use qtty_core::units::frequency::*;
-pub use qtty_core::units::length::*;
-pub use qtty_core::units::mass::*;
-pub use qtty_core::units::power::*;
-pub use qtty_core::units::time::*;
-pub use qtty_core::units::velocity::*;
-pub use qtty_core::units::volume::*;
+/// Type-level unit markers used by [`Quantity`].
+///
+/// The crate root exposes singular quantity aliases such as [`Meter`] and
+/// [`Second`]. Use this module when generic code needs the unit marker itself,
+/// for example `Quantity<unit::Meter, S>` or `to::<unit::Kilometer>()`.
+pub mod unit {
+    pub use qtty_core::{Per, Prod, Unit, UnitDiv, UnitMul, Unitless};
+
+    pub use qtty_core::units::angular::{
+        AngularUnit, Arcminute, Arcsecond, Degree, Gradian, HourAngle, MicroArcsecond,
+        MilliArcsecond, Milliradian, Radian, Turn,
+    };
+    pub use qtty_core::units::area::{
+        Acre, Are, AreaUnit, Hectare, SquareCentimeter, SquareFoot, SquareInch, SquareKilometer,
+        SquareMeter, SquareMile, SquareMillimeter, SquareYard,
+    };
+    pub use qtty_core::units::length::nominal::{
+        EarthEquatorialRadius, EarthPolarRadius, EarthRadius, JupiterRadius, LunarDistance,
+        LunarRadius, SolarDiameter, SolarRadius,
+    };
+    pub use qtty_core::units::length::{
+        AstronomicalUnit, Attometer, BohrRadius, Centimeter, Chain, ClassicalElectronRadius,
+        Decameter, Decimeter, EarthEquatorialCircumference, EarthMeridionalCircumference,
+        ElectronReducedComptonWavelength, Exameter, Fathom, Femtometer, Foot, Gigameter,
+        Gigaparsec, Hectometer, Inch, Kilometer, Kiloparsec, LengthUnit, LightYear, Link,
+        Megameter, Megaparsec, Meter, Micrometer, Mile, Millimeter, Nanometer, NauticalMile,
+        Parsec, Petameter, Picometer, PlanckLength, Rod, Terameter, Yard, Yoctometer, Yottameter,
+        Zeptometer, Zettameter,
+    };
+    pub use qtty_core::units::mass::{
+        AtomicMassUnit, Attogram, Carat, Centigram, Decagram, Decigram, Exagram, Femtogram,
+        Gigagram, Grain, Gram, Hectogram, Kilogram, LongTon, MassUnit, Megagram, Microgram,
+        Milligram, Nanogram, Ounce, Petagram, Picogram, Pound, ShortTon, SolarMass, Stone,
+        Teragram, Tonne, Yoctogram, Yottagram, Zeptogram, Zettagram,
+    };
+    pub use qtty_core::units::power::{
+        Attowatt, Decawatt, Deciwatt, ErgPerSecond, Exawatt, Femtowatt, Gigawatt, Hectowatt,
+        HorsepowerElectric, HorsepowerMetric, Kilowatt, Megawatt, Microwatt, Milliwatt, Nanowatt,
+        Petawatt, Picowatt, PowerUnit, SolarLuminosity, Terawatt, Watt, Yoctowatt, Yottawatt,
+        Zeptowatt, Zettawatt,
+    };
+    pub use qtty_core::units::time::{
+        Attosecond, Centisecond, Century, Day, Decade, Decasecond, Decisecond, Femtosecond,
+        Fortnight, Gigasecond, Hectosecond, Hour, JulianCentury, JulianYear, Kilosecond,
+        Megasecond, Microsecond, Millennium, Millisecond, Minute, Nanosecond, Picosecond, Second,
+        SiderealDay, SiderealYear, SynodicMonth, Terasecond, TimeUnit, Week, Year,
+    };
+    pub use qtty_core::units::volume::{
+        Centiliter, CubicCentimeter, CubicFoot, CubicInch, CubicKilometer, CubicMeter,
+        CubicMillimeter, Deciliter, Liter, Microliter, Milliliter, UsFluidOunce, UsGallon,
+        VolumeUnit,
+    };
+}
+
+/// Velocity quantities represented as one unit divided by another.
+pub mod velocity {
+    pub use qtty_core::units::velocity::{Velocity, VelocityUnit};
+}
+
+/// Angular-frequency quantities represented as one unit divided by another.
+pub mod frequency {
+    pub use qtty_core::units::frequency::{Frequency, FrequencyUnit};
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Convenience quantity aliases (default f64 scalar)
+// ─────────────────────────────────────────────────────────────────────────────
+
+scalar_aliases::define_scalar_aliases!(f64);
+
+/// Dimensionless quantity alias.
+pub type Unitless<S = f64> = Quantity<unit::Unitless, S>;
+
+pub use qtty_core::units::angular::{DEG, RAD};
+pub use qtty_core::units::length::{AU, KM, LY, M};
+pub use qtty_core::units::time::{DAY, SEC};
+
+pub use frequency::Frequency;
+pub use velocity::Velocity;
 
 #[doc(hidden)]
 pub mod __private {
@@ -197,19 +285,19 @@ pub mod __private {
 /// # Forms
 ///
 /// - Array (const-friendly):
-///   `qtty::qtty_vec!(Seconds; 1.0, 2.0, 3.0)`
+///   `qtty::qtty_vec!(Second; 1.0, 2.0, 3.0)`
 /// - Vector:
-///   `qtty::qtty_vec!(vec Seconds; 1.0, 2.0, 3.0)` (requires `std` or `alloc`)
+///   `qtty::qtty_vec!(vec Second; 1.0, 2.0, 3.0)` (requires `std` or `alloc`)
 ///
 /// # Examples
 ///
 /// ```
-/// use qtty::Seconds;
+/// use qtty::Second;
 ///
-/// const OFFSETS: [Seconds; 3] = qtty::qtty_vec!(Seconds; 56.86, 63.83, 70.0);
+/// const OFFSETS: [Second; 3] = qtty::qtty_vec!(Second; 56.86, 63.83, 70.0);
 /// assert_eq!(OFFSETS[1].value(), 63.83);
 ///
-/// let samples: Vec<Seconds> = qtty::qtty_vec!(vec Seconds; 1.0, 2.0, 3.0);
+/// let samples: Vec<Second> = qtty::qtty_vec!(vec Second; 1.0, 2.0, 3.0);
 /// assert_eq!(samples.len(), 3);
 /// ```
 #[cfg(any(feature = "std", feature = "alloc"))]

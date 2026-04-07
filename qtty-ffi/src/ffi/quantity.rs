@@ -1,6 +1,9 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
 use super::shared::{catch_panic, decode_unit, out_ptr};
 use crate::registry;
-use crate::types::{QttyQuantity, QttyStatus, QTTY_FMT_LOWER_EXP, QTTY_FMT_UPPER_EXP};
+use crate::types::{QttyQuantity, QttyStatus, UnitId, QTTY_FMT_LOWER_EXP, QTTY_FMT_UPPER_EXP};
 use core::ffi::c_char;
 
 fn map_convert_error(err: QttyStatus) -> QttyStatus {
@@ -11,8 +14,8 @@ fn map_convert_error(err: QttyStatus) -> QttyStatus {
     }
 }
 
-fn format_quantity(qty: QttyQuantity, precision: i32, flags: u32) -> String {
-    let symbol = qty.unit.symbol();
+fn format_quantity(qty: QttyQuantity, unit: UnitId, precision: i32, flags: u32) -> String {
+    let symbol = unit.symbol();
 
     match flags {
         QTTY_FMT_LOWER_EXP => {
@@ -116,12 +119,16 @@ pub unsafe extern "C" fn qtty_quantity_convert(
             Ok(out) => out,
             Err(err) => return err,
         };
+        let src_unit = match decode_unit(src.unit) {
+            Ok(unit) => unit,
+            Err(err) => return err,
+        };
         let dst_unit = match decode_unit(dst_unit_id) {
             Ok(unit) => unit,
             Err(err) => return err,
         };
 
-        match registry::convert_value(src.value, src.unit, dst_unit) {
+        match registry::convert_value(src.value, src_unit, dst_unit) {
             Ok(value) => {
                 unsafe { *out.as_mut() = QttyQuantity::new(value, dst_unit) };
                 QttyStatus::Ok
@@ -220,11 +227,15 @@ pub unsafe extern "C" fn qtty_quantity_format(
             Ok(buf) => buf,
             Err(err) => return err,
         };
-        if registry::meta(qty.unit).is_none() {
+        let unit = match decode_unit(qty.unit) {
+            Ok(u) => u,
+            Err(err) => return err,
+        };
+        if registry::meta(unit).is_none() {
             return QttyStatus::UnknownUnit;
         }
 
-        let formatted = format_quantity(qty, precision, flags);
+        let formatted = format_quantity(qty, unit, precision, flags);
         let bytes = formatted.as_bytes();
         let needed = bytes.len() + 1;
         if buf_len < needed {
@@ -257,7 +268,7 @@ mod tests {
         let status = unsafe { qtty_quantity_make(42.0, UnitId::Meter as u32, &mut out) };
         assert_eq!(status, QttyStatus::Ok);
         assert_eq!(out.value, 42.0);
-        assert_eq!(out.unit, UnitId::Meter);
+        assert_eq!(out.unit, UnitId::Meter as u32);
     }
 
     #[test]
@@ -281,7 +292,7 @@ mod tests {
         let status = unsafe { qtty_quantity_convert(src, UnitId::Kilometer as u32, &mut out) };
         assert_eq!(status, QttyStatus::Ok);
         assert_relative_eq!(out.value, 1.0, epsilon = 1e-12);
-        assert_eq!(out.unit, UnitId::Kilometer);
+        assert_eq!(out.unit, UnitId::Kilometer as u32);
     }
 
     #[test]
