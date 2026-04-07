@@ -224,31 +224,6 @@ fn same_unit_ratio_has_atan() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Simplify compatibility
-// ─────────────────────────────────────────────────────────────────────────────
-
-#[test]
-fn simplify_unitless_identity() {
-    let u: Quantity<Unitless> = Quantity::new(42.0);
-    let s: Quantity<Unitless> = u.simplify();
-    assert!((s.value() - 42.0).abs() < 1e-12);
-}
-
-#[test]
-fn simplify_meter_identity() {
-    let m = Quantity::<Meter>::new(42.0);
-    let s: Quantity<Meter> = m.simplify();
-    assert!((s.value() - 42.0).abs() < 1e-12);
-}
-
-#[test]
-fn simplify_per_u_u_still_works() {
-    let ratio: Quantity<Per<Meter, Meter>> = Quantity::new(2.75);
-    let u: Quantity<Unitless> = ratio.simplify();
-    assert!((u.value() - 2.75).abs() < 1e-12);
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Compile-time type assignment checks
 // ─────────────────────────────────────────────────────────────────────────────
 

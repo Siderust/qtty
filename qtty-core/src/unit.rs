@@ -141,8 +141,8 @@ where
 /// Zero-sized marker type for dimensionless quantities.
 ///
 /// `Unitless` represents a dimensionless unit with a conversion ratio of 1.0
-/// and an empty symbol. It is used to model the result of simplifying same-unit
-/// ratios (e.g., `Meters / Meters`) into a plain "number-like" `Quantity<Unitless>`.
+/// and an empty symbol. It is used to model same-unit ratios (e.g.,
+/// `Meters / Meters`) as a plain "number-like" `Quantity<Unitless>`.
 ///
 /// Unlike a type alias to `f64`, this is a proper zero-sized type, which ensures
 /// that only explicitly constructed `Quantity<Unitless>` values are treated as
@@ -174,117 +174,11 @@ impl<S: Scalar + UpperExp> UpperExp for Quantity<Unitless, S> {
     }
 }
 
-/// Trait for simplifying composite unit types.
-///
-/// This allows reducing complex unit expressions to simpler forms,
-/// such as `Per<U, U>` to `Unitless` or `Per<N, Per<N, D>>` to `D`.
-pub trait Simplify {
-    /// The scalar type of this quantity.
-    type Scalar: Scalar;
-    /// The simplified unit type.
-    type Out: Unit;
-    /// Convert this quantity to its simplified unit.
-    fn simplify(self) -> Quantity<Self::Out, Self::Scalar>;
-}
-
-impl<U: Unit, S: Scalar> Simplify for Quantity<Per<U, U>, S>
-where
-    U::Dim: DimDiv<U::Dim>,
-    <U::Dim as DimDiv<U::Dim>>::Output: Dimension,
-{
-    type Scalar = S;
-    type Out = Unitless;
-    /// ```rust
-    /// use qtty_core::{Quantity, Per, Simplify, Unitless};
-    /// use qtty_core::length::Meter;
-    ///
-    /// // A Per<U,U> value constructed manually can still be simplified:
-    /// let ratio: Quantity<Per<Meter, Meter>> = Quantity::new(0.5);
-    /// let unitless: Quantity<Unitless> = ratio.simplify();
-    /// assert!((unitless.value() - 0.5).abs() < 1e-12);
-    /// ```
-    fn simplify(self) -> Quantity<Unitless, S> {
-        Quantity::new(self.value())
-    }
-}
-
-impl<N: Unit, D: Unit, S: Scalar> Simplify for Quantity<Per<N, Per<N, D>>, S>
-where
-    N::Dim: DimDiv<D::Dim>,
-    <N::Dim as DimDiv<D::Dim>>::Output: Dimension,
-    N::Dim: DimDiv<<N::Dim as DimDiv<D::Dim>>::Output>,
-    <N::Dim as DimDiv<<N::Dim as DimDiv<D::Dim>>::Output>>::Output: Dimension,
-{
-    type Scalar = S;
-    type Out = D;
-    fn simplify(self) -> Quantity<D, S> {
-        Quantity::new(self.value())
-    }
-}
-
-/// Identity `Simplify` for `Quantity<Unitless>`: already simplified.
-impl<S: Scalar> Simplify for Quantity<Unitless, S> {
-    type Scalar = S;
-    type Out = Unitless;
-    fn simplify(self) -> Quantity<Unitless, S> {
-        self
-    }
-}
-
-/// Macro to generate an identity `Simplify` impl for a plain unit type.
-///
-/// Used internally to provide compatibility for code that calls `.simplify()`
-/// on quantities whose unit is already a simple marker type.
-macro_rules! impl_identity_simplify {
-    ($($unit:ty),+ $(,)?) => {
-        $(
-            impl<S: Scalar> Simplify for Quantity<$unit, S> {
-                type Scalar = S;
-                type Out = $unit;
-                fn simplify(self) -> Quantity<$unit, S> {
-                    self
-                }
-            }
-        )+
-    };
-}
-
-impl_identity_simplify!(
-    // Length
-    crate::units::length::Meter,
-    crate::units::length::Kilometer,
-    crate::units::length::Centimeter,
-    crate::units::length::Millimeter,
-    crate::units::length::AstronomicalUnit,
-    crate::units::length::LightYear,
-    crate::units::length::Parsec,
-    // Time
-    crate::units::time::Second,
-    crate::units::time::Minute,
-    crate::units::time::Hour,
-    crate::units::time::Day,
-    crate::units::time::Year,
-    crate::units::time::JulianYear,
-    // Mass
-    crate::units::mass::Gram,
-    crate::units::mass::Kilogram,
-    // Angular
-    crate::units::angular::Degree,
-    crate::units::angular::Radian,
-    // Power
-    crate::units::power::Watt,
-    // Area
-    crate::units::area::SquareMeter,
-    crate::units::area::SquareKilometer,
-    // Volume
-    crate::units::volume::CubicMeter,
-);
-
 #[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
-    use crate::units::length::{Kilometer, Meter, Meters};
-    use crate::units::time::{Hour, Second};
+    use crate::units::length::{Kilometer, Meter};
+    use crate::units::time::Second;
     use crate::Quantity;
 
     // ── Per: Display, LowerExp, UpperExp ──────────────────────────────────────
@@ -371,24 +265,5 @@ mod tests {
         let qty: Quantity<Unitless> = Quantity::new(0.5);
         let s = format!("{qty:E}");
         assert!(s.contains("E"), "Expected uppercase-E notation, got: {s}");
-    }
-
-    // ── Simplify: Per<U, U> → Unitless ────────────────────────────────────────
-
-    #[test]
-    fn simplify_per_u_u_gives_unitless() {
-        let ratio = Meters::new(3.0) / Meters::new(6.0);
-        let unitless: Quantity<Unitless> = ratio.simplify();
-        assert!((unitless.value() - 0.5).abs() < 1e-12);
-    }
-
-    // ── Simplify: Per<N, Per<N, D>> → D ──────────────────────────────────────
-
-    #[test]
-    fn simplify_per_n_per_n_d_gives_d() {
-        // Quantity<Per<Meter, Per<Meter, Hour>>> should simplify to Quantity<Hour>
-        let q: Quantity<Per<Meter, Per<Meter, Hour>>> = Quantity::new(42.0);
-        let simplified: Quantity<Hour> = q.simplify();
-        assert!((simplified.value() - 42.0).abs() < 1e-12);
     }
 }
