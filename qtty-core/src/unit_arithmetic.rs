@@ -15,8 +15,8 @@
 //! - `Per<N, D> * D → N`
 //! - `D * Per<N, D> → N`
 //!
-//! For all built-in unit pairs (plain marker types), macro-generated fallback
-//! impls produce the default composite types:
+//! For all built-in unit pairs (plain marker types), fallback impls produce the
+//! default composite types:
 //!
 //! - `A / B → Per<A, B>` (when `A ≠ B`)
 //! - `A * B → Prod<A, B>`
@@ -27,7 +27,7 @@
 //! same fallback tables.
 
 use crate::dimension::{DimDiv, DimMul, Dimension};
-use crate::unit::{Per, Unit, Unitless};
+use crate::unit::{Per, Prod, Unit, Unitless};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Core traits
@@ -46,6 +46,10 @@ pub trait UnitMul<Rhs: Unit>: Unit {
     /// The resulting unit type.
     type Output: Unit;
 }
+
+// Marker for plain built-in units. This lets built-in multiplication use a
+// single generic impl instead of an O(n²) generated impl table.
+pub(crate) trait BuiltinUnit: Unit {}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Generic structural recovery impls
@@ -101,14 +105,24 @@ where
     type Output = N;
 }
 
+// Built-in plain units multiply to a `Prod<A, B>`. Division still uses an
+// explicit pair table because `U / U -> Unitless` overlaps with a blanket
+// `A / B -> Per<A, B>` impl on stable Rust.
+impl<A: BuiltinUnit, B: BuiltinUnit> UnitMul<B> for A
+where
+    A::Dim: DimMul<B::Dim>,
+    <A::Dim as DimMul<B::Dim>>::Output: Dimension,
+{
+    type Output = Prod<A, B>;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
-// Macro-generated fallback tables for built-in units
+// Fallback registration for plain units
 // ─────────────────────────────────────────────────────────────────────────────
 
 // The macros below generate `UnitDiv` and `UnitMul` impls for every ordered
-// pair of distinct built-in unit marker types. This replaces the previous
-// blanket impls that produced `Per<N, D>` or `Prod<A, B>` for all pairs
-// unconditionally.
+// pair of distinct marker types. Built-in units use the division table only;
+// multiplication uses the blanket `BuiltinUnit` impl above.
 
 /// Generates `UnitDiv` impls for all ordered pairs of distinct units.
 ///
@@ -244,7 +258,17 @@ macro_rules! impl_unit_arithmetic_pairs {
 // Register all built-in unit marker types so that cross-unit division and
 // multiplication "just work" for the standard catalog.
 
-impl_unit_arithmetic_pairs!(
+macro_rules! register_builtin_units {
+    ($($unit:ty),+ $(,)?) => {
+        $(
+            impl BuiltinUnit for $unit {}
+        )+
+
+        impl_unit_division_pairs!($($unit),+);
+    };
+}
+
+register_builtin_units!(
     // ── Unitless ──────────────────────────────────────────────────────────
     crate::unit::Unitless,
     // ── Length ────────────────────────────────────────────────────────────
