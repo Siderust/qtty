@@ -97,3 +97,138 @@ macro_rules! impl_unit_conversions {
         $crate::impl_unit_cross_unit_ops!($($unit),+);
     };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Between-group helpers (used for feature-gated unit families)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Helper: generate `From` between one extra unit and every base unit.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __impl_from_one_to_many {
+    ($one:ty; $($base:ty),+ $(,)?) => {
+        $(
+            impl<S: $crate::scalar::Real> From<$crate::Quantity<$one, S>> for $crate::Quantity<$base, S> {
+                fn from(value: $crate::Quantity<$one, S>) -> Self {
+                    value.to::<$base>()
+                }
+            }
+
+            impl<S: $crate::scalar::Real> From<$crate::Quantity<$base, S>> for $crate::Quantity<$one, S> {
+                fn from(value: $crate::Quantity<$base, S>) -> Self {
+                    value.to::<$one>()
+                }
+            }
+        )+
+    };
+}
+
+/// Generates `From` implementations between every unit in the **extra** group
+/// and every unit in the **base** group, *plus* all intra-extra pairs.
+///
+/// Does *not* regenerate intra-base pairs (those must be emitted separately
+/// via [`impl_unit_from_conversions!`]).
+///
+/// Syntax: `impl_unit_from_conversions_between!(Base1, Base2; Extra1, Extra2);`
+#[macro_export]
+macro_rules! impl_unit_from_conversions_between {
+    ($($base:ty),+; $($extra:ty),+ $(,)?) => {
+        // extra <-> base (recursive to avoid repetition-count mismatch)
+        $crate::__impl_from_each_extra_to_bases!({$($base),+} $($extra),+);
+        // intra-extra
+        $crate::impl_unit_from_conversions!($($extra),+);
+    };
+    // Single extra unit (no intra-extra needed)
+    ($($base:ty),+; $extra:ty $(,)?) => {
+        $crate::__impl_from_one_to_many!($extra; $($base),+);
+    };
+}
+
+/// Recursive helper: iterate over extras one at a time, emitting cross-pairs
+/// with the full base list each time.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __impl_from_each_extra_to_bases {
+    // Base case: single extra remaining.
+    ({$($base:ty),+} $extra:ty) => {
+        $crate::__impl_from_one_to_many!($extra; $($base),+);
+    };
+    // Recursive case: peel the first extra, recurse on the rest.
+    ({$($base:ty),+} $first:ty, $($rest:ty),+) => {
+        $crate::__impl_from_one_to_many!($first; $($base),+);
+        $crate::__impl_from_each_extra_to_bases!({$($base),+} $($rest),+);
+    };
+}
+
+/// Helper: generate cross-unit `PartialEq` + `PartialOrd` between one extra
+/// unit and every base unit.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __impl_cross_ops_one_to_many {
+    ($one:ty; $($base:ty),+ $(,)?) => {
+        $(
+            impl<S: $crate::scalar::Real> PartialEq<$crate::Quantity<$base, S>> for $crate::Quantity<$one, S> {
+                #[inline]
+                fn eq(&self, other: &$crate::Quantity<$base, S>) -> bool {
+                    self.value() == other.to::<$one>().value()
+                }
+            }
+
+            impl<S: $crate::scalar::Real> PartialEq<$crate::Quantity<$one, S>> for $crate::Quantity<$base, S> {
+                #[inline]
+                fn eq(&self, other: &$crate::Quantity<$one, S>) -> bool {
+                    self.value() == other.to::<$base>().value()
+                }
+            }
+
+            impl<S: $crate::scalar::Real> PartialOrd<$crate::Quantity<$base, S>> for $crate::Quantity<$one, S> {
+                #[inline]
+                fn partial_cmp(&self, other: &$crate::Quantity<$base, S>) -> Option<core::cmp::Ordering> {
+                    self.value().partial_cmp(&other.to::<$one>().value())
+                }
+            }
+
+            impl<S: $crate::scalar::Real> PartialOrd<$crate::Quantity<$one, S>> for $crate::Quantity<$base, S> {
+                #[inline]
+                fn partial_cmp(&self, other: &$crate::Quantity<$one, S>) -> Option<core::cmp::Ordering> {
+                    self.value().partial_cmp(&other.to::<$base>().value())
+                }
+            }
+        )+
+    };
+}
+
+/// Generates cross-unit `PartialEq` and `PartialOrd` implementations between
+/// every unit in the **extra** group and every unit in the **base** group,
+/// *plus* all intra-extra pairs.
+///
+/// Syntax: `impl_unit_cross_unit_ops_between!(Base1, Base2; Extra1, Extra2);`
+#[macro_export]
+macro_rules! impl_unit_cross_unit_ops_between {
+    ($($base:ty),+; $($extra:ty),+ $(,)?) => {
+        // extra <-> base (recursive to avoid repetition-count mismatch)
+        $crate::__impl_cross_ops_each_extra_to_bases!({$($base),+} $($extra),+);
+        // intra-extra
+        $crate::impl_unit_cross_unit_ops!($($extra),+);
+    };
+    // Single extra unit (no intra-extra needed)
+    ($($base:ty),+; $extra:ty $(,)?) => {
+        $crate::__impl_cross_ops_one_to_many!($extra; $($base),+);
+    };
+}
+
+/// Recursive helper: iterate over extras one at a time, emitting cross-ops
+/// with the full base list each time.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __impl_cross_ops_each_extra_to_bases {
+    // Base case: single extra remaining.
+    ({$($base:ty),+} $extra:ty) => {
+        $crate::__impl_cross_ops_one_to_many!($extra; $($base),+);
+    };
+    // Recursive case: peel the first extra, recurse on the rest.
+    ({$($base:ty),+} $first:ty, $($rest:ty),+) => {
+        $crate::__impl_cross_ops_one_to_many!($first; $($base),+);
+        $crate::__impl_cross_ops_each_extra_to_bases!({$($base),+} $($rest),+);
+    };
+}

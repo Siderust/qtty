@@ -30,18 +30,21 @@
 //! relationships over rounded convenience factors wherever practical.
 //!
 //! ```rust
-//! use qtty_core::length::{AstronomicalUnits, Kilometer};
+//! use qtty_core::length::Kilometer;
 //!
+//! # #[cfg(feature = "astro")]
+//! # {
+//! use qtty_core::length::AstronomicalUnits;
 //! let au = AstronomicalUnits::new(1.0);
 //! let km = au.to::<Kilometer>();
 //! assert_eq!(km.value(), 149_597_870.7);
+//! # }
 //! ```
 //!
-//! ## All length units
+//! ## All length units (default)
 //!
 //! ```rust
 //! use qtty_core::length::*;
-//! use qtty_core::length::nominal::*;
 //!
 //! macro_rules! touch {
 //!     ($T:ty, $v:expr) => {{
@@ -61,28 +64,9 @@
 //! touch!(Megameters, 1.0); touch!(Gigameters, 1.0); touch!(Terameters, 1.0);
 //! touch!(Petameters, 1.0); touch!(Exameters, 1.0); touch!(Zettameters, 1.0);
 //! touch!(Yottameters, 1.0);
-//! // Astronomical
-//! touch!(AstronomicalUnits, 1.0); touch!(LightYears, 1.0); touch!(Parsecs, 1.0);
-//! touch!(Kiloparsecs, 1.0); touch!(Megaparsecs, 1.0); touch!(Gigaparsecs, 1.0);
-//! // Imperial
-//! touch!(Inches, 1.0); touch!(Feet, 1.0); touch!(Yards, 1.0);
-//! touch!(Miles, 1.0); touch!(NauticalMiles, 1.0); touch!(Chains, 1.0);
-//! touch!(Rods, 1.0); touch!(Links, 1.0); touch!(Fathoms, 1.0);
-//! // Geodesy
-//! touch!(EarthMeridionalCircumferences, 1.0);
-//! touch!(EarthEquatorialCircumferences, 1.0);
-//! // Physics
-//! touch!(BohrRadii, 1.0); touch!(ClassicalElectronRadii, 1.0);
-//! touch!(PlanckLengths, 1.0); touch!(ElectronReducedComptonWavelengths, 1.0);
-//! // Nominal
-//! touch!(SolarRadiuses, 1.0); touch!(EarthRadii, 1.0);
-//! touch!(EarthEquatorialRadii, 1.0); touch!(EarthPolarRadii, 1.0);
-//! touch!(LunarRadii, 1.0); touch!(JupiterRadii, 1.0);
-//! touch!(LunarDistances, 1.0); touch!(SolarDiameters, 1.0);
 //! ```
 
 use crate::{Quantity, Unit};
-use core::f64::consts::PI;
 use qtty_derive::Unit;
 
 /// Re-export from the dimension module.
@@ -91,6 +75,23 @@ pub use crate::dimension::Length;
 /// Marker trait for any [`Unit`] whose dimension is [`Length`].
 pub trait LengthUnit: Unit<Dim = Length> {}
 impl<T: Unit<Dim = Length>> LengthUnit for T {}
+
+#[cfg(feature = "astro")]
+mod astro;
+#[cfg(feature = "astro")]
+pub use astro::*;
+#[cfg(feature = "customary")]
+mod customary;
+#[cfg(feature = "customary")]
+pub use customary::*;
+#[cfg(feature = "navigation")]
+mod navigation;
+#[cfg(feature = "navigation")]
+pub use navigation::*;
+#[cfg(feature = "fundamental-physics")]
+mod fundamental_physics;
+#[cfg(feature = "fundamental-physics")]
+pub use fundamental_physics::*;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SI base unit and core helpers
@@ -298,417 +299,34 @@ pub type Yottameters = Quantity<Yottameter>;
 pub const YM: Yottameters = Yottameters::new(1.0);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Astronomical distance units
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Astronomical unit (au). Exact (IAU 2012): metres per au.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "au", dimension = Length, ratio = 149_597_870_700.0)]
-pub struct AstronomicalUnit;
-/// Type alias shorthand for [`AstronomicalUnit`].
-pub type Au = AstronomicalUnit;
-/// A quantity measured in astronomical units.
-pub type AstronomicalUnits = Quantity<Au>;
-/// One astronomical unit.
-pub const AU: AstronomicalUnits = AstronomicalUnits::new(1.0);
-
-// Exact speed of light and Julian year, used to derive the light‑year ratio.
-const SPEED_OF_LIGHT_M_PER_S: f64 = 299_792_458.0;
-const SECONDS_PER_DAY: f64 = 86_400.0;
-const DAYS_PER_JULIAN_YEAR: f64 = 36525.0 / 100.0; // 365.25 d
-const SECONDS_PER_JULIAN_YEAR: f64 = SECONDS_PER_DAY * DAYS_PER_JULIAN_YEAR;
-const METERS_PER_LIGHT_YEAR: f64 = SPEED_OF_LIGHT_M_PER_S * SECONDS_PER_JULIAN_YEAR;
-
-/// Light-year (ly): distance light travels in one Julian year (`365.25 d`) at `c = 299_792_458 m/s`.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "ly", dimension = Length, ratio = METERS_PER_LIGHT_YEAR)]
-pub struct LightYear;
-/// Type alias shorthand for [`LightYear`].
-pub type Ly = LightYear;
-/// A quantity measured in light-years.
-pub type LightYears = Quantity<Ly>;
-/// One light-year.
-pub const LY: LightYears = LightYears::new(1.0);
-
-/// Parsec (pc): `pc = au * 648000 / π` (exact given au).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "pc", dimension = Length, ratio = 149_597_870_700.0 * (648_000.0 / PI))]
-pub struct Parsec;
-/// Type alias shorthand for [`Parsec`].
-pub type Pc = Parsec;
-/// A quantity measured in parsecs.
-pub type Parsecs = Quantity<Pc>;
-/// One parsec.
-pub const PC: Parsecs = Parsecs::new(1.0);
-
-/// Kiloparsec (kpc): `1e3 pc`.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "kpc", dimension = Length, ratio = 1_000.0 * 149_597_870_700.0 * (648_000.0 / PI))]
-pub struct Kiloparsec;
-/// A quantity measured in kiloparsecs.
-pub type Kiloparsecs = Quantity<Kiloparsec>;
-/// One kiloparsec.
-pub const KPC: Kiloparsecs = Kiloparsecs::new(1.0);
-
-/// Megaparsec (Mpc): `1e6 pc`.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Mpc", dimension = Length, ratio = 1_000_000.0 * 149_597_870_700.0 * (648_000.0 / PI))]
-pub struct Megaparsec;
-/// A quantity measured in megaparsecs.
-pub type Megaparsecs = Quantity<Megaparsec>;
-/// One megaparsec.
-pub const MPC: Megaparsecs = Megaparsecs::new(1.0);
-
-/// Gigaparsec (Gpc): `1e9 pc`.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Gpc", dimension = Length, ratio = 1_000_000_000.0 * 149_597_870_700.0 * (648_000.0 / PI))]
-pub struct Gigaparsec;
-/// A quantity measured in gigaparsecs.
-pub type Gigaparsecs = Quantity<Gigaparsec>;
-/// One gigaparsec.
-pub const GPC: Gigaparsecs = Gigaparsecs::new(1.0);
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Imperial, US customary, and surveying units
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Inch (`0.0254 m` exactly).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "in", dimension = Length, ratio = 254.0 / 10_000.0)]
-pub struct Inch;
-/// A quantity measured in inches.
-pub type Inches = Quantity<Inch>;
-/// One inch.
-pub const INCH: Inches = Inches::new(1.0);
-
-/// Foot (`0.3048 m` exactly).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "ft", dimension = Length, ratio = 3048.0 / 10_000.0)]
-pub struct Foot;
-/// A quantity measured in feet.
-pub type Feet = Quantity<Foot>;
-/// One foot.
-pub const FT: Feet = Feet::new(1.0);
-
-/// Yard (`0.9144 m` exactly).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "yd", dimension = Length, ratio = 9144.0 / 10_000.0)]
-pub struct Yard;
-/// A quantity measured in yards.
-pub type Yards = Quantity<Yard>;
-/// One yard.
-pub const YD: Yards = Yards::new(1.0);
-
-/// (Statute) mile (`1609.344 m` exactly).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "mi", dimension = Length, ratio = 1_609_344.0 / 1_000.0)]
-pub struct Mile;
-/// A quantity measured in miles.
-pub type Miles = Quantity<Mile>;
-/// One mile.
-pub const MI: Miles = Miles::new(1.0);
-
-/// Nautical mile (`1852 m` exactly).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "nmi", dimension = Length, ratio = 1_852.0)]
-pub struct NauticalMile;
-/// A quantity measured in nautical miles.
-pub type NauticalMiles = Quantity<NauticalMile>;
-/// One nautical mile.
-pub const NMI: NauticalMiles = NauticalMiles::new(1.0);
-
-/// Chain (`66 ft` exactly).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "ch", dimension = Length, ratio = 66.0 * (3048.0 / 10_000.0))]
-pub struct Chain;
-/// A quantity measured in chains.
-pub type Chains = Quantity<Chain>;
-/// One chain.
-pub const CHAIN: Chains = Chains::new(1.0);
-
-/// Rod / pole / perch (`16.5 ft` exactly).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "rd", dimension = Length, ratio = 16.5 * (3048.0 / 10_000.0))]
-pub struct Rod;
-/// A quantity measured in rods/poles/perches.
-pub type Rods = Quantity<Rod>;
-/// One rod.
-pub const ROD: Rods = Rods::new(1.0);
-
-/// Link (`1/100 of a chain`, i.e. `0.66 ft`).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "lk", dimension = Length, ratio = (66.0 / 100.0) * (3048.0 / 10_000.0))]
-pub struct Link;
-/// A quantity measured in links.
-pub type Links = Quantity<Link>;
-/// One link.
-pub const LINK: Links = Links::new(1.0);
-
-/// Fathom (`6 ft` exactly).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "ftm", dimension = Length, ratio = 6.0 * (3048.0 / 10_000.0))]
-pub struct Fathom;
-/// A quantity measured in fathoms.
-pub type Fathoms = Quantity<Fathom>;
-/// One fathom.
-pub const FTM: Fathoms = Fathoms::new(1.0);
-
 // ─────────────────────────────────────────────────────────────────────────────
-// Geodesy and navigation
+// From conversions: default (metric) units
 // ─────────────────────────────────────────────────────────────────────────────
-
-/// Earth meridional circumference (approximate mean value).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Cmer", dimension = Length, ratio = 40_007_863.0)]
-pub struct EarthMeridionalCircumference;
-/// A quantity measured in Earth meridional circumferences.
-pub type EarthMeridionalCircumferences = Quantity<EarthMeridionalCircumference>;
-/// One Earth meridional circumference.
-pub const C_MERIDIONAL: EarthMeridionalCircumferences = EarthMeridionalCircumferences::new(1.0);
-
-/// Earth equatorial circumference.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Ceq", dimension = Length, ratio = 40_075_017.0)]
-pub struct EarthEquatorialCircumference;
-/// A quantity measured in Earth equatorial circumferences.
-pub type EarthEquatorialCircumferences = Quantity<EarthEquatorialCircumference>;
-/// One Earth equatorial circumference.
-pub const C_EQUATORIAL: EarthEquatorialCircumferences = EarthEquatorialCircumferences::new(1.0);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Fundamental physics lengths (CODATA values)
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Bohr radius (`a0`). CODATA 2018 value in metres.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "a0", dimension = Length, ratio = 5.291_772_109_03e-11)]
-pub struct BohrRadius;
-/// A quantity measured in Bohr radii.
-pub type BohrRadii = Quantity<BohrRadius>;
-/// One Bohr radius.
-pub const A0: BohrRadii = BohrRadii::new(1.0);
-
-/// Classical electron radius (`re`). CODATA 2018 value in metres.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "re", dimension = Length, ratio = 2.817_940_326_2e-15)]
-pub struct ClassicalElectronRadius;
-/// A quantity measured in classical electron radii.
-pub type ClassicalElectronRadii = Quantity<ClassicalElectronRadius>;
-/// One classical electron radius.
-pub const RE: ClassicalElectronRadii = ClassicalElectronRadii::new(1.0);
-
-/// Planck length (`lp`). CODATA 2018 value in metres.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "lp", dimension = Length, ratio = 1.616_255e-35)]
-pub struct PlanckLength;
-/// A quantity measured in Planck lengths.
-pub type PlanckLengths = Quantity<PlanckLength>;
-/// One Planck length.
-pub const LP: PlanckLengths = PlanckLengths::new(1.0);
-
-/// Reduced Compton wavelength of the electron (`lambda_bar_e`). CODATA 2018 value in metres.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "lambda_bar_e", dimension = Length, ratio = 3.861_592_679_6e-13)]
-pub struct ElectronReducedComptonWavelength;
-/// A quantity measured in reduced Compton wavelengths of the electron.
-pub type ElectronReducedComptonWavelengths = Quantity<ElectronReducedComptonWavelength>;
-/// One reduced Compton wavelength of the electron.
-pub const LAMBDA_BAR_E: ElectronReducedComptonWavelengths =
-    ElectronReducedComptonWavelengths::new(1.0);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Nominal radii and distances
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Nominal astronomical and planetary radii and related distances.
-///
-/// Values in this module are **nominal** (conventionally rounded) and are kept separate from the
-/// main length namespace to avoid confusion with strictly defined units.
-pub mod nominal {
-    use super::*;
-
-    /// Solar radius (R☉). Nominal value: metres per R☉.
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-    #[unit(symbol = "Rsun", dimension = Length, ratio = 695_700_000.0)]
-    pub struct SolarRadius;
-    /// A quantity measured in solar radii.
-    pub type SolarRadiuses = Quantity<SolarRadius>;
-    /// One solar radius.
-    pub const RSUN: SolarRadiuses = SolarRadiuses::new(1.0);
-
-    /// Earth mean radius (nominal).
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-    #[unit(symbol = "Rearth", dimension = Length, ratio = 6_371_000.0)]
-    pub struct EarthRadius;
-    /// A quantity measured in Earth radii.
-    pub type EarthRadii = Quantity<EarthRadius>;
-    /// One Earth radius (mean).
-    pub const R_EARTH: EarthRadii = EarthRadii::new(1.0);
-
-    /// Earth equatorial radius (WGS84).
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-    #[unit(symbol = "Rearth_eq", dimension = Length, ratio = 6_378_137.0)]
-    pub struct EarthEquatorialRadius;
-    /// A quantity measured in Earth equatorial radii.
-    pub type EarthEquatorialRadii = Quantity<EarthEquatorialRadius>;
-    /// One Earth equatorial radius.
-    pub const R_EARTH_EQ: EarthEquatorialRadii = EarthEquatorialRadii::new(1.0);
-
-    /// Earth polar radius.
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-    #[unit(symbol = "Rearth_p", dimension = Length, ratio = 6_356_752.314_2)]
-    pub struct EarthPolarRadius;
-    /// A quantity measured in Earth polar radii.
-    pub type EarthPolarRadii = Quantity<EarthPolarRadius>;
-    /// One Earth polar radius.
-    pub const R_EARTH_P: EarthPolarRadii = EarthPolarRadii::new(1.0);
-
-    /// Lunar radius (mean, nominal).
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-    #[unit(symbol = "Rmoon", dimension = Length, ratio = 1_737_400.0)]
-    pub struct LunarRadius;
-    /// A quantity measured in lunar radii.
-    pub type LunarRadii = Quantity<LunarRadius>;
-    /// One lunar radius.
-    pub const R_MOON: LunarRadii = LunarRadii::new(1.0);
-
-    /// Jupiter equatorial radius (nominal).
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-    #[unit(symbol = "Rjup", dimension = Length, ratio = 71_492_000.0)]
-    pub struct JupiterRadius;
-    /// A quantity measured in Jupiter radii.
-    pub type JupiterRadii = Quantity<JupiterRadius>;
-    /// One Jupiter radius.
-    pub const R_JUPITER: JupiterRadii = JupiterRadii::new(1.0);
-
-    /// Lunar distance (Earth–Moon mean distance, LD).
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-    #[unit(symbol = "LD", dimension = Length, ratio = 384_400_000.0)]
-    pub struct LunarDistance;
-    /// A quantity measured in lunar distances.
-    pub type LunarDistances = Quantity<LunarDistance>;
-    /// One lunar distance.
-    pub const LD: LunarDistances = LunarDistances::new(1.0);
-
-    /// Solar diameter (twice the solar radius).
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-    #[unit(symbol = "Dsun", dimension = Length, ratio = 2.0 * 695_700_000.0)]
-    pub struct SolarDiameter;
-    /// A quantity measured in solar diameters.
-    pub type SolarDiameters = Quantity<SolarDiameter>;
-    /// One solar diameter.
-    pub const D_SUN: SolarDiameters = SolarDiameters::new(1.0);
-
-    // Allow convenient conversions between selected nominal units and core
-    // length units (e.g., SolarRadius <-> Kilometer) without polluting the
-    // main length namespace with nominal types.
-    crate::impl_unit_from_conversions!(SolarRadius, Kilometer);
-    #[cfg(feature = "cross-unit-ops")]
-    crate::impl_unit_cross_unit_ops!(SolarRadius, Kilometer);
-}
-
-// Generate all bidirectional From implementations between length units.
-//
-// This single invocation ensures that any quantity measured in one length unit can be
-// converted into any other via `From`/`Into`, mirroring the previous behavior while
-// including the extended unit set.
 crate::impl_unit_from_conversions!(
-    Meter,
-    Decimeter,
-    Centimeter,
-    Millimeter,
-    Micrometer,
-    Nanometer,
-    Picometer,
-    Femtometer,
-    Attometer,
-    Zeptometer,
-    Yoctometer,
-    Decameter,
-    Hectometer,
-    Kilometer,
-    Megameter,
-    Gigameter,
-    Terameter,
-    Petameter,
-    Exameter,
-    Zettameter,
-    Yottameter,
-    AstronomicalUnit,
-    LightYear,
-    Parsec,
-    Kiloparsec,
-    Megaparsec,
-    Gigaparsec,
-    Inch,
-    Foot,
-    Yard,
-    Mile,
-    NauticalMile,
-    Chain,
-    Rod,
-    Link,
-    Fathom,
-    EarthMeridionalCircumference,
-    EarthEquatorialCircumference,
-    BohrRadius,
-    ClassicalElectronRadius,
-    PlanckLength,
-    ElectronReducedComptonWavelength
+    Meter, Decimeter, Centimeter, Millimeter, Micrometer, Nanometer, Picometer, Femtometer,
+    Attometer, Zeptometer, Yoctometer, Decameter, Hectometer, Kilometer, Megameter, Gigameter,
+    Terameter, Petameter, Exameter, Zettameter, Yottameter
 );
 
-// Optional cross-unit operator support (`==`, `<`, etc.).
+// ─────────────────────────────────────────────────────────────────────────────
+// Cross-unit ops: default (metric) units
+// ─────────────────────────────────────────────────────────────────────────────
 #[cfg(feature = "cross-unit-ops")]
 crate::impl_unit_cross_unit_ops!(
-    Meter,
-    Decimeter,
-    Centimeter,
-    Millimeter,
-    Micrometer,
-    Nanometer,
-    Picometer,
-    Femtometer,
-    Attometer,
-    Zeptometer,
-    Yoctometer,
-    Decameter,
-    Hectometer,
-    Kilometer,
-    Megameter,
-    Gigameter,
-    Terameter,
-    Petameter,
-    Exameter,
-    Zettameter,
-    Yottameter,
-    AstronomicalUnit,
-    LightYear,
-    Parsec,
-    Kiloparsec,
-    Megaparsec,
-    Gigaparsec,
-    Inch,
-    Foot,
-    Yard,
-    Mile,
-    NauticalMile,
-    Chain,
-    Rod,
-    Link,
-    Fathom,
-    EarthMeridionalCircumference,
-    EarthEquatorialCircumference,
-    BohrRadius,
-    ClassicalElectronRadius,
-    PlanckLength,
-    ElectronReducedComptonWavelength
+    Meter, Decimeter, Centimeter, Millimeter, Micrometer, Nanometer, Picometer, Femtometer,
+    Attometer, Zeptometer, Yoctometer, Decameter, Hectometer, Kilometer, Megameter, Gigameter,
+    Terameter, Petameter, Exameter, Zettameter, Yottameter
 );
 
 #[cfg(all(test, feature = "std"))]
 mod tests {
-    use super::nominal::SolarRadiuses;
     use super::*;
     use approx::{assert_abs_diff_eq, assert_relative_eq};
+    #[cfg(feature = "astro")]
+    use core::f64::consts::PI;
     use proptest::prelude::*;
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -730,6 +348,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn au_to_meters() {
         let au = AstronomicalUnits::new(1.0);
         let m = au.to::<Meter>();
@@ -738,6 +357,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn au_to_kilometers() {
         let au = AstronomicalUnits::new(1.0);
         let km = au.to::<Kilometer>();
@@ -746,14 +366,16 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn light_year_to_meters() {
         let ly = LightYears::new(1.0);
         let m = ly.to::<Meter>();
         // 1 LY = c * 365.25 d, where d = 86400 s
-        assert_relative_eq!(m.value(), METERS_PER_LIGHT_YEAR, max_relative = 1e-12);
+        assert_relative_eq!(m.value(), LightYear::RATIO, max_relative = 1e-12);
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn light_year_to_kilometers() {
         let ly = LightYears::new(1.0);
         let km = ly.to::<Kilometer>();
@@ -766,6 +388,7 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "astro")]
     fn au_to_light_year() {
         let au = AstronomicalUnits::new(1.0);
         let ly = au.to::<LightYear>();
@@ -774,6 +397,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn light_year_to_au() {
         let ly = LightYears::new(1.0);
         let au = ly.to::<AstronomicalUnit>();
@@ -782,6 +406,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn from_impl_au_to_ly() {
         let au = 1.0 * AU;
         let ly: LightYears = au.into();
@@ -789,6 +414,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn from_impl_ly_to_au() {
         let ly = 1.0 * LY;
         let au: AstronomicalUnits = ly.into();
@@ -800,6 +426,7 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "astro")]
     fn parsec_to_light_year() {
         let pc = Parsecs::new(1.0);
         let ly = pc.to::<LightYear>();
@@ -809,6 +436,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn parsec_to_au() {
         let pc = Parsecs::new(1.0);
         let au = pc.to::<AstronomicalUnit>();
@@ -818,6 +446,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn parsec_ratio_sanity() {
         // Parsec is defined from AU: pc = au * 648000 / π
         let lhs = Parsec::RATIO / AstronomicalUnit::RATIO;
@@ -830,16 +459,18 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "astro")]
     fn solar_radius_to_meters() {
-        let sr = SolarRadiuses::new(1.0);
+        let sr = nominal::SolarRadiuses::new(1.0);
         let m = sr.to::<Meter>();
         // 1 R☉ = 695,700 km = 695,700,000 m
         assert_abs_diff_eq!(m.value(), 695_700_000.0, epsilon = 1e-3);
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn solar_radius_to_km() {
-        let sr = SolarRadiuses::new(1.0);
+        let sr = nominal::SolarRadiuses::new(1.0);
         let km = sr.to::<Kilometer>();
         // 1 R☉ = 695,700 km
         assert_abs_diff_eq!(km.value(), 695_700.0, epsilon = 1e-6);
@@ -858,6 +489,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn roundtrip_au_ly() {
         let original = AstronomicalUnits::new(10000.0);
         let converted = original.to::<LightYear>();
@@ -866,6 +498,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn roundtrip_parsec_ly() {
         let original = Parsecs::new(5.0);
         let converted = original.to::<LightYear>();
@@ -878,6 +511,7 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "customary")]
     fn inch_to_meter_exact_ratio() {
         let inch = Inches::new(1.0);
         let m = inch.to::<Meter>();
@@ -886,6 +520,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "navigation")]
     fn nautical_mile_to_meter_exact_ratio() {
         let nmi = NauticalMiles::new(1.0);
         let m = nmi.to::<Meter>();
@@ -898,6 +533,7 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "customary")]
     fn roundtrip_inch_meter() {
         let original = Inches::new(123.456);
         let converted = original.to::<Meter>();
@@ -906,6 +542,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "navigation")]
     fn roundtrip_nautical_mile_meter() {
         let original = NauticalMiles::new(3.75);
         let converted = original.to::<Meter>();
@@ -914,6 +551,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn roundtrip_parsec_kpc() {
         let original = Parsecs::new(12_345.0);
         let converted = original.to::<Kiloparsec>();
@@ -943,6 +581,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(feature = "astro")]
         fn prop_roundtrip_au_km(a in 1e-6..1e6f64) {
             let original = AstronomicalUnits::new(a);
             let converted = original.to::<Kilometer>();
@@ -951,6 +590,7 @@ mod tests {
         }
 
         #[test]
+        #[cfg(feature = "customary")]
         fn prop_roundtrip_inch_m(i in -1e6..1e6f64) {
             let original = Inches::new(i);
             let converted = original.to::<Meter>();
@@ -1087,6 +727,7 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "customary")]
     fn foot_to_meter() {
         let q = Feet::new(1.0);
         // 1 ft = 0.3048 m exactly
@@ -1094,6 +735,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn yard_to_meter() {
         let q = Yards::new(1.0);
         // 1 yd = 0.9144 m exactly
@@ -1101,6 +743,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn mile_to_kilometer() {
         let q = Miles::new(1.0);
         // 1 mi = 1609.344 m exactly
@@ -1108,6 +751,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(all(feature = "navigation", feature = "customary"))]
     fn fathom_to_foot() {
         let q = Fathoms::new(1.0);
         // 1 fathom = 6 ft
@@ -1115,6 +759,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(all(feature = "navigation", feature = "customary"))]
     fn chain_to_foot() {
         let q = Chains::new(1.0);
         // 1 chain = 66 ft
@@ -1122,6 +767,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(all(feature = "navigation", feature = "customary"))]
     fn rod_to_foot() {
         let q = Rods::new(1.0);
         // 1 rod = 16.5 ft
@@ -1129,6 +775,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(all(feature = "navigation", feature = "customary"))]
     fn link_to_foot() {
         let q = Links::new(100.0);
         // 100 links = 1 chain = 66 ft
@@ -1140,12 +787,14 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "astro")]
     fn megaparsec_to_kiloparsec() {
         let q = Megaparsecs::new(1.0);
         assert_relative_eq!(q.to::<Kiloparsec>().value(), 1_000.0, max_relative = 1e-12);
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn gigaparsec_to_megaparsec() {
         let q = Gigaparsecs::new(1.0);
         assert_relative_eq!(q.to::<Megaparsec>().value(), 1_000.0, max_relative = 1e-12);
@@ -1156,6 +805,7 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "navigation")]
     fn earth_meridional_circumference_to_km() {
         let q = EarthMeridionalCircumferences::new(1.0);
         // ≈ 40_007.863 km
@@ -1163,6 +813,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "navigation")]
     fn earth_equatorial_circumference_to_km() {
         let q = EarthEquatorialCircumferences::new(1.0);
         // ≈ 40_075.017 km
@@ -1174,6 +825,7 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "fundamental-physics")]
     fn bohr_radius_to_picometers() {
         let q = BohrRadii::new(1.0);
         // a0 ≈ 52.9177 pm
@@ -1181,6 +833,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "fundamental-physics")]
     fn classical_electron_radius_to_femtometers() {
         let q = ClassicalElectronRadii::new(1.0);
         // re ≈ 2.81794 fm
@@ -1192,6 +845,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "fundamental-physics")]
     fn planck_length_ratio() {
         // Just check ratio round-trips without numeric overflow
         let q = PlanckLengths::new(1.0);
@@ -1200,6 +854,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "fundamental-physics")]
     fn electron_compton_wavelength_to_femtometers() {
         let q = ElectronReducedComptonWavelengths::new(1.0);
         // λ̄_e ≈ 386.159 fm
@@ -1215,18 +870,21 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "astro")]
     fn earth_radius_to_km() {
         let q = nominal::EarthRadii::new(1.0);
         assert_relative_eq!(q.to::<Kilometer>().value(), 6_371.0, max_relative = 1e-9);
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn earth_equatorial_radius_to_km() {
         let q = nominal::EarthEquatorialRadii::new(1.0);
         assert_relative_eq!(q.to::<Kilometer>().value(), 6_378.137, max_relative = 1e-9);
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn earth_polar_radius_to_km() {
         let q = nominal::EarthPolarRadii::new(1.0);
         assert_relative_eq!(
@@ -1237,24 +895,28 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn lunar_radius_to_km() {
         let q = nominal::LunarRadii::new(1.0);
         assert_relative_eq!(q.to::<Kilometer>().value(), 1_737.4, max_relative = 1e-9);
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn jupiter_radius_to_km() {
         let q = nominal::JupiterRadii::new(1.0);
         assert_relative_eq!(q.to::<Kilometer>().value(), 71_492.0, max_relative = 1e-9);
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn lunar_distance_to_km() {
         let q = nominal::LunarDistances::new(1.0);
         assert_relative_eq!(q.to::<Kilometer>().value(), 384_400.0, max_relative = 1e-9);
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn solar_diameter_to_solar_radius() {
         let diameters = nominal::SolarDiameters::new(1.0);
         let radii = diameters.to::<nominal::SolarRadius>();
@@ -1266,8 +928,11 @@ mod tests {
         assert_eq!(Meter::SYMBOL, "m");
         assert_eq!(Kilometer::SYMBOL, "km");
         assert_eq!(Centimeter::SYMBOL, "cm");
+        #[cfg(feature = "customary")]
         assert_eq!(Inch::SYMBOL, "in");
+        #[cfg(feature = "astro")]
         assert_eq!(AstronomicalUnit::SYMBOL, "au");
+        #[cfg(feature = "astro")]
         assert_eq!(Parsec::SYMBOL, "pc");
     }
 }

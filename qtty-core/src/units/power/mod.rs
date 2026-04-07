@@ -11,18 +11,17 @@
 //! - Nominal astronomical reference: solar luminosity (IAU).
 //!
 //! ```rust
-//! use qtty_core::power::{SolarLuminosities, Watt};
+//! use qtty_core::power::{Kilowatts, Watt};
 //!
-//! let sol = SolarLuminosities::new(1.0);
-//! let w = sol.to::<Watt>();
-//! assert!((w.value() - 3.828e26).abs() < 1e18);
+//! let kw = Kilowatts::new(1.0);
+//! let w = kw.to::<Watt>();
+//! assert_eq!(w.value(), 1000.0);
 //! ```
 //!
-//! ## All power units
+//! ## All power units (default)
 //!
 //! ```rust
 //! use qtty_core::power::*;
-//! use qtty_core::Quantity;
 //!
 //! macro_rules! touch {
 //!     ($T:ty, $v:expr) => {{ let q = <$T>::new($v); let _c = q; assert!(q == q); }};
@@ -31,10 +30,6 @@
 //! touch!(Watts, 1.0);
 //! touch!(Kilowatts, 1.0);   touch!(Megawatts, 1.0);  touch!(Gigawatts, 1.0);
 //! touch!(Milliwatts, 1.0);  touch!(Microwatts, 1.0);
-//! touch!(HorsepowerMetrics, 1.0); touch!(HorsepowerElectrics, 1.0);
-//! touch!(SolarLuminosities, 1.0);
-//! let erg = Quantity::<ErgPerSecond>::new(1.0);
-//! assert!(erg == erg);
 //! ```
 
 use crate::{Quantity, Unit};
@@ -46,6 +41,19 @@ pub use crate::dimension::Power;
 /// Marker trait for power units.
 pub trait PowerUnit: Unit<Dim = Power> {}
 impl<T: Unit<Dim = Power>> PowerUnit for T {}
+
+#[cfg(feature = "fundamental-physics")]
+mod fundamental_physics;
+#[cfg(feature = "fundamental-physics")]
+pub use fundamental_physics::*;
+#[cfg(feature = "customary")]
+mod customary;
+#[cfg(feature = "customary")]
+pub use customary::*;
+#[cfg(feature = "astro")]
+mod astro;
+#[cfg(feature = "astro")]
+pub use astro::*;
 
 /// Watt (SI coherent derived unit).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
@@ -95,99 +103,23 @@ si_watt!(Exawatt, "EW", 1e18, EW, Exawatts, EW_1);
 si_watt!(Zettawatt, "ZW", 1e21, ZW, Zettawatts, ZW_1);
 si_watt!(Yottawatt, "YW", 1e24, YW, Yottawatts, YW_1);
 
-/// Erg per second (`erg/s`).
-///
-/// Exact: `1 erg = 1e-7 J`, so `1 erg/s = 1e-7 W`.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "erg/s", dimension = Power, ratio = 1e-7)]
-pub struct ErgPerSecond;
-/// One erg/s.
-pub const ERG_PER_S: Quantity<ErgPerSecond> = Quantity::new(1.0);
-
-/// Metric horsepower (`PS`), defined as exactly `735.49875 W`.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "PS", dimension = Power, ratio = 73_549_875.0 / 100_000.0)]
-pub struct HorsepowerMetric;
-/// A quantity measured in metric horsepower.
-pub type HorsepowerMetrics = Quantity<HorsepowerMetric>;
-/// One metric horsepower.
-pub const PS: HorsepowerMetrics = HorsepowerMetrics::new(1.0);
-
-/// Electric horsepower (`hp_e`), defined as exactly `746 W`.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "hp_e", dimension = Power, ratio = 746.0)]
-pub struct HorsepowerElectric;
-/// A quantity measured in electric horsepower.
-pub type HorsepowerElectrics = Quantity<HorsepowerElectric>;
-/// One electric horsepower.
-pub const HP_E: HorsepowerElectrics = HorsepowerElectrics::new(1.0);
-
-/// Solar luminosity (IAU nominal constant; watts per L☉).
-///
-/// This is a *nominal reference* value intended for consistent conversion.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "L☉", dimension = Power, ratio = 3.828e26)]
-pub struct SolarLuminosity;
-/// A quantity measured in solar luminosities.
-pub type SolarLuminosities = Quantity<SolarLuminosity>;
-/// One solar luminosity.
-pub const L_SUN: SolarLuminosities = SolarLuminosities::new(1.0);
-
-// Generate all bidirectional From implementations between power units.
+// ─────────────────────────────────────────────────────────────────────────────
+// From conversions: default (metric) units
+// ─────────────────────────────────────────────────────────────────────────────
 crate::impl_unit_from_conversions!(
-    Watt,
-    Yoctowatt,
-    Zeptowatt,
-    Attowatt,
-    Femtowatt,
-    Picowatt,
-    Nanowatt,
-    Microwatt,
-    Milliwatt,
-    Deciwatt,
-    Decawatt,
-    Hectowatt,
-    Kilowatt,
-    Megawatt,
-    Gigawatt,
-    Terawatt,
-    Petawatt,
-    Exawatt,
-    Zettawatt,
-    Yottawatt,
-    ErgPerSecond,
-    HorsepowerMetric,
-    HorsepowerElectric,
-    SolarLuminosity
+    Watt, Yoctowatt, Zeptowatt, Attowatt, Femtowatt, Picowatt, Nanowatt, Microwatt, Milliwatt,
+    Deciwatt, Decawatt, Hectowatt, Kilowatt, Megawatt, Gigawatt, Terawatt, Petawatt, Exawatt,
+    Zettawatt, Yottawatt
 );
 
-// Optional cross-unit operator support (`==`, `<`, etc.).
+// ─────────────────────────────────────────────────────────────────────────────
+// Cross-unit ops: default (metric) units
+// ─────────────────────────────────────────────────────────────────────────────
 #[cfg(feature = "cross-unit-ops")]
 crate::impl_unit_cross_unit_ops!(
-    Watt,
-    Yoctowatt,
-    Zeptowatt,
-    Attowatt,
-    Femtowatt,
-    Picowatt,
-    Nanowatt,
-    Microwatt,
-    Milliwatt,
-    Deciwatt,
-    Decawatt,
-    Hectowatt,
-    Kilowatt,
-    Megawatt,
-    Gigawatt,
-    Terawatt,
-    Petawatt,
-    Exawatt,
-    Zettawatt,
-    Yottawatt,
-    ErgPerSecond,
-    HorsepowerMetric,
-    HorsepowerElectric,
-    SolarLuminosity
+    Watt, Yoctowatt, Zeptowatt, Attowatt, Femtowatt, Picowatt, Nanowatt, Microwatt, Milliwatt,
+    Deciwatt, Decawatt, Hectowatt, Kilowatt, Megawatt, Gigawatt, Terawatt, Petawatt, Exawatt,
+    Zettawatt, Yottawatt
 );
 
 #[cfg(all(test, feature = "std"))]
@@ -201,6 +133,7 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "astro")]
     fn solar_luminosity_to_watts() {
         let sol = SolarLuminosities::new(1.0);
         let w = sol.to::<Watt>();
@@ -209,6 +142,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn watts_to_solar_luminosity() {
         let w = Watts::new(3.828e26);
         let sol = w.to::<SolarLuminosity>();
@@ -216,6 +150,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn multiple_solar_luminosities() {
         let sol = SolarLuminosities::new(3.0);
         let w = sol.to::<Watt>();
@@ -227,12 +162,14 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "astro")]
     fn solar_luminosity_ratio_sanity() {
         // RATIO should be 3.828e26
         assert_relative_eq!(SolarLuminosity::RATIO, 3.828e26, max_relative = 1e-9);
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn solar_luminosity_order_of_magnitude() {
         let sun = SolarLuminosities::new(1.0);
         let w = sun.to::<Watt>();
@@ -246,6 +183,7 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "astro")]
     fn roundtrip_w_sol() {
         let original = Watts::new(1e26);
         let converted = original.to::<SolarLuminosity>();
@@ -259,6 +197,7 @@ mod tests {
 
     proptest! {
         #[test]
+        #[cfg(feature = "astro")]
         fn prop_roundtrip_w_sol(w in 1e20..1e30f64) {
             let original = Watts::new(w);
             let converted = original.to::<SolarLuminosity>();
@@ -293,6 +232,7 @@ mod tests {
     // ─── Non-SI power units ──────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "fundamental-physics")]
     fn erg_per_second_to_watt() {
         let erg_s = Quantity::<ErgPerSecond>::new(1e7);
         let w = erg_s.to::<Watt>();
@@ -301,6 +241,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn metric_horsepower_to_watt() {
         let ps = HorsepowerMetrics::new(1.0);
         let w = ps.to::<Watt>();
@@ -309,6 +250,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn electric_horsepower_to_watt() {
         let hp = HorsepowerElectrics::new(1.0);
         let w = hp.to::<Watt>();
@@ -321,7 +263,9 @@ mod tests {
         assert_eq!(Watt::SYMBOL, "W");
         assert_eq!(Kilowatt::SYMBOL, "kW");
         assert_eq!(Megawatt::SYMBOL, "MW");
+        #[cfg(feature = "customary")]
         assert_eq!(HorsepowerMetric::SYMBOL, "PS");
+        #[cfg(feature = "fundamental-physics")]
         assert_eq!(ErgPerSecond::SYMBOL, "erg/s");
     }
 }

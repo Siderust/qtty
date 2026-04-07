@@ -13,7 +13,7 @@ readme = "README.md"
 [lib]
 crate-type = ["cdylib", "staticlib", "rlib"]
 [dependencies]
-qtty = { version = "0.5.0", path = "../qtty" }
+qtty = { version = "0.5.0", path = "../qtty", features = ["all-units"] }
 serde = { version = "1.0", features = ["derive"] }
 pyo3 = { version = "0.28.2", optional = true }
 
