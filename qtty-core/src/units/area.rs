@@ -141,6 +141,37 @@ pub struct Acre;
 /// A quantity measured in acres.
 pub type Acres = Quantity<Acre>;
 
+// Generate all bidirectional From implementations between area units.
+crate::impl_unit_from_conversions!(
+    SquareMeter,
+    SquareKilometer,
+    SquareCentimeter,
+    SquareMillimeter,
+    Hectare,
+    Are,
+    SquareInch,
+    SquareFoot,
+    SquareYard,
+    SquareMile,
+    Acre
+);
+
+// Optional cross-unit operator support (`==`, `<`, etc.).
+#[cfg(feature = "cross-unit-ops")]
+crate::impl_unit_cross_unit_ops!(
+    SquareMeter,
+    SquareKilometer,
+    SquareCentimeter,
+    SquareMillimeter,
+    Hectare,
+    Are,
+    SquareInch,
+    SquareFoot,
+    SquareYard,
+    SquareMile,
+    Acre
+);
+
 #[cfg(test)]
 mod tests {
     use super::*;

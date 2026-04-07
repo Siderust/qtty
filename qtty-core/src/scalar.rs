@@ -299,9 +299,14 @@ pub trait Transcendental: Real {
 /// Types implementing this trait (e.g., `Rational64`, `Rational32`, signed integers)
 /// provide exact arithmetic but typically do not support transcendental functions.
 ///
+/// # Unit conversion is lossy
+///
 /// The `to_f64_approx` and `from_f64_approx` methods enable lossy unit conversion
-/// for types that cannot implement [`Real`]. For integers, `from_f64_approx`
-/// truncates toward zero.
+/// for types that cannot implement [`Real`]. Because unit ratios are stored as `f64`,
+/// converting between units with an `Exact` scalar goes through `f64` and back,
+/// which introduces floating-point rounding. This means the `scalar-rational` feature
+/// provides **exact arithmetic within a fixed unit** but **lossy unit conversion**.
+/// For integers, `from_f64_approx` truncates toward zero.
 ///
 /// This trait is sealed and cannot be implemented outside this crate.
 pub trait Exact: Scalar {

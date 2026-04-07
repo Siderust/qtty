@@ -676,7 +676,13 @@ impl<U: Unit, S: Scalar + Rem<Output = S>> Rem<S> for Quantity<U, S> {
     }
 }
 
-// PartialEq with scalar
+// PartialEq with scalar — compares the **raw stored value** (in whatever unit
+// the quantity is expressed in) against the scalar. This does NOT perform any
+// unit conversion. For example, `Kilometers::new(1.0) == 1.0` is `true` even
+// though the SI-canonical value would be `1000.0` metres.
+//
+// Prefer comparing against a typed quantity (e.g., `distance == Meters::new(5.0)`)
+// whenever unit safety matters.
 impl<U: Unit, S: Scalar> PartialEq<S> for Quantity<U, S> {
     #[inline]
     fn eq(&self, other: &S) -> bool {
@@ -684,7 +690,8 @@ impl<U: Unit, S: Scalar> PartialEq<S> for Quantity<U, S> {
     }
 }
 
-// PartialOrd with scalar
+// PartialOrd with scalar — same caveat as `PartialEq<S>`: compares the raw
+// stored value without unit conversion.
 impl<U: Unit, S: Scalar> PartialOrd<S> for Quantity<U, S> {
     #[inline]
     fn partial_cmp(&self, other: &S) -> Option<Ordering> {
