@@ -241,9 +241,10 @@ fn f32_per_mul_recovers_numerator() {
 }
 
 #[test]
-fn f32_simplify() {
-    let ratio: Quantity<Per<TestUnit, TestUnit>, f32> = Quantity::new(2.5);
-    let unitless: Quantity<Unitless, f32> = ratio.simplify();
+fn f32_same_unit_division_gives_unitless() {
+    let a = Quantity::<TestUnit, f32>::new(5.0);
+    let b = Quantity::<TestUnit, f32>::new(2.0);
+    let unitless: Quantity<Unitless, f32> = a / b;
     assert!((unitless.value() - 2.5).abs() < 1e-6);
 }
 

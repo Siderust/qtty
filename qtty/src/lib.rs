@@ -137,7 +137,7 @@ pub use qtty_core::{
     Acceleration, AmountOfSubstance, Angular, Area, Current, Dimension, Dimensionless, Energy,
     Exact, Force, FrequencyDim, IntegerScalar, Length, LuminousIntensity, Mass, Per, Power, Prod,
     Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16, QuantityI32, QuantityI64,
-    QuantityI8, Real, Scalar, Simplify, Temperature, Time, Transcendental, Unit, UnitDiv, UnitMul,
+    QuantityI8, Real, Scalar, Temperature, Time, Transcendental, Unit, UnitDiv, UnitMul,
     VelocityDim, Volume,
 };
 

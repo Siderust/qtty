@@ -11,7 +11,7 @@
 //! - Area and volume from dimensional multiplication
 //! - Mass and power units (including solar constants)
 //! - Angular frequency (`Frequency<A, T>` = angular / time)
-//! - Unitless ratio via `Simplify`
+//! - Unitless ratio from same-unit division
 //! - Integer-scalar quantities (`i64`) with `to_lossy()`
 //! - `f32`-scalar quantities
 //! - The `qtty_vec!` macro for typed arrays and vectors
@@ -24,7 +24,7 @@
 use qtty::frequency::Frequency;
 use qtty::velocity::Velocity;
 use qtty::{
-    AstronomicalUnit, CubicMeter, Kilogram, Kilometer, LightYear, Meter, Radian, Second, Simplify,
+    AstronomicalUnit, CubicMeter, Kilogram, Kilometer, LightYear, Meter, Radian, Second,
     SolarLuminosity, SolarMass, SquareMeter, Unitless, Watt,
 };
 
@@ -97,16 +97,12 @@ fn main() {
         moon_rads.value()
     );
 
-    // ── 6. Unitless ratio via Simplify ───────────────────────────────────────
-    println!("\n6. Unitless ratio (Simplify):");
+    // ── 6. Unitless ratio ───────────────────────────────────────────────────
+    println!("\n6. Unitless ratio:");
     let au_dist = AstronomicalUnit::new(1.0);
     let au_in_km: Kilometer = au_dist.to::<qtty::unit::Kilometer>();
-    let km_ratio = Kilometer::new(1_000.0) / Kilometer::new(500.0);
-    let dimensionless: Unitless = km_ratio.simplify();
-    println!(
-        "   1 km / 500 m (as km/km ratio) simplifies → {}",
-        dimensionless.value()
-    );
+    let dimensionless: Unitless = Kilometer::new(1_000.0) / Kilometer::new(500.0);
+    println!("   1000 km / 500 km = {}", dimensionless.value());
     assert!((dimensionless.value() - 2.0).abs() < 1e-12);
     println!("   1 AU = {:.0} km", au_in_km.value());
 

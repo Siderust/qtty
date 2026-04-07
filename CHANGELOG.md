@@ -13,16 +13,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - Macro-generated fallback pair tables for all built-in unit marker types: cross-unit division produces `Per<A, B>`, multiplication produces `Prod<A, B>`.
 - Exported macros `impl_unit_division_pairs!`, `impl_unit_multiplication_pairs!`, and `impl_unit_arithmetic_pairs!` for downstream custom units to opt into the same generated arithmetic.
 - `asin`, `acos`, and `atan` methods on `Quantity<Unitless, S>` (moved from `Quantity<Per<U, U>>`) so same-unit ratios keep ergonomic trig behavior.
-- Identity `Simplify` impls for `Quantity<Unitless>` and commonly used built-in plain units as a compatibility bridge.
-- Comprehensive compile-time and runtime tests for unit arithmetic covering all recovery patterns, cross-unit pairs, custom-unit registration, and Simplify compatibility.
+- Comprehensive compile-time and runtime tests for unit arithmetic covering all recovery patterns, cross-unit pairs, and custom-unit registration.
 - Added invalid-unit regression coverage for `qtty-ffi` quantity carriers so raw `u32` unit IDs from C callers are rejected cleanly instead of producing undefined behavior.
 - Added serde round-trip coverage for the Rust-side `qtty-ffi` carrier structs using their raw numeric unit IDs.
 
 ### Removed
 - Removed the `scalar-decimal` feature and `rust_decimal` scalar support from `qtty-core` and the `qtty` facade crate.
+- **Breaking:** Removed the public `Simplify` trait and `.simplify()` method from `qtty-core` and the `qtty` facade crate; unit arithmetic now resolves these cases at compile time.
 
 ### Changed
-- **Breaking:** Same-unit division (`Meter / Meter`) now directly returns `Quantity<Unitless>` instead of `Quantity<Per<Meter, Meter>>`. Code that type-annotated the result as `Quantity<Per<U, U>>` must be updated. Explicit `Per<U, U>` values can still be `.simplify()`d as before.
+- **Breaking:** Same-unit division (`Meter / Meter`) now directly returns `Quantity<Unitless>` instead of `Quantity<Per<Meter, Meter>>`. Code that type-annotated the result as `Quantity<Per<U, U>>` must be updated.
 - **Breaking:** `Per<N, D> * D` and `D * Per<N, D>` now directly return the numerator quantity (e.g., `Quantity<Meter>`) instead of `Quantity<Prod<Per<N, D>, D>>`. The `.to()` call to recover the numerator is no longer needed.
 - **Breaking:** `N / Per<N, D>` now directly returns the denominator quantity (e.g., `Quantity<Second>`) instead of `Quantity<Per<N, Per<N, D>>>`.
 - **Breaking:** `asin`/`acos`/`atan` are now on `Quantity<Unitless>` instead of `Quantity<Per<U, U>>`. Since same-unit division now yields `Unitless` directly, this is transparent for `(a / b).asin()` patterns.
@@ -158,7 +158,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - **Velocity and Frequency**: Refactored to use generic parameterized types instead of specific aliases (e.g., `Velocity<Kilometer, Second>` instead of `KilometersPerSecond`).
 - Import organization in examples for improved clarity and consistency.
 - Conversion constants and ratios updated across all unit modules for accuracy and consistency.
- - **Unitless refactor**: `Unitless` changed from a `pub type Unitless = f64` alias to a proper zero-sized marker type (`pub struct Unitless;`). The `Unit` impl for `Unitless` remains (`RATIO = 1.0`, `Dim = Dimensionless`, `SYMBOL = ""`) while removing the implicit `Unit` implementation for `f64`. API ergonomics preserved: `Quantity<Unitless>` display/From conversions/Simplify behavior unchanged. Updated docs, tests, and examples accordingly.
+- **Unitless refactor**: `Unitless` changed from a `pub type Unitless = f64` alias to a proper zero-sized marker type (`pub struct Unitless;`). The `Unit` impl for `Unitless` remains (`RATIO = 1.0`, `Dim = Dimensionless`, `SYMBOL = ""`) while removing the implicit `Unit` implementation for `f64`. API ergonomics preserved: `Quantity<Unitless>` display and From conversions unchanged. Updated docs, tests, and examples accordingly.
 
 ### Deprecated
 - `define_unit!` is retained for internal use and backward compatibility; new units in `qtty-core` use `#[derive(Unit)]`.

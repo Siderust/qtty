@@ -249,20 +249,6 @@ fn per_multiplication_commutative() {
 }
 
 #[test]
-fn simplify_per_u_u_to_unitless() {
-    let ratio: Quantity<Per<TestUnit, TestUnit>> = Quantity::new(1.23456);
-    let unitless: Quantity<Unitless> = ratio.simplify();
-    assert!((unitless.value() - 1.23456).abs() < 1e-12);
-}
-
-#[test]
-fn simplify_per_n_per_n_d_to_d() {
-    let q: Quantity<Per<TestUnit, Per<TestUnit, DoubleTestUnit>>> = Quantity::new(7.5);
-    let simplified: Dtu = q.simplify();
-    assert!((simplified.value() - 7.5).abs() < 1e-12);
-}
-
-#[test]
 fn unitless_asin() {
     let ratio: Quantity<Unitless> = Quantity::new(0.5);
     let result = ratio.asin();
