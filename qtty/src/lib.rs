@@ -183,10 +183,12 @@ pub mod i8;
 // ─────────────────────────────────────────────────────────────────────────────
 
 pub use qtty_core::units::angular;
+pub use qtty_core::units::area;
 pub use qtty_core::units::length;
 pub use qtty_core::units::mass;
 pub use qtty_core::units::power;
 pub use qtty_core::units::time;
+pub use qtty_core::units::volume;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Type-level unit markers
