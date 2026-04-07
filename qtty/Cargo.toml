@@ -18,6 +18,15 @@ std = ["alloc", "qtty-core/std"]
 cross-unit-ops = ["qtty-core/cross-unit-ops"]
 serde = ["qtty-core/serde"]
 
+# Unit-family feature gates (forwarded to qtty-core)
+astro = ["qtty-core/astro"]
+navigation = ["qtty-core/navigation"]
+fundamental-physics = ["qtty-core/fundamental-physics"]
+customary = ["qtty-core/customary"]
+land-area = ["qtty-core/land-area"]
+julian-time = ["qtty-core/julian-time"]
+all-units = ["astro", "navigation", "fundamental-physics", "customary", "land-area", "julian-time"]
+
 # Scalar type support
 scalar-rational = ["qtty-core/scalar-rational"]
 pyo3 = ["qtty-core/pyo3", "dep:pyo3"]
@@ -41,4 +50,12 @@ required-features = ["pyo3"]
 
 [[example]]
 name = "all_units"
-required-features = ["std"]
+required-features = ["std", "all-units"]
+
+[[example]]
+name = "astronomy"
+required-features = ["std", "astro"]
+
+[[example]]
+name = "angles"
+required-features = ["std", "astro"]
