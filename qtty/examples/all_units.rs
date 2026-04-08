@@ -10,7 +10,7 @@
 //! Demonstrates:
 //! - Area and volume from dimensional multiplication
 //! - Mass and power units (including solar constants)
-//! - Angular frequency (`Frequency<A, T>` = angular / time)
+//! - Angular rate (`AngularRate<A, T>` = angular / time)
 //! - Unitless ratio from same-unit division
 //! - Integer-scalar quantities (`i64`) with `to_lossy()`
 //! - `f32`-scalar quantities
@@ -21,7 +21,7 @@
 //! cargo run -p qtty --example all_units
 //! ```
 
-use qtty::frequency::Frequency;
+use qtty::frequency::AngularRate;
 use qtty::velocity::Velocity;
 use qtty::{
     AstronomicalUnit, CubicMeter, Kilogram, Kilometer, LightYear, Meter, Radian, Second,
@@ -74,12 +74,12 @@ fn main() {
     println!("   1 L☉ = {:.4e} W", sol_watts.value());
     assert!(sol_watts.value() > 3.8e26 && sol_watts.value() < 3.9e26);
 
-    // ── 5. Angular Frequency ─────────────────────────────────────────────────
-    println!("\n5. Angular frequency (Angular / Time):");
+    // ── 5. Angular Rate ──────────────────────────────────────────────────
+    println!("\n5. Angular rate (Angular / Time):");
     // Earth rotation: 360° per day
-    let earth_rot: Frequency<qtty::unit::Degree, qtty::unit::Day> = Frequency::new(360.0);
-    let earth_rot_rads: Frequency<qtty::unit::Radian, qtty::unit::Day> = earth_rot.to();
-    let earth_rot_degs: Frequency<qtty::unit::Degree, qtty::unit::Second> = earth_rot.to();
+    let earth_rot: AngularRate<qtty::unit::Degree, qtty::unit::Day> = AngularRate::new(360.0);
+    let earth_rot_rads: AngularRate<qtty::unit::Radian, qtty::unit::Day> = earth_rot.to();
+    let earth_rot_degs: AngularRate<qtty::unit::Degree, qtty::unit::Second> = earth_rot.to();
     println!(
         "   Earth rotation: {} °/day = {:.6} rad/day = {:.6e} °/s",
         earth_rot.value(),
@@ -88,9 +88,9 @@ fn main() {
     );
 
     // Moon mean angular velocity: 360° per 27.321661 days (sidereal)
-    let moon_angular: Frequency<qtty::unit::Degree, qtty::unit::Day> =
-        Frequency::new(360.0 / 27.321_661);
-    let moon_rads: Frequency<qtty::unit::Radian, qtty::unit::Day> = moon_angular.to();
+    let moon_angular: AngularRate<qtty::unit::Degree, qtty::unit::Day> =
+        AngularRate::new(360.0 / 27.321_661);
+    let moon_rads: AngularRate<qtty::unit::Radian, qtty::unit::Day> = moon_angular.to();
     println!(
         "   Moon angular velocity: {:.4} °/day = {:.4} rad/day",
         moon_angular.value(),

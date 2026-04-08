@@ -27,7 +27,7 @@
 //! assert!((vol.value() - 27.0).abs() < 1e-12);
 //! ```
 //!
-//! ## All volume units
+//! ## All volume units (default)
 //!
 //! ```rust
 //! use qtty_core::volume::*;
@@ -40,9 +40,7 @@
 //! touch!(CubicCentimeters, 1.0); touch!(CubicMillimeters, 1.0);
 //! touch!(Liters, 1.0);         touch!(Milliliters, 1.0);
 //! touch!(Microliters, 1.0);    touch!(Centiliters, 1.0);
-//! touch!(Deciliters, 1.0);     touch!(CubicInches, 1.0);
-//! touch!(CubicFeet, 1.0);      touch!(UsGallons, 1.0);
-//! touch!(UsFluidOunces, 1.0);
+//! touch!(Deciliters, 1.0);
 //! ```
 
 use crate::{Quantity, Unit};
@@ -54,6 +52,11 @@ pub use crate::dimension::Volume;
 /// Marker trait for any [`Unit`] whose dimension is [`Volume`].
 pub trait VolumeUnit: Unit<Dim = Volume> {}
 impl<T: Unit<Dim = Volume>> VolumeUnit for T {}
+
+#[cfg(feature = "customary")]
+mod customary;
+#[cfg(feature = "customary")]
+pub use customary::*;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SI / metric volume units
@@ -127,36 +130,32 @@ pub struct Deciliter;
 pub type Deciliters = Quantity<Deciliter>;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Imperial / US customary volume units
+// From conversions: default (metric + litre) units
 // ─────────────────────────────────────────────────────────────────────────────
+crate::impl_unit_from_conversions!(
+    CubicMeter,
+    CubicKilometer,
+    CubicCentimeter,
+    CubicMillimeter,
+    Liter,
+    Milliliter,
+    Microliter,
+    Centiliter,
+    Deciliter
+);
 
-/// Cubic inch (`1.6387064e-5 m³`, exact: `0.0254³ m³`).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "in³", dimension = Volume, ratio = 1.638_706_4e-5)]
-pub struct CubicInch;
-/// A quantity measured in cubic inches.
-pub type CubicInches = Quantity<CubicInch>;
-
-/// Cubic foot (`0.028316846592 m³`, exact: `0.3048³ m³`).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "ft³", dimension = Volume, ratio = 0.028_316_846_592)]
-pub struct CubicFoot;
-/// A quantity measured in cubic feet.
-pub type CubicFeet = Quantity<CubicFoot>;
-
-/// US liquid gallon (`0.003785411784 m³`, exact: `231 in³`).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "gal", dimension = Volume, ratio = 0.003_785_411_784)]
-pub struct UsGallon;
-/// A quantity measured in US gallons.
-pub type UsGallons = Quantity<UsGallon>;
-
-/// US fluid ounce (`2.95735295625e-5 m³`, exact: `gal / 128`).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "fl oz", dimension = Volume, ratio = 2.957_352_956_25e-5)]
-pub struct UsFluidOunce;
-/// A quantity measured in US fluid ounces.
-pub type UsFluidOunces = Quantity<UsFluidOunce>;
+#[cfg(feature = "cross-unit-ops")]
+crate::impl_unit_cross_unit_ops!(
+    CubicMeter,
+    CubicKilometer,
+    CubicCentimeter,
+    CubicMillimeter,
+    Liter,
+    Milliliter,
+    Microliter,
+    Centiliter,
+    Deciliter
+);
 
 #[cfg(test)]
 mod tests {
@@ -185,6 +184,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn us_gallon_to_liter() {
         let g = UsGallons::new(1.0);
         let l: Liters = g.to();
@@ -192,6 +192,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn cubic_foot_to_liter() {
         let cf = CubicFeet::new(1.0);
         let l: Liters = cf.to();
@@ -247,6 +248,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn cubic_inch_to_cubic_cm() {
         let cin = CubicInches::new(1.0);
         let cc: CubicCentimeters = cin.to();
@@ -255,6 +257,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn us_fluid_ounce_to_milliliter() {
         let floz = UsFluidOunces::new(1.0);
         let ml: Milliliters = floz.to();
@@ -267,6 +270,7 @@ mod tests {
         assert_eq!(CubicMeter::SYMBOL, "m³");
         assert_eq!(Liter::SYMBOL, "L");
         assert_eq!(Milliliter::SYMBOL, "mL");
+        #[cfg(feature = "customary")]
         assert_eq!(UsGallon::SYMBOL, "gal");
     }
 }

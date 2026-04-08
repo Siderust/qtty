@@ -5,7 +5,7 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [x.y.z] - yyyy-mm-dd
+## [Unreleased] - yyyy-mm-dd
 
 ### Added
 - New **stable unit arithmetic layer** (`unit_arithmetic` module) with `UnitDiv` and `UnitMul` extension traits that control output types for quantity division and multiplication, replacing the previous blanket impls.
@@ -16,6 +16,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - Comprehensive compile-time and runtime tests for unit arithmetic covering all recovery patterns, cross-unit pairs, and custom-unit registration.
 - Added invalid-unit regression coverage for `qtty-ffi` quantity carriers so raw `u32` unit IDs from C callers are rejected cleanly instead of producing undefined behavior.
 - Added serde round-trip coverage for the Rust-side `qtty-ffi` carrier structs using their raw numeric unit IDs.
+- `AngularRate<N, D>` type alias and `AngularRateUnit` trait as the primary
+  names for angular-rate quantities (`Angular / Time`), replacing the
+  misleading `Frequency` / `FrequencyUnit` names. `AngularRateDim` replaces
+  `FrequencyDim` in the dimension layer.
+- `Exact::checked_from_f64(value: f64) -> Option<Self>` for converting a
+  floating-point value to an exact scalar without silent overflow; returns
+  `None` when the value is out of range or non-representable. (QTTY-003)
+- `Quantity::checked_to_lossy<T>() -> Option<Quantity<T, S>>` for safe
+  cross-unit conversion when the scalar type is `Exact`; returns `None`
+  instead of silently saturating.
+- 18 regression tests in `qtty-core/tests/audit_regressions.rs` covering
+  cross-unit comparison symmetry, integer `abs()` boundary behaviour, and
+  lossy/checked conversion semantics.
 
 ### Removed
 - Removed the `scalar-decimal` feature and `rust_decimal` scalar support from `qtty-core` and the `qtty` facade crate.
@@ -28,6 +41,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - **Breaking:** `asin`/`acos`/`atan` are now on `Quantity<Unitless>` instead of `Quantity<Per<U, U>>`. Since same-unit division now yields `Unitless` directly, this is transparent for `(a / b).asin()` patterns.
 - `qtty-ffi` quantity carrier fields and C-facing unit parameters now use raw `u32`/`uint32_t` unit IDs, and `qtty_ffi_version()` now reports ABI version `500`.
 - `Quantity::sqrt()` was renamed to `Quantity::scalar_sqrt()` to make it explicit that the operation returns the underlying scalar rather than a quantity with the original unit type.
+- **Breaking:** `Frequency<N, D>`, `FrequencyUnit`, and `FrequencyDim` are
+  removed. Use `AngularRate<N, D>`, `AngularRateUnit`, and `AngularRateDim`.
+- Cross-unit comparison (`==`, `<`, …) is now **symmetric**: both operands
+  are independently scaled to the same reference unit before comparison,
+  eliminating the previous asymmetry where `a == b` could differ from
+  `b == a` after a floating-point round-trip.
 
 ### Fixed
 - Cleaned up stale `scalar-decimal` cfg gates, tests, and documentation left behind by the Decimal removal so current builds no longer emit `unexpected_cfgs` warnings.
@@ -37,6 +56,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - Fixed `qtty` pure `no_std` test/example target checks by gating std-only integration tests and the `all_units` example.
 - Generalized generated pairwise unit `From`/`Into` conversions across `Real` scalar types so non-default scalar modules such as `qtty::f32` get the same conversion ergonomics as the default `f64` surface.
 - Updated crate docs and README dependency snippets to the current `0.5.0` release line.
+- Integer `abs()` no longer panics in debug builds on the minimum signed
+  value (e.g. `i32::MIN`); it now uses `saturating_abs()`, returning
+  `i32::MAX`. (QTTY-002)
+- `to_lossy()` documentation now explicitly describes truncation and
+  saturation semantics for integer scalars and warns that the result may
+  not equal the original value. (QTTY-003)
+- Crate-level docs in `qtty-core` and `qtty` corrected: removed the claim
+  that all quantities are "backed by an `f64`"; serde section now says "raw
+  scalar value" instead of "raw `f64` value".
 
 ## [0.5.0] - 2026-03-31
 

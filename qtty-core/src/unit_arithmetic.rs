@@ -268,183 +268,342 @@ macro_rules! register_builtin_units {
     };
 }
 
-register_builtin_units!(
-    // ── Unitless ──────────────────────────────────────────────────────────
-    crate::unit::Unitless,
-    // ── Length ────────────────────────────────────────────────────────────
-    crate::units::length::Meter,
-    crate::units::length::Kilometer,
-    crate::units::length::Centimeter,
-    crate::units::length::Millimeter,
-    crate::units::length::Micrometer,
-    crate::units::length::Nanometer,
-    crate::units::length::Picometer,
-    crate::units::length::Femtometer,
-    crate::units::length::Attometer,
-    crate::units::length::Zeptometer,
-    crate::units::length::Yoctometer,
-    crate::units::length::Megameter,
-    crate::units::length::Decimeter,
-    crate::units::length::Decameter,
-    crate::units::length::Hectometer,
-    crate::units::length::Gigameter,
-    crate::units::length::Terameter,
-    crate::units::length::Petameter,
-    crate::units::length::Exameter,
-    crate::units::length::Zettameter,
-    crate::units::length::Yottameter,
-    crate::units::length::AstronomicalUnit,
-    crate::units::length::LightYear,
-    crate::units::length::Parsec,
-    crate::units::length::Kiloparsec,
-    crate::units::length::Megaparsec,
-    crate::units::length::Gigaparsec,
-    crate::units::length::Inch,
-    crate::units::length::Foot,
-    crate::units::length::Yard,
-    crate::units::length::Mile,
-    crate::units::length::NauticalMile,
-    crate::units::length::Chain,
-    crate::units::length::Rod,
-    crate::units::length::Link,
-    crate::units::length::Fathom,
-    crate::units::length::EarthMeridionalCircumference,
-    crate::units::length::EarthEquatorialCircumference,
-    crate::units::length::BohrRadius,
-    crate::units::length::ClassicalElectronRadius,
-    crate::units::length::PlanckLength,
-    crate::units::length::ElectronReducedComptonWavelength,
-    // ── Length (nominal) ──────────────────────────────────────────────────
-    crate::units::length::nominal::SolarRadius,
-    crate::units::length::nominal::SolarDiameter,
-    crate::units::length::nominal::EarthRadius,
-    crate::units::length::nominal::EarthEquatorialRadius,
-    crate::units::length::nominal::EarthPolarRadius,
-    crate::units::length::nominal::JupiterRadius,
-    crate::units::length::nominal::LunarRadius,
-    crate::units::length::nominal::LunarDistance,
-    // ── Time ──────────────────────────────────────────────────────────────
-    crate::units::time::Attosecond,
-    crate::units::time::Femtosecond,
-    crate::units::time::Picosecond,
-    crate::units::time::Nanosecond,
-    crate::units::time::Microsecond,
-    crate::units::time::Millisecond,
-    crate::units::time::Centisecond,
-    crate::units::time::Decisecond,
-    crate::units::time::Second,
-    crate::units::time::Decasecond,
-    crate::units::time::Hectosecond,
-    crate::units::time::Kilosecond,
-    crate::units::time::Megasecond,
-    crate::units::time::Gigasecond,
-    crate::units::time::Terasecond,
-    crate::units::time::Minute,
-    crate::units::time::Hour,
-    crate::units::time::Day,
-    crate::units::time::Week,
-    crate::units::time::Fortnight,
-    crate::units::time::Year,
-    crate::units::time::Decade,
-    crate::units::time::Century,
-    crate::units::time::Millennium,
-    crate::units::time::JulianYear,
-    crate::units::time::JulianCentury,
-    crate::units::time::SiderealDay,
-    crate::units::time::SynodicMonth,
-    crate::units::time::SiderealYear,
-    // ── Mass ──────────────────────────────────────────────────────────────
-    crate::units::mass::Gram,
-    crate::units::mass::Yoctogram,
-    crate::units::mass::Zeptogram,
-    crate::units::mass::Attogram,
-    crate::units::mass::Femtogram,
-    crate::units::mass::Picogram,
-    crate::units::mass::Nanogram,
-    crate::units::mass::Microgram,
-    crate::units::mass::Milligram,
-    crate::units::mass::Centigram,
-    crate::units::mass::Decigram,
-    crate::units::mass::Decagram,
-    crate::units::mass::Hectogram,
-    crate::units::mass::Kilogram,
-    crate::units::mass::Megagram,
-    crate::units::mass::Gigagram,
-    crate::units::mass::Teragram,
-    crate::units::mass::Petagram,
-    crate::units::mass::Exagram,
-    crate::units::mass::Zettagram,
-    crate::units::mass::Yottagram,
-    crate::units::mass::Tonne,
-    crate::units::mass::Carat,
-    crate::units::mass::Grain,
-    crate::units::mass::Pound,
-    crate::units::mass::Ounce,
-    crate::units::mass::Stone,
-    crate::units::mass::ShortTon,
-    crate::units::mass::LongTon,
-    crate::units::mass::AtomicMassUnit,
-    crate::units::mass::SolarMass,
-    // ── Angular ───────────────────────────────────────────────────────────
-    crate::units::angular::Degree,
-    crate::units::angular::Radian,
-    crate::units::angular::Milliradian,
-    crate::units::angular::Arcminute,
-    crate::units::angular::Arcsecond,
-    crate::units::angular::MilliArcsecond,
-    crate::units::angular::MicroArcsecond,
-    crate::units::angular::Gradian,
-    crate::units::angular::Turn,
-    crate::units::angular::HourAngle,
-    // ── Power ─────────────────────────────────────────────────────────────
-    crate::units::power::Watt,
-    crate::units::power::Yoctowatt,
-    crate::units::power::Zeptowatt,
-    crate::units::power::Attowatt,
-    crate::units::power::Femtowatt,
-    crate::units::power::Picowatt,
-    crate::units::power::Nanowatt,
-    crate::units::power::Microwatt,
-    crate::units::power::Milliwatt,
-    crate::units::power::Deciwatt,
-    crate::units::power::Decawatt,
-    crate::units::power::Hectowatt,
-    crate::units::power::Kilowatt,
-    crate::units::power::Megawatt,
-    crate::units::power::Gigawatt,
-    crate::units::power::Terawatt,
-    crate::units::power::Petawatt,
-    crate::units::power::Exawatt,
-    crate::units::power::Zettawatt,
-    crate::units::power::Yottawatt,
-    crate::units::power::ErgPerSecond,
-    crate::units::power::HorsepowerMetric,
-    crate::units::power::HorsepowerElectric,
-    crate::units::power::SolarLuminosity,
-    // ── Area ──────────────────────────────────────────────────────────────
-    crate::units::area::SquareMeter,
-    crate::units::area::SquareKilometer,
-    crate::units::area::SquareCentimeter,
-    crate::units::area::SquareMillimeter,
-    crate::units::area::Hectare,
-    crate::units::area::Are,
-    crate::units::area::SquareInch,
-    crate::units::area::SquareFoot,
-    crate::units::area::SquareYard,
-    crate::units::area::SquareMile,
-    crate::units::area::Acre,
-    // ── Volume ────────────────────────────────────────────────────────────
-    crate::units::volume::CubicMeter,
-    crate::units::volume::CubicKilometer,
-    crate::units::volume::CubicCentimeter,
-    crate::units::volume::CubicMillimeter,
-    crate::units::volume::Liter,
-    crate::units::volume::Milliliter,
-    crate::units::volume::Microliter,
-    crate::units::volume::Centiliter,
-    crate::units::volume::Deciliter,
-    crate::units::volume::CubicInch,
-    crate::units::volume::CubicFoot,
-    crate::units::volume::UsGallon,
-    crate::units::volume::UsFluidOunce
-);
+/// Generate cross-group `UnitDiv` impls between two disjoint sets of units,
+/// plus intra-group pairs within the `extra` set.
+///
+/// `register_builtin_units_extend!(base1, base2, ...; extra1, extra2, ...)`
+/// produces:
+/// - `impl BuiltinUnit` for each extra unit
+/// - all-pairs `UnitDiv` within the extras
+/// - cross-pairs between every base and every extra
+#[cfg(any(
+    feature = "astro",
+    feature = "julian-time",
+    feature = "customary",
+    feature = "navigation",
+    feature = "fundamental-physics",
+    feature = "land-area",
+))]
+macro_rules! register_builtin_units_extend {
+    ($($base:ty),+; $($extra:ty),+) => {
+        // Mark each extension type as built-in.
+        $(impl BuiltinUnit for $extra {})+
+
+        // Intra-extra pairs.
+        impl_unit_division_pairs!($($extra),+);
+
+        // Cross base × extra pairs (recursive to avoid repetition-count mismatch).
+        __impl_div_pairs_each_extra_to_bases!({$($base),+} $($extra),+);
+    };
+}
+
+/// Recursive helper: iterate over extras one at a time, emitting cross-division
+/// impls with the full base list each time.
+#[cfg(any(
+    feature = "astro",
+    feature = "julian-time",
+    feature = "customary",
+    feature = "navigation",
+    feature = "fundamental-physics",
+    feature = "land-area",
+))]
+macro_rules! __impl_div_pairs_each_extra_to_bases {
+    // Base case: single extra remaining.
+    ({$($base:ty),+} $extra:ty) => {
+        $(
+            impl $crate::unit_arithmetic::UnitDiv<$extra> for $base
+            where
+                <$base as $crate::Unit>::Dim: $crate::DimDiv<<$extra as $crate::Unit>::Dim>,
+                <<$base as $crate::Unit>::Dim as $crate::DimDiv<<$extra as $crate::Unit>::Dim>>::Output: $crate::Dimension,
+            {
+                type Output = $crate::Per<$base, $extra>;
+            }
+            impl $crate::unit_arithmetic::UnitDiv<$base> for $extra
+            where
+                <$extra as $crate::Unit>::Dim: $crate::DimDiv<<$base as $crate::Unit>::Dim>,
+                <<$extra as $crate::Unit>::Dim as $crate::DimDiv<<$base as $crate::Unit>::Dim>>::Output: $crate::Dimension,
+            {
+                type Output = $crate::Per<$extra, $base>;
+            }
+        )+
+    };
+    // Recursive case: peel the first extra, recurse on the rest.
+    ({$($base:ty),+} $first:ty, $($rest:ty),+) => {
+        $(
+            impl $crate::unit_arithmetic::UnitDiv<$first> for $base
+            where
+                <$base as $crate::Unit>::Dim: $crate::DimDiv<<$first as $crate::Unit>::Dim>,
+                <<$base as $crate::Unit>::Dim as $crate::DimDiv<<$first as $crate::Unit>::Dim>>::Output: $crate::Dimension,
+            {
+                type Output = $crate::Per<$base, $first>;
+            }
+            impl $crate::unit_arithmetic::UnitDiv<$base> for $first
+            where
+                <$first as $crate::Unit>::Dim: $crate::DimDiv<<$base as $crate::Unit>::Dim>,
+                <<$first as $crate::Unit>::Dim as $crate::DimDiv<<$base as $crate::Unit>::Dim>>::Output: $crate::Dimension,
+            {
+                type Output = $crate::Per<$first, $base>;
+            }
+        )+
+        __impl_div_pairs_each_extra_to_bases!({$($base),+} $($rest),+);
+    };
+}
+
+/// Helper: invokes `$callback!` with the full list of always-available (base)
+/// unit types so that the list is written in exactly one place.
+macro_rules! with_base_units {
+    ($callback:ident) => {
+        $callback!(
+            // ── Unitless ──────────────────────────────────────────────────────────
+            crate::unit::Unitless,
+            // ── Length (metric SI) ────────────────────────────────────────────────
+            crate::units::length::Meter,
+            crate::units::length::Kilometer,
+            crate::units::length::Centimeter,
+            crate::units::length::Millimeter,
+            crate::units::length::Micrometer,
+            crate::units::length::Nanometer,
+            crate::units::length::Picometer,
+            crate::units::length::Femtometer,
+            crate::units::length::Attometer,
+            crate::units::length::Zeptometer,
+            crate::units::length::Yoctometer,
+            crate::units::length::Megameter,
+            crate::units::length::Decimeter,
+            crate::units::length::Decameter,
+            crate::units::length::Hectometer,
+            crate::units::length::Gigameter,
+            crate::units::length::Terameter,
+            crate::units::length::Petameter,
+            crate::units::length::Exameter,
+            crate::units::length::Zettameter,
+            crate::units::length::Yottameter,
+            // ── Time (SI + calendar) ──────────────────────────────────────────────
+            crate::units::time::Attosecond,
+            crate::units::time::Femtosecond,
+            crate::units::time::Picosecond,
+            crate::units::time::Nanosecond,
+            crate::units::time::Microsecond,
+            crate::units::time::Millisecond,
+            crate::units::time::Centisecond,
+            crate::units::time::Decisecond,
+            crate::units::time::Second,
+            crate::units::time::Decasecond,
+            crate::units::time::Hectosecond,
+            crate::units::time::Kilosecond,
+            crate::units::time::Megasecond,
+            crate::units::time::Gigasecond,
+            crate::units::time::Terasecond,
+            crate::units::time::Minute,
+            crate::units::time::Hour,
+            crate::units::time::Day,
+            crate::units::time::Week,
+            crate::units::time::Fortnight,
+            crate::units::time::Year,
+            crate::units::time::Decade,
+            crate::units::time::Century,
+            crate::units::time::Millennium,
+            // ── Mass (SI + tonne) ─────────────────────────────────────────────────
+            crate::units::mass::Gram,
+            crate::units::mass::Yoctogram,
+            crate::units::mass::Zeptogram,
+            crate::units::mass::Attogram,
+            crate::units::mass::Femtogram,
+            crate::units::mass::Picogram,
+            crate::units::mass::Nanogram,
+            crate::units::mass::Microgram,
+            crate::units::mass::Milligram,
+            crate::units::mass::Centigram,
+            crate::units::mass::Decigram,
+            crate::units::mass::Decagram,
+            crate::units::mass::Hectogram,
+            crate::units::mass::Kilogram,
+            crate::units::mass::Megagram,
+            crate::units::mass::Gigagram,
+            crate::units::mass::Teragram,
+            crate::units::mass::Petagram,
+            crate::units::mass::Exagram,
+            crate::units::mass::Zettagram,
+            crate::units::mass::Yottagram,
+            crate::units::mass::Tonne,
+            // ── Angular (base) ────────────────────────────────────────────────────
+            crate::units::angular::Degree,
+            crate::units::angular::Radian,
+            crate::units::angular::Milliradian,
+            crate::units::angular::Turn,
+            // ── Power (SI watts) ──────────────────────────────────────────────────
+            crate::units::power::Watt,
+            crate::units::power::Yoctowatt,
+            crate::units::power::Zeptowatt,
+            crate::units::power::Attowatt,
+            crate::units::power::Femtowatt,
+            crate::units::power::Picowatt,
+            crate::units::power::Nanowatt,
+            crate::units::power::Microwatt,
+            crate::units::power::Milliwatt,
+            crate::units::power::Deciwatt,
+            crate::units::power::Decawatt,
+            crate::units::power::Hectowatt,
+            crate::units::power::Kilowatt,
+            crate::units::power::Megawatt,
+            crate::units::power::Gigawatt,
+            crate::units::power::Terawatt,
+            crate::units::power::Petawatt,
+            crate::units::power::Exawatt,
+            crate::units::power::Zettawatt,
+            crate::units::power::Yottawatt,
+            // ── Area (metric) ─────────────────────────────────────────────────────
+            crate::units::area::SquareMeter,
+            crate::units::area::SquareKilometer,
+            crate::units::area::SquareCentimeter,
+            crate::units::area::SquareMillimeter,
+            // ── Volume (metric + litre) ───────────────────────────────────────────
+            crate::units::volume::CubicMeter,
+            crate::units::volume::CubicKilometer,
+            crate::units::volume::CubicCentimeter,
+            crate::units::volume::CubicMillimeter,
+            crate::units::volume::Liter,
+            crate::units::volume::Milliliter,
+            crate::units::volume::Microliter,
+            crate::units::volume::Centiliter,
+            crate::units::volume::Deciliter
+        );
+    };
+}
+
+// Register always-available (base) units.
+with_base_units!(register_builtin_units);
+
+// ── Feature-gated unit extensions ────────────────────────────────────────────
+// Each block extends the base registration with BuiltinUnit + cross-division
+// pairs against all base units.
+
+#[cfg(feature = "astro")]
+macro_rules! extend_with_astro {
+    ($($base:ty),+) => {
+        register_builtin_units_extend!(
+            $($base),+;
+            crate::units::length::AstronomicalUnit,
+            crate::units::length::LightYear,
+            crate::units::length::Parsec,
+            crate::units::length::Kiloparsec,
+            crate::units::length::Megaparsec,
+            crate::units::length::Gigaparsec,
+            crate::units::length::nominal::SolarRadius,
+            crate::units::length::nominal::SolarDiameter,
+            crate::units::length::nominal::EarthRadius,
+            crate::units::length::nominal::EarthEquatorialRadius,
+            crate::units::length::nominal::EarthPolarRadius,
+            crate::units::length::nominal::JupiterRadius,
+            crate::units::length::nominal::LunarRadius,
+            crate::units::length::nominal::LunarDistance,
+            crate::units::time::SiderealDay,
+            crate::units::time::SynodicMonth,
+            crate::units::time::SiderealYear,
+            crate::units::mass::SolarMass,
+            crate::units::angular::Arcminute,
+            crate::units::angular::Arcsecond,
+            crate::units::angular::MilliArcsecond,
+            crate::units::angular::MicroArcsecond,
+            crate::units::angular::HourAngle,
+            crate::units::power::SolarLuminosity
+        );
+    };
+}
+#[cfg(feature = "astro")]
+with_base_units!(extend_with_astro);
+
+#[cfg(feature = "julian-time")]
+macro_rules! extend_with_julian_time {
+    ($($base:ty),+) => {
+        register_builtin_units_extend!(
+            $($base),+;
+            crate::units::time::JulianYear,
+            crate::units::time::JulianCentury
+        );
+    };
+}
+#[cfg(feature = "julian-time")]
+with_base_units!(extend_with_julian_time);
+
+#[cfg(feature = "customary")]
+macro_rules! extend_with_customary {
+    ($($base:ty),+) => {
+        register_builtin_units_extend!(
+            $($base),+;
+            crate::units::length::Inch,
+            crate::units::length::Foot,
+            crate::units::length::Yard,
+            crate::units::length::Mile,
+            crate::units::mass::Carat,
+            crate::units::mass::Grain,
+            crate::units::mass::Pound,
+            crate::units::mass::Ounce,
+            crate::units::mass::Stone,
+            crate::units::mass::ShortTon,
+            crate::units::mass::LongTon,
+            crate::units::power::HorsepowerMetric,
+            crate::units::power::HorsepowerElectric,
+            crate::units::area::SquareInch,
+            crate::units::area::SquareFoot,
+            crate::units::area::SquareYard,
+            crate::units::area::SquareMile,
+            crate::units::volume::CubicInch,
+            crate::units::volume::CubicFoot,
+            crate::units::volume::UsGallon,
+            crate::units::volume::UsFluidOunce
+        );
+    };
+}
+#[cfg(feature = "customary")]
+with_base_units!(extend_with_customary);
+
+#[cfg(feature = "navigation")]
+macro_rules! extend_with_navigation {
+    ($($base:ty),+) => {
+        register_builtin_units_extend!(
+            $($base),+;
+            crate::units::length::NauticalMile,
+            crate::units::length::Chain,
+            crate::units::length::Rod,
+            crate::units::length::Link,
+            crate::units::length::Fathom,
+            crate::units::length::EarthMeridionalCircumference,
+            crate::units::length::EarthEquatorialCircumference,
+            crate::units::angular::Gradian
+        );
+    };
+}
+#[cfg(feature = "navigation")]
+with_base_units!(extend_with_navigation);
+
+#[cfg(feature = "fundamental-physics")]
+macro_rules! extend_with_fundamental_physics {
+    ($($base:ty),+) => {
+        register_builtin_units_extend!(
+            $($base),+;
+            crate::units::length::BohrRadius,
+            crate::units::length::ClassicalElectronRadius,
+            crate::units::length::PlanckLength,
+            crate::units::length::ElectronReducedComptonWavelength,
+            crate::units::mass::AtomicMassUnit,
+            crate::units::power::ErgPerSecond
+        );
+    };
+}
+#[cfg(feature = "fundamental-physics")]
+with_base_units!(extend_with_fundamental_physics);
+
+#[cfg(feature = "land-area")]
+macro_rules! extend_with_land_area {
+    ($($base:ty),+) => {
+        register_builtin_units_extend!(
+            $($base),+;
+            crate::units::area::Hectare,
+            crate::units::area::Are,
+            crate::units::area::Acre
+        );
+    };
+}
+#[cfg(feature = "land-area")]
+with_base_units!(extend_with_land_area);

@@ -14,22 +14,30 @@ macro_rules! define_scalar_aliases {
         pub type Degree<S = $scalar> = $crate::Quantity<$crate::unit::Degree, S>;
         /// Radian.
         pub type Radian<S = $scalar> = $crate::Quantity<$crate::unit::Radian, S>;
-        /// Arcminute.
-        pub type Arcminute<S = $scalar> = $crate::Quantity<$crate::unit::Arcminute, S>;
-        /// Arcsecond.
-        pub type Arcsecond<S = $scalar> = $crate::Quantity<$crate::unit::Arcsecond, S>;
         /// Milliradian.
         pub type Milliradian<S = $scalar> = $crate::Quantity<$crate::unit::Milliradian, S>;
-        /// Milliarcseconds.
-        pub type MilliArcsecond<S = $scalar> = $crate::Quantity<$crate::unit::MilliArcsecond, S>;
-        /// Microarcseconds.
-        pub type MicroArcsecond<S = $scalar> = $crate::Quantity<$crate::unit::MicroArcsecond, S>;
-        /// Gradian.
-        pub type Gradian<S = $scalar> = $crate::Quantity<$crate::unit::Gradian, S>;
         /// Turn.
         pub type Turn<S = $scalar> = $crate::Quantity<$crate::unit::Turn, S>;
+
+        #[cfg(feature = "astro")]
+        /// Arcminute.
+        pub type Arcminute<S = $scalar> = $crate::Quantity<$crate::unit::Arcminute, S>;
+        #[cfg(feature = "astro")]
+        /// Arcsecond.
+        pub type Arcsecond<S = $scalar> = $crate::Quantity<$crate::unit::Arcsecond, S>;
+        #[cfg(feature = "astro")]
+        /// Milliarcseconds.
+        pub type MilliArcsecond<S = $scalar> = $crate::Quantity<$crate::unit::MilliArcsecond, S>;
+        #[cfg(feature = "astro")]
+        /// Microarcseconds.
+        pub type MicroArcsecond<S = $scalar> = $crate::Quantity<$crate::unit::MicroArcsecond, S>;
+        #[cfg(feature = "astro")]
         /// Hour angles.
         pub type HourAngle<S = $scalar> = $crate::Quantity<$crate::unit::HourAngle, S>;
+
+        #[cfg(feature = "navigation")]
+        /// Gradian.
+        pub type Gradian<S = $scalar> = $crate::Quantity<$crate::unit::Gradian, S>;
 
         // ── Length ───────────────────────────────────────────────────────
         /// Meter.
@@ -74,71 +82,104 @@ macro_rules! define_scalar_aliases {
         pub type Zettameter<S = $scalar> = $crate::Quantity<$crate::unit::Zettameter, S>;
         /// Yottameter.
         pub type Yottameter<S = $scalar> = $crate::Quantity<$crate::unit::Yottameter, S>;
+
+        #[cfg(feature = "astro")]
         /// Astronomical units.
         pub type AstronomicalUnit<S = $scalar> =
             $crate::Quantity<$crate::unit::AstronomicalUnit, S>;
+        #[cfg(feature = "astro")]
         /// Light years.
         pub type LightYear<S = $scalar> = $crate::Quantity<$crate::unit::LightYear, S>;
+        #[cfg(feature = "astro")]
         /// Parsec.
         pub type Parsec<S = $scalar> = $crate::Quantity<$crate::unit::Parsec, S>;
+        #[cfg(feature = "astro")]
         /// Kiloparsec.
         pub type Kiloparsec<S = $scalar> = $crate::Quantity<$crate::unit::Kiloparsec, S>;
+        #[cfg(feature = "astro")]
         /// Megaparsec.
         pub type Megaparsec<S = $scalar> = $crate::Quantity<$crate::unit::Megaparsec, S>;
+        #[cfg(feature = "astro")]
         /// Gigaparsec.
         pub type Gigaparsec<S = $scalar> = $crate::Quantity<$crate::unit::Gigaparsec, S>;
+
+        #[cfg(feature = "customary")]
         /// Inch.
         pub type Inch<S = $scalar> = $crate::Quantity<$crate::unit::Inch, S>;
+        #[cfg(feature = "customary")]
         /// Foot.
         pub type Foot<S = $scalar> = $crate::Quantity<$crate::unit::Foot, S>;
+        #[cfg(feature = "customary")]
         /// Yard.
         pub type Yard<S = $scalar> = $crate::Quantity<$crate::unit::Yard, S>;
+        #[cfg(feature = "customary")]
         /// Mile.
         pub type Mile<S = $scalar> = $crate::Quantity<$crate::unit::Mile, S>;
+
+        #[cfg(feature = "navigation")]
         /// Nautical miles.
         pub type NauticalMile<S = $scalar> = $crate::Quantity<$crate::unit::NauticalMile, S>;
+        #[cfg(feature = "navigation")]
         /// Chain.
         pub type Chain<S = $scalar> = $crate::Quantity<$crate::unit::Chain, S>;
+        #[cfg(feature = "navigation")]
         /// Rod.
         pub type Rod<S = $scalar> = $crate::Quantity<$crate::unit::Rod, S>;
+        #[cfg(feature = "navigation")]
         /// Link.
         pub type Link<S = $scalar> = $crate::Quantity<$crate::unit::Link, S>;
+        #[cfg(feature = "navigation")]
         /// Fathom.
         pub type Fathom<S = $scalar> = $crate::Quantity<$crate::unit::Fathom, S>;
+        #[cfg(feature = "navigation")]
         /// Earth meridional circumferences.
         pub type EarthMeridionalCircumference<S = $scalar> =
             $crate::Quantity<$crate::unit::EarthMeridionalCircumference, S>;
+        #[cfg(feature = "navigation")]
         /// Earth equatorial circumferences.
         pub type EarthEquatorialCircumference<S = $scalar> =
             $crate::Quantity<$crate::unit::EarthEquatorialCircumference, S>;
+
+        #[cfg(feature = "fundamental-physics")]
         /// Bohr radii.
         pub type BohrRadius<S = $scalar> = $crate::Quantity<$crate::unit::BohrRadius, S>;
+        #[cfg(feature = "fundamental-physics")]
         /// Classical electron radii.
         pub type ClassicalElectronRadius<S = $scalar> =
             $crate::Quantity<$crate::unit::ClassicalElectronRadius, S>;
+        #[cfg(feature = "fundamental-physics")]
         /// Planck lengths.
         pub type PlanckLength<S = $scalar> = $crate::Quantity<$crate::unit::PlanckLength, S>;
+        #[cfg(feature = "fundamental-physics")]
         /// Electron reduced Compton wavelengths.
         pub type ElectronReducedComptonWavelength<S = $scalar> =
             $crate::Quantity<$crate::unit::ElectronReducedComptonWavelength, S>;
 
         // ── Length: nominal ──────────────────────────────────────────────
+        #[cfg(feature = "astro")]
         /// Solar radiuses (nominal).
         pub type SolarRadius<S = $scalar> = $crate::Quantity<$crate::unit::SolarRadius, S>;
+        #[cfg(feature = "astro")]
         /// Earth radii (nominal).
         pub type EarthRadius<S = $scalar> = $crate::Quantity<$crate::unit::EarthRadius, S>;
+        #[cfg(feature = "astro")]
         /// Earth equatorial radii (nominal).
         pub type EarthEquatorialRadius<S = $scalar> =
             $crate::Quantity<$crate::unit::EarthEquatorialRadius, S>;
+        #[cfg(feature = "astro")]
         /// Earth polar radii (nominal).
         pub type EarthPolarRadius<S = $scalar> =
             $crate::Quantity<$crate::unit::EarthPolarRadius, S>;
+        #[cfg(feature = "astro")]
         /// Lunar radii (nominal).
         pub type LunarRadius<S = $scalar> = $crate::Quantity<$crate::unit::LunarRadius, S>;
+        #[cfg(feature = "astro")]
         /// Jupiter radii (nominal).
         pub type JupiterRadius<S = $scalar> = $crate::Quantity<$crate::unit::JupiterRadius, S>;
+        #[cfg(feature = "astro")]
         /// Lunar distances (nominal).
         pub type LunarDistance<S = $scalar> = $crate::Quantity<$crate::unit::LunarDistance, S>;
+        #[cfg(feature = "astro")]
         /// Solar diameters (nominal).
         pub type SolarDiameter<S = $scalar> = $crate::Quantity<$crate::unit::SolarDiameter, S>;
 
@@ -191,14 +232,19 @@ macro_rules! define_scalar_aliases {
         pub type Century<S = $scalar> = $crate::Quantity<$crate::unit::Century, S>;
         /// Millennium.
         pub type Millennium<S = $scalar> = $crate::Quantity<$crate::unit::Millennium, S>;
+        #[cfg(feature = "julian-time")]
         /// Julian years.
         pub type JulianYear<S = $scalar> = $crate::Quantity<$crate::unit::JulianYear, S>;
+        #[cfg(feature = "julian-time")]
         /// Julian centuries.
         pub type JulianCentury<S = $scalar> = $crate::Quantity<$crate::unit::JulianCentury, S>;
+        #[cfg(feature = "astro")]
         /// Sidereal days.
         pub type SiderealDay<S = $scalar> = $crate::Quantity<$crate::unit::SiderealDay, S>;
+        #[cfg(feature = "astro")]
         /// Synodic months.
         pub type SynodicMonth<S = $scalar> = $crate::Quantity<$crate::unit::SynodicMonth, S>;
+        #[cfg(feature = "astro")]
         /// Sidereal years.
         pub type SiderealYear<S = $scalar> = $crate::Quantity<$crate::unit::SiderealYear, S>;
 
@@ -247,22 +293,31 @@ macro_rules! define_scalar_aliases {
         pub type Yottagram<S = $scalar> = $crate::Quantity<$crate::unit::Yottagram, S>;
         /// Tonne (metric tons).
         pub type Tonne<S = $scalar> = $crate::Quantity<$crate::unit::Tonne, S>;
+        #[cfg(feature = "customary")]
         /// Carat.
         pub type Carat<S = $scalar> = $crate::Quantity<$crate::unit::Carat, S>;
+        #[cfg(feature = "customary")]
         /// Grain.
         pub type Grain<S = $scalar> = $crate::Quantity<$crate::unit::Grain, S>;
+        #[cfg(feature = "customary")]
         /// Pound.
         pub type Pound<S = $scalar> = $crate::Quantity<$crate::unit::Pound, S>;
+        #[cfg(feature = "customary")]
         /// Ounce.
         pub type Ounce<S = $scalar> = $crate::Quantity<$crate::unit::Ounce, S>;
+        #[cfg(feature = "customary")]
         /// Stone.
         pub type Stone<S = $scalar> = $crate::Quantity<$crate::unit::Stone, S>;
+        #[cfg(feature = "customary")]
         /// Short tons (US tons).
         pub type ShortTon<S = $scalar> = $crate::Quantity<$crate::unit::ShortTon, S>;
+        #[cfg(feature = "customary")]
         /// Long tons (Imperial tons).
         pub type LongTon<S = $scalar> = $crate::Quantity<$crate::unit::LongTon, S>;
+        #[cfg(feature = "fundamental-physics")]
         /// Atomic mass units (daltons).
         pub type AtomicMassUnit<S = $scalar> = $crate::Quantity<$crate::unit::AtomicMassUnit, S>;
+        #[cfg(feature = "astro")]
         /// Solar masses.
         pub type SolarMass<S = $scalar> = $crate::Quantity<$crate::unit::SolarMass, S>;
 
@@ -307,14 +362,18 @@ macro_rules! define_scalar_aliases {
         pub type Zettawatt<S = $scalar> = $crate::Quantity<$crate::unit::Zettawatt, S>;
         /// Yottawatt.
         pub type Yottawatt<S = $scalar> = $crate::Quantity<$crate::unit::Yottawatt, S>;
+        #[cfg(feature = "fundamental-physics")]
         /// Ergs per second.
         pub type ErgPerSecond<S = $scalar> = $crate::Quantity<$crate::unit::ErgPerSecond, S>;
+        #[cfg(feature = "customary")]
         /// Horsepower (metric).
         pub type HorsepowerMetric<S = $scalar> =
             $crate::Quantity<$crate::unit::HorsepowerMetric, S>;
+        #[cfg(feature = "customary")]
         /// Horsepower (electric).
         pub type HorsepowerElectric<S = $scalar> =
             $crate::Quantity<$crate::unit::HorsepowerElectric, S>;
+        #[cfg(feature = "astro")]
         /// Solar luminosities.
         pub type SolarLuminosity<S = $scalar> = $crate::Quantity<$crate::unit::SolarLuminosity, S>;
 
@@ -329,18 +388,25 @@ macro_rules! define_scalar_aliases {
         /// Square millimeters.
         pub type SquareMillimeter<S = $scalar> =
             $crate::Quantity<$crate::unit::SquareMillimeter, S>;
+        #[cfg(feature = "land-area")]
         /// Hectare.
         pub type Hectare<S = $scalar> = $crate::Quantity<$crate::unit::Hectare, S>;
+        #[cfg(feature = "land-area")]
         /// Are.
         pub type Are<S = $scalar> = $crate::Quantity<$crate::unit::Are, S>;
+        #[cfg(feature = "customary")]
         /// Square inches.
         pub type SquareInch<S = $scalar> = $crate::Quantity<$crate::unit::SquareInch, S>;
+        #[cfg(feature = "customary")]
         /// Square feet.
         pub type SquareFoot<S = $scalar> = $crate::Quantity<$crate::unit::SquareFoot, S>;
+        #[cfg(feature = "customary")]
         /// Square yards.
         pub type SquareYard<S = $scalar> = $crate::Quantity<$crate::unit::SquareYard, S>;
+        #[cfg(feature = "customary")]
         /// Square miles.
         pub type SquareMile<S = $scalar> = $crate::Quantity<$crate::unit::SquareMile, S>;
+        #[cfg(feature = "land-area")]
         /// Acre.
         pub type Acre<S = $scalar> = $crate::Quantity<$crate::unit::Acre, S>;
 
@@ -363,12 +429,16 @@ macro_rules! define_scalar_aliases {
         pub type Centiliter<S = $scalar> = $crate::Quantity<$crate::unit::Centiliter, S>;
         /// Deciliter.
         pub type Deciliter<S = $scalar> = $crate::Quantity<$crate::unit::Deciliter, S>;
+        #[cfg(feature = "customary")]
         /// Cubic inches.
         pub type CubicInch<S = $scalar> = $crate::Quantity<$crate::unit::CubicInch, S>;
+        #[cfg(feature = "customary")]
         /// Cubic feet.
         pub type CubicFoot<S = $scalar> = $crate::Quantity<$crate::unit::CubicFoot, S>;
+        #[cfg(feature = "customary")]
         /// US gallons.
         pub type UsGallon<S = $scalar> = $crate::Quantity<$crate::unit::UsGallon, S>;
+        #[cfg(feature = "customary")]
         /// US fluid ounces.
         pub type UsFluidOunce<S = $scalar> = $crate::Quantity<$crate::unit::UsFluidOunce, S>;
     };

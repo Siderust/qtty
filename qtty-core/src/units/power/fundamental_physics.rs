@@ -1,0 +1,29 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Vallés Puig, Ramon
+
+use super::*;
+use qtty_derive::Unit;
+
+/// Erg per second (`erg/s`).
+///
+/// Exact: `1 erg = 1e-7 J`, so `1 erg/s = 1e-7 W`.
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
+#[unit(symbol = "erg/s", dimension = Power, ratio = 1e-7)]
+pub struct ErgPerSecond;
+/// One erg/s.
+pub const ERG_PER_S: Quantity<ErgPerSecond> = Quantity::new(1.0);
+
+crate::impl_unit_from_conversions_between!(
+    Watt, Yoctowatt, Zeptowatt, Attowatt, Femtowatt, Picowatt, Nanowatt, Microwatt,
+    Milliwatt, Deciwatt, Decawatt, Hectowatt, Kilowatt, Megawatt, Gigawatt, Terawatt,
+    Petawatt, Exawatt, Zettawatt, Yottawatt;
+    ErgPerSecond
+);
+
+#[cfg(feature = "cross-unit-ops")]
+crate::impl_unit_cross_unit_ops_between!(
+    Watt, Yoctowatt, Zeptowatt, Attowatt, Femtowatt, Picowatt, Nanowatt, Microwatt,
+    Milliwatt, Deciwatt, Decawatt, Hectowatt, Kilowatt, Megawatt, Gigawatt, Terawatt,
+    Petawatt, Exawatt, Zettawatt, Yottawatt;
+    ErgPerSecond
+);
