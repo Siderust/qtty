@@ -6,8 +6,11 @@
 //! `qtty-core` provides a minimal, zero-cost units model:
 //!
 //! - A *unit* is a zero-sized marker type implementing [`Unit`].
-//! - A value tagged with a unit is a [`Quantity<U>`], backed by an `f64`.
-//! - Conversion is an explicit, type-checked scaling via [`Quantity::to`].
+//! - A value tagged with a unit is a [`Quantity<U, S>`], where `S` is the scalar
+//!   type (defaults to `f64`). Supported scalars include `f64`, `f32`, signed
+//!   integers (`i8`–`i128`), and optionally `Rational64`/`Rational32`.
+//! - Conversion is an explicit, type-checked scaling via [`Quantity::to`] (for
+//!   [`Real`] scalars) or [`Quantity::to_lossy`] (for [`Exact`] scalars).
 //! - Derived units like velocity are expressed as [`Per<N, D>`] (e.g. `Meter/Second`).
 //!
 //! Most users should depend on `qtty` (the facade crate) unless they need direct access to these primitives.
@@ -22,7 +25,6 @@
 //!
 //! # What this crate does not try to solve
 //!
-//! - Exact arithmetic (`Quantity` is `f64`).
 //! - General-purpose symbolic simplification of arbitrary unit expressions.
 //!   Products and quotients are structural (`Prod<A, B>`, `Per<A, B>`); use `.to()` to convert to named units.
 //!
@@ -66,14 +68,15 @@
 //!
 //! - `std` (default): enables `std` support.
 //! - `cross-unit-ops` (default): enables direct cross-unit comparison operators (`==`, `<`, etc.) for built-in unit catalogs.
-//! - `serde`: enables `serde` support for `Quantity<U>`; serialization is the raw `f64` value only.
+//! - `serde`: enables `serde` support for `Quantity<U, S>`; serialization is the raw scalar value.
 //! - `pyo3`: enables PyO3 bindings for Python interop via `#[pyclass]` and `#[pymethods]`.
 //!
 //! # Panics and errors
 //!
-//! This crate does not define an error type and does not return `Result` from its core operations. Conversions and
-//! arithmetic are pure `f64` computations; they do not panic on their own, but they follow IEEE-754 behavior (NaN and
-//! infinities propagate according to the underlying operation).
+//! This crate does not define an error type and does not return `Result` from its core operations. For floating-point
+//! scalars (`f64`, `f32`), arithmetic follows IEEE-754 behavior (NaN and infinities propagate). For integer
+//! scalars, `abs()` uses saturating semantics at the minimum value (e.g. `i32::MIN.abs()` returns `i32::MAX`
+//! instead of panicking). Standard integer overflow rules still apply to addition, subtraction, and multiplication.
 //!
 //! # SemVer and stability
 //!
@@ -118,13 +121,13 @@ pub use dimension::{
     AmountOfSubstance,
     // Base dimensions
     Angular,
+    AngularRateDim,
     Area,
     Current,
     Dimension,
     Dimensionless,
     Energy,
     Force,
-    FrequencyDim,
     Length,
     LuminousIntensity,
     Mass,

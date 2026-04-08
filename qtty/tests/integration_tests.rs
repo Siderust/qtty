@@ -54,9 +54,9 @@ fn smoke_test_velocity() {
 
 #[test]
 fn smoke_test_frequency() {
-    let f: frequency::Frequency<qtty::unit::Degree, qtty::unit::Day> =
-        frequency::Frequency::new(360.0);
-    let f_rad: frequency::Frequency<qtty::unit::Radian, qtty::unit::Day> = f.to();
+    let f: frequency::AngularRate<qtty::unit::Degree, qtty::unit::Day> =
+        frequency::AngularRate::new(360.0);
+    let f_rad: frequency::AngularRate<qtty::unit::Radian, qtty::unit::Day> = f.to();
     assert_abs_diff_eq!(f_rad.value(), 2.0 * std::f64::consts::PI, epsilon = 1e-12);
 }
 
@@ -121,8 +121,8 @@ fn angular_separation() {
 #[test]
 fn earth_rotation() {
     // Earth rotates 360° per sidereal day (~23h 56m)
-    let rotation_rate: frequency::Frequency<qtty::unit::Degree, qtty::unit::Day> =
-        frequency::Frequency::new(360.0);
+    let rotation_rate: frequency::AngularRate<qtty::unit::Degree, qtty::unit::Day> =
+        frequency::AngularRate::new(360.0);
 
     // After 6 hours (0.25 days)
     let time = Day::new(0.25);
@@ -174,11 +174,11 @@ fn calculate_velocity_from_distance_time() {
 #[test]
 fn mean_motion_conversion() {
     // Earth's mean motion ≈ 0.9856°/day
-    let mean_motion: frequency::Frequency<qtty::unit::Degree, qtty::unit::Day> =
-        frequency::Frequency::new(0.9856);
+    let mean_motion: frequency::AngularRate<qtty::unit::Degree, qtty::unit::Day> =
+        frequency::AngularRate::new(0.9856);
 
     // Convert to degrees per year
-    let per_year: frequency::Frequency<qtty::unit::Degree, qtty::unit::Year> = mean_motion.to();
+    let per_year: frequency::AngularRate<qtty::unit::Degree, qtty::unit::Year> = mean_motion.to();
 
     // Should be about 360°/year
     assert_relative_eq!(per_year.value(), 360.0, max_relative = 0.01);
