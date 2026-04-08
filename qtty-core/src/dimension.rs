@@ -234,5 +234,9 @@ pub type Energy = Dim<P2, N2, P1, Z0, Z0, Z0, Z0, Z0>;
 /// Power (M¹ · L² · T⁻³).
 pub type Power = Dim<P2, N3, P1, Z0, Z0, Z0, Z0, Z0>;
 
-/// Frequency — angular per time (A¹ · T⁻¹).
-pub type FrequencyDim = Dim<Z0, N1, Z0, Z0, Z0, Z0, Z0, P1>;
+/// Angular rate (A¹ · T⁻¹) — angular displacement per unit time.
+///
+/// This dimension represents *angular frequency* (radians, degrees, etc. per
+/// unit time), **not** SI cycle frequency (Hz = cycles/s). If you need cycle
+/// frequency, model it as `T⁻¹` (inverse time) with dimensionless cycles.
+pub type AngularRateDim = Dim<Z0, N1, Z0, Z0, Z0, Z0, Z0, P1>;
