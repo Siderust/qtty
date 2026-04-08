@@ -101,7 +101,7 @@
 //! - `std` (default): enables `std` support in `qtty-core`.
 //! - `cross-unit-ops` (default): enables direct cross-unit comparison operators (`==`, `<`, etc.) for built-in units.
 //! - `alloc`: enables heap-backed helpers (like `qtty_vec!(vec ...)`) in `no_std` builds.
-//! - `serde`: enables `serde` support for `Quantity<U>`; serialization is the raw `f64` value only.
+//! - `serde`: enables `serde` support for `Quantity<U, S>`; serialization is the raw scalar value.
 //! - `scalar-rational`: enables `num_rational::Rational64` as a scalar type.
 //!
 //! Disable default features for `no_std`:
@@ -120,9 +120,10 @@
 //!
 //! # Panics and errors
 //!
-//! This crate does not define an error type and does not return `Result` from its core operations. Conversions and
-//! arithmetic are pure computations; they do not panic on their own, but they follow IEEE-754 behavior for floats
-//! (NaN and infinities propagate according to the underlying operation).
+//! This crate does not define an error type and does not return `Result` from its core operations. For floating-point
+//! scalars (`f64`, `f32`), arithmetic follows IEEE-754 behavior (NaN and infinities propagate). For integer
+//! scalars, `abs()` uses saturating semantics at the minimum value (e.g. `i32::MIN.abs()` returns `i32::MAX`
+//! instead of panicking). Standard integer overflow rules still apply to addition, subtraction, and multiplication.
 //!
 //! # SemVer and stability
 //!
@@ -134,11 +135,11 @@
 extern crate alloc;
 
 pub use qtty_core::{
-    Acceleration, AmountOfSubstance, Angular, Area, Current, Dimension, Dimensionless, Energy,
-    Exact, Force, FrequencyDim, IntegerScalar, Length, LuminousIntensity, Mass, Per, Power, Prod,
-    Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16, QuantityI32, QuantityI64,
-    QuantityI8, Real, Scalar, Temperature, Time, Transcendental, Unit, UnitDiv, UnitMul,
-    VelocityDim, Volume,
+    Acceleration, AmountOfSubstance, Angular, AngularRateDim, Area, Current, Dimension,
+    Dimensionless, Energy, Exact, Force, IntegerScalar, Length, LuminousIntensity, Mass, Per,
+    Power, Prod, Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16, QuantityI32,
+    QuantityI64, QuantityI8, Real, Scalar, Temperature, Time, Transcendental, Unit, UnitDiv,
+    UnitMul, VelocityDim, Volume,
 };
 
 #[doc(hidden)]
@@ -183,10 +184,12 @@ pub mod i8;
 // ─────────────────────────────────────────────────────────────────────────────
 
 pub use qtty_core::units::angular;
+pub use qtty_core::units::area;
 pub use qtty_core::units::length;
 pub use qtty_core::units::mass;
 pub use qtty_core::units::power;
 pub use qtty_core::units::time;
+pub use qtty_core::units::volume;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Type-level unit markers
@@ -200,50 +203,88 @@ pub use qtty_core::units::time;
 pub mod unit {
     pub use qtty_core::{Per, Prod, Unit, UnitDiv, UnitMul, Unitless};
 
+    #[cfg(feature = "navigation")]
+    pub use qtty_core::units::angular::Gradian;
+    pub use qtty_core::units::angular::{AngularUnit, Degree, Milliradian, Radian, Turn};
+    #[cfg(feature = "astro")]
     pub use qtty_core::units::angular::{
-        AngularUnit, Arcminute, Arcsecond, Degree, Gradian, HourAngle, MicroArcsecond,
-        MilliArcsecond, Milliradian, Radian, Turn,
+        Arcminute, Arcsecond, HourAngle, MicroArcsecond, MilliArcsecond,
     };
+
+    #[cfg(feature = "land-area")]
+    pub use qtty_core::units::area::{Acre, Are, Hectare};
     pub use qtty_core::units::area::{
-        Acre, Are, AreaUnit, Hectare, SquareCentimeter, SquareFoot, SquareInch, SquareKilometer,
-        SquareMeter, SquareMile, SquareMillimeter, SquareYard,
+        AreaUnit, SquareCentimeter, SquareKilometer, SquareMeter, SquareMillimeter,
     };
+    #[cfg(feature = "customary")]
+    pub use qtty_core::units::area::{SquareFoot, SquareInch, SquareMile, SquareYard};
+
+    #[cfg(feature = "astro")]
     pub use qtty_core::units::length::nominal::{
         EarthEquatorialRadius, EarthPolarRadius, EarthRadius, JupiterRadius, LunarDistance,
         LunarRadius, SolarDiameter, SolarRadius,
     };
+    #[cfg(feature = "astro")]
     pub use qtty_core::units::length::{
-        AstronomicalUnit, Attometer, BohrRadius, Centimeter, Chain, ClassicalElectronRadius,
-        Decameter, Decimeter, EarthEquatorialCircumference, EarthMeridionalCircumference,
-        ElectronReducedComptonWavelength, Exameter, Fathom, Femtometer, Foot, Gigameter,
-        Gigaparsec, Hectometer, Inch, Kilometer, Kiloparsec, LengthUnit, LightYear, Link,
-        Megameter, Megaparsec, Meter, Micrometer, Mile, Millimeter, Nanometer, NauticalMile,
-        Parsec, Petameter, Picometer, PlanckLength, Rod, Terameter, Yard, Yoctometer, Yottameter,
-        Zeptometer, Zettameter,
+        AstronomicalUnit, Gigaparsec, Kiloparsec, LightYear, Megaparsec, Parsec,
     };
+    pub use qtty_core::units::length::{
+        Attometer, Centimeter, Decameter, Decimeter, Exameter, Femtometer, Gigameter, Hectometer,
+        Kilometer, LengthUnit, Megameter, Meter, Micrometer, Millimeter, Nanometer, Petameter,
+        Picometer, Terameter, Yoctometer, Yottameter, Zeptometer, Zettameter,
+    };
+    #[cfg(feature = "fundamental-physics")]
+    pub use qtty_core::units::length::{
+        BohrRadius, ClassicalElectronRadius, ElectronReducedComptonWavelength, PlanckLength,
+    };
+    #[cfg(feature = "navigation")]
+    pub use qtty_core::units::length::{
+        Chain, EarthEquatorialCircumference, EarthMeridionalCircumference, Fathom, Link,
+        NauticalMile, Rod,
+    };
+    #[cfg(feature = "customary")]
+    pub use qtty_core::units::length::{Foot, Inch, Mile, Yard};
+
+    #[cfg(feature = "fundamental-physics")]
+    pub use qtty_core::units::mass::AtomicMassUnit;
+    #[cfg(feature = "astro")]
+    pub use qtty_core::units::mass::SolarMass;
     pub use qtty_core::units::mass::{
-        AtomicMassUnit, Attogram, Carat, Centigram, Decagram, Decigram, Exagram, Femtogram,
-        Gigagram, Grain, Gram, Hectogram, Kilogram, LongTon, MassUnit, Megagram, Microgram,
-        Milligram, Nanogram, Ounce, Petagram, Picogram, Pound, ShortTon, SolarMass, Stone,
-        Teragram, Tonne, Yoctogram, Yottagram, Zeptogram, Zettagram,
+        Attogram, Centigram, Decagram, Decigram, Exagram, Femtogram, Gigagram, Gram, Hectogram,
+        Kilogram, MassUnit, Megagram, Microgram, Milligram, Nanogram, Petagram, Picogram, Teragram,
+        Tonne, Yoctogram, Yottagram, Zeptogram, Zettagram,
     };
+    #[cfg(feature = "customary")]
+    pub use qtty_core::units::mass::{Carat, Grain, LongTon, Ounce, Pound, ShortTon, Stone};
+
+    #[cfg(feature = "fundamental-physics")]
+    pub use qtty_core::units::power::ErgPerSecond;
+    #[cfg(feature = "astro")]
+    pub use qtty_core::units::power::SolarLuminosity;
     pub use qtty_core::units::power::{
-        Attowatt, Decawatt, Deciwatt, ErgPerSecond, Exawatt, Femtowatt, Gigawatt, Hectowatt,
-        HorsepowerElectric, HorsepowerMetric, Kilowatt, Megawatt, Microwatt, Milliwatt, Nanowatt,
-        Petawatt, Picowatt, PowerUnit, SolarLuminosity, Terawatt, Watt, Yoctowatt, Yottawatt,
-        Zeptowatt, Zettawatt,
+        Attowatt, Decawatt, Deciwatt, Exawatt, Femtowatt, Gigawatt, Hectowatt, Kilowatt, Megawatt,
+        Microwatt, Milliwatt, Nanowatt, Petawatt, Picowatt, PowerUnit, Terawatt, Watt, Yoctowatt,
+        Yottawatt, Zeptowatt, Zettawatt,
     };
+    #[cfg(feature = "customary")]
+    pub use qtty_core::units::power::{HorsepowerElectric, HorsepowerMetric};
+
     pub use qtty_core::units::time::{
         Attosecond, Centisecond, Century, Day, Decade, Decasecond, Decisecond, Femtosecond,
-        Fortnight, Gigasecond, Hectosecond, Hour, JulianCentury, JulianYear, Kilosecond,
-        Megasecond, Microsecond, Millennium, Millisecond, Minute, Nanosecond, Picosecond, Second,
-        SiderealDay, SiderealYear, SynodicMonth, Terasecond, TimeUnit, Week, Year,
+        Fortnight, Gigasecond, Hectosecond, Hour, Kilosecond, Megasecond, Microsecond, Millennium,
+        Millisecond, Minute, Nanosecond, Picosecond, Second, Terasecond, TimeUnit, Week, Year,
     };
+    #[cfg(feature = "julian-time")]
+    pub use qtty_core::units::time::{JulianCentury, JulianYear};
+    #[cfg(feature = "astro")]
+    pub use qtty_core::units::time::{SiderealDay, SiderealYear, SynodicMonth};
+
     pub use qtty_core::units::volume::{
-        Centiliter, CubicCentimeter, CubicFoot, CubicInch, CubicKilometer, CubicMeter,
-        CubicMillimeter, Deciliter, Liter, Microliter, Milliliter, UsFluidOunce, UsGallon,
-        VolumeUnit,
+        Centiliter, CubicCentimeter, CubicKilometer, CubicMeter, CubicMillimeter, Deciliter, Liter,
+        Microliter, Milliliter, VolumeUnit,
     };
+    #[cfg(feature = "customary")]
+    pub use qtty_core::units::volume::{CubicFoot, CubicInch, UsFluidOunce, UsGallon};
 }
 
 /// Velocity quantities represented as one unit divided by another.
@@ -251,9 +292,9 @@ pub mod velocity {
     pub use qtty_core::units::velocity::{Velocity, VelocityUnit};
 }
 
-/// Angular-frequency quantities represented as one unit divided by another.
+/// Angular-rate quantities represented as one unit divided by another.
 pub mod frequency {
-    pub use qtty_core::units::frequency::{Frequency, FrequencyUnit};
+    pub use qtty_core::units::frequency::{AngularRate, AngularRateUnit};
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -266,10 +307,12 @@ scalar_aliases::define_scalar_aliases!(f64);
 pub type Unitless<S = f64> = Quantity<unit::Unitless, S>;
 
 pub use qtty_core::units::angular::{DEG, RAD};
-pub use qtty_core::units::length::{AU, KM, LY, M};
+#[cfg(feature = "astro")]
+pub use qtty_core::units::length::{AU, LY};
+pub use qtty_core::units::length::{KM, M};
 pub use qtty_core::units::time::{DAY, SEC};
 
-pub use frequency::Frequency;
+pub use frequency::AngularRate;
 pub use velocity::Velocity;
 
 #[doc(hidden)]
