@@ -315,10 +315,11 @@ impl<U: Unit, S: Real> Quantity<U, S> {
 
     /// Checks equality with a quantity of a different unit in the same dimension.
     ///
-    /// The `other` quantity is converted to unit `U` before comparison.
+    /// Both operands are converted to the reference (SI) unit before comparison,
+    /// ensuring that `a.eq_unit(&b)` and `b.eq_unit(&a)` always agree.
+    ///
     /// Note that floating-point conversion may introduce rounding; for exact
-    /// equality checks consider converting both to a common unit first and using
-    /// an epsilon tolerance.
+    /// equality checks consider using an epsilon tolerance.
     ///
     /// # Example
     ///
@@ -331,12 +332,15 @@ impl<U: Unit, S: Real> Quantity<U, S> {
     /// ```
     #[inline]
     pub fn eq_unit<V: Unit<Dim = U::Dim>>(self, other: &Quantity<V, S>) -> bool {
-        self.0 == other.to::<U>().value()
+        let lhs = self.0 * S::from_f64(U::RATIO);
+        let rhs = other.value() * S::from_f64(V::RATIO);
+        lhs == rhs
     }
 
     /// Compares with a quantity of a different unit in the same dimension.
     ///
-    /// The `other` quantity is converted to unit `U` before comparison.
+    /// Both operands are converted to the reference (SI) unit before comparison,
+    /// ensuring order-consistency regardless of operand direction.
     ///
     /// # Example
     ///
@@ -350,7 +354,9 @@ impl<U: Unit, S: Real> Quantity<U, S> {
     /// ```
     #[inline]
     pub fn cmp_unit<V: Unit<Dim = U::Dim>>(self, other: &Quantity<V, S>) -> Option<Ordering> {
-        self.0.partial_cmp(&other.to::<U>().value())
+        let lhs = self.0 * S::from_f64(U::RATIO);
+        let rhs = other.value() * S::from_f64(V::RATIO);
+        lhs.partial_cmp(&rhs)
     }
 }
 
@@ -363,7 +369,14 @@ impl<U: Unit, S: Exact> Quantity<U, S> {
     ///
     /// For integer scalars this performs the conversion through `f64` intermediate
     /// arithmetic, then truncates back to the integer type. The result may lose
-    /// precision due to truncation.
+    /// precision due to:
+    ///
+    /// - **Truncation toward zero** for fractional results (e.g. `1500 m → 1 km`).
+    /// - **Saturation at integer bounds** when the converted value exceeds the
+    ///   target type's range (e.g. `1 km → 127 m` for `i8`).
+    ///
+    /// Use [`checked_to_lossy`](Self::checked_to_lossy) if you need to detect
+    /// range overflow.
     ///
     /// # Example
     ///
@@ -380,6 +393,33 @@ impl<U: Unit, S: Exact> Quantity<U, S> {
         let value_f64 = self.0.to_f64_approx();
         let ratio = U::RATIO / T::RATIO;
         Quantity::<T, S>::new(S::from_f64_approx(value_f64 * ratio))
+    }
+
+    /// Checked lossy unit conversion.
+    ///
+    /// Like [`to_lossy`](Self::to_lossy), but returns `None` when the converted
+    /// value would overflow the scalar type (i.e. saturation/clipping would
+    /// occur). Fractional truncation toward zero is still permitted.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use qtty_core::Quantity;
+    /// use qtty_core::length::{Meter, Kilometer};
+    ///
+    /// let km: Quantity<Kilometer, i8> = Quantity::new(1);
+    /// // 1 km = 1000 m, which doesn't fit in i8
+    /// assert_eq!(km.checked_to_lossy::<Meter>(), None);
+    ///
+    /// let m: Quantity<Meter, i32> = Quantity::new(1500);
+    /// let km: Option<Quantity<Kilometer, i32>> = m.checked_to_lossy();
+    /// assert_eq!(km.unwrap().value(), 1); // truncated, but within range
+    /// ```
+    #[inline]
+    pub fn checked_to_lossy<T: Unit<Dim = U::Dim>>(self) -> Option<Quantity<T, S>> {
+        let value_f64 = self.0.to_f64_approx();
+        let ratio = U::RATIO / T::RATIO;
+        S::checked_from_f64(value_f64 * ratio).map(Quantity::<T, S>::new)
     }
 }
 
