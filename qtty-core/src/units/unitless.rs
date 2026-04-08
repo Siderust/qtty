@@ -5,85 +5,43 @@
 //!
 //! This module contains small adapters for working with dimensionless values.
 //!
-//! # Warning: unit erasure preserves the raw stored number
+//! `Quantity<Unitless>` represents a true dimensionless ratio — for example, the result
+//! of dividing two quantities with the same unit (`km / km`). It is **not** produced by
+//! implicitly converting a dimensioned quantity; such erasure would silently discard
+//! physical meaning.
 //!
-//! The provided conversion from a dimensioned quantity to a unitless quantity is *lossy*: it drops
-//! the unit type **without performing any normalization to the canonical (SI) unit**. The numeric
-//! value is preserved as-is, which means the result depends on which unit the source quantity was
-//! stored in.
+//! # Obtaining `Quantity<Unitless>`
+//!
+//! The canonical way to obtain a dimensionless quantity is through same-unit division:
 //!
 //! ```rust
-//! use qtty_core::time::Seconds;
-//! use qtty_core::length::{Meters, Kilometers};
+//! use qtty_core::length::Meters;
 //! use qtty_core::{Quantity, Unitless};
 //!
-//! // Canonical unit: value matches SI.
-//! let t = Seconds::new(3.0);
-//! let u: Quantity<Unitless> = t.into();
-//! assert_eq!(u.value(), 3.0);
-//!
-//! // Non-canonical unit: value is NOT converted to metres first!
-//! let km = Kilometers::new(1.0);
-//! let u: Quantity<Unitless> = km.into();
-//! assert_eq!(u.value(), 1.0); // NOT 1000.0
+//! let ratio: Quantity<Unitless> = Meters::new(3.0) / Meters::new(6.0);
+//! assert!((ratio.value() - 0.5).abs() < 1e-12);
 //! ```
 //!
-//! If you need the value in canonical (SI base) units before erasing, convert first:
+//! # Raw unit erasure (explicit, lossy)
+//!
+//! If you need to strip the unit tag for adapter or debugging purposes, use
+//! [`Quantity::erase_unit_raw`]. The name makes the loss of dimensional meaning obvious:
 //!
 //! ```rust
-//! use qtty_core::length::{Meter, Kilometers};
+//! use qtty_core::length::Kilometers;
 //! use qtty_core::{Quantity, Unitless};
 //!
 //! let km = Kilometers::new(1.0);
-//! let m = km.to::<Meter>();
-//! let u: Quantity<Unitless> = m.into();
-//! assert_eq!(u.value(), 1000.0);
+//! let u: Quantity<Unitless> = km.erase_unit_raw();
+//! assert_eq!(u.value(), 1.0); // raw stored number, NOT 1000.0 m
 //! ```
-
-use crate::dimension::{
-    Acceleration, AmountOfSubstance, Angular, Area, Current, Energy, Force, FrequencyDim, Length,
-    LuminousIntensity, Mass, Power, Temperature, Time, VelocityDim, Volume,
-};
-use crate::scalar::Scalar;
-use crate::{Quantity, Unit, Unitless};
-
-trait SupportedDimension {}
-impl SupportedDimension for Length {}
-impl SupportedDimension for Time {}
-impl SupportedDimension for Mass {}
-impl SupportedDimension for Temperature {}
-impl SupportedDimension for Current {}
-impl SupportedDimension for AmountOfSubstance {}
-impl SupportedDimension for LuminousIntensity {}
-impl SupportedDimension for Angular {}
-impl SupportedDimension for Area {}
-impl SupportedDimension for Volume {}
-impl SupportedDimension for VelocityDim {}
-impl SupportedDimension for Acceleration {}
-impl SupportedDimension for Force {}
-impl SupportedDimension for Energy {}
-impl SupportedDimension for Power {}
-impl SupportedDimension for FrequencyDim {}
-
-trait DimensionedUnit: Unit {}
-impl<U: Unit> DimensionedUnit for U where U::Dim: SupportedDimension {}
-
-impl<U: DimensionedUnit, S: Scalar> From<Quantity<U, S>> for Quantity<Unitless, S> {
-    #[inline]
-    fn from(quantity: Quantity<U, S>) -> Self {
-        Self::new(quantity.value())
-    }
-}
 
 #[cfg(all(test, feature = "std"))]
 mod tests {
-    use super::*;
-    use crate::units::angular::Degrees;
     use crate::units::length::Meters;
-    use crate::units::mass::Kilogram;
-    use crate::units::mass::Kilograms;
     use crate::units::time::Seconds;
     use crate::Unit;
+    use crate::{Quantity, Unitless};
     use approx::assert_abs_diff_eq;
     use proptest::prelude::*;
 
@@ -122,52 +80,42 @@ mod tests {
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // Conversion from dimensioned quantities
+    // Same-unit division produces Unitless
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
-    fn from_length() {
+    fn same_unit_division_gives_unitless() {
+        let a = Meters::new(10.0);
+        let b = Meters::new(5.0);
+        let ratio: Quantity<Unitless> = a / b;
+        assert_abs_diff_eq!(ratio.value(), 2.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn same_unit_division_time() {
+        let a = Seconds::new(100.0);
+        let b = Seconds::new(20.0);
+        let ratio: Quantity<Unitless> = a / b;
+        assert_abs_diff_eq!(ratio.value(), 5.0, epsilon = 1e-12);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Explicit erase_unit_raw
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn erase_unit_raw_preserves_value() {
         let m = Meters::new(42.0);
-        let u: Quantity<Unitless> = m.into();
+        let u: Quantity<Unitless> = m.erase_unit_raw();
         assert_eq!(u.value(), 42.0);
     }
 
     #[test]
-    fn from_non_canonical_unit_preserves_raw_value() {
+    fn erase_unit_raw_non_canonical_preserves_raw() {
         use crate::units::length::Kilometers;
-        // Kilometers::new(1.0) → unitless should give 1.0, NOT 1000.0.
-        // This verifies the documented behavior: no SI normalization on erasure.
         let km = Kilometers::new(1.0);
-        let u: Quantity<Unitless> = km.into();
-        assert_eq!(u.value(), 1.0);
-    }
-
-    #[test]
-    fn from_time() {
-        let t = Seconds::new(5.0);
-        let u: Quantity<Unitless> = t.into();
-        assert_eq!(u.value(), 5.0);
-    }
-
-    #[test]
-    fn from_mass() {
-        let m = Kilograms::new(2.5);
-        let u: Quantity<Unitless> = m.into();
-        assert_eq!(u.value(), 2.5);
-    }
-
-    #[test]
-    fn from_angular() {
-        let a = Degrees::new(90.0);
-        let u: Quantity<Unitless> = a.into();
-        assert_eq!(u.value(), 90.0);
-    }
-
-    #[test]
-    fn from_mass_preserves_non_default_scalar_type() {
-        let m: Quantity<Kilogram, i32> = Quantity::new(7);
-        let u: Quantity<Unitless, i32> = m.into();
-        assert_eq!(u.value(), 7);
+        let u: Quantity<Unitless> = km.erase_unit_raw();
+        assert_eq!(u.value(), 1.0); // NOT 1000.0
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -229,20 +177,6 @@ mod tests {
 
             // Value is preserved
             prop_assert!(((qa + qb).value() - (a + b)).abs() < 1e-9);
-        }
-
-        #[test]
-        fn prop_from_length_preserves_value(v in -1e6..1e6f64) {
-            let m = Meters::new(v);
-            let u: Quantity<Unitless> = m.into();
-            prop_assert!((u.value() - v).abs() < 1e-12);
-        }
-
-        #[test]
-        fn prop_from_time_preserves_value(v in -1e6..1e6f64) {
-            let t = Seconds::new(v);
-            let u: Quantity<Unitless> = t.into();
-            prop_assert!((u.value() - v).abs() < 1e-12);
         }
     }
 }

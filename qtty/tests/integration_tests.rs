@@ -61,31 +61,18 @@ fn smoke_test_frequency() {
 }
 
 #[test]
-fn smoke_test_unitless() {
+fn smoke_test_unitless_from_same_unit_division() {
+    let a = Meter::new(42.0);
+    let b = Meter::new(6.0);
+    let u: Unitless = a / b;
+    assert_abs_diff_eq!(u.value(), 7.0, epsilon = 1e-12);
+}
+
+#[test]
+fn smoke_test_erase_unit_raw() {
     let m = Meter::new(42.0);
-    let u: Unitless = m.into();
+    let u: Unitless = m.erase_unit_raw();
     assert_eq!(u.value(), 42.0);
-}
-
-#[test]
-fn smoke_test_unitless_from_time() {
-    let s = Second::new(5.0);
-    let u: Unitless = s.into();
-    assert_eq!(u.value(), 5.0);
-}
-
-#[test]
-fn smoke_test_unitless_from_mass() {
-    let kg = Kilogram::new(2.0);
-    let u: Unitless = kg.into();
-    assert_eq!(u.value(), 2.0);
-}
-
-#[test]
-fn smoke_test_unitless_from_angular() {
-    let deg = Degree::new(15.0);
-    let u: Unitless = deg.into();
-    assert_eq!(u.value(), 15.0);
 }
 
 #[test]

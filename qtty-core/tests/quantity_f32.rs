@@ -204,7 +204,7 @@ fn f32_quantity_rem() {
 #[test]
 fn f32_quantity_partial_eq() {
     let q = TU32::new(42.0);
-    assert!(q == 42.0_f32);
+    assert!(q == TU32::new(42.0));
 }
 
 #[test]
