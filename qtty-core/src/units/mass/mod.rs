@@ -11,14 +11,14 @@
 //! - **Science/astro**: atomic mass unit (u/Da), nominal solar mass.
 //!
 //! ```rust
-//! use qtty_core::mass::{Kilograms, SolarMass};
+//! use qtty_core::mass::{Kilograms, Gram};
 //!
 //! let m = Kilograms::new(1.0);
-//! let sm = m.to::<SolarMass>();
-//! assert!(sm.value() < 1.0);
+//! let g = m.to::<Gram>();
+//! assert_eq!(g.value(), 1000.0);
 //! ```
 //!
-//! ## All mass units
+//! ## All mass units (default)
 //!
 //! ```rust
 //! use qtty_core::mass::*;
@@ -27,10 +27,7 @@
 //!     ($T:ty, $v:expr) => {{ let q = <$T>::new($v); let _c = q; assert!(q == q); }};
 //! }
 //!
-//! touch!(Grams, 1.0);     touch!(Tonnes, 1.0);   touch!(Carats, 1.0);
-//! touch!(Grains, 1.0);    touch!(Pounds, 1.0);   touch!(Ounces, 1.0);
-//! touch!(Stones, 1.0);    touch!(ShortTons, 1.0); touch!(LongTons, 1.0);
-//! touch!(AtomicMassUnits, 1.0); touch!(SolarMasses, 1.0);
+//! touch!(Grams, 1.0);     touch!(Tonnes, 1.0);
 //! ```
 
 use crate::{Quantity, Unit};
@@ -42,6 +39,19 @@ pub use crate::dimension::Mass;
 /// Marker trait for any [`Unit`] whose dimension is [`Mass`].
 pub trait MassUnit: Unit<Dim = Mass> {}
 impl<T: Unit<Dim = Mass>> MassUnit for T {}
+
+#[cfg(feature = "customary")]
+mod customary;
+#[cfg(feature = "customary")]
+pub use customary::*;
+#[cfg(feature = "fundamental-physics")]
+mod fundamental_physics;
+#[cfg(feature = "fundamental-physics")]
+pub use fundamental_physics::*;
+#[cfg(feature = "astro")]
+mod astro;
+#[cfg(feature = "astro")]
+pub use astro::*;
 
 /// Gram.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
@@ -115,172 +125,23 @@ pub type Tonnes = Quantity<T>;
 /// One metric tonne.
 pub const TONE: Tonnes = Tonnes::new(1.0);
 
-/// Carat: `1 ct = 0.2 g` (exact).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "ct", dimension = Mass, ratio = 1.0 / 5.0)]
-pub struct Carat;
-/// Shorthand type alias for [`Carat`].
-pub type Ct = Carat;
-/// Quantity measured in carats.
-pub type Carats = Quantity<Ct>;
-/// One carat.
-pub const CT: Carats = Carats::new(1.0);
-
-/// Grain: `1 gr = 64.79891 mg` (exact) == `0.064_798_91 g`.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "gr", dimension = Mass, ratio = 6_479_891.0 / 1_000_000_000.0)]
-pub struct Grain;
-/// Shorthand type alias for [`Grain`].
-pub type Gr = Grain;
-/// Quantity measured in grains.
-pub type Grains = Quantity<Gr>;
-/// One grain.
-pub const GR: Grains = Grains::new(1.0);
-
-/// Avoirdupois pound: `1 lb = 0.45359237 kg` (exact) == `453.59237 g`.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "lb", dimension = Mass, ratio = 45_359_237.0 / 100_000.0)]
-pub struct Pound;
-/// Shorthand type alias for [`Pound`].
-pub type Lb = Pound;
-/// Quantity measured in pounds.
-pub type Pounds = Quantity<Lb>;
-/// One pound.
-pub const LB: Pounds = Pounds::new(1.0);
-
-/// Avoirdupois ounce: `1 oz = 1/16 lb` (exact).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "oz", dimension = Mass, ratio = (45_359_237.0 / 100_000.0) / 16.0)]
-pub struct Ounce;
-/// Shorthand type alias for [`Ounce`].
-pub type Oz = Ounce;
-/// Quantity measured in ounces.
-pub type Ounces = Quantity<Oz>;
-/// One ounce.
-pub const OZ: Ounces = Ounces::new(1.0);
-
-/// Avoirdupois stone: `1 st = 14 lb` (exact).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "st", dimension = Mass, ratio = (45_359_237.0 / 100_000.0) * 14.0)]
-pub struct Stone;
-/// Shorthand type alias for [`Stone`].
-pub type St = Stone;
-/// Quantity measured in stones.
-pub type Stones = Quantity<St>;
-/// One stone.
-pub const ST: Stones = Stones::new(1.0);
-
-/// Short ton (US customary): `2000 lb` (exact given lb).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "ton_us", dimension = Mass, ratio = (45_359_237.0 / 100_000.0) * 2000.0)]
-pub struct ShortTon;
-/// Quantity measured in short tons (US).
-pub type ShortTons = Quantity<ShortTon>;
-/// One short ton (US).
-pub const TON_US: ShortTons = ShortTons::new(1.0);
-
-/// Long ton (Imperial): `2240 lb` (exact given lb).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "ton_uk", dimension = Mass, ratio = (45_359_237.0 / 100_000.0) * 2240.0)]
-pub struct LongTon;
-/// Quantity measured in long tons (UK).
-pub type LongTons = Quantity<LongTon>;
-/// One long ton (UK).
-pub const TON_UK: LongTons = LongTons::new(1.0);
-
-/// Unified atomic mass unit (u), a.k.a. dalton (Da).
-///
-/// Stored in grams using the CODATA recommended value for `m_u` in kilograms, converted by `1 kg = 1000 g`.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "u", dimension = Mass, ratio = 1.660_539_068_92e-24)]
-pub struct AtomicMassUnit;
-/// Type alias shorthand for [`AtomicMassUnit`].
-pub type Dalton = AtomicMassUnit;
-/// Quantity measured in atomic mass units.
-pub type AtomicMassUnits = Quantity<AtomicMassUnit>;
-/// One atomic mass unit.
-pub const U: AtomicMassUnits = AtomicMassUnits::new(1.0);
-
-/// Nominal solar mass (IAU 2015 Resolution B3; grams per M☉).
-///
-/// This is a **conversion constant** (nominal), not a “best estimate” of the Sun’s true mass.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "M☉", dimension = Mass, ratio = 1.988_416e33)]
-pub struct SolarMass;
-/// A quantity measured in solar masses.
-pub type SolarMasses = Quantity<SolarMass>;
-/// One nominal solar mass.
-pub const MSUN: SolarMasses = SolarMasses::new(1.0);
-
-// Generate all bidirectional From implementations between mass units.
+// ─────────────────────────────────────────────────────────────────────────────
+// From conversions: default (metric) units
+// ─────────────────────────────────────────────────────────────────────────────
 crate::impl_unit_from_conversions!(
-    Gram,
-    Yoctogram,
-    Zeptogram,
-    Attogram,
-    Femtogram,
-    Picogram,
-    Nanogram,
-    Microgram,
-    Milligram,
-    Centigram,
-    Decigram,
-    Decagram,
-    Hectogram,
-    Kilogram,
-    Megagram,
-    Gigagram,
-    Teragram,
-    Petagram,
-    Exagram,
-    Zettagram,
-    Yottagram,
-    Tonne,
-    Carat,
-    Grain,
-    Pound,
-    Ounce,
-    Stone,
-    ShortTon,
-    LongTon,
-    AtomicMassUnit,
-    SolarMass
+    Gram, Yoctogram, Zeptogram, Attogram, Femtogram, Picogram, Nanogram, Microgram, Milligram,
+    Centigram, Decigram, Decagram, Hectogram, Kilogram, Megagram, Gigagram, Teragram, Petagram,
+    Exagram, Zettagram, Yottagram, Tonne
 );
 
-// Optional cross-unit operator support (`==`, `<`, etc.).
+// ─────────────────────────────────────────────────────────────────────────────
+// Cross-unit ops: default (metric) units
+// ─────────────────────────────────────────────────────────────────────────────
 #[cfg(feature = "cross-unit-ops")]
 crate::impl_unit_cross_unit_ops!(
-    Gram,
-    Yoctogram,
-    Zeptogram,
-    Attogram,
-    Femtogram,
-    Picogram,
-    Nanogram,
-    Microgram,
-    Milligram,
-    Centigram,
-    Decigram,
-    Decagram,
-    Hectogram,
-    Kilogram,
-    Megagram,
-    Gigagram,
-    Teragram,
-    Petagram,
-    Exagram,
-    Zettagram,
-    Yottagram,
-    Tonne,
-    Carat,
-    Grain,
-    Pound,
-    Ounce,
-    Stone,
-    ShortTon,
-    LongTon,
-    AtomicMassUnit,
-    SolarMass
+    Gram, Yoctogram, Zeptogram, Attogram, Femtogram, Picogram, Nanogram, Microgram, Milligram,
+    Centigram, Decigram, Decagram, Hectogram, Kilogram, Megagram, Gigagram, Teragram, Petagram,
+    Exagram, Zettagram, Yottagram, Tonne
 );
 
 #[cfg(all(test, feature = "std"))]
@@ -308,6 +169,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn solar_mass_to_grams() {
         let sm = SolarMasses::new(1.0);
         let g = sm.to::<Gram>();
@@ -316,6 +178,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn solar_mass_to_kilograms() {
         let sm = SolarMasses::new(1.0);
         let kg = sm.to::<Kilogram>();
@@ -324,6 +187,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn kilograms_to_solar_mass() {
         // Earth mass ≈ 5.97e24 kg ≈ 3e-6 M☉
         let earth_kg = Kilograms::new(5.97e24);
@@ -336,12 +200,14 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "astro")]
     fn solar_mass_ratio_sanity() {
         // 1 M☉ = 1.988416e33 g, so RATIO should be that value
         assert_relative_eq!(SolarMass::RATIO, 1.988416e33, max_relative = 1e-5);
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn solar_mass_order_of_magnitude() {
         // The Sun's mass is about 2e30 kg
         let sun = SolarMasses::new(1.0);
@@ -363,6 +229,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn roundtrip_kg_solar() {
         let original = Kilograms::new(1e30);
         let converted = original.to::<SolarMass>();
@@ -402,6 +269,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn carat_to_gram() {
         let ct = Carats::new(5.0);
         let g = ct.to::<Gram>();
@@ -410,6 +278,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn grain_to_milligram() {
         let gr = Grains::new(1.0);
         let mg = gr.to::<Milligram>();
@@ -418,6 +287,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn pound_to_gram() {
         let lb = Pounds::new(1.0);
         let g = lb.to::<Gram>();
@@ -426,6 +296,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn ounce_to_gram() {
         let oz = Ounces::new(16.0);
         let g = oz.to::<Gram>();
@@ -434,6 +305,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn stone_to_pound() {
         let st = Stones::new(1.0);
         let lb = st.to::<Pound>();
@@ -442,6 +314,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn short_ton_to_pound() {
         let ton = ShortTons::new(1.0);
         let lb = ton.to::<Pound>();
@@ -450,6 +323,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "customary")]
     fn long_ton_to_pound() {
         let ton = LongTons::new(1.0);
         let lb = ton.to::<Pound>();
@@ -458,6 +332,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "fundamental-physics")]
     fn atomic_mass_unit_to_gram() {
         // 1 u ≈ 1.660539e-24 g
         let u = AtomicMassUnits::new(1.0);
@@ -485,6 +360,7 @@ mod tests {
     fn symbols_are_correct() {
         assert_eq!(Kilogram::SYMBOL, "kg");
         assert_eq!(Gram::SYMBOL, "g");
+        #[cfg(feature = "customary")]
         assert_eq!(Pound::SYMBOL, "lb");
         assert_eq!(Tonne::SYMBOL, "t");
     }

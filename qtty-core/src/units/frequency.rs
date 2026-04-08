@@ -1,47 +1,51 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 Vallés Puig, Ramon
 
-//! Angular frequency unit aliases (`Angular / Time`).
+//! Angular rate (angular frequency) unit aliases (`Angular / Time`).
 //!
-//! This module provides a **dimension alias** [`Frequency`].
+//! This module models **angular rate** — angular displacement per unit time
+//! (e.g. radians/second, degrees/day). It does **not** model SI cycle frequency
+//! (Hz = cycles/s), which would be `T⁻¹` with dimensionless cycles.
 //!
 //! ```rust
 //! use qtty_core::angular::{Degree, Radian};
 //! use qtty_core::time::Day;
-//! use qtty_core::frequency::Frequency;
+//! use qtty_core::frequency::AngularRate;
 //!
-//! let f: Frequency<Degree, Day> = Frequency::new(180.0);
-//! let f_rad: Frequency<Radian, Day> = f.to();
+//! let f: AngularRate<Degree, Day> = AngularRate::new(180.0);
+//! let f_rad: AngularRate<Radian, Day> = f.to();
 //! assert!((f_rad.value() - core::f64::consts::PI).abs() < 1e-12);
 //! ```
 
 use crate::{Per, Quantity, Unit};
 
-/// Re-export the frequency dimension from the dimension module.
-pub use crate::dimension::FrequencyDim;
+/// Re-export the angular rate dimension from the dimension module.
+pub use crate::dimension::AngularRateDim;
 
-/// Marker trait for any unit with frequency dimension (`Angular / Time`).
-pub trait FrequencyUnit: Unit<Dim = FrequencyDim> {}
-impl<T: Unit<Dim = FrequencyDim>> FrequencyUnit for T {}
+/// Marker trait for any unit with angular-rate dimension (`Angular / Time`).
+pub trait AngularRateUnit: Unit<Dim = AngularRateDim> {}
+impl<T: Unit<Dim = AngularRateDim>> AngularRateUnit for T {}
 
-/// A frequency quantity parameterized by angular and time units.
+/// An angular-rate quantity parameterized by angular and time units.
 ///
 /// # Examples
 ///
 /// ```rust
 /// use qtty_core::angular::{Degree, Radian};
 /// use qtty_core::time::{Second, Day};
-/// use qtty_core::frequency::Frequency;
+/// use qtty_core::frequency::AngularRate;
 ///
-/// let f1: Frequency<Degree, Second> = Frequency::new(360.0);
-/// let f2: Frequency<Radian, Day> = Frequency::new(6.28);
+/// let f1: AngularRate<Degree, Second> = AngularRate::new(360.0);
+/// let f2: AngularRate<Radian, Day> = AngularRate::new(6.28);
 /// ```
-pub type Frequency<N, D> = Quantity<Per<N, D>>;
+pub type AngularRate<N, D> = Quantity<Per<N, D>>;
 
 #[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
-    use crate::units::angular::{Degree, Degrees, MilliArcsecond, Radian};
+    #[cfg(feature = "astro")]
+    use crate::units::angular::MilliArcsecond;
+    use crate::units::angular::{Degree, Degrees, Radian};
     use crate::units::time::{Day, Days, Year};
     use crate::Per;
     use approx::{assert_abs_diff_eq, assert_relative_eq};
@@ -49,43 +53,44 @@ mod tests {
     use std::f64::consts::PI;
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // Basic frequency conversions
+    // Basic angular-rate conversions
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
     fn deg_per_day_to_rad_per_day() {
-        let f: Frequency<Degree, Day> = Frequency::new(180.0);
-        let f_rad: Frequency<Radian, Day> = f.to();
+        let f: AngularRate<Degree, Day> = AngularRate::new(180.0);
+        let f_rad: AngularRate<Radian, Day> = f.to();
         // 180 deg = π rad
         assert_abs_diff_eq!(f_rad.value(), PI, epsilon = 1e-12);
     }
 
     #[test]
     fn rad_per_day_to_deg_per_day() {
-        let f: Frequency<Radian, Day> = Frequency::new(PI);
-        let f_deg: Frequency<Degree, Day> = f.to();
+        let f: AngularRate<Radian, Day> = AngularRate::new(PI);
+        let f_deg: AngularRate<Degree, Day> = f.to();
         assert_abs_diff_eq!(f_deg.value(), 180.0, epsilon = 1e-12);
     }
 
     #[test]
     fn deg_per_day_to_deg_per_year() {
-        let f: Frequency<Degree, Day> = Frequency::new(1.0);
-        let f_year: Frequency<Degree, Year> = f.to();
+        let f: AngularRate<Degree, Day> = AngularRate::new(1.0);
+        let f_year: AngularRate<Degree, Year> = f.to();
         // 1 deg/day = 365.2425 deg/year (tropical year)
         assert_relative_eq!(f_year.value(), 365.2425, max_relative = 1e-6);
     }
 
     #[test]
     fn deg_per_year_to_deg_per_day() {
-        let f: Frequency<Degree, Year> = Frequency::new(365.2425);
-        let f_day: Frequency<Degree, Day> = f.to();
+        let f: AngularRate<Degree, Year> = AngularRate::new(365.2425);
+        let f_day: AngularRate<Degree, Day> = f.to();
         assert_relative_eq!(f_day.value(), 1.0, max_relative = 1e-6);
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn mas_per_day_to_deg_per_day() {
-        let f: Frequency<MilliArcsecond, Day> = Frequency::new(3_600_000.0);
-        let f_deg: Frequency<Degree, Day> = f.to();
+        let f: AngularRate<MilliArcsecond, Day> = AngularRate::new(3_600_000.0);
+        let f_deg: AngularRate<Degree, Day> = f.to();
         // 3,600,000 mas = 1 deg
         assert_abs_diff_eq!(f_deg.value(), 1.0, epsilon = 1e-9);
     }
@@ -110,34 +115,34 @@ mod tests {
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // Frequency * Time = Angle
+    // AngularRate * Time = Angle
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
-    fn frequency_times_time() {
-        let f: Frequency<Degree, Day> = Frequency::new(360.0);
+    fn angular_rate_times_time() {
+        let f: AngularRate<Degree, Day> = AngularRate::new(360.0);
         let t: Days = Days::new(0.5);
         let angle: Degrees = (f * t).to();
         assert_abs_diff_eq!(angle.value(), 180.0, epsilon = 1e-9);
     }
 
     #[test]
-    fn time_times_frequency() {
-        let f: Frequency<Degree, Day> = Frequency::new(360.0);
+    fn time_times_angular_rate() {
+        let f: AngularRate<Degree, Day> = AngularRate::new(360.0);
         let t: Days = Days::new(0.5);
         let angle: Degrees = (t * f).to();
         assert_abs_diff_eq!(angle.value(), 180.0, epsilon = 1e-9);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // Angle / Time = Frequency
+    // Angle / Time = AngularRate
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
     fn angle_div_time() {
         let angle: Degrees = Degrees::new(360.0);
         let t: Days = Days::new(1.0);
-        let f: Frequency<Degree, Day> = angle / t;
+        let f: AngularRate<Degree, Day> = angle / t;
         assert_abs_diff_eq!(f.value(), 360.0, epsilon = 1e-9);
     }
 
@@ -147,9 +152,9 @@ mod tests {
 
     #[test]
     fn roundtrip_deg_rad_per_day() {
-        let original: Frequency<Degree, Day> = Frequency::new(90.0);
-        let converted: Frequency<Radian, Day> = original.to();
-        let back: Frequency<Degree, Day> = converted.to();
+        let original: AngularRate<Degree, Day> = AngularRate::new(90.0);
+        let converted: AngularRate<Radian, Day> = original.to();
+        let back: AngularRate<Degree, Day> = converted.to();
         assert_abs_diff_eq!(back.value(), original.value(), epsilon = 1e-9);
     }
 
@@ -160,22 +165,22 @@ mod tests {
     proptest! {
         #[test]
         fn prop_roundtrip_deg_rad_per_day(f in 1e-6..1e6f64) {
-            let original: Frequency<Degree, Day> = Frequency::new(f);
-            let converted: Frequency<Radian, Day> = original.to();
-            let back: Frequency<Degree, Day> = converted.to();
+            let original: AngularRate<Degree, Day> = AngularRate::new(f);
+            let converted: AngularRate<Radian, Day> = original.to();
+            let back: AngularRate<Degree, Day> = converted.to();
             prop_assert!((back.value() - original.value()).abs() < 1e-9 * f.abs().max(1.0));
         }
 
         #[test]
-        fn prop_frequency_time_roundtrip(
+        fn prop_angular_rate_time_roundtrip(
             f_val in 1e-3..1e3f64,
             t_val in 1e-3..1e3f64
         ) {
-            let f: Frequency<Degree, Day> = Frequency::new(f_val);
+            let f: AngularRate<Degree, Day> = AngularRate::new(f_val);
             let t: Days = Days::new(t_val);
             let angle: Degrees = (f * t).to();
             // angle / t should give back f
-            let f_back: Frequency<Degree, Day> = angle / t;
+            let f_back: AngularRate<Degree, Day> = angle / t;
             prop_assert!((f_back.value() - f.value()).abs() / f.value() < 1e-12);
         }
     }

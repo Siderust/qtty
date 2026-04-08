@@ -48,11 +48,11 @@
 13004,Length,NauticalMile,nmi,1852.0,qtty::length::NauticalMiles
 15000,Length,NominalLunarRadius,R_☾,1.7374e6,qtty::length::nominal::LunarRadii
 15001,Length,NominalLunarDistance,LD,3.844e8,qtty::length::nominal::LunarDistances
-15002,Length,NominalEarthPolarRadius,R_⊕pol,6.3568e6,qtty::length::nominal::EarthPolarRadii
-15003,Length,NominalEarthRadius,R_⊕,6.3781e6,qtty::length::nominal::EarthRadii
-15004,Length,NominalEarthEquatorialRadius,R_⊕eq,6.3781e6,qtty::length::nominal::EarthEquatorialRadii
-15005,Length,EarthMeridionalCircumference,C_mer,40007862.917,qtty::length::EarthMeridionalCircumferences
-15006,Length,EarthEquatorialCircumference,C_eq,40075016.686,qtty::length::EarthEquatorialCircumferences
+15002,Length,NominalEarthPolarRadius,R_⊕pol,6356752.3142,qtty::length::nominal::EarthPolarRadii
+15003,Length,NominalEarthRadius,R_⊕,6371000.0,qtty::length::nominal::EarthRadii
+15004,Length,NominalEarthEquatorialRadius,R_⊕eq,6378137.0,qtty::length::nominal::EarthEquatorialRadii
+15005,Length,EarthMeridionalCircumference,C_mer,40007863.0,qtty::length::EarthMeridionalCircumferences
+15006,Length,EarthEquatorialCircumference,C_eq,40075017.0,qtty::length::EarthEquatorialCircumferences
 15007,Length,NominalJupiterRadius,R_♃,7.1492e7,qtty::length::nominal::JupiterRadii
 15008,Length,NominalSolarRadius,R_☉,6.957e8,qtty::length::nominal::SolarRadiuses
 15009,Length,NominalSolarDiameter,D_☉,1.3914e9,qtty::length::nominal::SolarDiameters
@@ -77,14 +77,14 @@
 21002,Time,Day,d,86400.0,qtty::time::Days
 21003,Time,Week,wk,604800.0,qtty::time::Weeks
 21004,Time,Fortnight,fn,1209600.0,qtty::time::Fortnights
-22000,Time,Year,yr,31557600.0,qtty::time::Years
-22001,Time,Decade,dec,315576000.0,qtty::time::Decades
-22002,Time,Century,c,3155760000.0,qtty::time::Centuries
-22003,Time,Millennium,mill,31557600000.0,qtty::time::Millennia
+22000,Time,Year,yr,31556952.0,qtty::time::Years
+22001,Time,Decade,dec,315569520.0,qtty::time::Decades
+22002,Time,Century,cent,3155695200.0,qtty::time::Centuries
+22003,Time,Millennium,mill,31556952000.0,qtty::time::Millennia
 22004,Time,JulianYear,a,31557600.0,qtty::time::JulianYears
-22005,Time,JulianCentury,jc,3155760000.0,qtty::time::JulianCenturies
+22005,Time,JulianCentury,JC,3155760000.0,qtty::time::JulianCenturies
 23000,Time,SiderealDay,sd,86164.0905,qtty::time::SiderealDays
-23001,Time,SynodicMonth,mo_s,2551442.976,qtty::time::SynodicMonths
+23001,Time,SynodicMonth,synmo,2551442.8032,qtty::time::SynodicMonths
 23002,Time,SiderealYear,yr_s,31558149.7635456,qtty::time::SiderealYears
 # Angle units (3xxxx): 300xx=Radian, 310xx=Degree, 320xx=Other
 30000,Angle,Milliradian,mrad,0.001,qtty::angular::Milliradians
@@ -154,3 +154,29 @@
 51001,Power,HorsepowerMetric,PS,735.49875,qtty::power::HorsepowerMetrics
 51002,Power,HorsepowerElectric,hp_e,746.0,qtty::power::HorsepowerElectrics
 51003,Power,SolarLuminosity,L_☉,3.828e26,qtty::power::SolarLuminosities
+# Area units (6xxxx): 600xx=Metric, 610xx=Land, 620xx=Imperial
+60000,Area,SquareMillimeter,mm²,1e-6,qtty::area::SquareMillimeters
+60001,Area,SquareCentimeter,cm²,1e-4,qtty::area::SquareCentimeters
+60002,Area,SquareMeter,m²,1.0,qtty::area::SquareMeters
+60003,Area,SquareKilometer,km²,1e6,qtty::area::SquareKilometers
+61000,Area,Are,a,100.0,qtty::area::Ares
+61001,Area,Hectare,ha,1e4,qtty::area::Hectares
+62000,Area,SquareInch,in²,6.4516e-4,qtty::area::SquareInches
+62001,Area,SquareFoot,ft²,0.09290304,qtty::area::SquareFeet
+62002,Area,SquareYard,yd²,0.83612736,qtty::area::SquareYards
+62003,Area,SquareMile,mi²,2589988.110336,qtty::area::SquareMiles
+62004,Area,Acre,ac,4046.8564224,qtty::area::Acres
+# Volume units (7xxxx): 700xx=Metric, 710xx=Litre, 720xx=Imperial
+70000,Volume,CubicMillimeter,mm³,1e-9,qtty::volume::CubicMillimeters
+70001,Volume,CubicCentimeter,cm³,1e-6,qtty::volume::CubicCentimeters
+70002,Volume,CubicMeter,m³,1.0,qtty::volume::CubicMeters
+70003,Volume,CubicKilometer,km³,1e9,qtty::volume::CubicKilometers
+71000,Volume,Microliter,µL,1e-9,qtty::volume::Microliters
+71001,Volume,Milliliter,mL,1e-6,qtty::volume::Milliliters
+71002,Volume,Centiliter,cL,1e-5,qtty::volume::Centiliters
+71003,Volume,Deciliter,dL,1e-4,qtty::volume::Deciliters
+71004,Volume,Liter,L,1e-3,qtty::volume::Liters
+72000,Volume,CubicInch,in³,1.6387064e-5,qtty::volume::CubicInches
+72001,Volume,CubicFoot,ft³,0.028316846592,qtty::volume::CubicFeet
+72002,Volume,UsGallon,gal,0.003785411784,qtty::volume::UsGallons
+72003,Volume,UsFluidOunce,fl oz,2.95735295625e-5,qtty::volume::UsFluidOunces

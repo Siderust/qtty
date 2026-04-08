@@ -6,8 +6,11 @@
 //! `qtty-core` provides a minimal, zero-cost units model:
 //!
 //! - A *unit* is a zero-sized marker type implementing [`Unit`].
-//! - A value tagged with a unit is a [`Quantity<U>`], backed by an `f64`.
-//! - Conversion is an explicit, type-checked scaling via [`Quantity::to`].
+//! - A value tagged with a unit is a [`Quantity<U, S>`], where `S` is the scalar
+//!   type (defaults to `f64`). Supported scalars include `f64`, `f32`, signed
+//!   integers (`i8`–`i128`), and optionally `Rational64`/`Rational32`.
+//! - Conversion is an explicit, type-checked scaling via [`Quantity::to`] (for
+//!   [`Real`] scalars) or [`Quantity::to_lossy`] (for [`Exact`] scalars).
 //! - Derived units like velocity are expressed as [`Per<N, D>`] (e.g. `Meter/Second`).
 //!
 //! Most users should depend on `qtty` (the facade crate) unless they need direct access to these primitives.
@@ -16,13 +19,14 @@
 //!
 //! - Compile-time separation of dimensions (length vs time vs angle, …).
 //! - Zero runtime overhead for unit tags (phantom types only).
-//! - Full dimensional arithmetic: `m * m → m²`, `m / s → velocity`, `m² / m → m`.
+//! - Full dimensional arithmetic: `m * m → Prod<Meter, Meter>`, `m / s → Per<Meter, Second>`, `m / m → Unitless`.
+//!   Named derived units (e.g. `SquareMeter`) are obtained via `.to()`.
 //! - Automatic compile-time verification that multiplied/divided quantities produce the correct dimension.
 //!
 //! # What this crate does not try to solve
 //!
-//! - Exact arithmetic (`Quantity` is `f64`).
 //! - General-purpose symbolic simplification of arbitrary unit expressions.
+//!   Products and quotients are structural (`Prod<A, B>`, `Per<A, B>`); use `.to()` to convert to named units.
 //!
 //! # Quick start
 //!
@@ -64,14 +68,15 @@
 //!
 //! - `std` (default): enables `std` support.
 //! - `cross-unit-ops` (default): enables direct cross-unit comparison operators (`==`, `<`, etc.) for built-in unit catalogs.
-//! - `serde`: enables `serde` support for `Quantity<U>`; serialization is the raw `f64` value only.
+//! - `serde`: enables `serde` support for `Quantity<U, S>`; serialization is the raw scalar value.
 //! - `pyo3`: enables PyO3 bindings for Python interop via `#[pyclass]` and `#[pymethods]`.
 //!
 //! # Panics and errors
 //!
-//! This crate does not define an error type and does not return `Result` from its core operations. Conversions and
-//! arithmetic are pure `f64` computations; they do not panic on their own, but they follow IEEE-754 behavior (NaN and
-//! infinities propagate according to the underlying operation).
+//! This crate does not define an error type and does not return `Result` from its core operations. For floating-point
+//! scalars (`f64`, `f32`), arithmetic follows IEEE-754 behavior (NaN and infinities propagate). For integer
+//! scalars, `abs()` uses saturating semantics at the minimum value (e.g. `i32::MIN.abs()` returns `i32::MAX`
+//! instead of panicking). Standard integer overflow rules still apply to addition, subtraction, and multiplication.
 //!
 //! # SemVer and stability
 //!
@@ -116,13 +121,13 @@ pub use dimension::{
     AmountOfSubstance,
     // Base dimensions
     Angular,
+    AngularRateDim,
     Area,
     Current,
     Dimension,
     Dimensionless,
     Energy,
     Force,
-    FrequencyDim,
     Length,
     LuminousIntensity,
     Mass,
@@ -361,10 +366,10 @@ mod tests {
     }
 
     #[test]
-    fn sum_quantities_into_f64() {
+    fn sum_quantities_into_quantity() {
         let qs = vec![TU::new(1.0), TU::new(2.0), TU::new(3.0)];
-        let total: f64 = qs.into_iter().sum();
-        assert_eq!(total, 6.0);
+        let total: TU = qs.into_iter().sum();
+        assert_eq!(total.value(), 6.0);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -437,17 +442,6 @@ mod tests {
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // PartialEq<f64>
-    // ─────────────────────────────────────────────────────────────────────────────
-
-    #[test]
-    fn partial_eq_f64() {
-        let q = TU::new(5.0);
-        assert!(q == 5.0);
-        assert!(!(q == 4.0));
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────────
     // Division: same-unit yields Unitless, cross-unit yields Per<N, D>
     // ─────────────────────────────────────────────────────────────────────────────
 
@@ -496,34 +490,70 @@ mod tests {
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // Quantity<Unitless>::asin / acos / atan
+    // Quantity<Unitless>::asin_angle / acos_angle / atan_angle
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
-    fn unitless_asin() {
+    fn unitless_asin_angle() {
+        use crate::units::angular::Radian;
         let ratio: Quantity<Unitless> = Quantity::new(0.5);
-        let result = ratio.asin();
-        assert!((result - 0.5_f64.asin()).abs() < 1e-12);
+        let result: Quantity<Radian> = ratio.asin_angle();
+        assert!((result.value() - 0.5_f64.asin()).abs() < 1e-12);
     }
 
     #[test]
-    fn unitless_asin_boundary_values() {
+    fn unitless_asin_angle_boundary_values() {
         let one: Quantity<Unitless> = Quantity::new(1.0);
-        assert!((one.asin() - core::f64::consts::FRAC_PI_2).abs() < 1e-12);
+        assert!((one.asin_angle().value() - core::f64::consts::FRAC_PI_2).abs() < 1e-12);
 
         let neg_one: Quantity<Unitless> = Quantity::new(-1.0);
-        assert!((neg_one.asin() - (-core::f64::consts::FRAC_PI_2)).abs() < 1e-12);
+        assert!((neg_one.asin_angle().value() - (-core::f64::consts::FRAC_PI_2)).abs() < 1e-12);
 
         let zero: Quantity<Unitless> = Quantity::new(0.0);
-        assert!((zero.asin() - 0.0).abs() < 1e-12);
+        assert!((zero.asin_angle().value() - 0.0).abs() < 1e-12);
     }
 
     #[test]
-    fn same_unit_ratio_asin() {
-        // Same-unit division now directly yields Unitless, so asin works.
+    fn same_unit_ratio_asin_angle() {
+        use crate::units::angular::Radian;
+        // Same-unit division directly yields Unitless, so asin_angle works.
         let ratio = TU::new(1.0) / TU::new(2.0);
-        let result = ratio.asin();
-        assert!((result - 0.5_f64.asin()).abs() < 1e-12);
+        let result: Quantity<Radian> = ratio.asin_angle();
+        assert!((result.value() - 0.5_f64.asin()).abs() < 1e-12);
+    }
+
+    #[test]
+    fn asin_angle_to_degrees() {
+        use crate::units::angular::{Degree, Radian};
+        let ratio: Quantity<Unitless> = Quantity::new(0.5);
+        let angle: Quantity<Radian> = ratio.asin_angle();
+        let deg: Quantity<Degree> = angle.to();
+        assert!((deg.value() - 30.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn acos_angle_typed() {
+        use crate::units::angular::Radian;
+        let ratio: Quantity<Unitless> = Quantity::new(0.5);
+        let result: Quantity<Radian> = ratio.acos_angle();
+        assert!((result.value() - 0.5_f64.acos()).abs() < 1e-12);
+    }
+
+    #[test]
+    fn atan_angle_typed() {
+        use crate::units::angular::Radian;
+        let ratio: Quantity<Unitless> = Quantity::new(1.0);
+        let result: Quantity<Radian> = ratio.atan_angle();
+        assert!((result.value() - core::f64::consts::FRAC_PI_4).abs() < 1e-12);
+    }
+
+    #[test]
+    fn asin_angle_sin_roundtrip() {
+        use crate::units::angular::Radian;
+        let ratio: Quantity<Unitless> = Quantity::new(0.75);
+        let angle: Quantity<Radian> = ratio.asin_angle();
+        let back = angle.sin();
+        assert!((back - 0.75).abs() < 1e-12);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
