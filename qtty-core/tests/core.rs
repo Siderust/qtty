@@ -187,10 +187,10 @@ fn iterator_sum_quantity_owned() {
 }
 
 #[test]
-fn iterator_sum_quantity_borrowed_to_f64() {
+fn iterator_sum_quantity_borrowed() {
     let values = [TU::new(1.0), TU::new(2.5), TU::new(3.5)];
-    let total: f64 = values.iter().sum();
-    assert!((total - 7.0).abs() < 1e-12);
+    let total: TU = values.iter().sum();
+    assert!((total.value() - 7.0).abs() < 1e-12);
 }
 
 #[test]
@@ -201,10 +201,10 @@ fn operator_div_assign() {
 }
 
 #[test]
-fn partial_eq_f64() {
+fn partial_eq_same_unit() {
     let q = TU::new(5.0);
-    assert!(q == 5.0);
-    assert!(!(q == 4.0));
+    assert!(q == TU::new(5.0));
+    assert!(!(q == TU::new(4.0)));
 }
 
 #[test]
@@ -249,30 +249,32 @@ fn per_multiplication_commutative() {
 }
 
 #[test]
-fn unitless_asin() {
+fn unitless_asin_angle() {
+    use qtty_core::units::angular::Radian;
     let ratio: Quantity<Unitless> = Quantity::new(0.5);
-    let result = ratio.asin();
-    assert!((result - 0.5_f64.asin()).abs() < 1e-12);
+    let result: Quantity<Radian> = ratio.asin_angle();
+    assert!((result.value() - 0.5_f64.asin()).abs() < 1e-12);
 }
 
 #[test]
-fn same_unit_ratio_asin() {
-    // Same-unit division now directly yields Unitless, so asin works.
+fn same_unit_ratio_asin_angle() {
+    use qtty_core::units::angular::Radian;
+    // Same-unit division directly yields Unitless, so asin_angle works.
     let ratio = TU::new(1.0) / TU::new(2.0);
-    let result = ratio.asin();
-    assert!((result - 0.5_f64.asin()).abs() < 1e-12);
+    let result: Quantity<Radian> = ratio.asin_angle();
+    assert!((result.value() - 0.5_f64.asin()).abs() < 1e-12);
 }
 
 #[test]
-fn unitless_asin_boundary_values() {
+fn unitless_asin_angle_boundary_values() {
     let one: Quantity<Unitless> = Quantity::new(1.0);
-    assert!((one.asin() - core::f64::consts::FRAC_PI_2).abs() < 1e-12);
+    assert!((one.asin_angle().value() - core::f64::consts::FRAC_PI_2).abs() < 1e-12);
 
     let neg_one: Quantity<Unitless> = Quantity::new(-1.0);
-    assert!((neg_one.asin() - (-core::f64::consts::FRAC_PI_2)).abs() < 1e-12);
+    assert!((neg_one.asin_angle().value() - (-core::f64::consts::FRAC_PI_2)).abs() < 1e-12);
 
     let zero: Quantity<Unitless> = Quantity::new(0.0);
-    assert!((zero.asin() - 0.0).abs() < 1e-12);
+    assert!((zero.asin_angle().value() - 0.0).abs() < 1e-12);
 }
 
 #[test]
@@ -405,17 +407,19 @@ fn test_mean() {
 }
 
 #[test]
-fn test_acos() {
+fn test_acos_angle() {
+    use qtty_core::units::angular::Radian;
     let ratio: Quantity<Unitless> = Quantity::new(0.5);
-    let result = ratio.acos();
-    assert!((result - 0.5_f64.acos()).abs() < 1e-12);
+    let result: Quantity<Radian> = ratio.acos_angle();
+    assert!((result.value() - 0.5_f64.acos()).abs() < 1e-12);
 }
 
 #[test]
-fn test_atan() {
+fn test_atan_angle() {
+    use qtty_core::units::angular::Radian;
     let ratio: Quantity<Unitless> = Quantity::new(1.0);
-    let result = ratio.atan();
-    assert!((result - core::f64::consts::FRAC_PI_4).abs() < 1e-12);
+    let result: Quantity<Radian> = ratio.atan_angle();
+    assert!((result.value() - core::f64::consts::FRAC_PI_4).abs() < 1e-12);
 }
 
 #[test]
@@ -478,23 +482,12 @@ fn partial_ord_same_unit() {
 }
 
 #[test]
-fn partial_ord_scalar_f64() {
+fn partial_ord_same_unit_more() {
     let q = TU::new(5.0);
-    assert!(q > 3.0);
-    assert!(q >= 5.0);
-    assert!(q < 10.0);
-    assert!(q <= 5.0);
-    assert!(q >= 4.99);
-    assert!(q <= 5.01);
-}
-
-#[test]
-fn partial_ord_scalar_negative() {
-    let q = TU::new(-2.0);
-    assert!(q < 0.0);
-    assert!(q > -5.0);
-    assert!(q <= -2.0);
-    assert!(q >= -2.0);
+    assert!(q > TU::new(3.0));
+    assert!(q >= TU::new(5.0));
+    assert!(q < TU::new(10.0));
+    assert!(q <= TU::new(5.0));
 }
 
 #[test]
@@ -504,9 +497,6 @@ fn partial_ord_nan_returns_none() {
     // NaN comparisons are unordered
     assert!(nan.partial_cmp(&normal).is_none());
     assert!(!(nan == normal));
-    // NaN vs scalar
-    assert!(nan.partial_cmp(&5.0).is_none());
-    assert!(!(nan == 5.0));
 }
 
 #[test]
