@@ -16,13 +16,15 @@
 //!
 //! - Compile-time separation of dimensions (length vs time vs angle, …).
 //! - Zero runtime overhead for unit tags (phantom types only).
-//! - Full dimensional arithmetic: `m * m → m²`, `m / s → velocity`, `m² / m → m`.
+//! - Full dimensional arithmetic: `m * m → Prod<Meter, Meter>`, `m / s → Per<Meter, Second>`, `m / m → Unitless`.
+//!   Named derived units (e.g. `SquareMeter`) are obtained via `.to()`.
 //! - Automatic compile-time verification that multiplied/divided quantities produce the correct dimension.
 //!
 //! # What this crate does not try to solve
 //!
 //! - Exact arithmetic (`Quantity` is `f64`).
 //! - General-purpose symbolic simplification of arbitrary unit expressions.
+//!   Products and quotients are structural (`Prod<A, B>`, `Per<A, B>`); use `.to()` to convert to named units.
 //!
 //! # Quick start
 //!
@@ -361,10 +363,10 @@ mod tests {
     }
 
     #[test]
-    fn sum_quantities_into_f64() {
+    fn sum_quantities_into_quantity() {
         let qs = vec![TU::new(1.0), TU::new(2.0), TU::new(3.0)];
-        let total: f64 = qs.into_iter().sum();
-        assert_eq!(total, 6.0);
+        let total: TU = qs.into_iter().sum();
+        assert_eq!(total.value(), 6.0);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -437,17 +439,6 @@ mod tests {
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // PartialEq<f64>
-    // ─────────────────────────────────────────────────────────────────────────────
-
-    #[test]
-    fn partial_eq_f64() {
-        let q = TU::new(5.0);
-        assert!(q == 5.0);
-        assert!(!(q == 4.0));
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────────
     // Division: same-unit yields Unitless, cross-unit yields Per<N, D>
     // ─────────────────────────────────────────────────────────────────────────────
 
@@ -496,34 +487,70 @@ mod tests {
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // Quantity<Unitless>::asin / acos / atan
+    // Quantity<Unitless>::asin_angle / acos_angle / atan_angle
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
-    fn unitless_asin() {
+    fn unitless_asin_angle() {
+        use crate::units::angular::Radian;
         let ratio: Quantity<Unitless> = Quantity::new(0.5);
-        let result = ratio.asin();
-        assert!((result - 0.5_f64.asin()).abs() < 1e-12);
+        let result: Quantity<Radian> = ratio.asin_angle();
+        assert!((result.value() - 0.5_f64.asin()).abs() < 1e-12);
     }
 
     #[test]
-    fn unitless_asin_boundary_values() {
+    fn unitless_asin_angle_boundary_values() {
         let one: Quantity<Unitless> = Quantity::new(1.0);
-        assert!((one.asin() - core::f64::consts::FRAC_PI_2).abs() < 1e-12);
+        assert!((one.asin_angle().value() - core::f64::consts::FRAC_PI_2).abs() < 1e-12);
 
         let neg_one: Quantity<Unitless> = Quantity::new(-1.0);
-        assert!((neg_one.asin() - (-core::f64::consts::FRAC_PI_2)).abs() < 1e-12);
+        assert!((neg_one.asin_angle().value() - (-core::f64::consts::FRAC_PI_2)).abs() < 1e-12);
 
         let zero: Quantity<Unitless> = Quantity::new(0.0);
-        assert!((zero.asin() - 0.0).abs() < 1e-12);
+        assert!((zero.asin_angle().value() - 0.0).abs() < 1e-12);
     }
 
     #[test]
-    fn same_unit_ratio_asin() {
-        // Same-unit division now directly yields Unitless, so asin works.
+    fn same_unit_ratio_asin_angle() {
+        use crate::units::angular::Radian;
+        // Same-unit division directly yields Unitless, so asin_angle works.
         let ratio = TU::new(1.0) / TU::new(2.0);
-        let result = ratio.asin();
-        assert!((result - 0.5_f64.asin()).abs() < 1e-12);
+        let result: Quantity<Radian> = ratio.asin_angle();
+        assert!((result.value() - 0.5_f64.asin()).abs() < 1e-12);
+    }
+
+    #[test]
+    fn asin_angle_to_degrees() {
+        use crate::units::angular::{Degree, Radian};
+        let ratio: Quantity<Unitless> = Quantity::new(0.5);
+        let angle: Quantity<Radian> = ratio.asin_angle();
+        let deg: Quantity<Degree> = angle.to();
+        assert!((deg.value() - 30.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn acos_angle_typed() {
+        use crate::units::angular::Radian;
+        let ratio: Quantity<Unitless> = Quantity::new(0.5);
+        let result: Quantity<Radian> = ratio.acos_angle();
+        assert!((result.value() - 0.5_f64.acos()).abs() < 1e-12);
+    }
+
+    #[test]
+    fn atan_angle_typed() {
+        use crate::units::angular::Radian;
+        let ratio: Quantity<Unitless> = Quantity::new(1.0);
+        let result: Quantity<Radian> = ratio.atan_angle();
+        assert!((result.value() - core::f64::consts::FRAC_PI_4).abs() < 1e-12);
+    }
+
+    #[test]
+    fn asin_angle_sin_roundtrip() {
+        use crate::units::angular::Radian;
+        let ratio: Quantity<Unitless> = Quantity::new(0.75);
+        let angle: Quantity<Radian> = ratio.asin_angle();
+        let back = angle.sin();
+        assert!((back - 0.75).abs() < 1e-12);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
