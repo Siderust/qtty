@@ -599,29 +599,70 @@ pub mod nominal {
     /// One solar diameter.
     pub const D_SUN: SolarDiameters = SolarDiameters::new(1.0);
 
+    /// Canonical list of all nominal length units.
+    ///
+    /// Pass a macro identifier as the single argument; it will be invoked with all
+    /// nominal length unit types. Drives pairwise `From` impls among nominal units,
+    /// optional cross-unit ops, and the `assert_units_are_builtin!` check.
+    ///
+    /// Exported (`#[doc(hidden)]`) for use in `qtty`'s `inventory_consistency.rs`.
+    #[macro_export]
+    #[doc(hidden)]
+    macro_rules! length_nominal_units {
+        ($cb:path) => {
+            $cb!(
+                SolarRadius,
+                SolarDiameter,
+                EarthRadius,
+                EarthEquatorialRadius,
+                EarthPolarRadius,
+                JupiterRadius,
+                LunarRadius,
+                LunarDistance
+            );
+        };
+    }
+
+    // Generate all bidirectional From implementations between nominal length units.
+    length_nominal_units!(crate::impl_unit_from_conversions);
+
     // Allow convenient conversions between selected nominal units and core
-    // length units (e.g., SolarRadius <-> Kilometer) without polluting the
-    // main length namespace with nominal types.
+    // length units (e.g., SolarRadius <-> Kilometer).
     crate::impl_unit_from_conversions!(SolarRadius, Kilometer);
+
+    // Optional cross-unit operator support (`==`, `<`, etc.).
+    #[cfg(feature = "cross-unit-ops")]
+    length_nominal_units!(crate::impl_unit_cross_unit_ops);
     #[cfg(feature = "cross-unit-ops")]
     crate::impl_unit_cross_unit_ops!(SolarRadius, Kilometer);
+
+    // Compile-time check: every nominal unit is registered as BuiltinUnit.
+    #[cfg(test)]
+    length_nominal_units!(crate::assert_units_are_builtin);
 }
 
 /// Canonical list of all (non-nominal) length units.
 ///
 /// Pass a macro identifier as the single argument; it will be invoked with all
-/// non-nominal length unit types as its token list.  Used internally to drive
-/// `impl_unit_from_conversions!`, `impl_unit_cross_unit_ops!`, and (in future
-/// stages) the built-in arithmetic registration and facade alias generation.
+/// non-nominal length unit types as its token list. Drives:
+/// - `impl_unit_from_conversions!` — bidirectional `From` impls between all pairs.
+/// - `impl_unit_cross_unit_ops!` — cross-unit `PartialEq`/`PartialOrd` (feature-gated).
+/// - `assert_units_are_builtin!` — compile-time check that every unit is in
+///   `register_builtin_units!` (under `#[cfg(test)]`).
+///
+/// The macro is exported (`#[doc(hidden)]`) so the `qtty` facade can use it
+/// in compile-time consistency checks (`inventory_consistency.rs`).
 ///
 /// Nominal units (see [`nominal`]) are intentionally excluded: they are
 /// advisory reference values, not strict measurement standards, and only a
 /// small selection of cross-conversions between nominal and SI units is
-/// exposed (see the `impl_unit_from_conversions!` call inside `nominal`).
+/// exposed (see [`length_nominal_units!`] and its explicit pair calls).
 ///
 /// ```rust,ignore
 /// length_units!(crate::impl_unit_from_conversions);
 /// ```
+#[macro_export]
+#[doc(hidden)]
 macro_rules! length_units {
     ($cb:path) => {
         $cb!(
@@ -677,6 +718,10 @@ length_units!(crate::impl_unit_from_conversions);
 // Optional cross-unit operator support (`==`, `<`, etc.).
 #[cfg(feature = "cross-unit-ops")]
 length_units!(crate::impl_unit_cross_unit_ops);
+
+// Compile-time check: every unit in the inventory is registered as BuiltinUnit.
+#[cfg(test)]
+length_units!(crate::assert_units_are_builtin);
 
 #[cfg(all(test, feature = "std"))]
 mod tests {

@@ -8,6 +8,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 ## [x.y.z] - yyyy-mm-dd
 
 ### Added
+
+- **`assert_units_are_builtin!`** (`qtty-core`, `#[doc(hidden)]`) — compile-time
+  assertion macro driven by each dimension's inventory macro under `#[cfg(test)]`.
+  Uses a supertrait bound pattern: adding a unit to a dimension inventory without
+  also registering it in `register_builtin_units!` becomes a compile error. Catches
+  the most common drift case (new unit added to the dimension file but the
+  cross-dimension registry not updated).
+
+- **Facade consistency test** (`qtty/tests/inventory_consistency.rs`) — compile-time
+  integration test that uses exported inventory macros to assert every unit in every
+  dimension is both re-exported in `qtty::unit::*` and has a scalar alias in `qtty::*`.
+  Adding a unit to a dimension inventory but forgetting `lib.rs::unit` or
+  `scalar_aliases.rs` now fails CI instead of silently becoming a missing export.
+
 - New **stable unit arithmetic layer** (`unit_arithmetic` module) with `UnitDiv` and `UnitMul` extension traits that control output types for quantity division and multiplication, replacing the previous blanket impls.
 - Generic recovery impls: `U / U → Unitless`, `N / Per<N, D> → D`, `Per<N, D> * D → N`, `D * Per<N, D> → N`.
 - Macro-generated fallback pair tables for all built-in unit marker types: cross-unit division produces `Per<A, B>`, multiplication produces `Prod<A, B>`.
@@ -22,6 +36,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - **Breaking:** Removed the public `Simplify` trait and `.simplify()` method from `qtty-core` and the `qtty` facade crate; unit arithmetic now resolves these cases at compile time.
 
 ### Changed
+- **Internal: per-dimension unit inventory macros** — every dimension module in
+  `qtty-core` now owns a single `{dim}_units!($cb:path)` macro as the canonical
+  unit list for that dimension. The macro drives `impl_unit_from_conversions!`,
+  `impl_unit_cross_unit_ops!`, and `assert_units_are_builtin!` from one token list.
+  Affected dimensions: `angular`, `length` (non-nominal + nominal), `mass`, `power`,
+  `time`, `area`, `volume`. No public API change.
+
+- **Internal: nominal length units have full pairwise `From` conversions** —
+  `length_nominal_units!` now drives `impl_unit_from_conversions!` for all 8 nominal
+  units (`SolarRadius`, `SolarDiameter`, `EarthRadius`, `EarthEquatorialRadius`,
+  `EarthPolarRadius`, `JupiterRadius`, `LunarRadius`, `LunarDistance`). Previously
+  only `SolarRadius ↔ Kilometer` was generated. The explicit cross-group pair is
+  retained.
+
+- **Internal: inventory macros exported** — all 8 dimension inventory macros are
+  now `#[macro_export]` + `#[doc(hidden)]`, accessible to the `qtty` facade crate
+  as `qtty_core::{dim}_units!(...)` for use in the consistency test.
+
 - **Breaking:** Same-unit division (`Meter / Meter`) now directly returns `Quantity<Unitless>` instead of `Quantity<Per<Meter, Meter>>`. Code that type-annotated the result as `Quantity<Per<U, U>>` must be updated.
 - **Breaking:** `Per<N, D> * D` and `D * Per<N, D>` now directly return the numerator quantity (e.g., `Quantity<Meter>`) instead of `Quantity<Prod<Per<N, D>, D>>`. The `.to()` call to recover the numerator is no longer needed.
 - **Breaking:** `N / Per<N, D>` now directly returns the denominator quantity (e.g., `Quantity<Second>`) instead of `Quantity<Per<N, Per<N, D>>>`.

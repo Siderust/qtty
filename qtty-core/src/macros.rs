@@ -85,6 +85,34 @@ macro_rules! impl_unit_cross_unit_ops {
     };
 }
 
+/// Compile-time assertion that every listed unit type implements
+/// [`BuiltinUnit`](crate::unit_arithmetic::BuiltinUnit).
+///
+/// Each dimension module calls its own inventory macro with this callback under
+/// `#[cfg(test)]`. The generated code uses a supertrait bound: if a type does
+/// not implement `BuiltinUnit`, the `impl _AssertBuiltin for $unit {}` line
+/// fails to compile, catching drift between an inventory and
+/// `register_builtin_units!` in [`unit_arithmetic`](crate::unit_arithmetic).
+///
+/// This only catches the forward direction (unit in inventory but missing from
+/// `register_builtin_units!`). The reverse (unit in registry but missing from
+/// inventory) produces unusable arithmetic and is caught by downstream tests.
+///
+/// ```rust,ignore
+/// #[cfg(test)]
+/// time_units!(crate::assert_units_are_builtin);
+/// ```
+#[macro_export]
+#[doc(hidden)]
+macro_rules! assert_units_are_builtin {
+    ($($unit:ty),+ $(,)?) => {
+        const _: () = {
+            trait _AssertBuiltin: $crate::unit_arithmetic::BuiltinUnit {}
+            $(impl _AssertBuiltin for $unit {})+
+        };
+    };
+}
+
 /// Generates all pairwise conversions and cross-unit comparisons.
 ///
 /// Prefer `impl_unit_from_conversions!` + optional `impl_unit_cross_unit_ops!`

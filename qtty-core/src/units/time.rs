@@ -347,6 +347,70 @@ pub type SiderealYears = Quantity<SiderealYear>;
 /// A constant representing one sidereal year.
 pub const SIDEREAL_YEAR: SiderealYears = SiderealYears::new(1.0);
 
+/// Canonical list of all time units.
+///
+/// Pass a macro identifier as the single argument; it will be invoked with all
+/// time unit types as its token list. Drives:
+/// - `impl_unit_from_conversions!` — bidirectional `From` impls between all pairs.
+/// - `impl_unit_cross_unit_ops!` — cross-unit `PartialEq`/`PartialOrd` (feature-gated).
+/// - `assert_units_are_builtin!` — compile-time check that every unit is in
+///   `register_builtin_units!` (under `#[cfg(test)]`).
+///
+/// The macro is exported (`#[doc(hidden)]`) so the `qtty` facade can use it
+/// in compile-time consistency checks (`inventory_consistency.rs`).
+///
+/// ```rust,ignore
+/// time_units!(crate::impl_unit_from_conversions);
+/// ```
+#[macro_export]
+#[doc(hidden)]
+macro_rules! time_units {
+    ($cb:path) => {
+        $cb!(
+            Attosecond,
+            Femtosecond,
+            Picosecond,
+            Nanosecond,
+            Microsecond,
+            Millisecond,
+            Centisecond,
+            Decisecond,
+            Second,
+            Decasecond,
+            Hectosecond,
+            Kilosecond,
+            Megasecond,
+            Gigasecond,
+            Terasecond,
+            Minute,
+            Hour,
+            Day,
+            Week,
+            Fortnight,
+            Year,
+            Decade,
+            Century,
+            Millennium,
+            JulianYear,
+            JulianCentury,
+            SiderealDay,
+            SynodicMonth,
+            SiderealYear
+        );
+    };
+}
+
+// Generate all bidirectional From implementations between time units.
+time_units!(crate::impl_unit_from_conversions);
+
+// Optional cross-unit operator support (`==`, `<`, etc.).
+#[cfg(feature = "cross-unit-ops")]
+time_units!(crate::impl_unit_cross_unit_ops);
+
+// Compile-time check: every unit in the inventory is registered as BuiltinUnit.
+#[cfg(test)]
+time_units!(crate::assert_units_are_builtin);
+
 #[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;

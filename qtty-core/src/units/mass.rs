@@ -215,13 +215,20 @@ pub const MSUN: SolarMasses = SolarMasses::new(1.0);
 /// Canonical list of all mass units.
 ///
 /// Pass a macro identifier as the single argument; it will be invoked with all
-/// mass unit types as its token list.  Used internally to drive
-/// `impl_unit_from_conversions!`, `impl_unit_cross_unit_ops!`, and (in future
-/// stages) the built-in arithmetic registration and facade alias generation.
+/// mass unit types as its token list. Drives:
+/// - `impl_unit_from_conversions!` — bidirectional `From` impls between all pairs.
+/// - `impl_unit_cross_unit_ops!` — cross-unit `PartialEq`/`PartialOrd` (feature-gated).
+/// - `assert_units_are_builtin!` — compile-time check that every unit is in
+///   `register_builtin_units!` (under `#[cfg(test)]`).
+///
+/// The macro is exported (`#[doc(hidden)]`) so the `qtty` facade can use it
+/// in compile-time consistency checks (`inventory_consistency.rs`).
 ///
 /// ```rust,ignore
 /// mass_units!(crate::impl_unit_from_conversions);
 /// ```
+#[macro_export]
+#[doc(hidden)]
 macro_rules! mass_units {
     ($cb:path) => {
         $cb!(
@@ -266,6 +273,10 @@ mass_units!(crate::impl_unit_from_conversions);
 // Optional cross-unit operator support (`==`, `<`, etc.).
 #[cfg(feature = "cross-unit-ops")]
 mass_units!(crate::impl_unit_cross_unit_ops);
+
+// Compile-time check: every unit in the inventory is registered as BuiltinUnit.
+#[cfg(test)]
+mass_units!(crate::assert_units_are_builtin);
 
 #[cfg(all(test, feature = "std"))]
 mod tests {
