@@ -258,7 +258,7 @@ pub const FORTNIGHT: Fortnights = Fortnights::new(1.0);
 ///
 /// Convention used: `365.2425 d`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "yr", dimension = Time, ratio = 365.242_5 * SECONDS_PER_DAY)]
+#[unit(symbol = "yr", dimension = Time, ratio = 365.25 * SECONDS_PER_DAY)]
 pub struct Year;
 /// A quantity measured in years.
 pub type Years = Quantity<Year>;
@@ -267,7 +267,7 @@ pub const YEAR: Years = Years::new(1.0);
 
 /// Decade (`10` mean tropical years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "dec", dimension = Time, ratio = 10.0 * 365.242_5 * SECONDS_PER_DAY)]
+#[unit(symbol = "dec", dimension = Time, ratio = 10.0 * 365.25 * SECONDS_PER_DAY)]
 pub struct Decade;
 /// A quantity measured in decades.
 pub type Decades = Quantity<Decade>;
@@ -276,7 +276,7 @@ pub const DECADE: Decades = Decades::new(1.0);
 
 /// Century (`100` mean tropical years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "cent", dimension = Time, ratio = 100.0 * 365.242_5 * SECONDS_PER_DAY)]
+#[unit(symbol = "c", dimension = Time, ratio = 100.0 * 365.25 * SECONDS_PER_DAY)]
 pub struct Century;
 /// A quantity measured in centuries.
 pub type Centuries = Quantity<Century>;
@@ -285,7 +285,7 @@ pub const CENTURY: Centuries = Centuries::new(1.0);
 
 /// Millennium (`1000` mean tropical years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "mill", dimension = Time, ratio = 1000.0 * 365.242_5 * SECONDS_PER_DAY)]
+#[unit(symbol = "mill", dimension = Time, ratio = 1000.0 * 365.25 * SECONDS_PER_DAY)]
 pub struct Millennium;
 /// A quantity measured in millennia.
 pub type Millennia = Quantity<Millennium>;
@@ -305,7 +305,7 @@ pub const JULIAN_YEAR: JulianYears = JulianYears::new(1.0);
 
 /// Julian century (`36_525 d`), expressed in seconds.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "JC", dimension = Time, ratio = 36_525.0 * SECONDS_PER_DAY)]
+#[unit(symbol = "jc", dimension = Time, ratio = 36_525.0 * SECONDS_PER_DAY)]
 pub struct JulianCentury;
 /// A quantity measured in Julian centuries.
 pub type JulianCenturies = Quantity<JulianCentury>;
@@ -329,7 +329,7 @@ pub const SIDEREAL_DAY: SiderealDays = SiderealDays::new(1.0);
 ///
 /// Convention used: `1 synodic month ≈ 29.530588 d`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "synmo", dimension = Time, ratio = 29.530_588 * SECONDS_PER_DAY)]
+#[unit(symbol = "mo_s", dimension = Time, ratio = 29.530_59 * SECONDS_PER_DAY)]
 pub struct SynodicMonth;
 /// A quantity measured in synodic months.
 pub type SynodicMonths = Quantity<SynodicMonth>;
@@ -340,7 +340,7 @@ pub const SYNODIC_MONTH: SynodicMonths = SynodicMonths::new(1.0);
 ///
 /// Common convention: `1 sidereal year ≈ 365.256363004 d`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "syr", dimension = Time, ratio = 365.256_363_004 * SECONDS_PER_DAY)]
+#[unit(symbol = "yr_s", dimension = Time, ratio = 365.256_363_004 * SECONDS_PER_DAY)]
 pub struct SiderealYear;
 /// A quantity measured in sidereal years.
 pub type SiderealYears = Quantity<SiderealYear>;
@@ -488,14 +488,14 @@ mod tests {
     fn tropical_year_to_days() {
         let y = Years::new(1.0);
         let day = y.to::<Day>();
-        assert_abs_diff_eq!(day.value(), 365.2425, epsilon = 1e-9);
+        assert_abs_diff_eq!(day.value(), 365.25, epsilon = 1e-9);
     }
 
     #[test]
     fn century_to_days() {
         let c = Centuries::new(1.0);
         let day = c.to::<Day>();
-        assert_abs_diff_eq!(day.value(), 36524.25, epsilon = 1e-9);
+        assert_abs_diff_eq!(day.value(), 36525.0, epsilon = 1e-9);
     }
 
     #[test]
@@ -709,8 +709,8 @@ mod tests {
     fn synodic_month_to_days() {
         let q = SynodicMonths::new(1.0);
         let d = q.to::<Day>();
-        // 1 synodic month ≈ 29.530588 d
-        assert_abs_diff_eq!(d.value(), 29.530_588, epsilon = 1e-6);
+        // 1 synodic month ≈ 29.530590 d
+        assert_abs_diff_eq!(d.value(), 29.530_590, epsilon = 1e-6);
     }
 
     #[test]

@@ -71,13 +71,13 @@ mod tests {
     fn deg_per_day_to_deg_per_year() {
         let f: Frequency<Degree, Day> = Frequency::new(1.0);
         let f_year: Frequency<Degree, Year> = f.to();
-        // 1 deg/day = 365.2425 deg/year (tropical year)
-        assert_relative_eq!(f_year.value(), 365.2425, max_relative = 1e-6);
+        // 1 deg/day = 365.25 deg/year (Julian year)
+        assert_relative_eq!(f_year.value(), 365.25, max_relative = 1e-6);
     }
 
     #[test]
     fn deg_per_year_to_deg_per_day() {
-        let f: Frequency<Degree, Year> = Frequency::new(365.2425);
+        let f: Frequency<Degree, Year> = Frequency::new(365.25);
         let f_day: Frequency<Degree, Day> = f.to();
         assert_relative_eq!(f_day.value(), 1.0, max_relative = 1e-6);
     }
