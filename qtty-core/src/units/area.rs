@@ -141,6 +141,52 @@ pub struct Acre;
 /// A quantity measured in acres.
 pub type Acres = Quantity<Acre>;
 
+/// Canonical list of all area units.
+///
+/// Pass a macro identifier as the single argument; it will be invoked with all
+/// area unit types as its token list. Drives:
+/// - `impl_unit_from_conversions!` — bidirectional `From` impls between all pairs.
+/// - `impl_unit_cross_unit_ops!` — cross-unit `PartialEq`/`PartialOrd` (feature-gated).
+/// - `assert_units_are_builtin!` — compile-time check that every unit is in
+///   `register_builtin_units!` (under `#[cfg(test)]`).
+///
+/// The macro is exported (`#[doc(hidden)]`) so the `qtty` facade can use it
+/// in compile-time consistency checks (`inventory_consistency.rs`).
+///
+/// ```rust,ignore
+/// area_units!(crate::impl_unit_from_conversions);
+/// ```
+#[macro_export]
+#[doc(hidden)]
+macro_rules! area_units {
+    ($cb:path) => {
+        $cb!(
+            SquareMeter,
+            SquareKilometer,
+            SquareCentimeter,
+            SquareMillimeter,
+            Hectare,
+            Are,
+            SquareInch,
+            SquareFoot,
+            SquareYard,
+            SquareMile,
+            Acre
+        );
+    };
+}
+
+// Generate all bidirectional From implementations between area units.
+area_units!(crate::impl_unit_from_conversions);
+
+// Optional cross-unit operator support (`==`, `<`, etc.).
+#[cfg(feature = "cross-unit-ops")]
+area_units!(crate::impl_unit_cross_unit_ops);
+
+// Compile-time check: every unit in the inventory is registered as BuiltinUnit.
+#[cfg(test)]
+area_units!(crate::assert_units_are_builtin);
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -406,13 +406,20 @@ impl Degrees {
 /// Canonical list of all angular units.
 ///
 /// Pass a macro identifier as the single argument; it will be invoked with all
-/// angular unit types as its token list.  Used internally to drive
-/// `impl_unit_from_conversions!`, `impl_unit_cross_unit_ops!`, and (in future
-/// stages) the built-in arithmetic registration and facade alias generation.
+/// angular unit types as its token list. Drives:
+/// - `impl_unit_from_conversions!` — bidirectional `From` impls between all pairs.
+/// - `impl_unit_cross_unit_ops!` — cross-unit `PartialEq`/`PartialOrd` (feature-gated).
+/// - `assert_units_are_builtin!` — compile-time check that every unit is in
+///   `register_builtin_units!` (under `#[cfg(test)]`).
+///
+/// The macro is exported (`#[doc(hidden)]`) so the `qtty` facade can use it
+/// in compile-time consistency checks (`inventory_consistency.rs`).
 ///
 /// ```rust,ignore
 /// angular_units!(crate::impl_unit_from_conversions);
 /// ```
+#[macro_export]
+#[doc(hidden)]
 macro_rules! angular_units {
     ($cb:path) => {
         $cb!(
@@ -436,6 +443,10 @@ angular_units!(crate::impl_unit_from_conversions);
 // Optional cross-unit operator support (`==`, `<`, etc.).
 #[cfg(feature = "cross-unit-ops")]
 angular_units!(crate::impl_unit_cross_unit_ops);
+
+// Compile-time check: every unit in the inventory is registered as BuiltinUnit.
+#[cfg(test)]
+angular_units!(crate::assert_units_are_builtin);
 
 #[cfg(all(test, feature = "std"))]
 mod tests {

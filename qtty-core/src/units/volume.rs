@@ -158,6 +158,54 @@ pub struct UsFluidOunce;
 /// A quantity measured in US fluid ounces.
 pub type UsFluidOunces = Quantity<UsFluidOunce>;
 
+/// Canonical list of all volume units.
+///
+/// Pass a macro identifier as the single argument; it will be invoked with all
+/// volume unit types as its token list. Drives:
+/// - `impl_unit_from_conversions!` — bidirectional `From` impls between all pairs.
+/// - `impl_unit_cross_unit_ops!` — cross-unit `PartialEq`/`PartialOrd` (feature-gated).
+/// - `assert_units_are_builtin!` — compile-time check that every unit is in
+///   `register_builtin_units!` (under `#[cfg(test)]`).
+///
+/// The macro is exported (`#[doc(hidden)]`) so the `qtty` facade can use it
+/// in compile-time consistency checks (`inventory_consistency.rs`).
+///
+/// ```rust,ignore
+/// volume_units!(crate::impl_unit_from_conversions);
+/// ```
+#[macro_export]
+#[doc(hidden)]
+macro_rules! volume_units {
+    ($cb:path) => {
+        $cb!(
+            CubicMeter,
+            CubicKilometer,
+            CubicCentimeter,
+            CubicMillimeter,
+            Liter,
+            Milliliter,
+            Microliter,
+            Centiliter,
+            Deciliter,
+            CubicInch,
+            CubicFoot,
+            UsGallon,
+            UsFluidOunce
+        );
+    };
+}
+
+// Generate all bidirectional From implementations between volume units.
+volume_units!(crate::impl_unit_from_conversions);
+
+// Optional cross-unit operator support (`==`, `<`, etc.).
+#[cfg(feature = "cross-unit-ops")]
+volume_units!(crate::impl_unit_cross_unit_ops);
+
+// Compile-time check: every unit in the inventory is registered as BuiltinUnit.
+#[cfg(test)]
+volume_units!(crate::assert_units_are_builtin);
+
 #[cfg(test)]
 mod tests {
     use super::*;
