@@ -60,11 +60,16 @@ include!(concat!(env!("OUT_DIR"), "/unit_conversions.rs"));
 
 // =============================================================================
 // Explicit Helper Functions (convenience API for common units)
+//
+// DEPRECATED: Use From/TryFrom impls directly (e.g. `meters.into()` or
+// `qty.try_into()`).  These wrappers are thin aliases auto-generated
+// From/TryFrom impls that cover all units.
 // =============================================================================
 
 use crate::QttyQuantity;
 
 /// Converts `Meters` to an FFI-safe `QttyQuantity`.
+#[deprecated(since = "0.5.1", note = "use `Meters::into()` instead")]
 #[inline]
 pub fn meters_into_ffi(m: qtty::length::Meters) -> QttyQuantity {
     m.into()
@@ -73,12 +78,14 @@ pub fn meters_into_ffi(m: qtty::length::Meters) -> QttyQuantity {
 /// Attempts to convert a `QttyQuantity` to `Meters`.
 ///
 /// Returns an error if the quantity's unit is not length-compatible.
+#[deprecated(since = "0.5.1", note = "use `qty.try_into::<Meters>()` instead")]
 #[inline]
 pub fn try_into_meters(q: QttyQuantity) -> Result<qtty::length::Meters, i32> {
     q.try_into()
 }
 
 /// Converts `Kilometers` to an FFI-safe `QttyQuantity`.
+#[deprecated(since = "0.5.1", note = "use `Kilometers::into()` instead")]
 #[inline]
 pub fn kilometers_into_ffi(km: qtty::length::Kilometers) -> QttyQuantity {
     km.into()
@@ -87,12 +94,14 @@ pub fn kilometers_into_ffi(km: qtty::length::Kilometers) -> QttyQuantity {
 /// Attempts to convert a `QttyQuantity` to `Kilometers`.
 ///
 /// Returns an error if the quantity's unit is not length-compatible.
+#[deprecated(since = "0.5.1", note = "use `qty.try_into::<Kilometers>()` instead")]
 #[inline]
 pub fn try_into_kilometers(q: QttyQuantity) -> Result<qtty::length::Kilometers, i32> {
     q.try_into()
 }
 
 /// Converts `Seconds` to an FFI-safe `QttyQuantity`.
+#[deprecated(since = "0.5.1", note = "use `Seconds::into()` instead")]
 #[inline]
 pub fn seconds_into_ffi(s: qtty::time::Seconds) -> QttyQuantity {
     s.into()
@@ -101,12 +110,14 @@ pub fn seconds_into_ffi(s: qtty::time::Seconds) -> QttyQuantity {
 /// Attempts to convert a `QttyQuantity` to `Seconds`.
 ///
 /// Returns an error if the quantity's unit is not time-compatible.
+#[deprecated(since = "0.5.1", note = "use `qty.try_into::<Seconds>()` instead")]
 #[inline]
 pub fn try_into_seconds(q: QttyQuantity) -> Result<qtty::time::Seconds, i32> {
     q.try_into()
 }
 
 /// Converts `Minutes` to an FFI-safe `QttyQuantity`.
+#[deprecated(since = "0.5.1", note = "use `Minutes::into()` instead")]
 #[inline]
 pub fn minutes_into_ffi(m: qtty::time::Minutes) -> QttyQuantity {
     m.into()
@@ -115,12 +126,14 @@ pub fn minutes_into_ffi(m: qtty::time::Minutes) -> QttyQuantity {
 /// Attempts to convert a `QttyQuantity` to `Minutes`.
 ///
 /// Returns an error if the quantity's unit is not time-compatible.
+#[deprecated(since = "0.5.1", note = "use `qty.try_into::<Minutes>()` instead")]
 #[inline]
 pub fn try_into_minutes(q: QttyQuantity) -> Result<qtty::time::Minutes, i32> {
     q.try_into()
 }
 
 /// Converts `Hours` to an FFI-safe `QttyQuantity`.
+#[deprecated(since = "0.5.1", note = "use `Hours::into()` instead")]
 #[inline]
 pub fn hours_into_ffi(h: qtty::time::Hours) -> QttyQuantity {
     h.into()
@@ -129,12 +142,14 @@ pub fn hours_into_ffi(h: qtty::time::Hours) -> QttyQuantity {
 /// Attempts to convert a `QttyQuantity` to `Hours`.
 ///
 /// Returns an error if the quantity's unit is not time-compatible.
+#[deprecated(since = "0.5.1", note = "use `qty.try_into::<Hours>()` instead")]
 #[inline]
 pub fn try_into_hours(q: QttyQuantity) -> Result<qtty::time::Hours, i32> {
     q.try_into()
 }
 
 /// Converts `Days` to an FFI-safe `QttyQuantity`.
+#[deprecated(since = "0.5.1", note = "use `Days::into()` instead")]
 #[inline]
 pub fn days_into_ffi(d: qtty::time::Days) -> QttyQuantity {
     d.into()
@@ -143,12 +158,14 @@ pub fn days_into_ffi(d: qtty::time::Days) -> QttyQuantity {
 /// Attempts to convert a `QttyQuantity` to `Days`.
 ///
 /// Returns an error if the quantity's unit is not time-compatible.
+#[deprecated(since = "0.5.1", note = "use `qty.try_into::<Days>()` instead")]
 #[inline]
 pub fn try_into_days(q: QttyQuantity) -> Result<qtty::time::Days, i32> {
     q.try_into()
 }
 
 /// Converts `Radians` to an FFI-safe `QttyQuantity`.
+#[deprecated(since = "0.5.1", note = "use `Radians::into()` instead")]
 #[inline]
 pub fn radians_into_ffi(r: qtty::angular::Radians) -> QttyQuantity {
     r.into()
@@ -157,12 +174,14 @@ pub fn radians_into_ffi(r: qtty::angular::Radians) -> QttyQuantity {
 /// Attempts to convert a `QttyQuantity` to `Radians`.
 ///
 /// Returns an error if the quantity's unit is not angle-compatible.
+#[deprecated(since = "0.5.1", note = "use `qty.try_into::<Radians>()` instead")]
 #[inline]
 pub fn try_into_radians(q: QttyQuantity) -> Result<qtty::angular::Radians, i32> {
     q.try_into()
 }
 
 /// Converts `Degrees` to an FFI-safe `QttyQuantity`.
+#[deprecated(since = "0.5.1", note = "use `Degrees::into()` instead")]
 #[inline]
 pub fn degrees_into_ffi(d: qtty::angular::Degrees) -> QttyQuantity {
     d.into()
@@ -171,12 +190,14 @@ pub fn degrees_into_ffi(d: qtty::angular::Degrees) -> QttyQuantity {
 /// Attempts to convert a `QttyQuantity` to `Degrees`.
 ///
 /// Returns an error if the quantity's unit is not angle-compatible.
+#[deprecated(since = "0.5.1", note = "use `qty.try_into::<Degrees>()` instead")]
 #[inline]
 pub fn try_into_degrees(q: QttyQuantity) -> Result<qtty::angular::Degrees, i32> {
     q.try_into()
 }
 
 #[cfg(test)]
+#[allow(deprecated)]
 mod tests {
     use super::*;
     use crate::QttyStatus;
