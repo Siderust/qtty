@@ -126,7 +126,7 @@ pub const HP_E: HorsepowerElectrics = HorsepowerElectrics::new(1.0);
 ///
 /// This is a *nominal reference* value intended for consistent conversion.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "L☉", dimension = Power, ratio = 3.828e26)]
+#[unit(symbol = "L_☉", dimension = Power, ratio = 3.828e26)]
 pub struct SolarLuminosity;
 /// A quantity measured in solar luminosities.
 pub type SolarLuminosities = Quantity<SolarLuminosity>;

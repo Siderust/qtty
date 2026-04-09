@@ -331,7 +331,7 @@ pub const GON: Gradians = Gradians::new(1.0);
 
 /// Turn (full revolution; `360` degrees).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "turn", dimension = Angular, ratio = 360.0)]
+#[unit(symbol = "tr", dimension = Angular, ratio = 360.0)]
 pub struct Turn;
 /// Convenience alias for a turn quantity.
 pub type Turns = Quantity<Turn>;
@@ -340,7 +340,7 @@ pub const TURN: Turns = Turns::new(1.0);
 
 /// Hour angle hour (`15` degrees).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "h", dimension = Angular, ratio = 15.0)]
+#[unit(symbol = "ʰ", dimension = Angular, ratio = 15.0)]
 pub struct HourAngle;
 /// Type alias shorthand for [`HourAngle`].
 pub type Hms = HourAngle;

@@ -128,7 +128,7 @@ pub const CT: Carats = Carats::new(1.0);
 
 /// Grain: `1 gr = 64.79891 mg` (exact) == `0.064_798_91 g`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "gr", dimension = Mass, ratio = 6_479_891.0 / 1_000_000_000.0)]
+#[unit(symbol = "gr", dimension = Mass, ratio = 6_479_891.0 / 100_000_000.0)]
 pub struct Grain;
 /// Shorthand type alias for [`Grain`].
 pub type Gr = Grain;
@@ -172,7 +172,7 @@ pub const ST: Stones = Stones::new(1.0);
 
 /// Short ton (US customary): `2000 lb` (exact given lb).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "ton_us", dimension = Mass, ratio = (45_359_237.0 / 100_000.0) * 2000.0)]
+#[unit(symbol = "ton_s", dimension = Mass, ratio = (45_359_237.0 / 100_000.0) * 2000.0)]
 pub struct ShortTon;
 /// Quantity measured in short tons (US).
 pub type ShortTons = Quantity<ShortTon>;
@@ -181,7 +181,7 @@ pub const TON_US: ShortTons = ShortTons::new(1.0);
 
 /// Long ton (Imperial): `2240 lb` (exact given lb).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "ton_uk", dimension = Mass, ratio = (45_359_237.0 / 100_000.0) * 2240.0)]
+#[unit(symbol = "ton_l", dimension = Mass, ratio = (45_359_237.0 / 100_000.0) * 2240.0)]
 pub struct LongTon;
 /// Quantity measured in long tons (UK).
 pub type LongTons = Quantity<LongTon>;
@@ -205,7 +205,7 @@ pub const U: AtomicMassUnits = AtomicMassUnits::new(1.0);
 ///
 /// This is a **conversion constant** (nominal), not a “best estimate” of the Sun’s true mass.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "M☉", dimension = Mass, ratio = 1.988_416e33)]
+#[unit(symbol = "M_☉", dimension = Mass, ratio = 1.988_416e33)]
 pub struct SolarMass;
 /// A quantity measured in solar masses.
 pub type SolarMasses = Quantity<SolarMass>;
@@ -408,8 +408,8 @@ mod tests {
     fn grain_to_milligram() {
         let gr = Grains::new(1.0);
         let mg = gr.to::<Milligram>();
-        // ratio in code: 6_479_891 / 1_000_000_000 g = 6.479891 mg
-        assert_relative_eq!(mg.value(), 6.479_891, max_relative = 1e-6);
+        // ratio in code: 6_479_891 / 100_000_000 g = 64.79891 mg
+        assert_relative_eq!(mg.value(), 64.798_91, max_relative = 1e-6);
     }
 
     #[test]

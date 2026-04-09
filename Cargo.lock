@@ -695,6 +695,7 @@ dependencies = [
  "cbindgen",
  "pyo3",
  "qtty",
+ "qtty-core",
  "quote",
  "serde",
  "serde_json",

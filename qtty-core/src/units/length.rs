@@ -459,7 +459,7 @@ pub const FTM: Fathoms = Fathoms::new(1.0);
 
 /// Earth meridional circumference (approximate mean value).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Cmer", dimension = Length, ratio = 40_007_863.0)]
+#[unit(symbol = "C_mer", dimension = Length, ratio = 40_007_863.0)]
 pub struct EarthMeridionalCircumference;
 /// A quantity measured in Earth meridional circumferences.
 pub type EarthMeridionalCircumferences = Quantity<EarthMeridionalCircumference>;
@@ -468,7 +468,7 @@ pub const C_MERIDIONAL: EarthMeridionalCircumferences = EarthMeridionalCircumfer
 
 /// Earth equatorial circumference.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Ceq", dimension = Length, ratio = 40_075_017.0)]
+#[unit(symbol = "C_eq", dimension = Length, ratio = 40_075_017.0)]
 pub struct EarthEquatorialCircumference;
 /// A quantity measured in Earth equatorial circumferences.
 pub type EarthEquatorialCircumferences = Quantity<EarthEquatorialCircumference>;
@@ -481,7 +481,7 @@ pub const C_EQUATORIAL: EarthEquatorialCircumferences = EarthEquatorialCircumfer
 
 /// Bohr radius (`a0`). CODATA 2018 value in metres.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "a0", dimension = Length, ratio = 5.291_772_109_03e-11)]
+#[unit(symbol = "a₀", dimension = Length, ratio = 5.291_772_109_03e-11)]
 pub struct BohrRadius;
 /// A quantity measured in Bohr radii.
 pub type BohrRadii = Quantity<BohrRadius>;
@@ -490,7 +490,7 @@ pub const A0: BohrRadii = BohrRadii::new(1.0);
 
 /// Classical electron radius (`re`). CODATA 2018 value in metres.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "re", dimension = Length, ratio = 2.817_940_326_2e-15)]
+#[unit(symbol = "r_e", dimension = Length, ratio = 2.817_940_326_2e-15)]
 pub struct ClassicalElectronRadius;
 /// A quantity measured in classical electron radii.
 pub type ClassicalElectronRadii = Quantity<ClassicalElectronRadius>;
@@ -499,7 +499,7 @@ pub const RE: ClassicalElectronRadii = ClassicalElectronRadii::new(1.0);
 
 /// Planck length (`lp`). CODATA 2018 value in metres.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "lp", dimension = Length, ratio = 1.616_255e-35)]
+#[unit(symbol = "l_P", dimension = Length, ratio = 1.616_255e-35)]
 pub struct PlanckLength;
 /// A quantity measured in Planck lengths.
 pub type PlanckLengths = Quantity<PlanckLength>;
@@ -508,7 +508,7 @@ pub const LP: PlanckLengths = PlanckLengths::new(1.0);
 
 /// Reduced Compton wavelength of the electron (`lambda_bar_e`). CODATA 2018 value in metres.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "lambda_bar_e", dimension = Length, ratio = 3.861_592_679_6e-13)]
+#[unit(symbol = "λ̄_e", dimension = Length, ratio = 3.861_592_679_6e-13)]
 pub struct ElectronReducedComptonWavelength;
 /// A quantity measured in reduced Compton wavelengths of the electron.
 pub type ElectronReducedComptonWavelengths = Quantity<ElectronReducedComptonWavelength>;

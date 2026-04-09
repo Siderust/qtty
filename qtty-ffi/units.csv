@@ -123,7 +123,7 @@
 41001,Mass,Ounce,oz,28.349523125,qtty::mass::Ounces
 41002,Mass,Pound,lb,453.59237,qtty::mass::Pounds
 41003,Mass,Stone,st,6350.29318,qtty::mass::Stones
-41004,Mass,ShortTon,ton,907184.74,qtty::mass::ShortTons
+41004,Mass,ShortTon,ton_s,907184.74,qtty::mass::ShortTons
 41005,Mass,LongTon,ton_l,1016046.9088,qtty::mass::LongTons
 42000,Mass,Carat,ct,0.2,qtty::mass::Carats
 42001,Mass,Tonne,t,1e6,qtty::mass::Tonnes
