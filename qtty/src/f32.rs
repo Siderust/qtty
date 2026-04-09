@@ -17,4 +17,16 @@
 //! let time: Second = Second::new(10.0_f32);
 //! ```
 
-crate::scalar_aliases::define_scalar_aliases!(f32);
+macro_rules! _alias {
+    ($($unit:ident),+ $(,)?) => {
+        $(pub type $unit<S = f32> = $crate::Quantity<$crate::unit::$unit, S>;)+
+    };
+}
+qtty_core::angular_units!(_alias);
+qtty_core::length_units!(_alias);
+qtty_core::length_nominal_units!(_alias);
+qtty_core::time_units!(_alias);
+qtty_core::mass_units!(_alias);
+qtty_core::power_units!(_alias);
+qtty_core::area_units!(_alias);
+qtty_core::volume_units!(_alias);

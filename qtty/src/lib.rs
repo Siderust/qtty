@@ -160,11 +160,26 @@ pub use qtty_core::serde_scalar;
 pub use qtty_derive::Unit;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Internal macro for scalar-specific modules
+// Internal macros for inventory-driven generation
 // ─────────────────────────────────────────────────────────────────────────────
 
-#[macro_use]
-mod scalar_aliases;
+/// Invoke a callback macro with every qtty-core dimension inventory.
+///
+/// The callback is invoked once per dimension (8 total). This is usable for
+/// additive generation (aliases, assertions) where the callback doesn't need
+/// to know which dimension/module the units come from.
+macro_rules! invoke_all_inventories {
+    ($cb:path) => {
+        qtty_core::angular_units!($cb);
+        qtty_core::length_units!($cb);
+        qtty_core::length_nominal_units!($cb);
+        qtty_core::time_units!($cb);
+        qtty_core::mass_units!($cb);
+        qtty_core::power_units!($cb);
+        qtty_core::area_units!($cb);
+        qtty_core::volume_units!($cb);
+    };
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Scalar-specific modules
@@ -200,50 +215,33 @@ pub use qtty_core::units::time;
 pub mod unit {
     pub use qtty_core::{Per, Prod, Unit, UnitDiv, UnitMul, Unitless};
 
-    pub use qtty_core::units::angular::{
-        AngularUnit, Arcminute, Arcsecond, Degree, Gradian, HourAngle, MicroArcsecond,
-        MilliArcsecond, Milliradian, Radian, Turn,
-    };
-    pub use qtty_core::units::area::{
-        Acre, Are, AreaUnit, Hectare, SquareCentimeter, SquareFoot, SquareInch, SquareKilometer,
-        SquareMeter, SquareMile, SquareMillimeter, SquareYard,
-    };
-    pub use qtty_core::units::length::nominal::{
-        EarthEquatorialRadius, EarthPolarRadius, EarthRadius, JupiterRadius, LunarDistance,
-        LunarRadius, SolarDiameter, SolarRadius,
-    };
-    pub use qtty_core::units::length::{
-        AstronomicalUnit, Attometer, BohrRadius, Centimeter, Chain, ClassicalElectronRadius,
-        Decameter, Decimeter, EarthEquatorialCircumference, EarthMeridionalCircumference,
-        ElectronReducedComptonWavelength, Exameter, Fathom, Femtometer, Foot, Gigameter,
-        Gigaparsec, Hectometer, Inch, Kilometer, Kiloparsec, LengthUnit, LightYear, Link,
-        Megameter, Megaparsec, Meter, Micrometer, Mile, Millimeter, Nanometer, NauticalMile,
-        Parsec, Petameter, Picometer, PlanckLength, Rod, Terameter, Yard, Yoctometer, Yottameter,
-        Zeptometer, Zettameter,
-    };
-    pub use qtty_core::units::mass::{
-        AtomicMassUnit, Attogram, Carat, Centigram, Decagram, Decigram, Exagram, Femtogram,
-        Gigagram, Grain, Gram, Hectogram, Kilogram, LongTon, MassUnit, Megagram, Microgram,
-        Milligram, Nanogram, Ounce, Petagram, Picogram, Pound, ShortTon, SolarMass, Stone,
-        Teragram, Tonne, Yoctogram, Yottagram, Zeptogram, Zettagram,
-    };
-    pub use qtty_core::units::power::{
-        Attowatt, Decawatt, Deciwatt, ErgPerSecond, Exawatt, Femtowatt, Gigawatt, Hectowatt,
-        HorsepowerElectric, HorsepowerMetric, Kilowatt, Megawatt, Microwatt, Milliwatt, Nanowatt,
-        Petawatt, Picowatt, PowerUnit, SolarLuminosity, Terawatt, Watt, Yoctowatt, Yottawatt,
-        Zeptowatt, Zettawatt,
-    };
-    pub use qtty_core::units::time::{
-        Attosecond, Centisecond, Century, Day, Decade, Decasecond, Decisecond, Femtosecond,
-        Fortnight, Gigasecond, Hectosecond, Hour, JulianCentury, JulianYear, Kilosecond,
-        Megasecond, Microsecond, Millennium, Millisecond, Minute, Nanosecond, Picosecond, Second,
-        SiderealDay, SiderealYear, SynodicMonth, Terasecond, TimeUnit, Week, Year,
-    };
-    pub use qtty_core::units::volume::{
-        Centiliter, CubicCentimeter, CubicFoot, CubicInch, CubicKilometer, CubicMeter,
-        CubicMillimeter, Deciliter, Liter, Microliter, Milliliter, UsFluidOunce, UsGallon,
-        VolumeUnit,
-    };
+    // Dimension marker traits (not in inventories).
+    pub use qtty_core::units::angular::AngularUnit;
+    pub use qtty_core::units::area::AreaUnit;
+    pub use qtty_core::units::length::LengthUnit;
+    pub use qtty_core::units::mass::MassUnit;
+    pub use qtty_core::units::power::PowerUnit;
+    pub use qtty_core::units::time::TimeUnit;
+    pub use qtty_core::units::volume::VolumeUnit;
+
+    // Unit struct re-exports driven by inventory macros.
+    macro_rules! _reexport_angular    { ($($u:ident),+ $(,)?) => { $(pub use qtty_core::units::angular::$u;)+ }; }
+    macro_rules! _reexport_length     { ($($u:ident),+ $(,)?) => { $(pub use qtty_core::units::length::$u;)+ }; }
+    macro_rules! _reexport_length_nom { ($($u:ident),+ $(,)?) => { $(pub use qtty_core::units::length::nominal::$u;)+ }; }
+    macro_rules! _reexport_time       { ($($u:ident),+ $(,)?) => { $(pub use qtty_core::units::time::$u;)+ }; }
+    macro_rules! _reexport_mass       { ($($u:ident),+ $(,)?) => { $(pub use qtty_core::units::mass::$u;)+ }; }
+    macro_rules! _reexport_power      { ($($u:ident),+ $(,)?) => { $(pub use qtty_core::units::power::$u;)+ }; }
+    macro_rules! _reexport_area       { ($($u:ident),+ $(,)?) => { $(pub use qtty_core::units::area::$u;)+ }; }
+    macro_rules! _reexport_volume     { ($($u:ident),+ $(,)?) => { $(pub use qtty_core::units::volume::$u;)+ }; }
+
+    qtty_core::angular_units!(_reexport_angular);
+    qtty_core::length_units!(_reexport_length);
+    qtty_core::length_nominal_units!(_reexport_length_nom);
+    qtty_core::time_units!(_reexport_time);
+    qtty_core::mass_units!(_reexport_mass);
+    qtty_core::power_units!(_reexport_power);
+    qtty_core::area_units!(_reexport_area);
+    qtty_core::volume_units!(_reexport_volume);
 }
 
 /// Velocity quantities represented as one unit divided by another.
@@ -260,7 +258,15 @@ pub mod frequency {
 // Convenience quantity aliases (default f64 scalar)
 // ─────────────────────────────────────────────────────────────────────────────
 
-scalar_aliases::define_scalar_aliases!(f64);
+macro_rules! _root_alias {
+    ($($unit:ident),+ $(,)?) => {
+        $(
+            #[doc = concat!(stringify!($unit), ".")]
+            pub type $unit<S = f64> = Quantity<unit::$unit, S>;
+        )+
+    };
+}
+invoke_all_inventories!(_root_alias);
 
 /// Dimensionless quantity alias.
 pub type Unitless<S = f64> = Quantity<unit::Unitless, S>;
