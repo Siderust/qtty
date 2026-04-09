@@ -133,62 +133,53 @@ pub type SolarLuminosities = Quantity<SolarLuminosity>;
 /// One solar luminosity.
 pub const L_SUN: SolarLuminosities = SolarLuminosities::new(1.0);
 
+/// Canonical list of all power units.
+///
+/// Pass a macro identifier as the single argument; it will be invoked with all
+/// power unit types as its token list.  Used internally to drive
+/// `impl_unit_from_conversions!`, `impl_unit_cross_unit_ops!`, and (in future
+/// stages) the built-in arithmetic registration and facade alias generation.
+///
+/// ```rust,ignore
+/// power_units!(crate::impl_unit_from_conversions);
+/// ```
+macro_rules! power_units {
+    ($cb:path) => {
+        $cb!(
+            Watt,
+            Yoctowatt,
+            Zeptowatt,
+            Attowatt,
+            Femtowatt,
+            Picowatt,
+            Nanowatt,
+            Microwatt,
+            Milliwatt,
+            Deciwatt,
+            Decawatt,
+            Hectowatt,
+            Kilowatt,
+            Megawatt,
+            Gigawatt,
+            Terawatt,
+            Petawatt,
+            Exawatt,
+            Zettawatt,
+            Yottawatt,
+            ErgPerSecond,
+            HorsepowerMetric,
+            HorsepowerElectric,
+            SolarLuminosity
+        );
+    };
+}
+
 // Generate all bidirectional From implementations between power units.
-crate::impl_unit_from_conversions!(
-    Watt,
-    Yoctowatt,
-    Zeptowatt,
-    Attowatt,
-    Femtowatt,
-    Picowatt,
-    Nanowatt,
-    Microwatt,
-    Milliwatt,
-    Deciwatt,
-    Decawatt,
-    Hectowatt,
-    Kilowatt,
-    Megawatt,
-    Gigawatt,
-    Terawatt,
-    Petawatt,
-    Exawatt,
-    Zettawatt,
-    Yottawatt,
-    ErgPerSecond,
-    HorsepowerMetric,
-    HorsepowerElectric,
-    SolarLuminosity
-);
+power_units!(crate::impl_unit_from_conversions);
 
 // Optional cross-unit operator support (`==`, `<`, etc.).
 #[cfg(feature = "cross-unit-ops")]
-crate::impl_unit_cross_unit_ops!(
-    Watt,
-    Yoctowatt,
-    Zeptowatt,
-    Attowatt,
-    Femtowatt,
-    Picowatt,
-    Nanowatt,
-    Microwatt,
-    Milliwatt,
-    Deciwatt,
-    Decawatt,
-    Hectowatt,
-    Kilowatt,
-    Megawatt,
-    Gigawatt,
-    Terawatt,
-    Petawatt,
-    Exawatt,
-    Zettawatt,
-    Yottawatt,
-    ErgPerSecond,
-    HorsepowerMetric,
-    HorsepowerElectric,
-    SolarLuminosity
-);
+power_units!(crate::impl_unit_cross_unit_ops);
 
 #[cfg(all(test, feature = "std"))]
 mod tests {

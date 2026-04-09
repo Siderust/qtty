@@ -212,76 +212,60 @@ pub type SolarMasses = Quantity<SolarMass>;
 /// One nominal solar mass.
 pub const MSUN: SolarMasses = SolarMasses::new(1.0);
 
+/// Canonical list of all mass units.
+///
+/// Pass a macro identifier as the single argument; it will be invoked with all
+/// mass unit types as its token list.  Used internally to drive
+/// `impl_unit_from_conversions!`, `impl_unit_cross_unit_ops!`, and (in future
+/// stages) the built-in arithmetic registration and facade alias generation.
+///
+/// ```rust,ignore
+/// mass_units!(crate::impl_unit_from_conversions);
+/// ```
+macro_rules! mass_units {
+    ($cb:path) => {
+        $cb!(
+            Gram,
+            Yoctogram,
+            Zeptogram,
+            Attogram,
+            Femtogram,
+            Picogram,
+            Nanogram,
+            Microgram,
+            Milligram,
+            Centigram,
+            Decigram,
+            Decagram,
+            Hectogram,
+            Kilogram,
+            Megagram,
+            Gigagram,
+            Teragram,
+            Petagram,
+            Exagram,
+            Zettagram,
+            Yottagram,
+            Tonne,
+            Carat,
+            Grain,
+            Pound,
+            Ounce,
+            Stone,
+            ShortTon,
+            LongTon,
+            AtomicMassUnit,
+            SolarMass
+        );
+    };
+}
+
 // Generate all bidirectional From implementations between mass units.
-crate::impl_unit_from_conversions!(
-    Gram,
-    Yoctogram,
-    Zeptogram,
-    Attogram,
-    Femtogram,
-    Picogram,
-    Nanogram,
-    Microgram,
-    Milligram,
-    Centigram,
-    Decigram,
-    Decagram,
-    Hectogram,
-    Kilogram,
-    Megagram,
-    Gigagram,
-    Teragram,
-    Petagram,
-    Exagram,
-    Zettagram,
-    Yottagram,
-    Tonne,
-    Carat,
-    Grain,
-    Pound,
-    Ounce,
-    Stone,
-    ShortTon,
-    LongTon,
-    AtomicMassUnit,
-    SolarMass
-);
+mass_units!(crate::impl_unit_from_conversions);
 
 // Optional cross-unit operator support (`==`, `<`, etc.).
 #[cfg(feature = "cross-unit-ops")]
-crate::impl_unit_cross_unit_ops!(
-    Gram,
-    Yoctogram,
-    Zeptogram,
-    Attogram,
-    Femtogram,
-    Picogram,
-    Nanogram,
-    Microgram,
-    Milligram,
-    Centigram,
-    Decigram,
-    Decagram,
-    Hectogram,
-    Kilogram,
-    Megagram,
-    Gigagram,
-    Teragram,
-    Petagram,
-    Exagram,
-    Zettagram,
-    Yottagram,
-    Tonne,
-    Carat,
-    Grain,
-    Pound,
-    Ounce,
-    Stone,
-    ShortTon,
-    LongTon,
-    AtomicMassUnit,
-    SolarMass
-);
+mass_units!(crate::impl_unit_cross_unit_ops);
 
 #[cfg(all(test, feature = "std"))]
 mod tests {

@@ -607,102 +607,76 @@ pub mod nominal {
     crate::impl_unit_cross_unit_ops!(SolarRadius, Kilometer);
 }
 
+/// Canonical list of all (non-nominal) length units.
+///
+/// Pass a macro identifier as the single argument; it will be invoked with all
+/// non-nominal length unit types as its token list.  Used internally to drive
+/// `impl_unit_from_conversions!`, `impl_unit_cross_unit_ops!`, and (in future
+/// stages) the built-in arithmetic registration and facade alias generation.
+///
+/// Nominal units (see [`nominal`]) are intentionally excluded: they are
+/// advisory reference values, not strict measurement standards, and only a
+/// small selection of cross-conversions between nominal and SI units is
+/// exposed (see the `impl_unit_from_conversions!` call inside `nominal`).
+///
+/// ```rust,ignore
+/// length_units!(crate::impl_unit_from_conversions);
+/// ```
+macro_rules! length_units {
+    ($cb:path) => {
+        $cb!(
+            Meter,
+            Decimeter,
+            Centimeter,
+            Millimeter,
+            Micrometer,
+            Nanometer,
+            Picometer,
+            Femtometer,
+            Attometer,
+            Zeptometer,
+            Yoctometer,
+            Decameter,
+            Hectometer,
+            Kilometer,
+            Megameter,
+            Gigameter,
+            Terameter,
+            Petameter,
+            Exameter,
+            Zettameter,
+            Yottameter,
+            AstronomicalUnit,
+            LightYear,
+            Parsec,
+            Kiloparsec,
+            Megaparsec,
+            Gigaparsec,
+            Inch,
+            Foot,
+            Yard,
+            Mile,
+            NauticalMile,
+            Chain,
+            Rod,
+            Link,
+            Fathom,
+            EarthMeridionalCircumference,
+            EarthEquatorialCircumference,
+            BohrRadius,
+            ClassicalElectronRadius,
+            PlanckLength,
+            ElectronReducedComptonWavelength
+        );
+    };
+}
+
 // Generate all bidirectional From implementations between length units.
-//
-// This single invocation ensures that any quantity measured in one length unit can be
-// converted into any other via `From`/`Into`, mirroring the previous behavior while
-// including the extended unit set.
-crate::impl_unit_from_conversions!(
-    Meter,
-    Decimeter,
-    Centimeter,
-    Millimeter,
-    Micrometer,
-    Nanometer,
-    Picometer,
-    Femtometer,
-    Attometer,
-    Zeptometer,
-    Yoctometer,
-    Decameter,
-    Hectometer,
-    Kilometer,
-    Megameter,
-    Gigameter,
-    Terameter,
-    Petameter,
-    Exameter,
-    Zettameter,
-    Yottameter,
-    AstronomicalUnit,
-    LightYear,
-    Parsec,
-    Kiloparsec,
-    Megaparsec,
-    Gigaparsec,
-    Inch,
-    Foot,
-    Yard,
-    Mile,
-    NauticalMile,
-    Chain,
-    Rod,
-    Link,
-    Fathom,
-    EarthMeridionalCircumference,
-    EarthEquatorialCircumference,
-    BohrRadius,
-    ClassicalElectronRadius,
-    PlanckLength,
-    ElectronReducedComptonWavelength
-);
+length_units!(crate::impl_unit_from_conversions);
 
 // Optional cross-unit operator support (`==`, `<`, etc.).
 #[cfg(feature = "cross-unit-ops")]
-crate::impl_unit_cross_unit_ops!(
-    Meter,
-    Decimeter,
-    Centimeter,
-    Millimeter,
-    Micrometer,
-    Nanometer,
-    Picometer,
-    Femtometer,
-    Attometer,
-    Zeptometer,
-    Yoctometer,
-    Decameter,
-    Hectometer,
-    Kilometer,
-    Megameter,
-    Gigameter,
-    Terameter,
-    Petameter,
-    Exameter,
-    Zettameter,
-    Yottameter,
-    AstronomicalUnit,
-    LightYear,
-    Parsec,
-    Kiloparsec,
-    Megaparsec,
-    Gigaparsec,
-    Inch,
-    Foot,
-    Yard,
-    Mile,
-    NauticalMile,
-    Chain,
-    Rod,
-    Link,
-    Fathom,
-    EarthMeridionalCircumference,
-    EarthEquatorialCircumference,
-    BohrRadius,
-    ClassicalElectronRadius,
-    PlanckLength,
-    ElectronReducedComptonWavelength
-);
+length_units!(crate::impl_unit_cross_unit_ops);
 
 #[cfg(all(test, feature = "std"))]
 mod tests {
