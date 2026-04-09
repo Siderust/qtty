@@ -403,34 +403,39 @@ impl Degrees {
     }
 }
 
+/// Canonical list of all angular units.
+///
+/// Pass a macro identifier as the single argument; it will be invoked with all
+/// angular unit types as its token list.  Used internally to drive
+/// `impl_unit_from_conversions!`, `impl_unit_cross_unit_ops!`, and (in future
+/// stages) the built-in arithmetic registration and facade alias generation.
+///
+/// ```rust,ignore
+/// angular_units!(crate::impl_unit_from_conversions);
+/// ```
+macro_rules! angular_units {
+    ($cb:path) => {
+        $cb!(
+            Degree,
+            Radian,
+            Milliradian,
+            Arcminute,
+            Arcsecond,
+            MilliArcsecond,
+            MicroArcsecond,
+            Gradian,
+            Turn,
+            HourAngle
+        );
+    };
+}
+
 // Generate all bidirectional From implementations between angular units.
-crate::impl_unit_from_conversions!(
-    Degree,
-    Radian,
-    Milliradian,
-    Arcminute,
-    Arcsecond,
-    MilliArcsecond,
-    MicroArcsecond,
-    Gradian,
-    Turn,
-    HourAngle
-);
+angular_units!(crate::impl_unit_from_conversions);
 
 // Optional cross-unit operator support (`==`, `<`, etc.).
 #[cfg(feature = "cross-unit-ops")]
-crate::impl_unit_cross_unit_ops!(
-    Degree,
-    Radian,
-    Milliradian,
-    Arcminute,
-    Arcsecond,
-    MilliArcsecond,
-    MicroArcsecond,
-    Gradian,
-    Turn,
-    HourAngle
-);
+angular_units!(crate::impl_unit_cross_unit_ops);
 
 #[cfg(all(test, feature = "std"))]
 mod tests {
