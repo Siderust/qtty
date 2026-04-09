@@ -20,6 +20,7 @@ fn main() {
     generate_from_u32(&units, &out_dir);
     generate_registry(&units, &out_dir);
     generate_unit_conversions(&units, &out_dir);
+    generate_unit_constants(&units, &out_dir);
 
     eprintln!(
         "cargo:warning=Generated FFI bindings for {} units from units.csv",
@@ -268,6 +269,44 @@ fn generate_unit_conversions(units: &[UnitDef], out_dir: &str) {
 
     let dest_path = PathBuf::from(out_dir).join("unit_conversions.rs");
     fs::write(&dest_path, code).expect("Failed to write unit_conversions.rs");
+}
+
+fn generate_unit_constants(units: &[UnitDef], out_dir: &str) {
+    let mut code = String::from("// Auto-generated QTTY_UNIT_* constants from units.csv\n");
+    code.push_str("// Each constant is the raw u32 discriminant of the corresponding UnitId variant.\n\n");
+
+    for unit in units {
+        let screaming = to_screaming_snake(&unit.name);
+        code.push_str(&format!(
+            "/// Raw unit ID constant: {} ({}, {}).\n",
+            unit.name, unit.dimension, unit.symbol
+        ));
+        code.push_str(&format!(
+            "pub const QTTY_UNIT_{}: u32 = UnitId::{} as u32;\n",
+            screaming, unit.name
+        ));
+    }
+
+    let dest_path = PathBuf::from(out_dir).join("unit_constants.rs");
+    fs::write(&dest_path, code).expect("Failed to write unit_constants.rs");
+}
+
+/// Convert a PascalCase name to SCREAMING_SNAKE_CASE.
+fn to_screaming_snake(name: &str) -> String {
+    let mut result = String::with_capacity(name.len() + 4);
+    for (i, ch) in name.chars().enumerate() {
+        if ch.is_uppercase() && i > 0 {
+            // Don't insert underscore between consecutive uppercase letters
+            // (e.g. "AU" stays "AU"), but do insert before a new word start.
+            let prev = name.as_bytes()[i - 1] as char;
+            let next_is_lower = name.chars().nth(i + 1).is_some_and(|c| c.is_lowercase());
+            if prev.is_lowercase() || next_is_lower {
+                result.push('_');
+            }
+        }
+        result.push(ch.to_ascii_uppercase());
+    }
+    result
 }
 
 fn generate_c_header(crate_dir: &str) {
