@@ -136,13 +136,20 @@ pub const L_SUN: SolarLuminosities = SolarLuminosities::new(1.0);
 /// Canonical list of all power units.
 ///
 /// Pass a macro identifier as the single argument; it will be invoked with all
-/// power unit types as its token list.  Used internally to drive
-/// `impl_unit_from_conversions!`, `impl_unit_cross_unit_ops!`, and (in future
-/// stages) the built-in arithmetic registration and facade alias generation.
+/// power unit types as its token list. Drives:
+/// - `impl_unit_from_conversions!` — bidirectional `From` impls between all pairs.
+/// - `impl_unit_cross_unit_ops!` — cross-unit `PartialEq`/`PartialOrd` (feature-gated).
+/// - `assert_units_are_builtin!` — compile-time check that every unit is in
+///   `register_builtin_units!` (under `#[cfg(test)]`).
+///
+/// The macro is exported (`#[doc(hidden)]`) so the `qtty` facade can use it
+/// in compile-time consistency checks (`inventory_consistency.rs`).
 ///
 /// ```rust,ignore
 /// power_units!(crate::impl_unit_from_conversions);
 /// ```
+#[macro_export]
+#[doc(hidden)]
 macro_rules! power_units {
     ($cb:path) => {
         $cb!(
@@ -180,6 +187,10 @@ power_units!(crate::impl_unit_from_conversions);
 // Optional cross-unit operator support (`==`, `<`, etc.).
 #[cfg(feature = "cross-unit-ops")]
 power_units!(crate::impl_unit_cross_unit_ops);
+
+// Compile-time check: every unit in the inventory is registered as BuiltinUnit.
+#[cfg(test)]
+power_units!(crate::assert_units_are_builtin);
 
 #[cfg(all(test, feature = "std"))]
 mod tests {
