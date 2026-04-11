@@ -39,8 +39,6 @@ crate::impl_unit_cross_unit_ops_between!(
 #[doc(hidden)]
 macro_rules! mass_fundamental_physics_units {
     ($cb:path) => {
-        $cb!(
-            AtomicMassUnit,
-        );
+        $cb!(AtomicMassUnit,);
     };
 }

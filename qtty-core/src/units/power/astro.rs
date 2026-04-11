@@ -37,8 +37,6 @@ crate::impl_unit_cross_unit_ops_between!(
 #[doc(hidden)]
 macro_rules! power_astro_units {
     ($cb:path) => {
-        $cb!(
-            SolarLuminosity,
-        );
+        $cb!(SolarLuminosity,);
     };
 }

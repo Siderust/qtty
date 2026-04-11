@@ -20,11 +20,11 @@
 use crate::{Per, Quantity, Unit};
 
 /// Re-export the angular rate dimension from the dimension module.
-pub use crate::dimension::AngularRateDim;
+pub use crate::dimension::AngularRate as AngularRateDimension;
 
-/// Marker trait for any unit with angular-rate dimension (`Angular / Time`).
-pub trait AngularRateUnit: Unit<Dim = AngularRateDim> {}
-impl<T: Unit<Dim = AngularRateDim>> AngularRateUnit for T {}
+/// Marker trait for any unit with angular-rate dimension ([`AngularRate`](crate::AngularRate)).
+pub trait AngularRateUnit: Unit<Dim = crate::AngularRate> {}
+impl<T: Unit<Dim = crate::AngularRate>> AngularRateUnit for T {}
 
 /// An angular-rate quantity parameterized by angular and time units.
 ///

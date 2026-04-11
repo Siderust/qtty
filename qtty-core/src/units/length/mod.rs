@@ -315,27 +315,9 @@ pub const YM: Yottameters = Yottameters::new(1.0);
 macro_rules! length_units {
     ($cb:path) => {
         $cb!(
-            Meter,
-            Decimeter,
-            Centimeter,
-            Millimeter,
-            Micrometer,
-            Nanometer,
-            Picometer,
-            Femtometer,
-            Attometer,
-            Zeptometer,
-            Yoctometer,
-            Decameter,
-            Hectometer,
-            Kilometer,
-            Megameter,
-            Gigameter,
-            Terameter,
-            Petameter,
-            Exameter,
-            Zettameter,
-            Yottameter
+            Meter, Decimeter, Centimeter, Millimeter, Micrometer, Nanometer, Picometer, Femtometer,
+            Attometer, Zeptometer, Yoctometer, Decameter, Hectometer, Kilometer, Megameter,
+            Gigameter, Terameter, Petameter, Exameter, Zettameter, Yottameter
         );
     };
 }

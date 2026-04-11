@@ -99,14 +99,6 @@ crate::impl_unit_cross_unit_ops_between!(
 #[doc(hidden)]
 macro_rules! mass_customary_units {
     ($cb:path) => {
-        $cb!(
-            Carat,
-            Grain,
-            Pound,
-            Ounce,
-            Stone,
-            ShortTon,
-            LongTon,
-        );
+        $cb!(Carat, Grain, Pound, Ounce, Stone, ShortTon, LongTon,);
     };
 }

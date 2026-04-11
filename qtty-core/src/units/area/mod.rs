@@ -12,16 +12,15 @@
 //! - **Land measurement**: hectare, are.
 //! - **Imperial/US**: square inch, square foot, square yard, square mile, acre.
 //!
-//! Area units can also arise *automatically* from multiplying two length quantities:
+//! Area units arise *directly* from multiplying two length quantities — no
+//! conversion needed:
 //!
 //! ```rust
-//! use qtty_core::length::{Meter, Meters};
-//! use qtty_core::area::{SquareMeters, SquareMeter};
-//! use qtty_core::Prod;
+//! use qtty_core::length::Meters;
+//! use qtty_core::area::SquareMeters;
 //!
 //! let side = Meters::new(5.0);
-//! let area_prod = side * side;                     // Quantity<Prod<Meter, Meter>>
-//! let area: SquareMeters = area_prod.to();          // Convert to named area unit
+//! let area: SquareMeters = side * side;             // Direct product
 //! assert!((area.value() - 25.0).abs() < 1e-12);
 //! ```
 //!
@@ -38,8 +37,8 @@
 //! touch!(SquareCentimeters, 1.0);touch!(SquareMillimeters, 1.0);
 //! ```
 
-use crate::{Quantity, Unit};
-use qtty_derive::Unit;
+use crate::units::length::{Centimeter, Kilometer, Meter, Millimeter};
+use crate::{Prod, Quantity, Unit};
 
 /// Re-export the area dimension from the dimension module.
 pub use crate::dimension::Area;
@@ -47,6 +46,28 @@ pub use crate::dimension::Area;
 /// Marker trait for any [`Unit`] whose dimension is [`Area`].
 pub trait AreaUnit: Unit<Dim = Area> {}
 impl<T: Unit<Dim = Area>> AreaUnit for T {}
+
+/// A composed area quantity from squaring a length unit.
+///
+/// `SquareOf<L>` is `Quantity<Prod<L, L>>`. Since the metric area types are
+/// themselves `Prod` aliases, `SquareOf<Meter>` and [`SquareMeters`] are the
+/// **same type**.
+///
+/// # Examples
+///
+/// ```rust
+/// use qtty_core::area::{SquareOf, SquareMeters};
+/// use qtty_core::length::{Meter, Meters};
+///
+/// let side = Meters::new(5.0);
+/// let area: SquareOf<Meter> = side * side;
+/// assert!((area.value() - 25.0).abs() < 1e-12);
+///
+/// // SquareOf<Meter> IS SquareMeters — same type:
+/// let named: SquareMeters = area;
+/// assert!((named.value() - 25.0).abs() < 1e-12);
+/// ```
+pub type SquareOf<L> = Quantity<Prod<L, L>>;
 
 #[cfg(feature = "land-area")]
 mod land_area;
@@ -61,31 +82,23 @@ pub use customary::*;
 // SI / metric area units
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Square metre (SI derived unit of area).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "m²", dimension = Area, ratio = 1.0)]
-pub struct SquareMeter;
-/// A quantity measured in square metres.
+/// Square metre — product of two [`Meter`] units (1 m²).
+pub type SquareMeter = Prod<Meter, Meter>;
+/// A quantity measured in square metres (= [`SquareOf<Meter>`]).
 pub type SquareMeters = Quantity<SquareMeter>;
 
-/// Square kilometre (`1e6 m²`).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "km²", dimension = Area, ratio = 1e6)]
-pub struct SquareKilometer;
+/// Square kilometre — product of two [`Kilometer`] units (10⁶ m²).
+pub type SquareKilometer = Prod<Kilometer, Kilometer>;
 /// A quantity measured in square kilometres.
 pub type SquareKilometers = Quantity<SquareKilometer>;
 
-/// Square centimetre (`1e-4 m²`).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "cm²", dimension = Area, ratio = 1e-4)]
-pub struct SquareCentimeter;
+/// Square centimetre — product of two [`Centimeter`] units (10⁻⁴ m²).
+pub type SquareCentimeter = Prod<Centimeter, Centimeter>;
 /// A quantity measured in square centimetres.
 pub type SquareCentimeters = Quantity<SquareCentimeter>;
 
-/// Square millimetre (`1e-6 m²`).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "mm²", dimension = Area, ratio = 1e-6)]
-pub struct SquareMillimeter;
+/// Square millimetre — product of two [`Millimeter`] units (10⁻⁶ m²).
+pub type SquareMillimeter = Prod<Millimeter, Millimeter>;
 /// A quantity measured in square millimetres.
 pub type SquareMillimeters = Quantity<SquareMillimeter>;
 
@@ -169,13 +182,11 @@ mod tests {
     }
 
     #[test]
-    fn length_product_to_area() {
-        use crate::length::{Meter, Meters};
-        use crate::Prod;
+    fn length_product_is_area() {
+        use crate::length::Meters;
 
         let side = Meters::new(5.0);
-        let area_prod: Quantity<Prod<Meter, Meter>> = side * side;
-        let area: SquareMeters = area_prod.to();
+        let area: SquareMeters = side * side; // direct — no .to() needed
         assert_abs_diff_eq!(area.value(), 25.0, epsilon = 1e-12);
     }
 
@@ -236,7 +247,9 @@ mod tests {
 
     #[test]
     fn symbols_are_correct() {
-        assert_eq!(SquareMeter::SYMBOL, "m²");
+        // Prod-based aliases inherit the Prod Display ("m·m");
+        // SYMBOL is empty but Display writes component symbols.
+        assert_eq!(format!("{}", SquareMeters::new(1.0)), "1 m·m");
         #[cfg(feature = "land-area")]
         assert_eq!(Hectare::SYMBOL, "ha");
         #[cfg(feature = "land-area")]

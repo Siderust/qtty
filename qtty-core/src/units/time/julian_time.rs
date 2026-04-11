@@ -31,9 +31,6 @@ pub const JULIAN_CENTURY: JulianCenturies = JulianCenturies::new(1.0);
 #[doc(hidden)]
 macro_rules! time_julian_time_units {
     ($cb:path) => {
-        $cb!(
-            JulianYear,
-            JulianCentury,
-        );
+        $cb!(JulianYear, JulianCentury,);
     };
 }

@@ -37,8 +37,6 @@ crate::impl_unit_cross_unit_ops_between!(
 #[doc(hidden)]
 macro_rules! mass_astro_units {
     ($cb:path) => {
-        $cb!(
-            SolarMass,
-        );
+        $cb!(SolarMass,);
     };
 }
