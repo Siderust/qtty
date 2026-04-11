@@ -99,6 +99,15 @@ impl<T: Unit<Dim = Angular>> AngularUnit for T {
     const QUARTER_TURN: f64 = Radians::new(TAU).to_const::<T>().value() * 0.25;
 }
 
+#[cfg(feature = "astro")]
+mod astro;
+#[cfg(feature = "astro")]
+pub use astro::*;
+#[cfg(feature = "navigation")]
+mod navigation;
+#[cfg(feature = "navigation")]
+pub use navigation::*;
+
 impl<U: AngularUnit + Copy> Quantity<U> {
     /// Constant representing τ radians (2π rad == 360°).
     ///
@@ -272,63 +281,6 @@ pub type Milliradians = Quantity<Mrad>;
 /// One milliradian.
 pub const MRAD: Milliradians = Milliradians::new(1.0);
 
-/// Arcminute (`1/60` degree).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "′", dimension = Angular, ratio = 1.0 / 60.0)]
-pub struct Arcminute;
-/// Alias for [`Arcminute`] (minute of angle, MOA).
-pub type MOA = Arcminute;
-/// Type alias shorthand for [`Arcminute`].
-pub type Arcm = Arcminute;
-/// Convenience alias for an arcminute quantity.
-pub type Arcminutes = Quantity<Arcm>;
-/// One arcminute.
-pub const ARCM: Arcminutes = Arcminutes::new(1.0);
-
-/// Arcsecond (`1/3600` degree).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "″", dimension = Angular, ratio = 1.0 / 3600.0)]
-pub struct Arcsecond;
-/// Type alias shorthand for [`Arcsecond`].
-pub type Arcs = Arcsecond;
-/// Convenience alias for an arcsecond quantity.
-pub type Arcseconds = Quantity<Arcs>;
-/// One arcsecond.
-pub const ARCS: Arcseconds = Arcseconds::new(1.0);
-
-/// Milliarcsecond (`1/3_600_000` degree).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "mas", dimension = Angular, ratio = 1.0 / 3_600_000.0)]
-pub struct MilliArcsecond;
-/// Type alias shorthand for [`MilliArcsecond`].
-pub type Mas = MilliArcsecond;
-/// Convenience alias for a milliarcsecond quantity.
-pub type MilliArcseconds = Quantity<Mas>;
-/// One milliarcsecond.
-pub const MAS: MilliArcseconds = MilliArcseconds::new(1.0);
-
-/// Microarcsecond (`1/3_600_000_000` degree).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "μas", dimension = Angular, ratio = 1.0 / 3_600_000_000.0)]
-pub struct MicroArcsecond;
-/// Type alias shorthand for [`MicroArcsecond`].
-pub type Uas = MicroArcsecond;
-/// Convenience alias for a microarcsecond quantity.
-pub type MicroArcseconds = Quantity<Uas>;
-/// One microarcsecond.
-pub const UAS: MicroArcseconds = MicroArcseconds::new(1.0);
-
-/// Gradian (also called gon; `1/400` of a full turn = `0.9` degree).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "gon", dimension = Angular, ratio = 0.9)]
-pub struct Gradian;
-/// Type alias shorthand for [`Gradian`].
-pub type Gon = Gradian;
-/// Convenience alias for a gradian quantity.
-pub type Gradians = Quantity<Gon>;
-/// One gradian.
-pub const GON: Gradians = Gradians::new(1.0);
-
 /// Turn (full revolution; `360` degrees).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "tr", dimension = Angular, ratio = 360.0)]
@@ -338,40 +290,6 @@ pub type Turns = Quantity<Turn>;
 /// One turn.
 pub const TURN: Turns = Turns::new(1.0);
 
-/// Hour angle hour (`15` degrees).
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "ʰ", dimension = Angular, ratio = 15.0)]
-pub struct HourAngle;
-/// Type alias shorthand for [`HourAngle`].
-pub type Hms = HourAngle;
-/// Convenience alias for an hour-angle quantity.
-pub type HourAngles = Quantity<Hms>;
-/// One hour angle hour (==15°).
-pub const HOUR_ANGLE: HourAngles = HourAngles::new(1.0);
-
-impl HourAngles {
-    /// Construct from **HMS** components (`hours`, `minutes`, `seconds`).
-    ///
-    /// Sign is taken from `hours`; the `minutes` and `seconds` parameters are treated as magnitudes.
-    ///
-    /// ```rust
-    /// use qtty_core::angular::HourAngles;
-    /// let ra = HourAngles::from_hms(5, 30, 0.0); // 5h30m == 5.5h
-    /// assert_eq!(ra.value(), 5.5);
-    /// ```
-    pub const fn from_hms(hours: i32, minutes: u32, seconds: f64) -> Self {
-        let sign = if hours < 0 { -1.0 } else { 1.0 };
-        let h_abs = if hours < 0 {
-            -(hours as f64)
-        } else {
-            hours as f64
-        };
-        let m = minutes as f64 / 60.0;
-        let s = seconds / 3600.0;
-        let total_hours = sign * (h_abs + m + s);
-        Self::new(total_hours)
-    }
-}
 
 impl Degrees {
     /// Construct from **DMS** components (`deg`, `min`, `sec`).
@@ -403,48 +321,29 @@ impl Degrees {
     }
 }
 
-/// Canonical list of all angular units.
+/// Canonical list of always-available (base) angular units.
 ///
-/// Pass a macro identifier as the single argument; it will be invoked with all
-/// angular unit types as its token list. Drives:
-/// - `impl_unit_from_conversions!` — bidirectional `From` impls between all pairs.
-/// - `impl_unit_cross_unit_ops!` — cross-unit `PartialEq`/`PartialOrd` (feature-gated).
-/// - `assert_units_are_builtin!` — compile-time check that every unit is in
-///   `register_builtin_units!` (under `#[cfg(test)]`).
-///
-/// The macro is exported (`#[doc(hidden)]`) so the `qtty` facade can use it
-/// in compile-time consistency checks (`inventory_consistency.rs`).
-///
-/// ```rust,ignore
-/// angular_units!(crate::impl_unit_from_conversions);
-/// ```
+/// Exported (`#[doc(hidden)]`) for use in `qtty`'s scalar alias generation and
+/// compile-time consistency checks.  Feature-gated units (astro, navigation)
+/// are in their sub-modules and registered via `register_builtin_units_extend!`.
 #[macro_export]
 #[doc(hidden)]
 macro_rules! angular_units {
     ($cb:path) => {
-        $cb!(
-            Degree,
-            Radian,
-            Milliradian,
-            Arcminute,
-            Arcsecond,
-            MilliArcsecond,
-            MicroArcsecond,
-            Gradian,
-            Turn,
-            HourAngle
-        );
+        $cb!(Degree, Radian, Milliradian, Turn);
     };
 }
 
-// Generate all bidirectional From implementations between angular units.
+// Generate bidirectional From impls between base angular units.
 angular_units!(crate::impl_unit_from_conversions);
 
-// Optional cross-unit operator support (`==`, `<`, etc.).
+// ─────────────────────────────────────────────────────────────────────────────
+// Cross-unit ops: default units
+// ─────────────────────────────────────────────────────────────────────────────
 #[cfg(feature = "cross-unit-ops")]
 angular_units!(crate::impl_unit_cross_unit_ops);
 
-// Compile-time check: every unit in the inventory is registered as BuiltinUnit.
+// Compile-time check: every base angular unit is registered as BuiltinUnit.
 #[cfg(test)]
 angular_units!(crate::assert_units_are_builtin);
 
@@ -463,6 +362,7 @@ mod tests {
     fn test_full_turn() {
         assert_abs_diff_eq!(Radian::FULL_TURN, TAU, epsilon = 1e-12);
         assert_eq!(Degree::FULL_TURN, 360.0);
+        #[cfg(feature = "astro")]
         assert_eq!(Arcsecond::FULL_TURN, 1_296_000.0);
     }
 
@@ -470,6 +370,7 @@ mod tests {
     fn test_half_turn() {
         assert_abs_diff_eq!(Radian::HALF_TURN, PI, epsilon = 1e-12);
         assert_eq!(Degree::HALF_TURN, 180.0);
+        #[cfg(feature = "astro")]
         assert_eq!(Arcsecond::HALF_TURN, 648_000.0);
     }
 
@@ -477,6 +378,7 @@ mod tests {
     fn test_quarter_turn() {
         assert_abs_diff_eq!(Radian::QUARTER_TURN, PI / 2.0, epsilon = 1e-12);
         assert_eq!(Degree::QUARTER_TURN, 90.0);
+        #[cfg(feature = "astro")]
         assert_eq!(Arcsecond::QUARTER_TURN, 324_000.0);
     }
 
@@ -507,6 +409,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn conversion_degrees_to_arcseconds() {
         let deg = Degrees::new(1.0);
         let arcs = deg.to::<Arcsecond>();
@@ -514,6 +417,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn conversion_arcseconds_to_degrees() {
         let arcs = Arcseconds::new(3600.0);
         let deg = arcs.to::<Degree>();
@@ -521,6 +425,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn conversion_degrees_to_milliarcseconds() {
         let deg = Degrees::new(1.0);
         let mas = deg.to::<MilliArcsecond>();
@@ -528,6 +433,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn conversion_hour_angles_to_degrees() {
         let ha = HourAngles::new(1.0);
         let deg = ha.to::<Degree>();
@@ -868,18 +774,21 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn hour_angles_from_hms() {
         let ha = HourAngles::from_hms(5, 30, 0.0);
         assert_abs_diff_eq!(ha.value(), 5.5, epsilon = 1e-12);
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn hour_angles_from_hms_negative() {
         let ha = HourAngles::from_hms(-3, 15, 0.0);
         assert_abs_diff_eq!(ha.value(), -3.25, epsilon = 1e-12);
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn hour_angles_to_degrees() {
         let ha = HourAngles::new(6.0);
         let deg = ha.to::<Degree>();
@@ -911,13 +820,17 @@ mod tests {
         assert_eq!(DEG.value(), 1.0);
         assert_eq!(RAD.value(), 1.0);
         assert_eq!(MRAD.value(), 1.0);
-        assert_eq!(ARCM.value(), 1.0);
-        assert_eq!(ARCS.value(), 1.0);
-        assert_eq!(MAS.value(), 1.0);
-        assert_eq!(UAS.value(), 1.0);
+        #[cfg(feature = "astro")]
+        {
+            assert_eq!(ARCM.value(), 1.0);
+            assert_eq!(ARCS.value(), 1.0);
+            assert_eq!(MAS.value(), 1.0);
+            assert_eq!(UAS.value(), 1.0);
+            assert_eq!(HOUR_ANGLE.value(), 1.0);
+        }
+        #[cfg(feature = "navigation")]
         assert_eq!(GON.value(), 1.0);
         assert_eq!(TURN.value(), 1.0);
-        assert_eq!(HOUR_ANGLE.value(), 1.0);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -944,6 +857,7 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────────
 
     #[test]
+    #[cfg(feature = "astro")]
     fn conversion_degrees_to_arcminutes() {
         let deg = Degrees::new(1.0);
         let arcm = deg.to::<Arcminute>();
@@ -951,6 +865,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn conversion_arcminutes_to_degrees() {
         let arcm = Arcminutes::new(60.0);
         let deg = arcm.to::<Degree>();
@@ -958,6 +873,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn conversion_arcminutes_to_arcseconds() {
         let arcm = Arcminutes::new(1.0);
         let arcs = arcm.to::<Arcsecond>();
@@ -965,6 +881,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn conversion_arcseconds_to_microarcseconds() {
         let arcs = Arcseconds::new(1.0);
         let uas = arcs.to::<MicroArcsecond>();
@@ -972,6 +889,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn conversion_microarcseconds_to_degrees() {
         let uas = MicroArcseconds::new(3_600_000_000.0);
         let deg = uas.to::<Degree>();
@@ -979,6 +897,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "navigation")]
     fn conversion_degrees_to_gradians() {
         let deg = Degrees::new(90.0);
         let gon = deg.to::<Gradian>();
@@ -986,6 +905,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "navigation")]
     fn conversion_gradians_to_degrees() {
         let gon = Gradians::new(400.0);
         let deg = gon.to::<Degree>();
@@ -993,6 +913,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "navigation")]
     fn conversion_gradians_to_radians() {
         let gon = Gradians::new(200.0);
         let rad = gon.to::<Radian>();
@@ -1028,22 +949,31 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn from_impl_new_units() {
         // Test From trait implementations for new units
         let deg = Degrees::new(1.0);
         let arcm: Arcminutes = deg.into();
         assert_abs_diff_eq!(arcm.value(), 60.0, epsilon = 1e-12);
-
-        let gon = Gradians::new(100.0);
-        let deg2: Degrees = gon.into();
-        assert_abs_diff_eq!(deg2.value(), 90.0, epsilon = 1e-12);
-
-        let turn = Turns::new(0.25);
-        let deg3: Degrees = turn.into();
-        assert_abs_diff_eq!(deg3.value(), 90.0, epsilon = 1e-12);
     }
 
     #[test]
+    #[cfg(feature = "navigation")]
+    fn from_impl_gradian_to_deg() {
+        let gon = Gradians::new(100.0);
+        let deg: Degrees = gon.into();
+        assert_abs_diff_eq!(deg.value(), 90.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn from_impl_turn_to_deg() {
+        let turn = Turns::new(0.25);
+        let deg: Degrees = turn.into();
+        assert_abs_diff_eq!(deg.value(), 90.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    #[cfg(feature = "astro")]
     fn roundtrip_arcminute_arcsecond() {
         let original = Arcminutes::new(5.0);
         let arcs = original.to::<Arcsecond>();
@@ -1052,6 +982,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "navigation")]
     fn roundtrip_gradian_degree() {
         let original = Gradians::new(123.456);
         let deg = original.to::<Degree>();
@@ -1068,6 +999,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "navigation")]
     fn gradian_full_turn() {
         assert_abs_diff_eq!(Gradian::FULL_TURN, 400.0, epsilon = 1e-12);
     }
@@ -1078,11 +1010,13 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn arcminute_full_turn() {
         assert_abs_diff_eq!(Arcminute::FULL_TURN, 21_600.0, epsilon = 1e-9);
     }
 
     #[test]
+    #[cfg(feature = "astro")]
     fn microarcsecond_conversion_chain() {
         // Test a long conversion chain
         let uas = MicroArcseconds::new(1e9);
@@ -1105,6 +1039,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "navigation")]
     fn wrap_signed_with_gradians() {
         let gon = Gradians::new(350.0);
         let wrapped = gon.wrap_signed();
@@ -1112,6 +1047,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "navigation")]
     fn trig_with_gradians() {
         let gon = Gradians::new(100.0); // 90 degrees
         assert_abs_diff_eq!(gon.sin(), 1.0, epsilon = 1e-12);
@@ -1126,6 +1062,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(all(feature = "astro", feature = "navigation"))]
     fn all_units_to_degrees() {
         // Verify all units convert correctly to degrees
         assert_abs_diff_eq!(
@@ -1233,13 +1170,17 @@ mod tests {
         assert!(Degree == Degree);
         assert!(Radian == Radian);
         assert!(Milliradian == Milliradian);
-        assert!(Arcminute == Arcminute);
-        assert!(Arcsecond == Arcsecond);
-        assert!(MilliArcsecond == MilliArcsecond);
-        assert!(MicroArcsecond == MicroArcsecond);
+        #[cfg(feature = "astro")]
+        {
+            assert!(Arcminute == Arcminute);
+            assert!(Arcsecond == Arcsecond);
+            assert!(MilliArcsecond == MilliArcsecond);
+            assert!(MicroArcsecond == MicroArcsecond);
+            assert!(HourAngle == HourAngle);
+        }
+        #[cfg(feature = "navigation")]
         assert!(Gradian == Gradian);
         assert!(Turn == Turn);
-        assert!(HourAngle == HourAngle);
         // signum_const: cover both positive and negative branches
         let pos = Degrees::new(90.0);
         let neg = Degrees::new(-45.0);

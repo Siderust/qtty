@@ -299,9 +299,15 @@ pub trait Transcendental: Real {
 /// Types implementing this trait (e.g., `Rational64`, `Rational32`, signed integers)
 /// provide exact arithmetic but typically do not support transcendental functions.
 ///
+/// # Unit conversion is lossy
+///
 /// The `to_f64_approx` and `from_f64_approx` methods enable lossy unit conversion
-/// for types that cannot implement [`Real`]. For integers, `from_f64_approx`
-/// truncates toward zero.
+/// for types that cannot implement [`Real`]. Because unit ratios are stored as `f64`,
+/// converting between units with an `Exact` scalar goes through `f64` and back,
+/// which introduces floating-point rounding. This means the `scalar-rational` feature
+/// provides **exact arithmetic within a fixed unit** but **lossy unit conversion**.
+/// For integers, `from_f64_approx` truncates toward zero and saturates at the
+/// type's bounds.
 ///
 /// This trait is sealed and cannot be implemented outside this crate.
 pub trait Exact: Scalar {
@@ -314,6 +320,16 @@ pub trait Exact: Scalar {
     ///
     /// For integers, this is equivalent to `value as Self` (truncation + saturation).
     fn from_f64_approx(value: f64) -> Self;
+
+    /// Checked conversion from `f64`.
+    ///
+    /// Returns `None` if the value cannot be represented in this type without
+    /// range overflow (i.e. clipping/saturation). Fractional truncation toward
+    /// zero is still permitted and does **not** cause a `None` return.
+    ///
+    /// For integers, returns `None` when the truncated value falls outside
+    /// `[Self::MIN, Self::MAX]` or when the input is NaN/infinite.
+    fn checked_from_f64(value: f64) -> Option<Self>;
 }
 
 /// Marker trait for integer scalar types.
@@ -1322,6 +1338,14 @@ mod rational_impl {
         fn from_f64_approx(value: f64) -> Self {
             Rational64::approximate_float(value).unwrap_or(Rational64::new_raw(0, 1))
         }
+
+        #[inline]
+        fn checked_from_f64(value: f64) -> Option<Self> {
+            if !value.is_finite() {
+                return None;
+            }
+            Rational64::approximate_float(value)
+        }
     }
 
     impl Scalar for Rational32 {
@@ -1376,6 +1400,14 @@ mod rational_impl {
         fn from_f64_approx(value: f64) -> Self {
             Rational32::approximate_float(value).unwrap_or(Rational32::new_raw(0, 1))
         }
+
+        #[inline]
+        fn checked_from_f64(value: f64) -> Option<Self> {
+            if !value.is_finite() {
+                return None;
+            }
+            Rational32::approximate_float(value)
+        }
     }
 }
 
@@ -1395,7 +1427,7 @@ macro_rules! impl_scalar_for_signed_int {
 
             #[inline]
             fn abs(self) -> Self {
-                self.abs()
+                self.saturating_abs()
             }
 
             #[inline]
@@ -1423,6 +1455,22 @@ macro_rules! impl_scalar_for_signed_int {
             #[inline]
             fn from_f64_approx(value: f64) -> Self {
                 value as Self
+            }
+
+            #[inline]
+            fn checked_from_f64(value: f64) -> Option<Self> {
+                if !value.is_finite() {
+                    return None;
+                }
+                let converted = value as Self;
+                // Detect saturation: if the round-trip difference is ≥ 1.0,
+                // the value was outside the representable range.
+                let round_trip = converted as f64;
+                if (round_trip - value).abs() >= 1.0 {
+                    None
+                } else {
+                    Some(converted)
+                }
             }
         }
 

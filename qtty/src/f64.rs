@@ -24,7 +24,6 @@ macro_rules! _alias {
 }
 qtty_core::angular_units!(_alias);
 qtty_core::length_units!(_alias);
-qtty_core::length_nominal_units!(_alias);
 qtty_core::time_units!(_alias);
 qtty_core::mass_units!(_alias);
 qtty_core::power_units!(_alias);
