@@ -17,6 +17,15 @@ std = []
 cross-unit-ops = []
 serde = ["dep:serde"]
 
+# Unit-family features (opt-in for rare/domain-specific units)
+astro = []
+navigation = []
+fundamental-physics = []
+customary = []
+land-area = []
+julian-time = []
+all-units = ["astro", "navigation", "fundamental-physics", "customary", "land-area", "julian-time"]
+
 # Optional support
 scalar-rational = ["num-rational"]
 pyo3 = ["dep:pyo3"]

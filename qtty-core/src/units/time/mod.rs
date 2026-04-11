@@ -50,9 +50,6 @@
 //! touch!(Weeks,        1.0); touch!(Fortnights,   1.0);
 //! touch!(Years,        1.0); touch!(Decades,      1.0);
 //! touch!(Centuries,    1.0); touch!(Millennia,    1.0);
-//! touch!(JulianYears,  1.0); touch!(JulianCenturies, 1.0);
-//! touch!(SiderealDays, 1.0); touch!(SynodicMonths, 1.0);
-//! touch!(SiderealYears, 1.0);
 //! ```
 
 use crate::{Quantity, Unit};
@@ -67,6 +64,15 @@ impl<T: Unit<Dim = Time>> TimeUnit for T {}
 
 /// Conventional civil mapping used by this module: seconds per mean solar day.
 pub const SECONDS_PER_DAY: f64 = 86_400.0;
+
+#[cfg(feature = "julian-time")]
+mod julian_time;
+#[cfg(feature = "julian-time")]
+pub use julian_time::*;
+#[cfg(feature = "astro")]
+mod astro;
+#[cfg(feature = "astro")]
+pub use astro::*;
 
 // --- SI submultiples of the second ---
 
@@ -258,7 +264,7 @@ pub const FORTNIGHT: Fortnights = Fortnights::new(1.0);
 ///
 /// Convention used: `365.2425 d`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "yr", dimension = Time, ratio = 365.25 * SECONDS_PER_DAY)]
+#[unit(symbol = "yr", dimension = Time, ratio = 365.242_5 * SECONDS_PER_DAY)]
 pub struct Year;
 /// A quantity measured in years.
 pub type Years = Quantity<Year>;
@@ -267,7 +273,7 @@ pub const YEAR: Years = Years::new(1.0);
 
 /// Decade (`10` mean tropical years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "dec", dimension = Time, ratio = 10.0 * 365.25 * SECONDS_PER_DAY)]
+#[unit(symbol = "dec", dimension = Time, ratio = 10.0 * 365.242_5 * SECONDS_PER_DAY)]
 pub struct Decade;
 /// A quantity measured in decades.
 pub type Decades = Quantity<Decade>;
@@ -276,7 +282,7 @@ pub const DECADE: Decades = Decades::new(1.0);
 
 /// Century (`100` mean tropical years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "c", dimension = Time, ratio = 100.0 * 365.25 * SECONDS_PER_DAY)]
+#[unit(symbol = "c", dimension = Time, ratio = 100.0 * 365.242_5 * SECONDS_PER_DAY)]
 pub struct Century;
 /// A quantity measured in centuries.
 pub type Centuries = Quantity<Century>;
@@ -285,83 +291,18 @@ pub const CENTURY: Centuries = Centuries::new(1.0);
 
 /// Millennium (`1000` mean tropical years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "mill", dimension = Time, ratio = 1000.0 * 365.25 * SECONDS_PER_DAY)]
+#[unit(symbol = "mill", dimension = Time, ratio = 1000.0 * 365.242_5 * SECONDS_PER_DAY)]
 pub struct Millennium;
 /// A quantity measured in millennia.
 pub type Millennia = Quantity<Millennium>;
 /// A constant representing one millennium.
 pub const MILLENNIUM: Millennia = Millennia::new(1.0);
 
-// --- Julian conventions (useful in astronomy/ephemerides) ---
-
-/// Julian year (`365.25 d`), expressed in seconds.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "a", dimension = Time, ratio = 365.25 * SECONDS_PER_DAY)]
-pub struct JulianYear;
-/// A quantity measured in Julian years.
-pub type JulianYears = Quantity<JulianYear>;
-/// A constant representing one Julian year.
-pub const JULIAN_YEAR: JulianYears = JulianYears::new(1.0);
-
-/// Julian century (`36_525 d`), expressed in seconds.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "jc", dimension = Time, ratio = 36_525.0 * SECONDS_PER_DAY)]
-pub struct JulianCentury;
-/// A quantity measured in Julian centuries.
-pub type JulianCenturies = Quantity<JulianCentury>;
-/// A constant representing one Julian century.
-pub const JULIAN_CENTURY: JulianCenturies = JulianCenturies::new(1.0);
-
-// --- Astronomical mean units (explicitly approximate) ---
-
-/// Mean sidereal day (Earth), expressed in SI seconds.
+/// Canonical list of always-available (SI + calendar) time units.
 ///
-/// Convention used: `1 sidereal day ≈ 86_164.0905 s`.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "sd", dimension = Time, ratio = 86_164.090_5)]
-pub struct SiderealDay;
-/// A quantity measured in sidereal days.
-pub type SiderealDays = Quantity<SiderealDay>;
-/// A constant representing one sidereal day.
-pub const SIDEREAL_DAY: SiderealDays = SiderealDays::new(1.0);
-
-/// Mean synodic month (lunar phase cycle), expressed in seconds.
-///
-/// Convention used: `1 synodic month ≈ 29.530588 d`.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "mo_s", dimension = Time, ratio = 29.530_59 * SECONDS_PER_DAY)]
-pub struct SynodicMonth;
-/// A quantity measured in synodic months.
-pub type SynodicMonths = Quantity<SynodicMonth>;
-/// A constant representing one synodic month.
-pub const SYNODIC_MONTH: SynodicMonths = SynodicMonths::new(1.0);
-
-/// Mean sidereal year (Earth), expressed in seconds.
-///
-/// Common convention: `1 sidereal year ≈ 365.256363004 d`.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "yr_s", dimension = Time, ratio = 365.256_363_004 * SECONDS_PER_DAY)]
-pub struct SiderealYear;
-/// A quantity measured in sidereal years.
-pub type SiderealYears = Quantity<SiderealYear>;
-/// A constant representing one sidereal year.
-pub const SIDEREAL_YEAR: SiderealYears = SiderealYears::new(1.0);
-
-/// Canonical list of all time units.
-///
-/// Pass a macro identifier as the single argument; it will be invoked with all
-/// time unit types as its token list. Drives:
-/// - `impl_unit_from_conversions!` — bidirectional `From` impls between all pairs.
-/// - `impl_unit_cross_unit_ops!` — cross-unit `PartialEq`/`PartialOrd` (feature-gated).
-/// - `assert_units_are_builtin!` — compile-time check that every unit is in
-///   `register_builtin_units!` (under `#[cfg(test)]`).
-///
-/// The macro is exported (`#[doc(hidden)]`) so the `qtty` facade can use it
-/// in compile-time consistency checks (`inventory_consistency.rs`).
-///
-/// ```rust,ignore
-/// time_units!(crate::impl_unit_from_conversions);
-/// ```
+/// Exported (`#[doc(hidden)]`) for use in `qtty`'s scalar alias generation and
+/// compile-time consistency checks.  Feature-gated units (julian-time, astro)
+/// are in their sub-modules.
 #[macro_export]
 #[doc(hidden)]
 macro_rules! time_units {
@@ -390,24 +331,19 @@ macro_rules! time_units {
             Year,
             Decade,
             Century,
-            Millennium,
-            JulianYear,
-            JulianCentury,
-            SiderealDay,
-            SynodicMonth,
-            SiderealYear
+            Millennium
         );
     };
 }
 
-// Generate all bidirectional From implementations between time units.
+// Generate bidirectional From impls between base SI + calendar time units.
 time_units!(crate::impl_unit_from_conversions);
 
-// Optional cross-unit operator support (`==`, `<`, etc.).
+// Optional cross-unit operator support.
 #[cfg(feature = "cross-unit-ops")]
 time_units!(crate::impl_unit_cross_unit_ops);
 
-// Compile-time check: every unit in the inventory is registered as BuiltinUnit.
+// Compile-time check: every base time unit is registered as BuiltinUnit.
 #[cfg(test)]
 time_units!(crate::assert_units_are_builtin);
 
@@ -463,6 +399,7 @@ mod tests {
         assert_abs_diff_eq!(week.value(), 1.0, epsilon = 1e-12);
     }
 
+    #[cfg(feature = "julian-time")]
     #[test]
     fn julian_year_to_days() {
         let jy = JulianYears::new(1.0);
@@ -470,6 +407,7 @@ mod tests {
         assert_abs_diff_eq!(day.value(), 365.25, epsilon = 1e-9);
     }
 
+    #[cfg(feature = "julian-time")]
     #[test]
     fn julian_century_to_days() {
         let jc = JulianCenturies::new(1.0);
@@ -477,6 +415,7 @@ mod tests {
         assert_abs_diff_eq!(day.value(), 36525.0, epsilon = 1e-9);
     }
 
+    #[cfg(feature = "julian-time")]
     #[test]
     fn julian_century_to_julian_years() {
         let jc = JulianCenturies::new(1.0);
@@ -488,14 +427,14 @@ mod tests {
     fn tropical_year_to_days() {
         let y = Years::new(1.0);
         let day = y.to::<Day>();
-        assert_abs_diff_eq!(day.value(), 365.25, epsilon = 1e-9);
+        assert_abs_diff_eq!(day.value(), 365.242_5, epsilon = 1e-9);
     }
 
     #[test]
     fn century_to_days() {
         let c = Centuries::new(1.0);
         let day = c.to::<Day>();
-        assert_abs_diff_eq!(day.value(), 36525.0, epsilon = 1e-9);
+        assert_abs_diff_eq!(day.value(), 36524.25, epsilon = 1e-9);
     }
 
     #[test]
@@ -517,6 +456,7 @@ mod tests {
         assert_abs_diff_eq!(back.value(), original.value(), epsilon = 1e-12);
     }
 
+    #[cfg(feature = "julian-time")]
     #[test]
     fn roundtrip_julian_year_day() {
         let original = JulianYears::new(2.5);
@@ -568,6 +508,10 @@ mod tests {
             prop_assert!((sec.value() / day.value() - 86400.0).abs() < 1e-9);
         }
 
+    }
+
+    #[cfg(feature = "julian-time")]
+    proptest! {
         #[test]
         fn prop_julian_year_day_ratio(y in 1e-6..1e6f64) {
             let jy = JulianYears::new(y);
@@ -697,6 +641,7 @@ mod tests {
 
     // ─── Astronomical mean units ────────────────────────────────────────────
 
+    #[cfg(feature = "astro")]
     #[test]
     fn sidereal_day_to_seconds() {
         let q = SiderealDays::new(1.0);
@@ -705,6 +650,7 @@ mod tests {
         assert_abs_diff_eq!(s.value(), 86_164.090_5, epsilon = 1e-3);
     }
 
+    #[cfg(feature = "astro")]
     #[test]
     fn synodic_month_to_days() {
         let q = SynodicMonths::new(1.0);
@@ -713,6 +659,7 @@ mod tests {
         assert_abs_diff_eq!(d.value(), 29.530_590, epsilon = 1e-6);
     }
 
+    #[cfg(feature = "astro")]
     #[test]
     fn sidereal_year_to_days() {
         let q = SiderealYears::new(1.0);
@@ -729,6 +676,11 @@ mod tests {
         assert_eq!(format!("{}", Nanoseconds::new(1.0)), "1 ns");
         assert_eq!(format!("{}", Kiloseconds::new(1.0)), "1 ks");
         assert_eq!(format!("{}", Fortnights::new(1.0)), "1 fn");
+    }
+
+    #[cfg(feature = "astro")]
+    #[test]
+    fn astro_symbols_are_correct() {
         assert_eq!(format!("{}", SiderealDays::new(1.0)), "1 sd");
     }
 }

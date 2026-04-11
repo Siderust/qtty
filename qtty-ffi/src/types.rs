@@ -96,9 +96,9 @@ pub enum DimensionId {
     Mass = 4,
     /// Power dimension (e.g., watts, kilowatts).
     Power = 5,
-    /// Area dimension (e.g., square meters, hectares).
+    /// Area dimension (e.g., square metres, hectares).
     Area = 6,
-    /// Volume dimension (e.g., cubic meters, liters).
+    /// Volume dimension (e.g., cubic metres, litres).
     Volume = 7,
 }
 
@@ -580,6 +580,7 @@ mod tests {
     fn unit_id_from_u32_rejects_invalid() {
         assert_eq!(UnitId::from_u32(0), None);
         assert_eq!(UnitId::from_u32(9999), None);
+        assert_eq!(UnitId::from_u32(80000), None);
         assert_eq!(UnitId::from_u32(99999), None);
         assert_eq!(UnitId::from_u32(u32::MAX), None);
     }

@@ -10,6 +10,8 @@ fn main() {
     let half: Unitless = Meter::new(1.0) / Meter::new(2.0);
     assert!((half.value() - 0.5).abs() < 1e-12);
 
+    // Typed angle from inverse trig
     let ratio: Unitless = Second::new(1.0) / Second::new(1.0);
-    assert_eq!(ratio.asin(), core::f64::consts::FRAC_PI_2);
+    let angle: qtty::angular::Radians = ratio.asin_angle().to();
+    assert!((angle.value() - core::f64::consts::FRAC_PI_2).abs() < 1e-12);
 }

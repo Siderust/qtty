@@ -35,8 +35,6 @@ compile time while valid conversions stay explicit and cheap.
 | `cross-unit-ops` | ✔ | Direct cross-unit comparisons for compatible built-in units (`==`, `<`, `>=`, …) |
 | `alloc` | via `std` | Heap-backed helpers in `no_std`, including `qtty::qtty_vec!(vec ...)` |
 | `serde` |  | `Serialize` / `Deserialize` support for quantities |
-| `ffi` |  | Marks `Quantity<U, S>` as `repr(transparent)` for Rust-side FFI layout guarantees |
-| `scalar-decimal` |  | `rust_decimal::Decimal` scalar support |
 | `scalar-rational` |  | `num_rational::Rational64` scalar support |
 | `pyo3` |  | PyO3 conversions for Python-facing integrations |
 | `tiberius` |  | SQL Server integration helpers in `qtty-core` |
@@ -133,7 +131,6 @@ The default scalar type is `f64`, but the same unit system is available across m
 - `qtty::*` / `qtty::f64::*` → `f64`
 - `qtty::f32::*` → `f32`
 - `qtty::i8::*`, `qtty::i16::*`, `qtty::i32::*`, `qtty::i64::*`, `qtty::i128::*` → signed integers
-- `scalar-decimal` feature → `rust_decimal::Decimal`
 - `scalar-rational` feature → `num_rational::Rational64`
 
 Integer quantities preserve unit safety for discrete data while exposing lossy conversions where appropriate.
@@ -147,7 +144,7 @@ The facade crate re-exports the built-in unit modules from `qtty-core` at the cr
 - **Angular**: degrees, radians, arcminutes, arcseconds, milliarcseconds
 - **Time**: seconds, minutes, hours, days, weeks, years, Julian/sidereal variants
 - **Length**: meters, kilometers, astronomical units, light-years, parsecs, nautical miles, and more
-- **Mass**: gram-family units, kilograms, tonnes, Earth/Jupiter/Solar masses
+- **Mass**: gram-family units, kilograms, tonnes, solar mass
 - **Power**: watts, metric/electric horsepower, solar luminosity
 - **Area / Volume**: square and cubic derived units plus liter-family and land units
 - **Velocity / Frequency**: generic `Per`-based derived quantities
@@ -182,7 +179,7 @@ Further repository docs:
 
 - User overview: [`../doc/users/rust-workspace.md`](../doc/users/rust-workspace.md)
 - Architecture: [`../doc/architecture/repository-layout.md`](../doc/architecture/repository-layout.md)
-- FFI architecture: [`../doc/architecture/qtty-ffi.md`](../doc/architecture/qtty-ffi.md)
+- FFI documentation: [`qtty-ffi/README.md`](qtty-ffi/README.md)
 
 ---
 
@@ -195,7 +192,7 @@ Need a stable C ABI or adapter boundary? Use `qtty-ffi`, which exposes:
 - Generated `include/qtty_ffi.h`
 - Optional JSON and Python-facing integration layers
 
-See `qtty-ffi/README.md` and `qtty-ffi/ARCHITECTURE.md` for details.
+See [`qtty-ffi/README.md`](qtty-ffi/README.md) for details.
 
 ---
 

@@ -56,7 +56,6 @@ macro_rules! assert_alias_exists {
 
 qtty_core::angular_units!(assert_unit_reexported);
 qtty_core::length_units!(assert_unit_reexported);
-qtty_core::length_nominal_units!(assert_unit_reexported);
 qtty_core::time_units!(assert_unit_reexported);
 qtty_core::mass_units!(assert_unit_reexported);
 qtty_core::power_units!(assert_unit_reexported);
@@ -67,7 +66,6 @@ qtty_core::volume_units!(assert_unit_reexported);
 
 qtty_core::angular_units!(assert_alias_exists);
 qtty_core::length_units!(assert_alias_exists);
-qtty_core::length_nominal_units!(assert_alias_exists);
 qtty_core::time_units!(assert_alias_exists);
 qtty_core::mass_units!(assert_alias_exists);
 qtty_core::power_units!(assert_alias_exists);

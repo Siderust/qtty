@@ -153,7 +153,7 @@ fn test_i64_rem() {
 #[test]
 fn test_i32_partial_eq_scalar() {
     let a = Quantity::<Meter, i32>::new(42);
-    assert_eq!(a, 42);
+    assert_eq!(a, Quantity::<Meter, i32>::new(42));
 }
 
 #[test]
@@ -588,13 +588,13 @@ fn test_i128_from_scalar() {
 #[test]
 fn test_i16_partial_eq() {
     let a = Quantity::<Meter, i16>::new(42);
-    assert_eq!(a, 42_i16);
+    assert_eq!(a, Quantity::<Meter, i16>::new(42));
 }
 
 #[test]
 fn test_i128_partial_eq() {
     let a = Quantity::<Meter, i128>::new(42);
-    assert_eq!(a, 42_i128);
+    assert_eq!(a, Quantity::<Meter, i128>::new(42));
 }
 
 #[test]
@@ -624,7 +624,7 @@ fn test_i8_from_scalar() {
 #[test]
 fn test_i8_partial_eq() {
     let a = Quantity::<Meter, i8>::new(42);
-    assert_eq!(a, 42_i8);
+    assert_eq!(a, Quantity::<Meter, i8>::new(42));
 }
 
 #[test]
