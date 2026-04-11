@@ -47,10 +47,6 @@ crate::impl_unit_cross_unit_ops_between!(
 #[doc(hidden)]
 macro_rules! area_land_area_units {
     ($cb:path) => {
-        $cb!(
-            Hectare,
-            Are,
-            Acre,
-        );
+        $cb!(Hectare, Are, Acre,);
     };
 }

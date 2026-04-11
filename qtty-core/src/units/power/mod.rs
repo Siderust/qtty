@@ -113,26 +113,9 @@ si_watt!(Yottawatt, "YW", 1e24, YW, Yottawatts, YW_1);
 macro_rules! power_units {
     ($cb:path) => {
         $cb!(
-            Watt,
-            Yoctowatt,
-            Zeptowatt,
-            Attowatt,
-            Femtowatt,
-            Picowatt,
-            Nanowatt,
-            Microwatt,
-            Milliwatt,
-            Deciwatt,
-            Decawatt,
-            Hectowatt,
-            Kilowatt,
-            Megawatt,
-            Gigawatt,
-            Terawatt,
-            Petawatt,
-            Exawatt,
-            Zettawatt,
-            Yottawatt
+            Watt, Yoctowatt, Zeptowatt, Attowatt, Femtowatt, Picowatt, Nanowatt, Microwatt,
+            Milliwatt, Deciwatt, Decawatt, Hectowatt, Kilowatt, Megawatt, Gigawatt, Terawatt,
+            Petawatt, Exawatt, Zettawatt, Yottawatt
         );
     };
 }

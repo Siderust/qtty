@@ -50,11 +50,6 @@ crate::impl_unit_cross_unit_ops_between!(
 #[doc(hidden)]
 macro_rules! area_customary_units {
     ($cb:path) => {
-        $cb!(
-            SquareInch,
-            SquareFoot,
-            SquareYard,
-            SquareMile,
-        );
+        $cb!(SquareInch, SquareFoot, SquareYard, SquareMile,);
     };
 }

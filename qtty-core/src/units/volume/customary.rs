@@ -54,11 +54,6 @@ crate::impl_unit_cross_unit_ops_between!(
 #[doc(hidden)]
 macro_rules! volume_customary_units {
     ($cb:path) => {
-        $cb!(
-            CubicInch,
-            CubicFoot,
-            UsGallon,
-            UsFluidOunce,
-        );
+        $cb!(CubicInch, CubicFoot, UsGallon, UsFluidOunce,);
     };
 }

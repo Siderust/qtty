@@ -44,9 +44,6 @@ crate::impl_unit_cross_unit_ops_between!(
 #[doc(hidden)]
 macro_rules! power_customary_units {
     ($cb:path) => {
-        $cb!(
-            HorsepowerMetric,
-            HorsepowerElectric,
-        );
+        $cb!(HorsepowerMetric, HorsepowerElectric,);
     };
 }

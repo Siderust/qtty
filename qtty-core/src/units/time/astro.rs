@@ -46,10 +46,6 @@ pub const SIDEREAL_YEAR: SiderealYears = SiderealYears::new(1.0);
 #[doc(hidden)]
 macro_rules! time_astro_units {
     ($cb:path) => {
-        $cb!(
-            SiderealDay,
-            SynodicMonth,
-            SiderealYear,
-        );
+        $cb!(SiderealDay, SynodicMonth, SiderealYear,);
     };
 }
