@@ -466,7 +466,25 @@ macro_rules! with_base_units {
             crate::units::volume::Milliliter,
             crate::units::volume::Microliter,
             crate::units::volume::Centiliter,
-            crate::units::volume::Deciliter
+            crate::units::volume::Deciliter,
+            // ── Acceleration ──────────────────────────────────────────────────────
+            crate::units::acceleration::MeterPerSecondSquared,
+            crate::units::acceleration::StandardGravity,
+            // ── Force (SI newtons) ────────────────────────────────────────────────
+            crate::units::force::Newton,
+            crate::units::force::Micronewton,
+            crate::units::force::Millinewton,
+            crate::units::force::Kilonewton,
+            crate::units::force::Meganewton,
+            crate::units::force::Giganewton,
+            // ── Energy (SI joules) ────────────────────────────────────────────────
+            crate::units::energy::Joule,
+            crate::units::energy::Microjoule,
+            crate::units::energy::Millijoule,
+            crate::units::energy::Kilojoule,
+            crate::units::energy::Megajoule,
+            crate::units::energy::Gigajoule,
+            crate::units::energy::Terajoule
         );
     };
 }
@@ -551,7 +569,10 @@ macro_rules! extend_with_customary {
             crate::units::volume::CubicInch,
             crate::units::volume::CubicFoot,
             crate::units::volume::UsGallon,
-            crate::units::volume::UsFluidOunce
+            crate::units::volume::UsFluidOunce,
+            crate::units::force::PoundForce,
+            crate::units::energy::Calorie,
+            crate::units::energy::Kilocalorie
         );
     };
 }
@@ -587,7 +608,12 @@ macro_rules! extend_with_fundamental_physics {
             crate::units::length::PlanckLength,
             crate::units::length::ElectronReducedComptonWavelength,
             crate::units::mass::AtomicMassUnit,
-            crate::units::power::ErgPerSecond
+            crate::units::power::ErgPerSecond,
+            crate::units::force::Dyne,
+            crate::units::energy::Erg,
+            crate::units::energy::Electronvolt,
+            crate::units::energy::Kiloelectronvolt,
+            crate::units::energy::Megaelectronvolt
         );
     };
 }

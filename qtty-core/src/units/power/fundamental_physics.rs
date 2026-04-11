@@ -35,8 +35,6 @@ crate::impl_unit_cross_unit_ops_between!(
 #[doc(hidden)]
 macro_rules! power_fundamental_physics_units {
     ($cb:path) => {
-        $cb!(
-            ErgPerSecond,
-        );
+        $cb!(ErgPerSecond,);
     };
 }

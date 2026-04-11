@@ -121,7 +121,7 @@ pub use dimension::{
     AmountOfSubstance,
     // Base dimensions
     Angular,
-    AngularRateDim,
+    AngularRate,
     Area,
     Current,
     Dimension,
@@ -134,7 +134,7 @@ pub use dimension::{
     Power,
     Temperature,
     Time,
-    VelocityDim,
+    Velocity,
     Volume,
 };
 
@@ -169,8 +169,11 @@ pub use feature_serde::serde_scalar;
 /// orphan rules.
 pub mod units;
 
+pub use units::acceleration;
 pub use units::angular;
 pub use units::area;
+pub use units::energy;
+pub use units::force;
 pub use units::frequency;
 pub use units::length;
 pub use units::mass;

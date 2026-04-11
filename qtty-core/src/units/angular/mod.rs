@@ -290,7 +290,6 @@ pub type Turns = Quantity<Turn>;
 /// One turn.
 pub const TURN: Turns = Turns::new(1.0);
 
-
 impl Degrees {
     /// Construct from **DMS** components (`deg`, `min`, `sec`).
     ///

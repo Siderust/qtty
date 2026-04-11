@@ -23,10 +23,7 @@ fn main() {
     println!("cargo:rerun-if-changed=discriminants.csv");
     // We read qtty-core sources for inventory extraction
     let qtty_core_units_dir = PathBuf::from(&crate_dir).join("../qtty-core/src/units");
-    println!(
-        "cargo::rerun-if-changed={}",
-        qtty_core_units_dir.display()
-    );
+    println!("cargo::rerun-if-changed={}", qtty_core_units_dir.display());
 
     // Step 1: Parse discriminant mapping (ABI contract)
     let disc_map = parse_discriminants(&crate_dir);
@@ -365,7 +362,7 @@ fn resolve_units(
     }
 
     // Verify all discriminants.csv entries were resolved
-    for (name, _) in disc_map {
+    for name in disc_map.keys() {
         if !seen_ffi_names.contains_key(name) {
             panic!(
                 "discriminants.csv contains '{name}' but it was not found in any qtty-core \
@@ -446,10 +443,7 @@ fn generate_unit_enum(units: &[ResolvedUnit], out_dir: &str) {
             "    /// {} ({} dimension)\n",
             unit.ffi_name, unit.dimension
         ));
-        code.push_str(&format!(
-            "    {} = {},\n",
-            unit.ffi_name, unit.discriminant
-        ));
+        code.push_str(&format!("    {} = {},\n", unit.ffi_name, unit.discriminant));
     }
 
     code.push_str("}\n\n");
@@ -480,7 +474,9 @@ fn generate_unit_enum(units: &[ResolvedUnit], out_dir: &str) {
     code.push_str("        let cls = qtty.getattr(\"Quantity\")?;\n");
     code.push_str("        cls.call1((scalar, *self))\n");
     code.push_str("    }\n\n");
-    code.push_str("    /// Right multiplication: `Unit.Second * 9.58` → `Quantity(9.58, Unit.Second)`\n");
+    code.push_str(
+        "    /// Right multiplication: `Unit.Second * 9.58` → `Quantity(9.58, Unit.Second)`\n",
+    );
     code.push_str("    fn __rmul__<'py>(&self, py: pyo3::Python<'py>, scalar: f64) -> pyo3::PyResult<pyo3::Bound<'py, pyo3::PyAny>> {\n");
     code.push_str("        self.__mul__(py, scalar)\n");
     code.push_str("    }\n");
@@ -566,7 +562,10 @@ fn generate_registry(units: &[ResolvedUnit], out_dir: &str) {
          match id {\n",
     );
     for unit in units {
-        code.push_str(&format!("    UnitId::{} => Some(UnitMeta {{\n", unit.ffi_name));
+        code.push_str(&format!(
+            "    UnitId::{} => Some(UnitMeta {{\n",
+            unit.ffi_name
+        ));
         code.push_str(&format!("        dim: DimensionId::{},\n", unit.dimension));
         code.push_str(&format!(
             "        scale_to_canonical: <{} as qtty::Unit>::RATIO,\n",

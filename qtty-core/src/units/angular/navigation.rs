@@ -33,8 +33,6 @@ crate::impl_unit_cross_unit_ops_between!(
 #[doc(hidden)]
 macro_rules! angular_navigation_units {
     ($cb:path) => {
-        $cb!(
-            Gradian,
-        );
+        $cb!(Gradian,);
     };
 }

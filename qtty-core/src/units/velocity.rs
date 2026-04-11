@@ -11,7 +11,7 @@
 //!
 //! ## Design notes
 //!
-//! - The velocity *dimension* is [`Velocity`] = [`Length`] / [`Time`].
+//! - The velocity *dimension* is [`Velocity`](crate::Velocity) = [`Length`] / [`Time`].
 //! - All velocity units are zero-cost type aliases.
 //! - Conversions are handled automatically via the underlying length and time units.
 //! - No assumptions are made about reference frames, relativistic effects, or media.
@@ -41,11 +41,11 @@
 use crate::{Per, Quantity, Unit};
 
 /// Re-export the velocity dimension from the dimension module.
-pub use crate::dimension::VelocityDim;
+pub use crate::dimension::Velocity as VelocityDimension;
 
-/// Marker trait for any unit whose dimension is [`VelocityDim`].
-pub trait VelocityUnit: Unit<Dim = VelocityDim> {}
-impl<T: Unit<Dim = VelocityDim>> VelocityUnit for T {}
+/// Marker trait for any unit whose dimension is [`Velocity`](crate::Velocity).
+pub trait VelocityUnit: Unit<Dim = crate::Velocity> {}
+impl<T: Unit<Dim = crate::Velocity>> VelocityUnit for T {}
 
 /// A velocity quantity parameterized by length and time units.
 ///

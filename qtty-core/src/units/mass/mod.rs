@@ -135,28 +135,9 @@ pub const TONE: Tonnes = Tonnes::new(1.0);
 macro_rules! mass_units {
     ($cb:path) => {
         $cb!(
-            Gram,
-            Yoctogram,
-            Zeptogram,
-            Attogram,
-            Femtogram,
-            Picogram,
-            Nanogram,
-            Microgram,
-            Milligram,
-            Centigram,
-            Decigram,
-            Decagram,
-            Hectogram,
-            Kilogram,
-            Megagram,
-            Gigagram,
-            Teragram,
-            Petagram,
-            Exagram,
-            Zettagram,
-            Yottagram,
-            Tonne
+            Gram, Yoctogram, Zeptogram, Attogram, Femtogram, Picogram, Nanogram, Microgram,
+            Milligram, Centigram, Decigram, Decagram, Hectogram, Kilogram, Megagram, Gigagram,
+            Teragram, Petagram, Exagram, Zettagram, Yottagram, Tonne
         );
     };
 }

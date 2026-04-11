@@ -63,11 +63,6 @@ crate::impl_unit_cross_unit_ops_between!(
 #[doc(hidden)]
 macro_rules! length_customary_units {
     ($cb:path) => {
-        $cb!(
-            Inch,
-            Foot,
-            Yard,
-            Mile,
-        );
+        $cb!(Inch, Foot, Yard, Mile,);
     };
 }
