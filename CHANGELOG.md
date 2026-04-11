@@ -30,8 +30,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - Comprehensive compile-time and runtime tests for unit arithmetic covering all recovery patterns, cross-unit pairs, and custom-unit registration.
 - Added invalid-unit regression coverage for `qtty-ffi` quantity carriers so raw `u32` unit IDs from C callers are rejected cleanly instead of producing undefined behavior.
 - Added serde round-trip coverage for the Rust-side `qtty-ffi` carrier structs using their raw numeric unit IDs.
+- **`qtty-ffi` Area & Volume FFI coverage** — `DimensionId::Area` (6) and `DimensionId::Volume` (7) are now part of the ABI, exposing 11 area units (`SquareMeter` … `SquareDecimeter`) and 13 volume units (`CubicMeter` … `UsTeaspoon`) with stable discriminant ranges 60000–60010 and 70000–70012 respectively.
+- **`qtty-ffi` `discriminants.csv`** — new file that is the sole source of ABI-stable discriminant values. All unit metadata (ratios, symbols) is now derived at compile time from `<Type as qtty::Unit>::RATIO`/`::SYMBOL`, eliminating the historic dual-source-of-truth between `units.csv` and qtty-core.
+- **`qtty` `area` / `volume` module re-exports** — `qtty::area` and `qtty::volume` modules are now re-exported at the crate root, mirroring `qtty::angular`, `qtty::length`, etc.
 
 ### Removed
+- **`qtty-ffi` `units.csv`** — hardcoded ratio/symbol data removed; metadata is now derived from qtty-core trait constants so divergence is impossible at compile time.
+- **`qtty-ffi` deprecated helper functions** — `meters_into_ffi`, `try_into_meters`, `kilometers_into_ffi`, `try_into_kilometers`, `seconds_into_ffi`, `try_into_seconds`, `minutes_into_ffi`, `try_into_minutes`, `hours_into_ffi`, `try_into_hours`, `days_into_ffi`, `try_into_days`, `radians_into_ffi`, `try_into_radians`, `degrees_into_ffi`, `try_into_degrees` (all deprecated since 0.5.1) have been removed. Use `From`/`TryFrom` directly (`qty.into()`, `qty.try_into()`).
 - Removed the `scalar-decimal` feature and `rust_decimal` scalar support from `qtty-core` and the `qtty` facade crate.
 - **Breaking:** Removed the public `Simplify` trait and `.simplify()` method from `qtty-core` and the `qtty` facade crate; unit arithmetic now resolves these cases at compile time.
 
@@ -55,6 +60,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
   as `qtty_core::{dim}_units!(...)` for use in the consistency test.
 
 - **Breaking:** Same-unit division (`Meter / Meter`) now directly returns `Quantity<Unitless>` instead of `Quantity<Per<Meter, Meter>>`. Code that type-annotated the result as `Quantity<Per<U, U>>` must be updated.
+- **`qtty-ffi` build pipeline** — `build.rs` now resolves all unit metadata by extracting inventory types from qtty-core source files and emitting `<Type as qtty::Unit>::RATIO` / `::SYMBOL` expressions directly. Hardcoded floats are gone; the generated registry is always in sync with qtty-core by construction.
+- **`qtty-ffi` consistency test** — `tests/csv_inventory_consistency.rs` replaced by `tests/consistency.rs`. The new test uses only compile-time `UnitId::$variant` assertions (forward check) and a lightweight runtime smoke-test that verifies trait-derived metadata matches the registry. The `KNOWN_RATIO_DIVERGENCES` / `KNOWN_SYMBOL_DIVERGENCES` workaround lists are gone.
 - **Breaking:** `Per<N, D> * D` and `D * Per<N, D>` now directly return the numerator quantity (e.g., `Quantity<Meter>`) instead of `Quantity<Prod<Per<N, D>, D>>`. The `.to()` call to recover the numerator is no longer needed.
 - **Breaking:** `N / Per<N, D>` now directly returns the denominator quantity (e.g., `Quantity<Second>`) instead of `Quantity<Per<N, Per<N, D>>>`.
 - **Breaking:** `asin`/`acos`/`atan` are now on `Quantity<Unitless>` instead of `Quantity<Per<U, U>>`. Since same-unit division now yields `Unitless` directly, this is transparent for `(a / b).asin()` patterns.
