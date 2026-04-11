@@ -19,9 +19,9 @@ pub const SIDEREAL_DAY: SiderealDays = SiderealDays::new(1.0);
 
 /// Mean synodic month (lunar phase cycle), expressed in seconds.
 ///
-/// Convention used: `1 synodic month ≈ 29.530588 d`.
+/// Convention used: `1 synodic month ≈ 29.530590 d`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "synmo", dimension = Time, ratio = 29.530_588 * SECONDS_PER_DAY)]
+#[unit(symbol = "synmo", dimension = Time, ratio = 29.530_590 * SECONDS_PER_DAY)]
 pub struct SynodicMonth;
 /// A quantity measured in synodic months.
 pub type SynodicMonths = Quantity<SynodicMonth>;
