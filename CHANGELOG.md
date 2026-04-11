@@ -17,10 +17,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
   cross-dimension registry not updated).
 
 - **Facade consistency test** (`qtty/tests/inventory_consistency.rs`) — compile-time
-  integration test that uses exported inventory macros to assert every unit in every
-  dimension is both re-exported in `qtty::unit::*` and has a scalar alias in `qtty::*`.
-  Adding a unit to a dimension inventory but forgetting `lib.rs::unit` or
-  `scalar_aliases.rs` now fails CI instead of silently becoming a missing export.
+  integration test that uses exported inventory macros to assert every always-available
+  unit in `angular`, `length`, `time`, `mass`, `power`, `area`, and `volume`
+  is both re-exported in `qtty::unit::*` and has a root quantity alias in `qtty::*`.
+  Adding a unit to an inventory but forgetting the corresponding `lib.rs` re-export
+  or root alias generation now fails CI instead of silently becoming a missing export.
+
+- New public **acceleration / force / energy** unit families across `qtty-core`
+  and `qtty`, including `Accel<L, T>`, `MeterPerSecondSquared`,
+  `StandardGravity`, SI newton/joule ladders, and feature-gated
+  `PoundForce`, `Dyne`, `Calorie`, and electron-volt units.
+
+- **`SquareOf<L>` / `CubeOf<L>` helper aliases** — new typed composition helpers
+  for area and volume quantities derived from multiplied length quantities.
 
 - New **stable unit arithmetic layer** (`unit_arithmetic` module) with `UnitDiv` and `UnitMul` extension traits that control output types for quantity division and multiplication, replacing the previous blanket impls.
 - Generic recovery impls: `U / U → Unitless`, `N / Per<N, D> → D`, `Per<N, D> * D → N`, `D * Per<N, D> → N`.
@@ -32,11 +41,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - Added serde round-trip coverage for the Rust-side `qtty-ffi` carrier structs using their raw numeric unit IDs.
 - **`qtty-ffi` Area & Volume FFI coverage** — `DimensionId::Area` (6) and `DimensionId::Volume` (7) are now part of the ABI, exposing 11 area units (`SquareMeter` … `SquareDecimeter`) and 13 volume units (`CubicMeter` … `UsTeaspoon`) with stable discriminant ranges 60000–60010 and 70000–70012 respectively.
 - **`qtty-ffi` `discriminants.csv`** — new file that is the sole source of ABI-stable discriminant values. All unit metadata (ratios, symbols) is now derived at compile time from `<Type as qtty::Unit>::RATIO`/`::SYMBOL`, eliminating the historic dual-source-of-truth between `units.csv` and qtty-core.
-- **`qtty` `area` / `volume` module re-exports** — `qtty::area` and `qtty::volume` modules are now re-exported at the crate root, mirroring `qtty::angular`, `qtty::length`, etc.
+- **`qtty` crate-root module re-exports** — `qtty::{area, volume, acceleration, force, energy}` are now re-exported at the crate root, and root quantity aliases are generated from the inventory macros for all built-in scalar families.
+- **Auto-generated FFI unit constants** — `qtty-ffi` now emits named `QTTY_UNIT_*`
+  constants from `discriminants.csv` for the full registry instead of maintaining
+  a hand-written subset.
 - `AngularRate<N, D>` type alias and `AngularRateUnit` trait as the primary
   names for angular-rate quantities (`Angular / Time`), replacing the
-  misleading `Frequency` / `FrequencyUnit` names. `AngularRateDim` replaces
-  `FrequencyDim` in the dimension layer.
+  misleading `Frequency` / `FrequencyUnit` names. The dimension alias is now
+  `AngularRate`.
 - `Exact::checked_from_f64(value: f64) -> Option<Self>` for converting a
   floating-point value to an exact scalar without silent overflow; returns
   `None` when the value is out of range or non-representable. (QTTY-003)
@@ -54,12 +66,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - **Breaking:** Removed the public `Simplify` trait and `.simplify()` method from `qtty-core` and the `qtty` facade crate; unit arithmetic now resolves these cases at compile time.
 
 ### Changed
-- **Internal: per-dimension unit inventory macros** — every dimension module in
-  `qtty-core` now owns a single `{dim}_units!($cb:path)` macro as the canonical
-  unit list for that dimension. The macro drives `impl_unit_from_conversions!`,
-  `impl_unit_cross_unit_ops!`, and `assert_units_are_builtin!` from one token list.
-  Affected dimensions: `angular`, `length` (non-nominal + nominal), `mass`, `power`,
-  `time`, `area`, `volume`. No public API change.
+- **Internal: inventory macros are now the canonical unit lists** — every
+  always-available unit family in `qtty-core` (`angular`, `length`, `time`,
+  `mass`, `power`, `area`, `volume`, `acceleration`, `force`, `energy`) and the
+  relevant feature-gated subfamilies now expose a `{family}_units!($cb:path)`
+  macro that drives conversions, cross-unit ops, facade alias generation,
+  FFI registry generation, and builtin-unit checks. No public API change.
 
 - **Internal: nominal length units have full pairwise `From` conversions** —
   `length_nominal_units!` now drives `impl_unit_from_conversions!` for all 8 nominal
@@ -68,9 +80,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
   only `SolarRadius ↔ Kilometer` was generated. The explicit cross-group pair is
   retained.
 
-- **Internal: inventory macros exported** — all 8 dimension inventory macros are
-  now `#[macro_export]` + `#[doc(hidden)]`, accessible to the `qtty` facade crate
-  as `qtty_core::{dim}_units!(...)` for use in the consistency test.
+- **Breaking:** Metric area marker types `SquareMeter`, `SquareKilometer`,
+  `SquareCentimeter`, and `SquareMillimeter` are now `Prod<Length, Length>`
+  aliases. `side * side` can therefore be assigned directly to `SquareMeters`,
+  but symbol behavior now follows `Prod` (`Display` renders `m·m`; there is no
+  dedicated `SquareMeter::SYMBOL` value like `m²`).
 
 - **Breaking:** Same-unit division (`Meter / Meter`) now directly returns `Quantity<Unitless>` instead of `Quantity<Per<Meter, Meter>>`. Code that type-annotated the result as `Quantity<Per<U, U>>` must be updated.
 - **`qtty-ffi` build pipeline** — `build.rs` now resolves all unit metadata by extracting inventory types from qtty-core source files and emitting `<Type as qtty::Unit>::RATIO` / `::SYMBOL` expressions directly. Hardcoded floats are gone; the generated registry is always in sync with qtty-core by construction.
@@ -80,8 +94,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - **Breaking:** `asin`/`acos`/`atan` are now on `Quantity<Unitless>` instead of `Quantity<Per<U, U>>`. Since same-unit division now yields `Unitless` directly, this is transparent for `(a / b).asin()` patterns.
 - `qtty-ffi` quantity carrier fields and C-facing unit parameters now use raw `u32`/`uint32_t` unit IDs, and `qtty_ffi_version()` now reports ABI version `500`.
 - `Quantity::sqrt()` was renamed to `Quantity::scalar_sqrt()` to make it explicit that the operation returns the underlying scalar rather than a quantity with the original unit type.
+- **Breaking:** Dimension aliases `VelocityDim` and `AngularRateDim` are now
+  `Velocity` and `AngularRate`. At the `qtty` crate root, `Velocity` and
+  `AngularRate` now name dimensions; the quantity aliases remain under
+  `qtty::velocity::Velocity<L, T>` and `qtty::frequency::AngularRate<N, D>`.
 - **Breaking:** `Frequency<N, D>`, `FrequencyUnit`, and `FrequencyDim` are
-  removed. Use `AngularRate<N, D>`, `AngularRateUnit`, and `AngularRateDim`.
+  removed. Use `AngularRate<N, D>`, `AngularRateUnit`, and `AngularRate`.
+- Canonical symbols were tightened for two built-in units: `Turn` now renders as
+  `tr` and `Century` now renders as `c`.
 - Cross-unit comparison (`==`, `<`, …) is now **symmetric**: both operands
   are independently scaled to the same reference unit before comparison,
   eliminating the previous asymmetry where `a == b` could differ from
@@ -98,6 +118,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - Integer `abs()` no longer panics in debug builds on the minimum signed
   value (e.g. `i32::MIN`); it now uses `saturating_abs()`, returning
   `i32::MAX`. (QTTY-002)
+- `qtty-ffi` formatting now clamps requested precision to 100 to avoid
+  pathological allocations and returns `QTTY_ERR_BUFFER_TOO_SMALL` for
+  zero-length output buffers instead of `QTTY_ERR_NULL_OUT`.
 - `to_lossy()` documentation now explicitly describes truncation and
   saturation semantics for integer scalars and warns that the result may
   not equal the original value. (QTTY-003)
