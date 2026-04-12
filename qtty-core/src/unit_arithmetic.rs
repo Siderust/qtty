@@ -28,7 +28,9 @@
 //! regenerating built-in/built-in impls.
 
 use crate::dimension::{DimDiv, DimMul, Dimension};
-use crate::unit::{Per, Prod, Unit, Unitless};
+use crate::unit::{Per, Prod, Unit};
+use crate::quantity::Quantity;
+use crate::scalar::Scalar;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Core traits
@@ -36,9 +38,15 @@ use crate::unit::{Per, Prod, Unit, Unitless};
 
 /// Determines the unit type produced by dividing a quantity of unit `Self` by
 /// a quantity of unit `Rhs`.
+///
+/// When `Self == Rhs` (same-unit division), `Output` is [`SameDivOutput`], which
+/// signals that the `Div` operator should return the raw scalar `S` rather than
+/// a wrapped `Quantity`.  For all other unit pairs, `Output` is a `Unit` type and
+/// the result is a `Quantity<Output, S>`.
 pub trait UnitDiv<Rhs: Unit>: Unit {
-    /// The resulting unit type.
-    type Output: Unit;
+    /// The resulting type token.  Either a [`Unit`] (wrapped in `Quantity` by
+    /// the `Div` impl) or [`SameDivOutput`] (unwrapped to the raw scalar).
+    type Output;
 }
 
 /// Determines the unit type produced by multiplying a quantity of unit `Self`
@@ -53,21 +61,63 @@ pub trait UnitMul<Rhs: Unit>: Unit {
 pub(crate) trait BuiltinUnit: Unit {}
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Same-unit division output marker
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Marker returned by `UnitDiv<U>` when the numerator and denominator units
+/// are identical.  It is **not** a `Unit`; the `Div` impl uses it to produce
+/// the raw scalar `S` instead of a `Quantity`.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct SameDivOutput;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dispatch trait: maps a UnitDiv::Output to the final Div::Output type
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Converts a `UnitDiv::Output` token into the concrete type returned by `Div`.
+///
+/// - `SameDivOutput` → `S`  (raw scalar; cancellation)
+/// - Any `U: Unit`     → `Quantity<U, S>`
+///
+/// Both implementations are coherent: `SameDivOutput` does not implement
+/// `Unit`, so the two impls are provably disjoint under Rust's orphan rules.
+pub trait QuantityDivOutput<S: Scalar> {
+    /// The type that `Div` will return.
+    type Output;
+    /// Wraps (or passes through) a raw scalar into the output type.
+    fn wrap(v: S) -> Self::Output;
+}
+
+impl<S: Scalar> QuantityDivOutput<S> for SameDivOutput {
+    type Output = S;
+    #[inline]
+    fn wrap(v: S) -> S {
+        v
+    }
+}
+
+impl<U: Unit, S: Scalar> QuantityDivOutput<S> for U {
+    type Output = Quantity<U, S>;
+    #[inline]
+    fn wrap(v: S) -> Quantity<U, S> {
+        Quantity::new(v)
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Generic structural recovery impls
 // ─────────────────────────────────────────────────────────────────────────────
 
-// U / U → Unitless
+// U / U → SameDivOutput  (cancellation — the Div impl unwraps this to S)
 //
-// Any unit divided by itself produces a dimensionless result.  This is
-// implemented with a blanket impl so it works for *all* units — built-in,
-// composite (`Per`, `Prod`), and downstream custom types — without needing
-// per-type macro entries.
+// Any unit divided by itself produces the raw scalar.  This blanket impl covers
+// all units — built-in, composite (`Per`, `Prod`), and downstream custom types.
 impl<U: Unit> UnitDiv<U> for U
 where
     U::Dim: DimDiv<U::Dim>,
     <U::Dim as DimDiv<U::Dim>>::Output: Dimension,
 {
-    type Output = Unitless;
+    type Output = SameDivOutput;
 }
 
 // N / Per<N, D> → D
@@ -131,7 +181,7 @@ where
 /// with `Output = Per<A, B>`.
 ///
 /// Self-pairs are skipped because they are covered by the blanket
-/// `impl<U> UnitDiv<U> for U { type Output = Unitless; }`.
+/// `impl<U> UnitDiv<U> for U { type Output = SameDivOutput; }` which returns the raw scalar.
 ///
 /// # Example
 ///
@@ -446,8 +496,6 @@ macro_rules! register_builtin_units_extend {
 macro_rules! with_base_units {
     ($callback:ident) => {
         $callback!(
-            // ── Unitless ──────────────────────────────────────────────────────────
-            crate::unit::Unitless,
             // ── Length (metric SI) ────────────────────────────────────────────────
             crate::units::length::Meter,
             crate::units::length::Kilometer,
