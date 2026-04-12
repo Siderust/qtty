@@ -46,3 +46,14 @@ crate::impl_unit_cross_unit_ops_between!(
     CubicMeter, CubicKilometer, CubicCentimeter, CubicMillimeter, Liter, Milliliter, Microliter, Centiliter, Deciliter;
     CubicInch, CubicFoot, UsGallon, UsFluidOunce
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+#[macro_export]
+#[doc(hidden)]
+macro_rules! volume_customary_units {
+    ($cb:path) => {
+        $cb!(CubicInch, CubicFoot, UsGallon, UsFluidOunce,);
+    };
+}

@@ -31,3 +31,14 @@ crate::impl_unit_cross_unit_ops_between!(
     Teragram, Petagram, Exagram, Zettagram, Yottagram, Tonne;
     AtomicMassUnit
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+#[macro_export]
+#[doc(hidden)]
+macro_rules! mass_fundamental_physics_units {
+    ($cb:path) => {
+        $cb!(AtomicMassUnit,);
+    };
+}

@@ -1,0 +1,212 @@
+# FFI Unit Discriminant Mapping
+#
+# Format: discriminant,ffi_name
+#
+# This file maps stable ABI discriminant values to UnitId variant names.
+# It is the ONLY place where FFI discriminant values are assigned.
+#
+# All other metadata (symbol, ratio, dimension) is derived from qtty-core's
+# Unit trait implementations at compile time — this file does NOT duplicate
+# that information.
+#
+# Discriminant encoding: DSSCC where D=dimension (1 digit), SS=system (2 digits), CC=counter (2 digits)
+# Units are grouped by dimension with ranges:
+#   Length: 1xxxx (10000-19999)
+#   Time:   2xxxx (20000-29999)
+#   Angle:  3xxxx (30000-39999)
+#   Mass:   4xxxx (40000-49999)
+#   Power:  5xxxx (50000-59999)
+#   Area:   6xxxx (60000-69999)
+#   Volume: 7xxxx (70000-79999)
+#
+# ABI CONTRACT: Existing discriminant values MUST NEVER change.
+# New units may be appended with new discriminant values.
+
+# ─── Length units ─────────────────────────────────────────────────────────────
+# 100xx=SI, 110xx=Astronomical/Physics, 120xx=Imperial, 130xx=Nautical/Survey, 150xx=Nominal
+10000,PlanckLength
+10001,Yoctometer
+10002,Zeptometer
+10003,Attometer
+10004,Femtometer
+10005,Picometer
+10006,Nanometer
+10007,Micrometer
+10008,Millimeter
+10009,Centimeter
+10010,Decimeter
+10011,Meter
+10012,Decameter
+10013,Hectometer
+10014,Kilometer
+10015,Megameter
+10016,Gigameter
+10017,Terameter
+10018,Petameter
+10019,Exameter
+10020,Zettameter
+10021,Yottameter
+11000,BohrRadius
+11001,ClassicalElectronRadius
+11002,ElectronReducedComptonWavelength
+11003,AstronomicalUnit
+11004,LightYear
+11005,Parsec
+11006,Kiloparsec
+11007,Megaparsec
+11008,Gigaparsec
+12000,Inch
+12001,Foot
+12002,Yard
+12003,Mile
+13000,Link
+13001,Fathom
+13002,Rod
+13003,Chain
+13004,NauticalMile
+15000,NominalLunarRadius
+15001,NominalLunarDistance
+15002,NominalEarthPolarRadius
+15003,NominalEarthRadius
+15004,NominalEarthEquatorialRadius
+15005,EarthMeridionalCircumference
+15006,EarthEquatorialCircumference
+15007,NominalJupiterRadius
+15008,NominalSolarRadius
+15009,NominalSolarDiameter
+
+# ─── Time units ───────────────────────────────────────────────────────────────
+# 200xx=SI, 210xx=Common, 220xx=Calendar, 230xx=Astronomical
+20000,Attosecond
+20001,Femtosecond
+20002,Picosecond
+20003,Nanosecond
+20004,Microsecond
+20005,Millisecond
+20006,Centisecond
+20007,Decisecond
+20008,Second
+20009,Decasecond
+20010,Hectosecond
+20011,Kilosecond
+20012,Megasecond
+20013,Gigasecond
+20014,Terasecond
+21000,Minute
+21001,Hour
+21002,Day
+21003,Week
+21004,Fortnight
+22000,Year
+22001,Decade
+22002,Century
+22003,Millennium
+22004,JulianYear
+22005,JulianCentury
+23000,SiderealDay
+23001,SynodicMonth
+23002,SiderealYear
+
+# ─── Angle units ──────────────────────────────────────────────────────────────
+# 300xx=Radian, 310xx=Degree, 320xx=Other
+30000,Milliradian
+30001,Radian
+31000,MicroArcsecond
+31001,MilliArcsecond
+31002,Arcsecond
+31003,Arcminute
+31004,Degree
+32000,Gradian
+32001,Turn
+32002,HourAngle
+
+# ─── Mass units ───────────────────────────────────────────────────────────────
+# 400xx=SI, 410xx=Imperial, 420xx=Special
+40000,Yoctogram
+40001,Zeptogram
+40002,Attogram
+40003,Femtogram
+40004,Picogram
+40005,Nanogram
+40006,Microgram
+40007,Milligram
+40008,Centigram
+40009,Decigram
+40010,Gram
+40011,Decagram
+40012,Hectogram
+40013,Kilogram
+40014,Megagram
+40015,Gigagram
+40016,Teragram
+40017,Petagram
+40018,Exagram
+40019,Zettagram
+40020,Yottagram
+41000,Grain
+41001,Ounce
+41002,Pound
+41003,Stone
+41004,ShortTon
+41005,LongTon
+42000,Carat
+42001,Tonne
+42002,AtomicMassUnit
+42003,SolarMass
+
+# ─── Power units ──────────────────────────────────────────────────────────────
+# 500xx=SI, 510xx=Other
+50000,Yoctowatt
+50001,Zeptowatt
+50002,Attowatt
+50003,Femtowatt
+50004,Picowatt
+50005,Nanowatt
+50006,Microwatt
+50007,Milliwatt
+50008,Deciwatt
+50009,Watt
+50010,Decawatt
+50011,Hectowatt
+50012,Kilowatt
+50013,Megawatt
+50014,Gigawatt
+50015,Terawatt
+50016,Petawatt
+50017,Exawatt
+50018,Zettawatt
+50019,Yottawatt
+51000,ErgPerSecond
+51001,HorsepowerMetric
+51002,HorsepowerElectric
+51003,SolarLuminosity
+
+# ─── Area units ───────────────────────────────────────────────────────────────
+# 600xx=SI/Metric, 610xx=Land, 620xx=Imperial
+60000,SquareMeter
+60001,SquareKilometer
+60002,SquareCentimeter
+60003,SquareMillimeter
+60004,Hectare
+60005,Are
+60006,SquareInch
+60007,SquareFoot
+60008,SquareYard
+60009,SquareMile
+60010,Acre
+
+# ─── Volume units ─────────────────────────────────────────────────────────────
+# 700xx=SI/Metric, 710xx=Litre, 720xx=Imperial
+70000,CubicMeter
+70001,CubicKilometer
+70002,CubicCentimeter
+70003,CubicMillimeter
+70004,Liter
+70005,Milliliter
+70006,Microliter
+70007,Centiliter
+70008,Deciliter
+70009,CubicInch
+70010,CubicFoot
+70011,UsGallon
+70012,UsFluidOunce

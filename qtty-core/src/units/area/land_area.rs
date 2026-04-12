@@ -39,3 +39,14 @@ crate::impl_unit_cross_unit_ops_between!(
     SquareMeter, SquareKilometer, SquareCentimeter, SquareMillimeter;
     Hectare, Are, Acre
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+#[macro_export]
+#[doc(hidden)]
+macro_rules! area_land_area_units {
+    ($cb:path) => {
+        $cb!(Hectare, Are, Acre,);
+    };
+}

@@ -60,3 +60,19 @@ crate::impl_unit_cross_unit_ops_between!(
     Terameter, Petameter, Exameter, Zettameter, Yottameter;
     BohrRadius, ClassicalElectronRadius, PlanckLength, ElectronReducedComptonWavelength
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+#[macro_export]
+#[doc(hidden)]
+macro_rules! length_fundamental_physics_units {
+    ($cb:path) => {
+        $cb!(
+            PlanckLength,
+            BohrRadius,
+            ClassicalElectronRadius,
+            ElectronReducedComptonWavelength,
+        );
+    };
+}

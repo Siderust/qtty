@@ -55,3 +55,14 @@ crate::impl_unit_cross_unit_ops_between!(
     Terameter, Petameter, Exameter, Zettameter, Yottameter;
     Inch, Foot, Yard, Mile
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+#[macro_export]
+#[doc(hidden)]
+macro_rules! length_customary_units {
+    ($cb:path) => {
+        $cb!(Inch, Foot, Yard, Mile,);
+    };
+}

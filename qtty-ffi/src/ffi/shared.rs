@@ -7,6 +7,10 @@ use crate::types::{QttyStatus, UnitId};
 /// Use this for functions that return `QttyStatus`.
 macro_rules! catch_panic {
     ($body:expr) => {{
+        // SAFETY: `AssertUnwindSafe` is sound here because every FFI function
+        // body operates only on by-value arguments and immutable static
+        // registries — there is no `&mut` shared state that could be left in
+        // an inconsistent state after a panic.
         match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| $body)) {
             Ok(result) => result,
             Err(_) => QttyStatus::InternalPanic,
@@ -17,6 +21,7 @@ macro_rules! catch_panic {
 /// Catches any panic and returns the given fallback for non-QttyStatus return types.
 macro_rules! catch_panic_or {
     ($fallback:expr, $body:expr) => {{
+        // SAFETY: Same rationale as `catch_panic!` — no mutable shared state.
         match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| $body)) {
             Ok(result) => result,
             Err(_) => $fallback,

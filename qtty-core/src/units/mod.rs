@@ -12,13 +12,21 @@
 //! - [`time`]: time units (SI second is canonical scaling unit).
 //! - [`length`]: length units (SI metre is canonical scaling unit) plus astronomy/geodesy helpers.
 //! - [`mass`]: mass units (gram is canonical scaling unit).
-//! - [`power`]: power units (watt is canonical scaling unit).
+//! - [`area`]: area units (SI square metre is canonical scaling unit) plus [`SquareOf`](area::SquareOf) alias.
+//! - [`volume`]: volume units (SI cubic metre is canonical scaling unit) plus [`CubeOf`](volume::CubeOf) alias.
 //! - [`velocity`]: velocity aliases (`Length / Time`) built from [`length`] and [`time`].
+//! - [`acceleration`]: acceleration aliases and named SI unit (`Length / Time²`).
+//! - [`force`]: force units (SI newton is canonical scaling unit).
+//! - [`energy`]: energy units (SI joule is canonical scaling unit).
+//! - [`power`]: power units (watt is canonical scaling unit).
 //! - [`frequency`]: angular frequency aliases (`Angular / Time`) built from [`angular`] and [`time`].
 //! - [`unitless`]: helpers for dimensionless quantities.
 
+pub mod acceleration;
 pub mod angular;
 pub mod area;
+pub mod energy;
+pub mod force;
 pub mod frequency;
 pub mod length;
 pub mod mass;

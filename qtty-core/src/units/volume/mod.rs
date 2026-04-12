@@ -15,15 +15,13 @@
 //! Volume units can also arise *automatically* from multiplying length × area quantities:
 //!
 //! ```rust
-//! use qtty_core::length::{Meter, Meters};
-//! use qtty_core::area::{SquareMeter, SquareMeters};
-//! use qtty_core::volume::{CubicMeters, CubicMeter};
-//! use qtty_core::Prod;
+//! use qtty_core::length::Meters;
+//! use qtty_core::area::SquareMeters;
+//! use qtty_core::volume::CubicMeters;
 //!
 //! let side = Meters::new(3.0);
-//! let face: SquareMeters = (side * side).to();
-//! let vol_prod = face * side;                       // Quantity<Prod<SquareMeter, Meter>>
-//! let vol: CubicMeters = vol_prod.to();
+//! let face: SquareMeters = side * side;              // direct product
+//! let vol: CubicMeters = (face * side).to();
 //! assert!((vol.value() - 27.0).abs() < 1e-12);
 //! ```
 //!
@@ -43,7 +41,7 @@
 //! touch!(Deciliters, 1.0);
 //! ```
 
-use crate::{Quantity, Unit};
+use crate::{Prod, Quantity, Unit};
 use qtty_derive::Unit;
 
 /// Re-export the volume dimension from the dimension module.
@@ -52,6 +50,29 @@ pub use crate::dimension::Volume;
 /// Marker trait for any [`Unit`] whose dimension is [`Volume`].
 pub trait VolumeUnit: Unit<Dim = Volume> {}
 impl<T: Unit<Dim = Volume>> VolumeUnit for T {}
+
+/// A composed volume quantity from cubing a length unit.
+///
+/// `CubeOf<L>` is `Quantity<Prod<Prod<L, L>, L>>` — the type produced when
+/// multiplying a [`SquareOf`](super::area::SquareOf) quantity by a further
+/// length quantity. Since metric area unit types are `Prod` aliases and are
+/// registered as [`BuiltinUnit`](crate::unit_arithmetic::BuiltinUnit), the
+/// intermediate multiplication just works.
+///
+/// # Examples
+///
+/// ```rust
+/// use qtty_core::volume::{CubeOf, CubicMeter, CubicMeters};
+/// use qtty_core::area::SquareMeters;
+/// use qtty_core::length::Meters;
+///
+/// let side = Meters::new(3.0);
+/// let face: SquareMeters = side * side;
+/// let vol: CubeOf<_> = face * side;                 // Quantity<Prod<Prod<Meter, Meter>, Meter>>
+/// let named: CubicMeters = vol.to();
+/// assert!((named.value() - 27.0).abs() < 1e-12);
+/// ```
+pub type CubeOf<L> = Quantity<Prod<Prod<L, L>, L>>;
 
 #[cfg(feature = "customary")]
 mod customary;
@@ -129,33 +150,49 @@ pub struct Deciliter;
 /// A quantity measured in decilitres.
 pub type Deciliters = Quantity<Deciliter>;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// From conversions: default (metric + litre) units
-// ─────────────────────────────────────────────────────────────────────────────
-crate::impl_unit_from_conversions!(
-    CubicMeter,
-    CubicKilometer,
-    CubicCentimeter,
-    CubicMillimeter,
-    Liter,
-    Milliliter,
-    Microliter,
-    Centiliter,
-    Deciliter
-);
+/// Canonical list of all volume units.
+///
+/// Pass a macro identifier as the single argument; it will be invoked with all
+/// volume unit types as its token list. Drives:
+/// - `impl_unit_from_conversions!` — bidirectional `From` impls between all pairs.
+/// - `impl_unit_cross_unit_ops!` — cross-unit `PartialEq`/`PartialOrd` (feature-gated).
+/// - `assert_units_are_builtin!` — compile-time check that every unit is in
+///   `register_builtin_units!` (under `#[cfg(test)]`).
+///
+/// The macro is exported (`#[doc(hidden)]`) so the `qtty` facade can use it
+/// in compile-time consistency checks (`inventory_consistency.rs`).
+///
+/// ```rust,ignore
+/// volume_units!(crate::impl_unit_from_conversions);
+/// ```
+#[macro_export]
+#[doc(hidden)]
+macro_rules! volume_units {
+    ($cb:path) => {
+        $cb!(
+            CubicMeter,
+            CubicKilometer,
+            CubicCentimeter,
+            CubicMillimeter,
+            Liter,
+            Milliliter,
+            Microliter,
+            Centiliter,
+            Deciliter
+        );
+    };
+}
 
+// Generate all bidirectional From implementations between volume units.
+volume_units!(crate::impl_unit_from_conversions);
+
+// Optional cross-unit operator support (`==`, `<`, etc.).
 #[cfg(feature = "cross-unit-ops")]
-crate::impl_unit_cross_unit_ops!(
-    CubicMeter,
-    CubicKilometer,
-    CubicCentimeter,
-    CubicMillimeter,
-    Liter,
-    Milliliter,
-    Microliter,
-    Centiliter,
-    Deciliter
-);
+volume_units!(crate::impl_unit_cross_unit_ops);
+
+// Compile-time check: every unit in the inventory is registered as BuiltinUnit.
+#[cfg(test)]
+volume_units!(crate::assert_units_are_builtin);
 
 #[cfg(test)]
 mod tests {

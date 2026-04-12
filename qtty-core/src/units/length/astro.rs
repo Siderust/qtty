@@ -182,3 +182,45 @@ crate::impl_unit_cross_unit_ops_between!(
     Terameter, Petameter, Exameter, Zettameter, Yottameter;
     AstronomicalUnit, LightYear, Parsec, Kiloparsec, Megaparsec, Gigaparsec
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro for nominal units (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Canonical list of always-available nominal length units (IAU / WGS84 radii and distances).
+///
+/// Exported (`#[doc(hidden)]`) for use in `qtty-ffi`'s build.rs discriminant generation.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! length_nominal_units {
+    ($cb:path) => {
+        $cb!(
+            SolarRadius,
+            SolarDiameter,
+            EarthRadius,
+            EarthEquatorialRadius,
+            EarthPolarRadius,
+            LunarRadius,
+            JupiterRadius,
+            LunarDistance
+        );
+    };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+#[macro_export]
+#[doc(hidden)]
+macro_rules! length_astro_units {
+    ($cb:path) => {
+        $cb!(
+            AstronomicalUnit,
+            LightYear,
+            Parsec,
+            Kiloparsec,
+            Megaparsec,
+            Gigaparsec,
+        );
+    };
+}

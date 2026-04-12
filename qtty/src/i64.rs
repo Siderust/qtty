@@ -20,4 +20,15 @@
 //! let time: Nanosecond = Nanosecond::new(500_000_000);
 //! ```
 
-crate::scalar_aliases::define_scalar_aliases!(i64);
+macro_rules! _alias {
+    ($($unit:ident),+ $(,)?) => {
+        $(pub type $unit<S = i64> = $crate::Quantity<$crate::unit::$unit, S>;)+
+    };
+}
+qtty_core::angular_units!(_alias);
+qtty_core::length_units!(_alias);
+qtty_core::time_units!(_alias);
+qtty_core::mass_units!(_alias);
+qtty_core::power_units!(_alias);
+qtty_core::area_units!(_alias);
+qtty_core::volume_units!(_alias);

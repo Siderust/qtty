@@ -27,3 +27,14 @@ crate::impl_unit_cross_unit_ops_between!(
     Petawatt, Exawatt, Zettawatt, Yottawatt;
     ErgPerSecond
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+#[macro_export]
+#[doc(hidden)]
+macro_rules! power_fundamental_physics_units {
+    ($cb:path) => {
+        $cb!(ErgPerSecond,);
+    };
+}

@@ -95,3 +95,20 @@ crate::impl_unit_cross_unit_ops_between!(
     Degree, Radian, Milliradian, Turn;
     Arcminute, Arcsecond, MilliArcsecond, MicroArcsecond, HourAngle
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+#[macro_export]
+#[doc(hidden)]
+macro_rules! angular_astro_units {
+    ($cb:path) => {
+        $cb!(
+            Arcminute,
+            Arcsecond,
+            MilliArcsecond,
+            MicroArcsecond,
+            HourAngle,
+        );
+    };
+}

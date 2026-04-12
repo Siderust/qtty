@@ -86,3 +86,22 @@ crate::impl_unit_cross_unit_ops_between!(
     Terameter, Petameter, Exameter, Zettameter, Yottameter;
     NauticalMile, Chain, Rod, Link, Fathom, EarthMeridionalCircumference, EarthEquatorialCircumference
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+#[macro_export]
+#[doc(hidden)]
+macro_rules! length_navigation_units {
+    ($cb:path) => {
+        $cb!(
+            NauticalMile,
+            Chain,
+            Rod,
+            Link,
+            Fathom,
+            EarthMeridionalCircumference,
+            EarthEquatorialCircumference,
+        );
+    };
+}
