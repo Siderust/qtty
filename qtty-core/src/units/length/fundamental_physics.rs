@@ -5,28 +5,28 @@ use super::*;
 use qtty_derive::Unit;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Fundamental physics lengths (CODATA values)
+// Fundamental physics lengths (CODATA 2022 recommended values)
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Bohr radius (`a0`). CODATA 2018 value in metres.
+/// Bohr radius (`a0`). CODATA 2022 value in metres.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "a0", dimension = Length, ratio = 5.291_772_109_03e-11)]
+#[unit(symbol = "a0", dimension = Length, ratio = 5.291_772_105_44e-11)]
 pub struct BohrRadius;
 /// A quantity measured in Bohr radii.
 pub type BohrRadii = Quantity<BohrRadius>;
 /// One Bohr radius.
 pub const A0: BohrRadii = BohrRadii::new(1.0);
 
-/// Classical electron radius (`re`). CODATA 2018 value in metres.
+/// Classical electron radius (`re`). CODATA 2022 value in metres.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "re", dimension = Length, ratio = 2.817_940_326_2e-15)]
+#[unit(symbol = "re", dimension = Length, ratio = 2.817_940_320_5e-15)]
 pub struct ClassicalElectronRadius;
 /// A quantity measured in classical electron radii.
 pub type ClassicalElectronRadii = Quantity<ClassicalElectronRadius>;
 /// One classical electron radius.
 pub const RE: ClassicalElectronRadii = ClassicalElectronRadii::new(1.0);
 
-/// Planck length (`lp`). CODATA 2018 value in metres.
+/// Planck length (`lp`). CODATA 2022 value in metres.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "lp", dimension = Length, ratio = 1.616_255e-35)]
 pub struct PlanckLength;
@@ -35,9 +35,9 @@ pub type PlanckLengths = Quantity<PlanckLength>;
 /// One Planck length.
 pub const LP: PlanckLengths = PlanckLengths::new(1.0);
 
-/// Reduced Compton wavelength of the electron (`lambda_bar_e`). CODATA 2018 value in metres.
+/// Reduced Compton wavelength of the electron (`lambda_bar_e`). CODATA 2022 value in metres.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "lambda_bar_e", dimension = Length, ratio = 3.861_592_679_6e-13)]
+#[unit(symbol = "lambda_bar_e", dimension = Length, ratio = 3.861_592_674_4e-13)]
 pub struct ElectronReducedComptonWavelength;
 /// A quantity measured in reduced Compton wavelengths of the electron.
 pub type ElectronReducedComptonWavelengths = Quantity<ElectronReducedComptonWavelength>;

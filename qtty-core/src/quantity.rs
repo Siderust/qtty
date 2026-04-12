@@ -159,6 +159,14 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
         let two = S::ONE + S::ONE;
         let a = self.0;
         let b = other.0;
+        // Equal operands: the midpoint is the operand itself.
+        // This also short-circuits same-sign infinities (e.g. +∞.mean(+∞)):
+        // the split-half path below computes ∞ − ∞ = NaN for those cases,
+        // which would violate the IEEE-754 expectation that the midpoint of
+        // two identical infinities stays infinite.
+        if a == b {
+            return Self::new(a);
+        }
         // When both values have the same sign, their sum may overflow.
         // Use a split-half formula that is safe for same-sign operands.
         // When signs differ, the direct sum never overflows (for integers
@@ -253,6 +261,17 @@ impl<U: Unit, S: Real> Quantity<U, S> {
     }
 
     /// Converts this quantity to another unit of the same dimension.
+    ///
+    /// The conversion multiplies the scalar value by `U::RATIO / T::RATIO`.
+    /// Because [`Unit::RATIO`] is always an `f64`, this ratio is computed in
+    /// `f64` and then cast back to `S` via [`Scalar::from_f64`].  For
+    /// floating-point scalars (`f64`, `f32`) the precision loss is negligible.
+    /// For **exact scalar types** (`Rational64`, integers) the cast is lossy:
+    /// the numeric value will be an `f64`-rounded approximation of the true
+    /// rational ratio.  See [`Exact`] for the explicit trade-off documentation.
+    ///
+    /// If you need unit conversion without the `f64` round-trip, store values
+    /// in the target unit from the start rather than converting after the fact.
     ///
     /// # Example
     ///
@@ -390,8 +409,15 @@ impl<U: Unit, S: Exact> Quantity<U, S> {
     /// ```
     #[inline]
     pub fn to_lossy<T: Unit<Dim = U::Dim>>(self) -> Quantity<T, S> {
-        let value_f64 = self.0.to_f64_approx();
         let ratio = U::RATIO / T::RATIO;
+        // Same-ratio fast path: skip the f64 round-trip entirely.
+        // Without this, large integer values (e.g. near i64::MAX) would be
+        // corrupted even for identity conversions because f64 cannot represent
+        // them exactly.
+        if ratio == 1.0 {
+            return Quantity::<T, S>::new(self.0);
+        }
+        let value_f64 = self.0.to_f64_approx();
         Quantity::<T, S>::new(S::from_f64_approx(value_f64 * ratio))
     }
 
@@ -417,8 +443,14 @@ impl<U: Unit, S: Exact> Quantity<U, S> {
     /// ```
     #[inline]
     pub fn checked_to_lossy<T: Unit<Dim = U::Dim>>(self) -> Option<Quantity<T, S>> {
-        let value_f64 = self.0.to_f64_approx();
         let ratio = U::RATIO / T::RATIO;
+        // Same-ratio fast path: the value is unchanged, so always in range.
+        // Without this, large integers near i64::MAX would round-trip through
+        // f64 and either return a mutated value or a false None.
+        if ratio == 1.0 {
+            return Some(Quantity::<T, S>::new(self.0));
+        }
+        let value_f64 = self.0.to_f64_approx();
         S::checked_from_f64(value_f64 * ratio).map(Quantity::<T, S>::new)
     }
 }
@@ -518,7 +550,7 @@ impl<U: Unit + Copy> Quantity<U, f32> {
     /// Const conversion to another unit.
     #[inline]
     pub const fn to_const<T: Unit<Dim = U::Dim> + Copy>(self) -> Quantity<T, f32> {
-        Quantity::<T, f32>(self.0 * (U::RATIO as f32 / T::RATIO as f32), PhantomData)
+        Quantity::<T, f32>(self.0 * ((U::RATIO / T::RATIO) as f32), PhantomData)
     }
 
     /// Const min of two quantities.
@@ -640,6 +672,29 @@ impl<U: Unit, S: Scalar> Mul<S> for Quantity<U, S> {
     }
 }
 
+impl<U: Unit, S: Scalar> MulAssign<S> for Quantity<U, S> {
+    /// In-place scalar multiplication.
+    ///
+    /// ```rust
+    /// use qtty_core::length::Meters;
+    ///
+    /// let mut d = Meters::new(3.0);
+    /// d *= 4.0;
+    /// assert_eq!(d.value(), 12.0);
+    /// ```
+    ///
+    /// ```compile_fail
+    /// use qtty_core::length::Meters;
+    ///
+    /// let mut d = Meters::new(3.0);
+    /// d *= Meters::new(4.0);
+    /// ```
+    #[inline]
+    fn mul_assign(&mut self, rhs: S) {
+        self.0 *= rhs;
+    }
+}
+
 impl<U: Unit, S: Scalar> Div<S> for Quantity<U, S> {
     type Output = Self;
     #[inline]
@@ -738,6 +793,15 @@ impl<U: Unit, S: Scalar + Rem<Output = S>> Rem<S> for Quantity<U, S> {
     #[inline]
     fn rem(self, rhs: S) -> Self {
         Self::new(self.0 % rhs)
+    }
+}
+
+// Same-unit remainder: `5 m % 3 m == 2 m`.
+impl<U: Unit, S: Scalar + Rem<Output = S>> Rem for Quantity<U, S> {
+    type Output = Self;
+    #[inline]
+    fn rem(self, rhs: Self) -> Self {
+        Self::new(self.0 % rhs.0)
     }
 }
 
@@ -849,48 +913,5 @@ impl<S: Transcendental> Quantity<Unitless, S> {
     #[inline]
     pub fn atan_angle(&self) -> Quantity<crate::units::angular::Radian, S> {
         Quantity::new(self.0.atan())
-    }
-
-    /// Arc sine of a unitless quantity (returns raw scalar).
-    ///
-    /// # Deprecation
-    ///
-    /// Use [`asin_angle`](Self::asin_angle) instead, which returns a typed
-    /// `Quantity<Radian, S>`. This method will be removed in a future release.
-    #[deprecated(
-        since = "0.2.0",
-        note = "use `asin_angle()` which returns Quantity<Radian, S>"
-    )]
-    #[inline]
-    pub fn asin(&self) -> S {
-        self.0.asin()
-    }
-
-    /// Arc cosine of a unitless quantity (returns raw scalar).
-    ///
-    /// # Deprecation
-    ///
-    /// Use [`acos_angle`](Self::acos_angle) instead.
-    #[deprecated(
-        since = "0.2.0",
-        note = "use `acos_angle()` which returns Quantity<Radian, S>"
-    )]
-    #[inline]
-    pub fn acos(&self) -> S {
-        self.0.acos()
-    }
-
-    /// Arc tangent of a unitless quantity (returns raw scalar).
-    ///
-    /// # Deprecation
-    ///
-    /// Use [`atan_angle`](Self::atan_angle) instead.
-    #[deprecated(
-        since = "0.2.0",
-        note = "use `atan_angle()` which returns Quantity<Radian, S>"
-    )]
-    #[inline]
-    pub fn atan(&self) -> S {
-        self.0.atan()
     }
 }

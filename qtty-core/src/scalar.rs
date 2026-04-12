@@ -1462,15 +1462,26 @@ macro_rules! impl_scalar_for_signed_int {
                 if !value.is_finite() {
                     return None;
                 }
-                let converted = value as Self;
-                // Detect saturation: if the round-trip difference is ≥ 1.0,
-                // the value was outside the representable range.
-                let round_trip = converted as f64;
-                if (round_trip - value).abs() >= 1.0 {
-                    None
-                } else {
-                    Some(converted)
+                // Explicit bounds check instead of a round-trip comparison.
+                // The round-trip approach silently accepts saturated casts when
+                // f64 spacing exceeds 1 near the type extremes (i64/i128): for
+                // example, (i64::MAX - 1) as f64 rounds up to the same bit
+                // pattern as i64::MAX as f64, so the round-trip difference is
+                // 0 even though the cast saturated.
+                //
+                // * MIN is always −2^(n−1), exactly representable in f64.
+                // * For narrow types (i8/i16/i32) MAX is exact in f64, so
+                //   F_MAX_EXCL = MAX as f64 + 1.0 is the first integer above
+                //   the range.
+                // * For wide types (i64/i128) MAX rounds up in f64 (to 2^63
+                //   or 2^127), so adding 1.0 is a no-op — that rounded-up
+                //   value is itself the correct exclusive upper bound.
+                const F_MIN: f64 = <$t>::MIN as f64;
+                const F_MAX_EXCL: f64 = <$t>::MAX as f64 + 1.0;
+                if !(F_MIN..F_MAX_EXCL).contains(&value) {
+                    return None;
                 }
+                Some(value as Self)
             }
         }
 
@@ -1585,5 +1596,53 @@ mod tests {
 
         // i8
         assert_eq!(i8::from_f64_approx(100.0), 100);
+    }
+
+    // ── checked_from_f64 regression: large integer saturation ─────────────────
+    //
+    // Previously the round-trip check ((converted as f64 - value).abs() < 1.0)
+    // could not detect saturation for i64/i128 values near MAX because f64
+    // spacing there exceeds 1, so the saturated cast and the input f64 were
+    // indistinguishable.
+
+    #[test]
+    fn checked_from_f64_i8_boundaries() {
+        assert_eq!(i8::checked_from_f64(127.0), Some(127));
+        assert_eq!(i8::checked_from_f64(127.9), Some(127)); // truncated, in range
+        assert_eq!(i8::checked_from_f64(128.0), None);
+        assert_eq!(i8::checked_from_f64(-128.0), Some(-128));
+        assert_eq!(i8::checked_from_f64(-128.9), None);
+        assert_eq!(i8::checked_from_f64(f64::INFINITY), None);
+        assert_eq!(i8::checked_from_f64(f64::NAN), None);
+    }
+
+    #[test]
+    fn checked_from_f64_i32_boundaries() {
+        assert_eq!(i32::checked_from_f64(2147483647.0), Some(i32::MAX));
+        assert_eq!(i32::checked_from_f64(2147483648.0), None);
+        assert_eq!(i32::checked_from_f64(-2147483648.0), Some(i32::MIN));
+        assert_eq!(i32::checked_from_f64(-2147483649.0), None);
+    }
+
+    #[test]
+    fn checked_from_f64_i64_no_false_success_near_max() {
+        // (i64::MAX - 1) rounds up to i64::MAX as f64 (= 2^63), which then
+        // saturates back to i64::MAX on cast.  The old round-trip check
+        // accepted this as Some(i64::MAX), silently mutating the value.
+        // The fixed bounds check must return None for any f64 >= 2^63.
+        let near_max_f64 = (i64::MAX - 1) as f64; // rounds up to 2^63
+        assert_eq!(i64::checked_from_f64(near_max_f64), None);
+        assert_eq!(i64::checked_from_f64(i64::MAX as f64), None); // 2^63, out of range
+
+        // Values that fit should still succeed.
+        // Largest f64 strictly below 2^63 is 2^63 - 1024.
+        let safe_max_f64 = 9_223_372_036_854_774_784.0_f64; // 2^63 - 1024
+        assert_eq!(
+            i64::checked_from_f64(safe_max_f64),
+            Some(9_223_372_036_854_774_784_i64)
+        );
+
+        // MIN is exactly representable.
+        assert_eq!(i64::checked_from_f64(i64::MIN as f64), Some(i64::MIN));
     }
 }

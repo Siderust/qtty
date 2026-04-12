@@ -159,12 +159,25 @@ pub mod nominal {
     /// One solar diameter.
     pub const D_SUN: SolarDiameters = SolarDiameters::new(1.0);
 
-    // Allow convenient conversions between selected nominal units and core
-    // length units (e.g., SolarRadius <-> Kilometer) without polluting the
-    // main length namespace with nominal types.
-    crate::impl_unit_from_conversions!(SolarRadius, Kilometer);
+    // ── nominal ↔ base metric conversions ────────────────────────────────────
+    // Wire all nominal units against the full base metric set so they get the
+    // same `From` and cross-unit comparison surface as "real" astro units.
+    crate::impl_unit_from_conversions_between!(
+        Meter, Decimeter, Centimeter, Millimeter, Micrometer, Nanometer, Picometer, Femtometer,
+        Attometer, Zeptometer, Yoctometer, Decameter, Hectometer, Kilometer, Megameter, Gigameter,
+        Terameter, Petameter, Exameter, Zettameter, Yottameter;
+        SolarRadius, SolarDiameter, EarthRadius, EarthEquatorialRadius, EarthPolarRadius,
+        LunarRadius, JupiterRadius, LunarDistance
+    );
+
     #[cfg(feature = "cross-unit-ops")]
-    crate::impl_unit_cross_unit_ops!(SolarRadius, Kilometer);
+    crate::impl_unit_cross_unit_ops_between!(
+        Meter, Decimeter, Centimeter, Millimeter, Micrometer, Nanometer, Picometer, Femtometer,
+        Attometer, Zeptometer, Yoctometer, Decameter, Hectometer, Kilometer, Megameter, Gigameter,
+        Terameter, Petameter, Exameter, Zettameter, Yottameter;
+        SolarRadius, SolarDiameter, EarthRadius, EarthEquatorialRadius, EarthPolarRadius,
+        LunarRadius, JupiterRadius, LunarDistance
+    );
 }
 
 // ── astro ────────────────────────────────────────────────────────────────
@@ -181,6 +194,22 @@ crate::impl_unit_cross_unit_ops_between!(
     Attometer, Zeptometer, Yoctometer, Decameter, Hectometer, Kilometer, Megameter, Gigameter,
     Terameter, Petameter, Exameter, Zettameter, Yottameter;
     AstronomicalUnit, LightYear, Parsec, Kiloparsec, Megaparsec, Gigaparsec
+);
+
+// ── nominal ↔ astro conversions ──────────────────────────────────────────
+crate::__impl_from_each_extra_to_bases!(
+    {AstronomicalUnit, LightYear, Parsec, Kiloparsec, Megaparsec, Gigaparsec}
+    nominal::SolarRadius, nominal::SolarDiameter, nominal::EarthRadius,
+    nominal::EarthEquatorialRadius, nominal::EarthPolarRadius,
+    nominal::JupiterRadius, nominal::LunarRadius, nominal::LunarDistance
+);
+
+#[cfg(feature = "cross-unit-ops")]
+crate::__impl_cross_ops_each_extra_to_bases!(
+    {AstronomicalUnit, LightYear, Parsec, Kiloparsec, Megaparsec, Gigaparsec}
+    nominal::SolarRadius, nominal::SolarDiameter, nominal::EarthRadius,
+    nominal::EarthEquatorialRadius, nominal::EarthPolarRadius,
+    nominal::JupiterRadius, nominal::LunarRadius, nominal::LunarDistance
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
