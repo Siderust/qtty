@@ -208,11 +208,11 @@ fn partial_eq_same_unit() {
 }
 
 #[test]
-fn division_same_unit_gives_unitless() {
+fn division_same_unit_gives_raw_scalar() {
     let a = TU::new(100.0);
     let b = TU::new(20.0);
-    let ratio: Quantity<Unitless> = a / b;
-    assert!((ratio.value() - 5.0).abs() < 1e-12);
+    let ratio: f64 = a / b;
+    assert!((ratio - 5.0).abs() < 1e-12);
 }
 
 #[test]
@@ -249,31 +249,30 @@ fn per_multiplication_commutative() {
 }
 
 #[test]
-fn unitless_asin_angle() {
+fn dimensionless_asin_angle() {
     use qtty_core::units::angular::Radian;
-    let ratio: Quantity<Unitless> = Quantity::new(0.5);
+    // Per<TestUnit, DoubleTestUnit> is Dimensionless → asin_angle available
+    let ratio: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(0.5);
     let result: Quantity<Radian> = ratio.asin_angle();
     assert!((result.value() - 0.5_f64.asin()).abs() < 1e-12);
 }
 
 #[test]
-fn same_unit_ratio_asin_angle() {
-    use qtty_core::units::angular::Radian;
-    // Same-unit division directly yields Unitless, so asin_angle works.
-    let ratio = TU::new(1.0) / TU::new(2.0);
-    let result: Quantity<Radian> = ratio.asin_angle();
-    assert!((result.value() - 0.5_f64.asin()).abs() < 1e-12);
+fn same_unit_ratio_is_raw_scalar() {
+    // Same-unit division now returns the raw f64 scalar.
+    let ratio: f64 = TU::new(1.0) / TU::new(2.0);
+    assert!((ratio - 0.5).abs() < 1e-12);
 }
 
 #[test]
-fn unitless_asin_angle_boundary_values() {
-    let one: Quantity<Unitless> = Quantity::new(1.0);
+fn dimensionless_asin_angle_boundary_values() {
+    let one: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(1.0);
     assert!((one.asin_angle().value() - core::f64::consts::FRAC_PI_2).abs() < 1e-12);
 
-    let neg_one: Quantity<Unitless> = Quantity::new(-1.0);
+    let neg_one: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(-1.0);
     assert!((neg_one.asin_angle().value() - (-core::f64::consts::FRAC_PI_2)).abs() < 1e-12);
 
-    let zero: Quantity<Unitless> = Quantity::new(0.0);
+    let zero: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(0.0);
     assert!((zero.asin_angle().value() - 0.0).abs() < 1e-12);
 }
 
@@ -409,7 +408,7 @@ fn test_mean() {
 #[test]
 fn test_acos_angle() {
     use qtty_core::units::angular::Radian;
-    let ratio: Quantity<Unitless> = Quantity::new(0.5);
+    let ratio: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(0.5);
     let result: Quantity<Radian> = ratio.acos_angle();
     assert!((result.value() - 0.5_f64.acos()).abs() < 1e-12);
 }
@@ -417,7 +416,7 @@ fn test_acos_angle() {
 #[test]
 fn test_atan_angle() {
     use qtty_core::units::angular::Radian;
-    let ratio: Quantity<Unitless> = Quantity::new(1.0);
+    let ratio: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(1.0);
     let result: Quantity<Radian> = ratio.atan_angle();
     assert!((result.value() - core::f64::consts::FRAC_PI_4).abs() < 1e-12);
 }

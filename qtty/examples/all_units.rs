@@ -11,7 +11,7 @@
 //! - Area and volume from dimensional multiplication
 //! - Mass and power units (including solar constants)
 //! - Angular rate (`AngularRate<A, T>` = angular / time)
-//! - Unitless ratio from same-unit division
+//! - Raw scalar ratio from same-unit division
 //! - Integer-scalar quantities (`i64`) with `to_lossy()`
 //! - `f32`-scalar quantities
 //! - The `qtty_vec!` macro for typed arrays and vectors
@@ -25,7 +25,7 @@ use qtty::angular_rate::AngularRate;
 use qtty::velocity::Velocity;
 use qtty::{
     AstronomicalUnit, CubicMeter, Kilogram, Kilometer, LightYear, Meter, Radian, Second,
-    SolarLuminosity, SolarMass, SquareMeter, Unitless, Watt,
+    SolarLuminosity, SolarMass, SquareMeter, Watt,
 };
 
 fn main() {
@@ -97,13 +97,13 @@ fn main() {
         moon_rads.value()
     );
 
-    // ── 6. Unitless ratio ───────────────────────────────────────────────────
-    println!("\n6. Unitless ratio:");
+    // ── 6. Ratio from same-unit division ───────────────────────────────────────
+    println!("\n6. Ratio (same-unit division → raw scalar):");
     let au_dist = AstronomicalUnit::new(1.0);
     let au_in_km: Kilometer = au_dist.to::<qtty::unit::Kilometer>();
-    let dimensionless: Unitless = Kilometer::new(1_000.0) / Kilometer::new(500.0);
-    println!("   1000 km / 500 km = {}", dimensionless.value());
-    assert!((dimensionless.value() - 2.0).abs() < 1e-12);
+    let dimensionless: f64 = Kilometer::new(1_000.0) / Kilometer::new(500.0);
+    println!("   1000 km / 500 km = {}", dimensionless);
+    assert!((dimensionless - 2.0).abs() < 1e-12);
     println!("   1 AU = {:.0} km", au_in_km.value());
 
     // ── 7. Velocity cross-check ───────────────────────────────────────────────

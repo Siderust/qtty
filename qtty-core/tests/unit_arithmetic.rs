@@ -9,31 +9,31 @@ use qtty_core::units::time::Second;
 use qtty_core::*;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// U / U → Unitless
+// U / U → raw scalar
 // ─────────────────────────────────────────────────────────────────────────────
 
 #[test]
-fn same_unit_division_gives_unitless_meter() {
+fn same_unit_division_gives_raw_scalar_meter() {
     let a = Quantity::<Meter>::new(10.0);
     let b = Quantity::<Meter>::new(4.0);
-    let ratio: Quantity<Unitless> = a / b;
-    assert!((ratio.value() - 2.5).abs() < 1e-12);
+    let ratio: f64 = a / b;
+    assert!((ratio - 2.5).abs() < 1e-12);
 }
 
 #[test]
-fn same_unit_division_gives_unitless_second() {
+fn same_unit_division_gives_raw_scalar_second() {
     let a = Quantity::<Second>::new(100.0);
     let b = Quantity::<Second>::new(50.0);
-    let ratio: Quantity<Unitless> = a / b;
-    assert!((ratio.value() - 2.0).abs() < 1e-12);
+    let ratio: f64 = a / b;
+    assert!((ratio - 2.0).abs() < 1e-12);
 }
 
 #[test]
-fn same_unit_division_gives_unitless_kilogram() {
+fn same_unit_division_gives_raw_scalar_kilogram() {
     let a = Quantity::<Kilogram>::new(6.0);
     let b = Quantity::<Kilogram>::new(3.0);
-    let ratio: Quantity<Unitless> = a / b;
-    assert!((ratio.value() - 2.0).abs() < 1e-12);
+    let ratio: f64 = a / b;
+    assert!((ratio - 2.0).abs() < 1e-12);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -179,11 +179,11 @@ impl Unit for CustomLengthC {
 qtty_core::impl_unit_arithmetic_pairs_between!(Meter, Kilometer; CustomLengthC);
 
 #[test]
-fn custom_unit_same_division_gives_unitless() {
+fn custom_unit_same_division_gives_raw_scalar() {
     let a = Quantity::<CustomLengthA>::new(10.0);
     let b = Quantity::<CustomLengthA>::new(5.0);
-    let ratio: Quantity<Unitless> = a / b;
-    assert!((ratio.value() - 2.0).abs() < 1e-12);
+    let ratio: f64 = a / b;
+    assert!((ratio - 2.0).abs() < 1e-12);
 }
 
 #[test]
@@ -235,27 +235,30 @@ fn custom_unit_between_group_self_multiplication() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Trig on Unitless from same-unit ratios
+// Trig via raw scalar from same-unit ratios
 // ─────────────────────────────────────────────────────────────────────────────
 
 #[test]
-fn same_unit_ratio_has_asin_angle() {
-    let ratio = Quantity::<Meter>::new(1.0) / Quantity::<Meter>::new(2.0);
-    let angle: Quantity<qtty_core::units::angular::Radian> = ratio.asin_angle();
+fn same_unit_ratio_asin() {
+    let ratio: f64 = Quantity::<Meter>::new(1.0) / Quantity::<Meter>::new(2.0);
+    let angle: Quantity<qtty_core::units::angular::Radian> =
+        Quantity::new(ratio.asin());
     assert!((angle.value() - core::f64::consts::FRAC_PI_6).abs() < 1e-12);
 }
 
 #[test]
-fn same_unit_ratio_has_acos_angle() {
-    let ratio = Quantity::<Meter>::new(1.0) / Quantity::<Meter>::new(2.0);
-    let angle: Quantity<qtty_core::units::angular::Radian> = ratio.acos_angle();
+fn same_unit_ratio_acos() {
+    let ratio: f64 = Quantity::<Meter>::new(1.0) / Quantity::<Meter>::new(2.0);
+    let angle: Quantity<qtty_core::units::angular::Radian> =
+        Quantity::new(ratio.acos());
     assert!((angle.value() - core::f64::consts::FRAC_PI_3).abs() < 1e-12);
 }
 
 #[test]
-fn same_unit_ratio_has_atan_angle() {
-    let ratio = Quantity::<Meter>::new(1.0) / Quantity::<Meter>::new(1.0);
-    let angle: Quantity<qtty_core::units::angular::Radian> = ratio.atan_angle();
+fn same_unit_ratio_atan() {
+    let ratio: f64 = Quantity::<Meter>::new(1.0) / Quantity::<Meter>::new(1.0);
+    let angle: Quantity<qtty_core::units::angular::Radian> =
+        Quantity::new(ratio.atan());
     assert!((angle.value() - core::f64::consts::FRAC_PI_4).abs() < 1e-12);
 }
 
@@ -263,12 +266,12 @@ fn same_unit_ratio_has_atan_angle() {
 // Compile-time type assignment checks
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Compile-time check: U / U → Unitless
-fn _check_u_div_u_unitless() {
-    fn assert_unitless(_: Quantity<Unitless>) {}
-    assert_unitless(Quantity::<Meter>::new(1.0) / Quantity::<Meter>::new(1.0));
-    assert_unitless(Quantity::<Second>::new(1.0) / Quantity::<Second>::new(1.0));
-    assert_unitless(Quantity::<Kilogram>::new(1.0) / Quantity::<Kilogram>::new(1.0));
+/// Compile-time check: U / U → raw scalar (f64)
+fn _check_u_div_u_raw_scalar() {
+    fn assert_f64(_: f64) {}
+    assert_f64(Quantity::<Meter>::new(1.0) / Quantity::<Meter>::new(1.0));
+    assert_f64(Quantity::<Second>::new(1.0) / Quantity::<Second>::new(1.0));
+    assert_f64(Quantity::<Kilogram>::new(1.0) / Quantity::<Kilogram>::new(1.0));
 }
 
 /// Compile-time check: N / (N / D) → D

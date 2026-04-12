@@ -21,7 +21,6 @@
 //! - [`power`]: power units (watt is canonical scaling unit).
 //! - [`angular_rate`]: angular-rate aliases (`Angular / Time`) built from [`angular`] and [`time`].
 //!   This is **not** SI Hertz-style inverse-time frequency (`T⁻¹`); see the module docs.
-//! - [`unitless`]: helpers for dimensionless quantities.
 
 pub mod acceleration;
 pub mod angular;
@@ -33,6 +32,5 @@ pub mod length;
 pub mod mass;
 pub mod power;
 pub mod time;
-pub mod unitless;
 pub mod velocity;
 pub mod volume;

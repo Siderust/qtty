@@ -349,7 +349,7 @@ pub use qtty_core::units::volume;
 /// [`Second`]. Use this module when generic code needs the unit marker itself,
 /// for example `Quantity<unit::Meter, S>` or `to::<unit::Kilometer>()`.
 pub mod unit {
-    pub use qtty_core::{Per, Prod, Unit, UnitDiv, UnitMul, Unitless};
+    pub use qtty_core::{Per, Prod, Unit, UnitDiv, UnitMul};
 
     #[cfg(feature = "navigation")]
     pub use qtty_core::units::angular::Gradian;
@@ -488,9 +488,6 @@ macro_rules! _root_alias {
 }
 __qtty_invoke_all_inventories!(_root_alias);
 __qtty_invoke_optional_inventories!(_root_alias);
-
-/// Dimensionless quantity alias.
-pub type Unitless<S = f64> = Quantity<unit::Unitless, S>;
 
 pub use qtty_core::units::angular::{DEG, RAD};
 #[cfg(feature = "astro")]

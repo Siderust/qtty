@@ -61,18 +61,18 @@ fn smoke_test_angular_rate() {
 }
 
 #[test]
-fn smoke_test_unitless_from_same_unit_division() {
+fn smoke_test_same_unit_division_gives_raw_scalar() {
     let a = Meter::new(42.0);
     let b = Meter::new(6.0);
-    let u: Unitless = a / b;
-    assert_abs_diff_eq!(u.value(), 7.0, epsilon = 1e-12);
+    let u: f64 = a / b;
+    assert_abs_diff_eq!(u, 7.0, epsilon = 1e-12);
 }
 
 #[test]
 fn smoke_test_erase_unit_raw() {
     let m = Meter::new(42.0);
-    let u: Unitless = m.erase_unit_raw();
-    assert_eq!(u.value(), 42.0);
+    let u: f64 = m.erase_unit_raw();
+    assert_eq!(u, 42.0);
 }
 
 #[test]
