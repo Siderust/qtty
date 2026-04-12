@@ -171,10 +171,10 @@ pub mod units;
 
 pub use units::acceleration;
 pub use units::angular;
+pub use units::angular_rate;
 pub use units::area;
 pub use units::energy;
 pub use units::force;
-pub use units::frequency;
 pub use units::length;
 pub use units::mass;
 pub use units::power;
@@ -644,6 +644,67 @@ mod tests {
     // ─────────────────────────────────────────────────────────────────────────────
     // Serde tests
     // ─────────────────────────────────────────────────────────────────────────────
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // to_lossy / checked_to_lossy regression: large integer same-unit corruption
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn to_lossy_same_unit_large_i64_is_stable() {
+        // Before the fix, the f64 round-trip corrupted values near i64::MAX:
+        //   (i64::MAX - 1) as f64 rounds up to i64::MAX as f64,
+        //   then back to i64::MAX — a silent mutation.
+        let q = Quantity::<TestUnit, i64>::new(i64::MAX - 1);
+        let result: Quantity<TestUnit, i64> = q.to_lossy();
+        assert_eq!(result.value(), i64::MAX - 1);
+    }
+
+    #[test]
+    fn checked_to_lossy_same_unit_large_i64_is_stable() {
+        // The "checked" path must not report success on a mutated value.
+        let q = Quantity::<TestUnit, i64>::new(i64::MAX - 1);
+        let result: Option<Quantity<TestUnit, i64>> = q.checked_to_lossy();
+        assert_eq!(result.map(|q| q.value()), Some(i64::MAX - 1));
+    }
+
+    #[test]
+    fn checked_to_lossy_cross_unit_overflow_returns_none() {
+        // 1 km in i8 meters = 1000, which overflows i8.
+        use crate::length::{Kilometer, Meter};
+        let km = Quantity::<Kilometer, i8>::new(1);
+        assert_eq!(km.checked_to_lossy::<Meter>(), None);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // mean regression: same-sign infinities must not produce NaN
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn mean_positive_infinity_stays_infinite() {
+        // The split-half overflow-avoidance path computed ∞ − ∞ = NaN.
+        // The midpoint of two identical positive infinities must be +∞.
+        let inf = TU::INFINITY;
+        assert!(inf.mean(inf).value().is_infinite());
+        assert!(inf.mean(inf).value() > 0.0);
+    }
+
+    #[test]
+    fn mean_negative_infinity_stays_infinite() {
+        let neg_inf = TU::NEG_INFINITY;
+        assert!(neg_inf.mean(neg_inf).value().is_infinite());
+        assert!(neg_inf.mean(neg_inf).value() < 0.0);
+    }
+
+    #[test]
+    fn mean_finite_values_unaffected() {
+        assert_eq!(TU::new(10.0).mean(TU::new(14.0)).value(), 12.0);
+        assert_eq!(
+            TU::new(i64::MAX as f64)
+                .mean(TU::new(i64::MAX as f64))
+                .value(),
+            i64::MAX as f64
+        );
+    }
 
     #[cfg(feature = "serde")]
     mod serde_tests {

@@ -56,6 +56,38 @@ jobs:
       - run: cargo test --all-targets
       - run: cargo test --doc
 
+  feature-matrix:
+    name: Feature Matrix
+    runs-on: ubuntu-latest
+    # Exercise cross-feature bridge code paths that only compile when specific
+    # feature *pairs* are enabled.  The coverage job runs --all-features but
+    # does not prove that each intermediate combination is sound on its own.
+    strategy:
+      fail-fast: false
+      matrix:
+        features:
+          # Pairs that activate astro cross-feature bridges
+          - "astro,julian-time"
+          - "astro,customary"
+          - "astro,navigation"
+          - "astro,fundamental-physics"
+          - "astro,land-area"
+          # Pairs that activate non-astro cross-feature bridges
+          - "customary,navigation"
+          - "customary,fundamental-physics"
+          - "navigation,fundamental-physics"
+          - "julian-time,customary"
+          # Triple combination to catch three-way interaction
+          - "astro,customary,cross-unit-ops"
+          - "astro,navigation,cross-unit-ops"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Check feature combination ${{ matrix.features }}
+        run: cargo check -p qtty-core --no-default-features --features "std,${{ matrix.features }}"
+      - name: Test feature combination ${{ matrix.features }}
+        run: cargo test -p qtty-core --no-default-features --features "std,${{ matrix.features }}"
+
   no-cross-unit-ops:
     name: No Cross-Unit Ops
     runs-on: ubuntu-latest

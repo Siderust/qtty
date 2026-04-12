@@ -22,9 +22,10 @@
 //! - `A * B → Prod<A, B>`
 //!
 //! Downstream crates can use the exported macros
-//! [`impl_unit_division_pairs!`], [`impl_unit_multiplication_pairs!`], and
-//! [`impl_unit_arithmetic_pairs!`] to register their own custom units into the
-//! same fallback tables.
+//! [`impl_unit_division_pairs!`], [`impl_unit_multiplication_pairs!`],
+//! [`impl_unit_arithmetic_pairs!`], and their `*_between!` variants to
+//! register their own custom units into the same fallback tables without
+//! regenerating built-in/built-in impls.
 
 use crate::dimension::{DimDiv, DimMul, Dimension};
 use crate::unit::{Per, Prod, Unit, Unitless};
@@ -173,6 +174,31 @@ macro_rules! impl_unit_division_pairs {
     };
 }
 
+/// Generates `UnitDiv` impls between every unit in the **extra** group and
+/// every unit in the **base** group, plus all intra-extra pairs.
+///
+/// This does **not** regenerate intra-base pairs, which avoids conflicting with
+/// existing registrations for built-in units.
+///
+/// # Example
+///
+/// ```ignore
+/// impl_unit_division_pairs_between!(Meter, Kilometer; Smoot, Furlong);
+/// // Generates:
+/// //   Meter / Smoot, Smoot / Meter
+/// //   Kilometer / Smoot, Smoot / Kilometer
+/// //   Meter / Furlong, Furlong / Meter
+/// //   Kilometer / Furlong, Furlong / Kilometer
+/// //   Smoot / Furlong, Furlong / Smoot
+/// ```
+#[macro_export]
+macro_rules! impl_unit_division_pairs_between {
+    ($($base:ty),+; $($extra:ty),+ $(,)?) => {
+        $crate::__impl_div_pairs_each_extra_to_bases!({$($base),+} $($extra),+);
+        $crate::impl_unit_division_pairs!($($extra),+);
+    };
+}
+
 /// Generates `UnitMul` impls for all ordered pairs of units, **including**
 /// self-pairs (`A * A`).
 ///
@@ -238,6 +264,19 @@ macro_rules! impl_unit_multiplication_pairs {
     };
 }
 
+/// Generates `UnitMul` impls between every unit in the **extra** group and
+/// every unit in the **base** group, plus all intra-extra pairs.
+///
+/// This does **not** regenerate intra-base pairs, which avoids conflicting with
+/// existing registrations for built-in units.
+#[macro_export]
+macro_rules! impl_unit_multiplication_pairs_between {
+    ($($base:ty),+; $($extra:ty),+ $(,)?) => {
+        $crate::__impl_mul_pairs_each_extra_to_bases!({$($base),+} $($extra),+);
+        $crate::impl_unit_multiplication_pairs!($($extra),+);
+    };
+}
+
 /// Convenience macro that generates both division and multiplication pair
 /// tables for a set of units.
 ///
@@ -248,6 +287,115 @@ macro_rules! impl_unit_arithmetic_pairs {
     ($($unit:ty),+ $(,)?) => {
         $crate::impl_unit_division_pairs!($($unit),+);
         $crate::impl_unit_multiplication_pairs!($($unit),+);
+    };
+}
+
+/// Convenience macro that generates both division and multiplication impls
+/// between an existing **base** group and a new **extra** group.
+///
+/// Equivalent to calling [`impl_unit_division_pairs_between!`] and
+/// [`impl_unit_multiplication_pairs_between!`] with the same arguments.
+#[macro_export]
+macro_rules! impl_unit_arithmetic_pairs_between {
+    ($($base:ty),+; $($extra:ty),+ $(,)?) => {
+        $crate::impl_unit_division_pairs_between!($($base),+; $($extra),+);
+        $crate::impl_unit_multiplication_pairs_between!($($base),+; $($extra),+);
+    };
+}
+
+/// Hidden helper for [`impl_unit_division_pairs_between!`].
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __impl_div_pairs_each_extra_to_bases {
+    // Base case: single extra remaining.
+    ({$($base:ty),+} $extra:ty) => {
+        $(
+            impl $crate::unit_arithmetic::UnitDiv<$extra> for $base
+            where
+                <$base as $crate::Unit>::Dim: $crate::DimDiv<<$extra as $crate::Unit>::Dim>,
+                <<$base as $crate::Unit>::Dim as $crate::DimDiv<<$extra as $crate::Unit>::Dim>>::Output: $crate::Dimension,
+            {
+                type Output = $crate::Per<$base, $extra>;
+            }
+
+            impl $crate::unit_arithmetic::UnitDiv<$base> for $extra
+            where
+                <$extra as $crate::Unit>::Dim: $crate::DimDiv<<$base as $crate::Unit>::Dim>,
+                <<$extra as $crate::Unit>::Dim as $crate::DimDiv<<$base as $crate::Unit>::Dim>>::Output: $crate::Dimension,
+            {
+                type Output = $crate::Per<$extra, $base>;
+            }
+        )+
+    };
+    // Recursive case: peel the first extra, recurse on the rest.
+    ({$($base:ty),+} $first:ty, $($rest:ty),+) => {
+        $(
+            impl $crate::unit_arithmetic::UnitDiv<$first> for $base
+            where
+                <$base as $crate::Unit>::Dim: $crate::DimDiv<<$first as $crate::Unit>::Dim>,
+                <<$base as $crate::Unit>::Dim as $crate::DimDiv<<$first as $crate::Unit>::Dim>>::Output: $crate::Dimension,
+            {
+                type Output = $crate::Per<$base, $first>;
+            }
+
+            impl $crate::unit_arithmetic::UnitDiv<$base> for $first
+            where
+                <$first as $crate::Unit>::Dim: $crate::DimDiv<<$base as $crate::Unit>::Dim>,
+                <<$first as $crate::Unit>::Dim as $crate::DimDiv<<$base as $crate::Unit>::Dim>>::Output: $crate::Dimension,
+            {
+                type Output = $crate::Per<$first, $base>;
+            }
+        )+
+
+        $crate::__impl_div_pairs_each_extra_to_bases!({$($base),+} $($rest),+);
+    };
+}
+
+/// Hidden helper for [`impl_unit_multiplication_pairs_between!`].
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __impl_mul_pairs_each_extra_to_bases {
+    // Base case: single extra remaining.
+    ({$($base:ty),+} $extra:ty) => {
+        $(
+            impl $crate::unit_arithmetic::UnitMul<$extra> for $base
+            where
+                <$base as $crate::Unit>::Dim: $crate::DimMul<<$extra as $crate::Unit>::Dim>,
+                <<$base as $crate::Unit>::Dim as $crate::DimMul<<$extra as $crate::Unit>::Dim>>::Output: $crate::Dimension,
+            {
+                type Output = $crate::Prod<$base, $extra>;
+            }
+
+            impl $crate::unit_arithmetic::UnitMul<$base> for $extra
+            where
+                <$extra as $crate::Unit>::Dim: $crate::DimMul<<$base as $crate::Unit>::Dim>,
+                <<$extra as $crate::Unit>::Dim as $crate::DimMul<<$base as $crate::Unit>::Dim>>::Output: $crate::Dimension,
+            {
+                type Output = $crate::Prod<$extra, $base>;
+            }
+        )+
+    };
+    // Recursive case: peel the first extra, recurse on the rest.
+    ({$($base:ty),+} $first:ty, $($rest:ty),+) => {
+        $(
+            impl $crate::unit_arithmetic::UnitMul<$first> for $base
+            where
+                <$base as $crate::Unit>::Dim: $crate::DimMul<<$first as $crate::Unit>::Dim>,
+                <<$base as $crate::Unit>::Dim as $crate::DimMul<<$first as $crate::Unit>::Dim>>::Output: $crate::Dimension,
+            {
+                type Output = $crate::Prod<$base, $first>;
+            }
+
+            impl $crate::unit_arithmetic::UnitMul<$base> for $first
+            where
+                <$first as $crate::Unit>::Dim: $crate::DimMul<<$base as $crate::Unit>::Dim>,
+                <<$first as $crate::Unit>::Dim as $crate::DimMul<<$base as $crate::Unit>::Dim>>::Output: $crate::Dimension,
+            {
+                type Output = $crate::Prod<$first, $base>;
+            }
+        )+
+
+        $crate::__impl_mul_pairs_each_extra_to_bases!({$($base),+} $($rest),+);
     };
 }
 
@@ -289,63 +437,7 @@ macro_rules! register_builtin_units_extend {
         // Mark each extension type as built-in.
         $(impl BuiltinUnit for $extra {})+
 
-        // Intra-extra pairs.
-        impl_unit_division_pairs!($($extra),+);
-
-        // Cross base × extra pairs (recursive to avoid repetition-count mismatch).
-        __impl_div_pairs_each_extra_to_bases!({$($base),+} $($extra),+);
-    };
-}
-
-/// Recursive helper: iterate over extras one at a time, emitting cross-division
-/// impls with the full base list each time.
-#[cfg(any(
-    feature = "astro",
-    feature = "julian-time",
-    feature = "customary",
-    feature = "navigation",
-    feature = "fundamental-physics",
-    feature = "land-area",
-))]
-macro_rules! __impl_div_pairs_each_extra_to_bases {
-    // Base case: single extra remaining.
-    ({$($base:ty),+} $extra:ty) => {
-        $(
-            impl $crate::unit_arithmetic::UnitDiv<$extra> for $base
-            where
-                <$base as $crate::Unit>::Dim: $crate::DimDiv<<$extra as $crate::Unit>::Dim>,
-                <<$base as $crate::Unit>::Dim as $crate::DimDiv<<$extra as $crate::Unit>::Dim>>::Output: $crate::Dimension,
-            {
-                type Output = $crate::Per<$base, $extra>;
-            }
-            impl $crate::unit_arithmetic::UnitDiv<$base> for $extra
-            where
-                <$extra as $crate::Unit>::Dim: $crate::DimDiv<<$base as $crate::Unit>::Dim>,
-                <<$extra as $crate::Unit>::Dim as $crate::DimDiv<<$base as $crate::Unit>::Dim>>::Output: $crate::Dimension,
-            {
-                type Output = $crate::Per<$extra, $base>;
-            }
-        )+
-    };
-    // Recursive case: peel the first extra, recurse on the rest.
-    ({$($base:ty),+} $first:ty, $($rest:ty),+) => {
-        $(
-            impl $crate::unit_arithmetic::UnitDiv<$first> for $base
-            where
-                <$base as $crate::Unit>::Dim: $crate::DimDiv<<$first as $crate::Unit>::Dim>,
-                <<$base as $crate::Unit>::Dim as $crate::DimDiv<<$first as $crate::Unit>::Dim>>::Output: $crate::Dimension,
-            {
-                type Output = $crate::Per<$base, $first>;
-            }
-            impl $crate::unit_arithmetic::UnitDiv<$base> for $first
-            where
-                <$first as $crate::Unit>::Dim: $crate::DimDiv<<$base as $crate::Unit>::Dim>,
-                <<$first as $crate::Unit>::Dim as $crate::DimDiv<<$base as $crate::Unit>::Dim>>::Output: $crate::Dimension,
-            {
-                type Output = $crate::Per<$first, $base>;
-            }
-        )+
-        __impl_div_pairs_each_extra_to_bases!({$($base),+} $($rest),+);
+        $crate::impl_unit_division_pairs_between!($($base),+; $($extra),+);
     };
 }
 
@@ -633,3 +725,313 @@ macro_rules! extend_with_land_area {
 }
 #[cfg(feature = "land-area")]
 with_base_units!(extend_with_land_area);
+
+// ── Per-feature "as-base" UnitDiv helpers ─────────────────────────────────────
+//
+// Each macro below holds ONE optional feature's complete unit list.  When two
+// optional features are both enabled the macro for the *larger* family is
+// invoked with the *smaller* family's units as arguments, so each unit list
+// lives in exactly one place rather than being copy-pasted into every pairing.
+//
+// To add a new optional unit family F:
+//   1. Define `__impl_div_pairs_with_F_as_base!` here with F's full unit list.
+//   2. Add one `#[cfg(all(feature = "F", feature = "X"))]` call per existing
+//      family X, invoking whichever family's macro covers the larger set.
+// Nothing else in this file needs to change.
+
+#[cfg(feature = "astro")]
+macro_rules! __impl_div_pairs_with_astro_as_base {
+    ($($extra:ty),+ $(,)?) => {
+        crate::__impl_div_pairs_each_extra_to_bases!(
+            {
+                crate::units::length::AstronomicalUnit,
+                crate::units::length::LightYear,
+                crate::units::length::Parsec,
+                crate::units::length::Kiloparsec,
+                crate::units::length::Megaparsec,
+                crate::units::length::Gigaparsec,
+                crate::units::length::nominal::SolarRadius,
+                crate::units::length::nominal::SolarDiameter,
+                crate::units::length::nominal::EarthRadius,
+                crate::units::length::nominal::EarthEquatorialRadius,
+                crate::units::length::nominal::EarthPolarRadius,
+                crate::units::length::nominal::JupiterRadius,
+                crate::units::length::nominal::LunarRadius,
+                crate::units::length::nominal::LunarDistance,
+                crate::units::time::SiderealDay,
+                crate::units::time::SynodicMonth,
+                crate::units::time::SiderealYear,
+                crate::units::mass::SolarMass,
+                crate::units::angular::Arcminute,
+                crate::units::angular::Arcsecond,
+                crate::units::angular::MilliArcsecond,
+                crate::units::angular::MicroArcsecond,
+                crate::units::angular::HourAngle,
+                crate::units::power::SolarLuminosity
+            }
+            $($extra),+
+        );
+    };
+}
+
+#[cfg(feature = "customary")]
+macro_rules! __impl_div_pairs_with_customary_as_base {
+    ($($extra:ty),+ $(,)?) => {
+        crate::__impl_div_pairs_each_extra_to_bases!(
+            {
+                crate::units::length::Inch,
+                crate::units::length::Foot,
+                crate::units::length::Yard,
+                crate::units::length::Mile,
+                crate::units::mass::Carat,
+                crate::units::mass::Grain,
+                crate::units::mass::Pound,
+                crate::units::mass::Ounce,
+                crate::units::mass::Stone,
+                crate::units::mass::ShortTon,
+                crate::units::mass::LongTon,
+                crate::units::power::HorsepowerMetric,
+                crate::units::power::HorsepowerElectric,
+                crate::units::area::SquareInch,
+                crate::units::area::SquareFoot,
+                crate::units::area::SquareYard,
+                crate::units::area::SquareMile,
+                crate::units::volume::CubicInch,
+                crate::units::volume::CubicFoot,
+                crate::units::volume::UsGallon,
+                crate::units::volume::UsFluidOunce,
+                crate::units::force::PoundForce,
+                crate::units::energy::Calorie,
+                crate::units::energy::Kilocalorie
+            }
+            $($extra),+
+        );
+    };
+}
+
+#[cfg(feature = "fundamental-physics")]
+macro_rules! __impl_div_pairs_with_fundamental_physics_as_base {
+    ($($extra:ty),+ $(,)?) => {
+        crate::__impl_div_pairs_each_extra_to_bases!(
+            {
+                crate::units::length::BohrRadius,
+                crate::units::length::ClassicalElectronRadius,
+                crate::units::length::PlanckLength,
+                crate::units::length::ElectronReducedComptonWavelength,
+                crate::units::mass::AtomicMassUnit,
+                crate::units::power::ErgPerSecond,
+                crate::units::force::Dyne,
+                crate::units::energy::Erg,
+                crate::units::energy::Electronvolt,
+                crate::units::energy::Kiloelectronvolt,
+                crate::units::energy::Megaelectronvolt
+            }
+            $($extra),+
+        );
+    };
+}
+
+#[cfg(feature = "navigation")]
+macro_rules! __impl_div_pairs_with_navigation_as_base {
+    ($($extra:ty),+ $(,)?) => {
+        crate::__impl_div_pairs_each_extra_to_bases!(
+            {
+                crate::units::length::NauticalMile,
+                crate::units::length::Chain,
+                crate::units::length::Rod,
+                crate::units::length::Link,
+                crate::units::length::Fathom,
+                crate::units::length::EarthMeridionalCircumference,
+                crate::units::length::EarthEquatorialCircumference,
+                crate::units::angular::Gradian
+            }
+            $($extra),+
+        );
+    };
+}
+
+#[cfg(feature = "land-area")]
+macro_rules! __impl_div_pairs_with_land_area_as_base {
+    ($($extra:ty),+ $(,)?) => {
+        crate::__impl_div_pairs_each_extra_to_bases!(
+            {
+                crate::units::area::Hectare,
+                crate::units::area::Are,
+                crate::units::area::Acre
+            }
+            $($extra),+
+        );
+    };
+}
+
+// ── Cross-feature UnitDiv pairs ──────────────────────────────────────────────
+//
+// When two optional feature families are both enabled, units from each family
+// need `UnitDiv` impls against each other so that cross-unit division "just
+// works".  Multiplication is already covered by the `BuiltinUnit` blanket impl;
+// division requires explicit pairs because the `U / U → Unitless` blanket
+// overlaps with a hypothetical `A / B → Per<A, B>` blanket.
+//
+// For each pair the macro of the *larger* family is invoked so that the smaller
+// family's (shorter) unit list is written at the call site.  Both `A / B` and
+// `B / A` impls are generated by one call — see `__impl_div_pairs_each_extra_to_bases!`.
+//
+// Pair count grows as C(N, 2) with N feature families; unit lists do not grow
+// with the pairing count because each list lives in exactly one macro above.
+
+// astro (24 units) — largest optional family; always the base for its pairs.
+#[cfg(all(feature = "astro", feature = "julian-time"))]
+__impl_div_pairs_with_astro_as_base!(
+    crate::units::time::JulianYear,
+    crate::units::time::JulianCentury
+);
+
+#[cfg(all(feature = "astro", feature = "customary"))]
+__impl_div_pairs_with_astro_as_base!(
+    crate::units::length::Inch,
+    crate::units::length::Foot,
+    crate::units::length::Yard,
+    crate::units::length::Mile,
+    crate::units::mass::Carat,
+    crate::units::mass::Grain,
+    crate::units::mass::Pound,
+    crate::units::mass::Ounce,
+    crate::units::mass::Stone,
+    crate::units::mass::ShortTon,
+    crate::units::mass::LongTon,
+    crate::units::power::HorsepowerMetric,
+    crate::units::power::HorsepowerElectric,
+    crate::units::area::SquareInch,
+    crate::units::area::SquareFoot,
+    crate::units::area::SquareYard,
+    crate::units::area::SquareMile,
+    crate::units::volume::CubicInch,
+    crate::units::volume::CubicFoot,
+    crate::units::volume::UsGallon,
+    crate::units::volume::UsFluidOunce,
+    crate::units::force::PoundForce,
+    crate::units::energy::Calorie,
+    crate::units::energy::Kilocalorie
+);
+
+#[cfg(all(feature = "astro", feature = "navigation"))]
+__impl_div_pairs_with_astro_as_base!(
+    crate::units::length::NauticalMile,
+    crate::units::length::Chain,
+    crate::units::length::Rod,
+    crate::units::length::Link,
+    crate::units::length::Fathom,
+    crate::units::length::EarthMeridionalCircumference,
+    crate::units::length::EarthEquatorialCircumference,
+    crate::units::angular::Gradian
+);
+
+#[cfg(all(feature = "astro", feature = "fundamental-physics"))]
+__impl_div_pairs_with_astro_as_base!(
+    crate::units::length::BohrRadius,
+    crate::units::length::ClassicalElectronRadius,
+    crate::units::length::PlanckLength,
+    crate::units::length::ElectronReducedComptonWavelength,
+    crate::units::mass::AtomicMassUnit,
+    crate::units::power::ErgPerSecond,
+    crate::units::force::Dyne,
+    crate::units::energy::Erg,
+    crate::units::energy::Electronvolt,
+    crate::units::energy::Kiloelectronvolt,
+    crate::units::energy::Megaelectronvolt
+);
+
+#[cfg(all(feature = "astro", feature = "land-area"))]
+__impl_div_pairs_with_astro_as_base!(
+    crate::units::area::Hectare,
+    crate::units::area::Are,
+    crate::units::area::Acre
+);
+
+// customary (23 units) — base for its pairs with smaller families.
+#[cfg(all(feature = "julian-time", feature = "customary"))]
+__impl_div_pairs_with_customary_as_base!(
+    crate::units::time::JulianYear,
+    crate::units::time::JulianCentury
+);
+
+#[cfg(all(feature = "customary", feature = "navigation"))]
+__impl_div_pairs_with_customary_as_base!(
+    crate::units::length::NauticalMile,
+    crate::units::length::Chain,
+    crate::units::length::Rod,
+    crate::units::length::Link,
+    crate::units::length::Fathom,
+    crate::units::length::EarthMeridionalCircumference,
+    crate::units::length::EarthEquatorialCircumference,
+    crate::units::angular::Gradian
+);
+
+#[cfg(all(feature = "customary", feature = "fundamental-physics"))]
+__impl_div_pairs_with_customary_as_base!(
+    crate::units::length::BohrRadius,
+    crate::units::length::ClassicalElectronRadius,
+    crate::units::length::PlanckLength,
+    crate::units::length::ElectronReducedComptonWavelength,
+    crate::units::mass::AtomicMassUnit,
+    crate::units::power::ErgPerSecond,
+    crate::units::force::Dyne,
+    crate::units::energy::Erg,
+    crate::units::energy::Electronvolt,
+    crate::units::energy::Kiloelectronvolt,
+    crate::units::energy::Megaelectronvolt
+);
+
+#[cfg(all(feature = "customary", feature = "land-area"))]
+__impl_div_pairs_with_customary_as_base!(
+    crate::units::area::Hectare,
+    crate::units::area::Are,
+    crate::units::area::Acre
+);
+
+// fundamental-physics (11 units) — base for its pairs with navigation and smaller families.
+#[cfg(all(feature = "julian-time", feature = "fundamental-physics"))]
+__impl_div_pairs_with_fundamental_physics_as_base!(
+    crate::units::time::JulianYear,
+    crate::units::time::JulianCentury
+);
+
+#[cfg(all(feature = "navigation", feature = "fundamental-physics"))]
+__impl_div_pairs_with_fundamental_physics_as_base!(
+    crate::units::length::NauticalMile,
+    crate::units::length::Chain,
+    crate::units::length::Rod,
+    crate::units::length::Link,
+    crate::units::length::Fathom,
+    crate::units::length::EarthMeridionalCircumference,
+    crate::units::length::EarthEquatorialCircumference,
+    crate::units::angular::Gradian
+);
+
+#[cfg(all(feature = "fundamental-physics", feature = "land-area"))]
+__impl_div_pairs_with_fundamental_physics_as_base!(
+    crate::units::area::Hectare,
+    crate::units::area::Are,
+    crate::units::area::Acre
+);
+
+// navigation (8 units) — base for its pairs with land-area and julian-time.
+#[cfg(all(feature = "julian-time", feature = "navigation"))]
+__impl_div_pairs_with_navigation_as_base!(
+    crate::units::time::JulianYear,
+    crate::units::time::JulianCentury
+);
+
+#[cfg(all(feature = "navigation", feature = "land-area"))]
+__impl_div_pairs_with_navigation_as_base!(
+    crate::units::area::Hectare,
+    crate::units::area::Are,
+    crate::units::area::Acre
+);
+
+// land-area (3 units) — base for the julian-time pair (land-area > julian-time).
+#[cfg(all(feature = "julian-time", feature = "land-area"))]
+__impl_div_pairs_with_land_area_as_base!(
+    crate::units::time::JulianYear,
+    crate::units::time::JulianCentury
+);

@@ -39,6 +39,24 @@ pub type SiderealYears = Quantity<SiderealYear>;
 /// A constant representing one sidereal year.
 pub const SIDEREAL_YEAR: SiderealYears = SiderealYears::new(1.0);
 
+// ── Conversions: astro time ↔ base time ──────────────────────────────────────
+crate::impl_unit_from_conversions_between!(
+    Attosecond, Femtosecond, Picosecond, Nanosecond, Microsecond, Millisecond,
+    Centisecond, Decisecond, Second, Decasecond, Hectosecond, Kilosecond,
+    Megasecond, Gigasecond, Terasecond, Minute, Hour, Day, Week, Fortnight,
+    Year, Decade, Century, Millennium;
+    SiderealDay, SynodicMonth, SiderealYear
+);
+
+#[cfg(feature = "cross-unit-ops")]
+crate::impl_unit_cross_unit_ops_between!(
+    Attosecond, Femtosecond, Picosecond, Nanosecond, Microsecond, Millisecond,
+    Centisecond, Decisecond, Second, Decasecond, Hectosecond, Kilosecond,
+    Megasecond, Gigasecond, Terasecond, Minute, Hour, Day, Week, Fortnight,
+    Year, Decade, Century, Millennium;
+    SiderealDay, SynodicMonth, SiderealYear
+);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Inventory macro (used by qtty-ffi build.rs)
 // ─────────────────────────────────────────────────────────────────────────────

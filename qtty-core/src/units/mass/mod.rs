@@ -151,6 +151,48 @@ mass_units!(crate::impl_unit_from_conversions);
 #[cfg(feature = "cross-unit-ops")]
 mass_units!(crate::impl_unit_cross_unit_ops);
 
+// ── Cross-feature: mass families ─────────────────────────────────────────────
+#[cfg(all(feature = "astro", feature = "customary"))]
+crate::__impl_from_each_extra_to_bases!(
+    {SolarMass}
+    Carat, Grain, Pound, Ounce, Stone, ShortTon, LongTon
+);
+#[cfg(all(feature = "astro", feature = "customary", feature = "cross-unit-ops"))]
+crate::__impl_cross_ops_each_extra_to_bases!(
+    {SolarMass}
+    Carat, Grain, Pound, Ounce, Stone, ShortTon, LongTon
+);
+
+#[cfg(all(feature = "astro", feature = "fundamental-physics"))]
+crate::__impl_from_each_extra_to_bases!(
+    {SolarMass}
+    AtomicMassUnit
+);
+#[cfg(all(
+    feature = "astro",
+    feature = "fundamental-physics",
+    feature = "cross-unit-ops"
+))]
+crate::__impl_cross_ops_each_extra_to_bases!(
+    {SolarMass}
+    AtomicMassUnit
+);
+
+#[cfg(all(feature = "customary", feature = "fundamental-physics"))]
+crate::__impl_from_each_extra_to_bases!(
+    {Carat, Grain, Pound, Ounce, Stone, ShortTon, LongTon}
+    AtomicMassUnit
+);
+#[cfg(all(
+    feature = "customary",
+    feature = "fundamental-physics",
+    feature = "cross-unit-ops"
+))]
+crate::__impl_cross_ops_each_extra_to_bases!(
+    {Carat, Grain, Pound, Ounce, Stone, ShortTon, LongTon}
+    AtomicMassUnit
+);
+
 // Compile-time check: every base mass unit is registered as BuiltinUnit.
 #[cfg(test)]
 mass_units!(crate::assert_units_are_builtin);

@@ -23,6 +23,17 @@ use core::marker::PhantomData;
 ///
 /// - Implementations should be zero-sized marker types (this crate's built-in units are unit structs with no fields).
 /// - `RATIO` should be finite and non-zero.
+///
+/// # Conversion precision
+///
+/// `RATIO` is an `f64`, so converting between units always involves an `f64`
+/// multiplication even when the scalar type is "exact" (e.g. `Rational64` or
+/// an integer). This is a deliberate trade-off: the type-level unit system
+/// remains zero-cost and dimensional analysis is exact, but the *numeric*
+/// conversion factor is limited to `f64` precision. Changing this to, say, a
+/// rational ratio would require a core trait redesign because the ratio is a
+/// compile-time constant and Rust's const generics do not yet support
+/// arbitrary-precision types.
 pub trait Unit: Copy + PartialEq + Debug + 'static {
     /// Unit-to-canonical conversion factor.
     const RATIO: f64;

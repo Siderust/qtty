@@ -6,7 +6,7 @@
 > **Strongly typed physical quantities for Rust, with astronomy-friendly units and zero-cost dimensional safety.**
 
 `qtty` keeps units in the type system instead of in comments or conventions. Length, time, angle, mass, power, area,
-volume, velocity, frequency, and unitless ratios are modeled as typed quantities, so invalid operations fail at
+volume, velocity, angular rate, and unitless ratios are modeled as typed quantities, so invalid operations fail at
 compile time while valid conversions stay explicit and cheap.
 
 ---
@@ -51,7 +51,7 @@ compile time while valid conversions stay explicit and cheap.
 | **Typed Quantities** | `Quantity<U, S>` keeps the unit `U` and scalar `S` at the type level, preventing invalid arithmetic across dimensions. |
 | **Explicit Conversion** | Convert with `.to::<TargetUnit>()`, or use `.to_lossy()` for integer-backed quantities. |
 | **Dimensional Arithmetic** | Multiplication and division compose dimensions at compile time: `Length * Length -> Area`, `Length / Time -> Velocity`, and more. |
-| **Broad Unit Catalog** | Built-in modules cover angular, time, length, mass, power, area, volume, velocity, frequency, and unitless quantities. |
+| **Broad Unit Catalog** | Built-in modules cover angular, time, length, mass, power, area, volume, velocity, angular-rate, and unitless quantities. |
 | **Astronomy-Friendly Units** | Includes `AstronomicalUnit`, `LightYear`, `Parsec`, `SolarMass`, `SolarLuminosity`, sidereal time units, and related helpers. |
 | **Multiple Scalar Families** | Use `f64`, `f32`, signed integers, and optional decimal/rational scalars depending on your precision model. |
 | **Interop Options** | Optional `serde`, `ffi`, `pyo3`, `diesel`, `tiberius`, plus a separate `qtty-ffi` crate for C-compatible consumers. |
