@@ -1,16 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 Vallés Puig, Ramon
 
-//! Angular rate (angular frequency) unit aliases (`Angular / Time`).
+//! Angular rate (angular displacement per unit time) unit aliases (`Angular / Time`).
 //!
 //! This module models **angular rate** — angular displacement per unit time
 //! (e.g. radians/second, degrees/day). It does **not** model SI cycle frequency
 //! (Hz = cycles/s), which would be `T⁻¹` with dimensionless cycles.
 //!
+//! If you need Hertz-style inverse-time frequency, model it directly as
+//! `Per<Unitless, Second>` (or a named wrapper) — this module is the wrong place.
+//!
 //! ```rust
 //! use qtty_core::angular::{Degree, Radian};
 //! use qtty_core::time::Day;
-//! use qtty_core::frequency::AngularRate;
+//! use qtty_core::angular_rate::AngularRate;
 //!
 //! let f: AngularRate<Degree, Day> = AngularRate::new(180.0);
 //! let f_rad: AngularRate<Radian, Day> = f.to();
@@ -33,7 +36,7 @@ impl<T: Unit<Dim = crate::AngularRate>> AngularRateUnit for T {}
 /// ```rust
 /// use qtty_core::angular::{Degree, Radian};
 /// use qtty_core::time::{Second, Day};
-/// use qtty_core::frequency::AngularRate;
+/// use qtty_core::angular_rate::AngularRate;
 ///
 /// let f1: AngularRate<Degree, Second> = AngularRate::new(360.0);
 /// let f2: AngularRate<Radian, Day> = AngularRate::new(6.28);

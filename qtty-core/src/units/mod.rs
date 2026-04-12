@@ -19,15 +19,16 @@
 //! - [`force`]: force units (SI newton is canonical scaling unit).
 //! - [`energy`]: energy units (SI joule is canonical scaling unit).
 //! - [`power`]: power units (watt is canonical scaling unit).
-//! - [`frequency`]: angular frequency aliases (`Angular / Time`) built from [`angular`] and [`time`].
+//! - [`angular_rate`]: angular-rate aliases (`Angular / Time`) built from [`angular`] and [`time`].
+//!   This is **not** SI Hertz-style inverse-time frequency (`T⁻¹`); see the module docs.
 //! - [`unitless`]: helpers for dimensionless quantities.
 
 pub mod acceleration;
 pub mod angular;
+pub mod angular_rate;
 pub mod area;
 pub mod energy;
 pub mod force;
-pub mod frequency;
 pub mod length;
 pub mod mass;
 pub mod power;

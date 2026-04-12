@@ -12,7 +12,7 @@ code without giving up ergonomics.
 
 - Zero-cost `Quantity<U, S>` model with compile-time unit safety
 - Explicit conversions via `.to::<TargetUnit>()`
-- Dimensional arithmetic for area, volume, velocity, frequency, and other derived quantities
+- Dimensional arithmetic for area, volume, velocity, angular rate, and other derived quantities
 - Built-in astronomy-oriented units such as `AstronomicalUnit`, `LightYear`, `Parsec`, `SolarMass`, and `SolarLuminosity`
 - `no_std` support, optional `serde`, optional PyO3/SQL integrations, and integer scalar families
 
@@ -71,10 +71,23 @@ assert!((speed.value() - 10.0).abs() < 1e-12);
 ## Modules
 
 - `angular`, `time`, `length`, `mass`, `power`
-- `area`, `volume`
-- `velocity`, `frequency`
+- `area`, `volume`, `acceleration`, `force`, `energy`
+- `velocity`, `angular_rate`, `accel`
 - `unitless`
 - scalar-specific facades: `f32`, `f64`, `i8`, `i16`, `i32`, `i64`, `i128`
+
+## Custom units
+
+`qtty` re-exports the derive and arithmetic macros needed for downstream custom
+units, so most consumers do not need to depend on `qtty-core` directly.
+
+```rust
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, qtty::Unit)]
+#[unit(crate = qtty, symbol = "smoot", dimension = qtty::Length, ratio = 1.7018)]
+pub struct Smoot;
+
+qtty::impl_unit_arithmetic_pairs_between!(qtty::unit::Meter, qtty::unit::Kilometer; Smoot);
+```
 
 ## Examples
 

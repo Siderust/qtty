@@ -22,13 +22,9 @@
 
 macro_rules! _alias {
     ($($unit:ident),+ $(,)?) => {
-        $(pub type $unit<S = i32> = $crate::Quantity<$crate::unit::$unit, S>;)+
+        $(pub type $unit = $crate::Quantity<$crate::unit::$unit, i32>;)+
     };
 }
-qtty_core::angular_units!(_alias);
-qtty_core::length_units!(_alias);
-qtty_core::time_units!(_alias);
-qtty_core::mass_units!(_alias);
-qtty_core::power_units!(_alias);
-qtty_core::area_units!(_alias);
-qtty_core::volume_units!(_alias);
+
+crate::__qtty_invoke_all_inventories!(_alias);
+crate::__qtty_invoke_optional_inventories!(_alias);

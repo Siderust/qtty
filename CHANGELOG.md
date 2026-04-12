@@ -58,14 +58,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - 18 regression tests in `qtty-core/tests/audit_regressions.rs` covering
   cross-unit comparison symmetry, integer `abs()` boundary behaviour, and
   lossy/checked conversion semantics.
+- **`MulAssign<S>`** for `Quantity<U, S>` — in-place scalar multiplication
+  (`q *= 2.0`), symmetric with the pre-existing `DivAssign<S>`.
+- **`Rem<Quantity<U, S>>`** for same-unit remainder — `5 m % 3 m == 2 m`,
+  complementing the pre-existing scalar `Rem<S>`.
+- **`DAYS_PER_GREGORIAN_YEAR`** named constant (`qtty-core::time`) — replaces
+  the four repeated `365.242_5` literals in `Year`/`Decade`/`Century`/`Millennium`
+  ratio expressions.
 
 ### Removed
 - **`qtty-ffi` `units.csv`** — hardcoded ratio/symbol data removed; metadata is now derived from qtty-core trait constants so divergence is impossible at compile time.
 - **`qtty-ffi` deprecated helper functions** — `meters_into_ffi`, `try_into_meters`, `kilometers_into_ffi`, `try_into_kilometers`, `seconds_into_ffi`, `try_into_seconds`, `minutes_into_ffi`, `try_into_minutes`, `hours_into_ffi`, `try_into_hours`, `days_into_ffi`, `try_into_days`, `radians_into_ffi`, `try_into_radians`, `degrees_into_ffi`, `try_into_degrees` (all deprecated since 0.5.1) have been removed. Use `From`/`TryFrom` directly (`qty.into()`, `qty.try_into()`).
 - Removed the `scalar-decimal` feature and `rust_decimal` scalar support from `qtty-core` and the `qtty` facade crate.
 - **Breaking:** Removed the public `Simplify` trait and `.simplify()` method from `qtty-core` and the `qtty` facade crate; unit arithmetic now resolves these cases at compile time.
+- **Breaking:** Removed the deprecated `frequency` alias modules from `qtty-core` and `qtty`. Use `angular_rate` for `Angular / Time` quantities.
+- **Breaking:** Removed deprecated `Quantity<Unitless>::asin()`, `acos()`, and `atan()` scalar-returning methods. Use `asin_angle()`, `acos_angle()`, and `atan_angle()` instead.
 
 ### Changed
+- **CODATA 2018 → 2022** (`fundamental-physics`) — Updated Bohr radius,
+  classical electron radius, and electron reduced Compton wavelength to the
+  CODATA 2022 recommended values. Planck length and atomic mass unit are
+  unchanged (identical in both adjustments). Affected constants and their
+  tests updated accordingly.
 - **Internal: inventory macros are now the canonical unit lists** — every
   always-available unit family in `qtty-core` (`angular`, `length`, `time`,
   `mass`, `power`, `area`, `volume`, `acceleration`, `force`, `energy`) and the
@@ -108,6 +122,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
   `b == a` after a floating-point round-trip.
 
 ### Fixed
+- **`f32` `to_const` precision** — ratio conversion for `f32`-backed quantities
+  now performs the `U::RATIO / T::RATIO` division in `f64` before casting to
+  `f32`, matching the `f64` code path and avoiding doubled rounding error from
+  two independent `as f32` casts.
 - Cleaned up stale `scalar-decimal` cfg gates, tests, and documentation left behind by the Decimal removal so current builds no longer emit `unexpected_cfgs` warnings.
 - Made `Quantity::mean()` overflow-safe for integer-backed quantities by avoiding addition before division.
 - Made `Degrees::from_dms()` and `HourAngles::from_hms()` safe for `i32::MIN` inputs by avoiding signed integer negation before widening.
