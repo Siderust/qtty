@@ -342,6 +342,18 @@ angular_units!(crate::impl_unit_from_conversions);
 #[cfg(feature = "cross-unit-ops")]
 angular_units!(crate::impl_unit_cross_unit_ops);
 
+// ── Cross-feature: astro × navigation ────────────────────────────────────────
+#[cfg(all(feature = "astro", feature = "navigation"))]
+crate::__impl_from_each_extra_to_bases!(
+    {Arcminute, Arcsecond, MilliArcsecond, MicroArcsecond, HourAngle}
+    Gradian
+);
+#[cfg(all(feature = "astro", feature = "navigation", feature = "cross-unit-ops"))]
+crate::__impl_cross_ops_each_extra_to_bases!(
+    {Arcminute, Arcsecond, MilliArcsecond, MicroArcsecond, HourAngle}
+    Gradian
+);
+
 // Compile-time check: every base angular unit is registered as BuiltinUnit.
 #[cfg(test)]
 angular_units!(crate::assert_units_are_builtin);

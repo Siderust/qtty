@@ -3,9 +3,9 @@
 
 //! Re-exports of quantity types specialized to `f32` scalar.
 //!
-//! This module provides type aliases for all unit types using `f32` as the
-//! underlying scalar type. Use this when memory efficiency is more important
-//! than precision.
+//! This module provides type aliases for all built-in unit types using `f32`
+//! as the underlying scalar type. Use this when memory efficiency is more
+//! important than precision.
 //!
 //! # Example
 //!
@@ -19,13 +19,9 @@
 
 macro_rules! _alias {
     ($($unit:ident),+ $(,)?) => {
-        $(pub type $unit<S = f32> = $crate::Quantity<$crate::unit::$unit, S>;)+
+        $(pub type $unit = $crate::Quantity<$crate::unit::$unit, f32>;)+
     };
 }
-qtty_core::angular_units!(_alias);
-qtty_core::length_units!(_alias);
-qtty_core::time_units!(_alias);
-qtty_core::mass_units!(_alias);
-qtty_core::power_units!(_alias);
-qtty_core::area_units!(_alias);
-qtty_core::volume_units!(_alias);
+
+crate::__qtty_invoke_all_inventories!(_alias);
+crate::__qtty_invoke_optional_inventories!(_alias);

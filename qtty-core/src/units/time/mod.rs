@@ -65,6 +65,10 @@ impl<T: Unit<Dim = Time>> TimeUnit for T {}
 /// Conventional civil mapping used by this module: seconds per mean solar day.
 pub const SECONDS_PER_DAY: f64 = 86_400.0;
 
+/// Mean Gregorian year length in days (accounts for the leap-year rule:
+/// every 4 years except centuries not divisible by 400).
+pub const DAYS_PER_GREGORIAN_YEAR: f64 = 365.242_5;
+
 #[cfg(feature = "julian-time")]
 mod julian_time;
 #[cfg(feature = "julian-time")]
@@ -264,7 +268,7 @@ pub const FORTNIGHT: Fortnights = Fortnights::new(1.0);
 ///
 /// Convention used: `365.2425 d`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "yr", dimension = Time, ratio = 365.242_5 * SECONDS_PER_DAY)]
+#[unit(symbol = "yr", dimension = Time, ratio = DAYS_PER_GREGORIAN_YEAR * SECONDS_PER_DAY)]
 pub struct Year;
 /// A quantity measured in years.
 pub type Years = Quantity<Year>;
@@ -273,7 +277,7 @@ pub const YEAR: Years = Years::new(1.0);
 
 /// Decade (`10` mean tropical years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "dec", dimension = Time, ratio = 10.0 * 365.242_5 * SECONDS_PER_DAY)]
+#[unit(symbol = "dec", dimension = Time, ratio = 10.0 * DAYS_PER_GREGORIAN_YEAR * SECONDS_PER_DAY)]
 pub struct Decade;
 /// A quantity measured in decades.
 pub type Decades = Quantity<Decade>;
@@ -282,7 +286,7 @@ pub const DECADE: Decades = Decades::new(1.0);
 
 /// Century (`100` mean tropical years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "c", dimension = Time, ratio = 100.0 * 365.242_5 * SECONDS_PER_DAY)]
+#[unit(symbol = "c", dimension = Time, ratio = 100.0 * DAYS_PER_GREGORIAN_YEAR * SECONDS_PER_DAY)]
 pub struct Century;
 /// A quantity measured in centuries.
 pub type Centuries = Quantity<Century>;
@@ -291,7 +295,7 @@ pub const CENTURY: Centuries = Centuries::new(1.0);
 
 /// Millennium (`1000` mean tropical years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "mill", dimension = Time, ratio = 1000.0 * 365.242_5 * SECONDS_PER_DAY)]
+#[unit(symbol = "mill", dimension = Time, ratio = 1000.0 * DAYS_PER_GREGORIAN_YEAR * SECONDS_PER_DAY)]
 pub struct Millennium;
 /// A quantity measured in millennia.
 pub type Millennia = Quantity<Millennium>;
@@ -342,6 +346,19 @@ time_units!(crate::impl_unit_from_conversions);
 // Optional cross-unit operator support.
 #[cfg(feature = "cross-unit-ops")]
 time_units!(crate::impl_unit_cross_unit_ops);
+
+// ── Cross-feature: astro × julian-time ────────────────────────────────────────
+#[cfg(all(feature = "astro", feature = "julian-time"))]
+crate::__impl_from_each_extra_to_bases!(
+    {SiderealDay, SynodicMonth, SiderealYear}
+    JulianYear, JulianCentury
+);
+
+#[cfg(all(feature = "astro", feature = "julian-time", feature = "cross-unit-ops"))]
+crate::__impl_cross_ops_each_extra_to_bases!(
+    {SiderealDay, SynodicMonth, SiderealYear}
+    JulianYear, JulianCentury
+);
 
 // Compile-time check: every base time unit is registered as BuiltinUnit.
 #[cfg(test)]

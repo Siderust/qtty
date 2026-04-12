@@ -141,6 +141,22 @@ area_units!(crate::impl_unit_from_conversions);
 #[cfg(feature = "cross-unit-ops")]
 area_units!(crate::impl_unit_cross_unit_ops);
 
+// ── Cross-feature: customary × land-area ─────────────────────────────────────
+#[cfg(all(feature = "customary", feature = "land-area"))]
+crate::__impl_from_each_extra_to_bases!(
+    {SquareInch, SquareFoot, SquareYard, SquareMile}
+    Hectare, Are, Acre
+);
+#[cfg(all(
+    feature = "customary",
+    feature = "land-area",
+    feature = "cross-unit-ops"
+))]
+crate::__impl_cross_ops_each_extra_to_bases!(
+    {SquareInch, SquareFoot, SquareYard, SquareMile}
+    Hectare, Are, Acre
+);
+
 // Compile-time check: every unit in the inventory is registered as BuiltinUnit.
 #[cfg(test)]
 area_units!(crate::assert_units_are_builtin);

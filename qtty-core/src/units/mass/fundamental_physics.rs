@@ -6,7 +6,7 @@ use qtty_derive::Unit;
 
 /// Unified atomic mass unit (u), a.k.a. dalton (Da).
 ///
-/// Stored in grams using the CODATA recommended value for `m_u` in kilograms, converted by `1 kg = 1000 g`.
+/// Stored in grams using the CODATA 2022 recommended value for `m_u` in kilograms, converted by `1 kg = 1000 g`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "u", dimension = Mass, ratio = 1.660_539_068_92e-24)]
 pub struct AtomicMassUnit;
