@@ -12,7 +12,7 @@
 //! ```
 
 use qtty::velocity::Velocity;
-use qtty::{CubicMeter, Kilometer, Meter, Second, SquareMeter, Unitless};
+use qtty::{CubicMeter, Kilometer, Meter, Second, SquareMeter};
 
 fn main() {
     // ─────────────────────────────────────────────────────────────────────
@@ -55,26 +55,27 @@ fn main() {
     assert!((recovered.value() - 100.0).abs() < 1e-9);
 
     // ─────────────────────────────────────────────────────────────────────
-    // 5.  Length / Length → dimensionless (directly Unitless)
+    // 5.  Length / Length → raw scalar
     // ─────────────────────────────────────────────────────────────────────
     let a = Meter::new(10.0);
     let b = Meter::new(4.0);
-    let ratio: Unitless = a / b;
-    println!("10 m / 4 m = {} (dimensionless)", ratio.value());
-    assert!((ratio.value() - 2.5).abs() < 1e-12);
+    let ratio: f64 = a / b;
+    println!("10 m / 4 m = {} (dimensionless)", ratio);
+    assert!((ratio - 2.5).abs() < 1e-12);
 
     // ─────────────────────────────────────────────────────────────────────
-    // 6.  Mixed units: km / m keeps the composite type
+    // 6.  Mixed units: km / m keeps the composite type; normalise to scalar
     // ─────────────────────────────────────────────────────────────────────
     let km = Kilometer::new(1.0);
     let m = Meter::new(500.0);
     let mixed = km / m; // Quantity<Per<qtty::unit::Kilometer, qtty::unit::Meter>>
                         // The value is 1.0/500.0 in "km per m" units:
     println!("1 km / 500 m = {} km/m", mixed.value());
-    // But in dimensionless terms (since km/m = 1000) the real ratio is 2.0:
-    let pure: Unitless = mixed.to();
-    println!("  → as dimensionless = {}", pure.value());
-    assert!((pure.value() - 2.0).abs() < 1e-12);
+    // Convert km to meters, then divide same-unit to get the raw scalar:
+    let km_as_m: Meter = km.to();
+    let pure: f64 = km_as_m / m;
+    println!("  → as dimensionless = {}", pure);
+    assert!((pure - 2.0).abs() < 1e-12);
 
     println!("\nAll dimensional arithmetic checks passed!");
 }

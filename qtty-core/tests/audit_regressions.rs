@@ -184,3 +184,75 @@ mod lossy_conversion {
         assert_eq!(result.unwrap().value(), 0);
     }
 }
+
+// ═════════════════════════════════════════════════════════════════════════════
+// QTTY-004: __impl_cross_ops_one_to_many! large-magnitude overflow
+//
+// LightYear (ratio ≈ 9.461e15 m) and Yottameter (ratio = 1e24 m) go through
+// the `_between!` helper, which previously canonicalized by multiplying both
+// values by their absolute ratios, overflowing to ±inf for large magnitudes
+// and producing spurious equality.  The fix scales only the smaller-ratio side
+// by a factor ≤ 1, matching the safe `impl_unit_cross_unit_ops!` path.
+// ═════════════════════════════════════════════════════════════════════════════
+
+#[cfg(all(feature = "astro", feature = "cross-unit-ops"))]
+mod cross_unit_one_to_many_overflow {
+    use core::cmp::Ordering;
+    use qtty_core::length::{LightYear, Yottameter};
+    use qtty_core::Quantity;
+
+    /// Two physically distinct large-magnitude quantities must not compare equal.
+    ///
+    /// Old code: `1e300 * RATIO_LY → inf`, `2e300 * RATIO_YM → inf`, `inf == inf → true`.
+    /// Fixed:    smaller-ratio side scaled by ratio ≤ 1, no overflow.
+    #[test]
+    fn large_magnitude_distinct_values_are_not_equal() {
+        let ly = Quantity::<LightYear>::new(1e300);
+        let ym = Quantity::<Yottameter>::new(2e300);
+        assert_ne!(ly, ym, "1e300 ly must not equal 2e300 Ym");
+        assert_ne!(ym, ly, "2e300 Ym must not equal 1e300 ly (symmetry)");
+    }
+
+    /// The spurious-equality fix must also hold for `partial_cmp`.
+    #[test]
+    fn large_magnitude_partial_cmp_not_equal() {
+        let ly = Quantity::<LightYear>::new(1e300);
+        let ym = Quantity::<Yottameter>::new(2e300);
+        // LightYear has a much smaller ratio than Yottameter, so 1e300 ly < 2e300 Ym
+        assert_eq!(
+            ly.partial_cmp(&ym),
+            Some(Ordering::Less),
+            "1e300 ly < 2e300 Ym"
+        );
+        assert_eq!(
+            ym.partial_cmp(&ly),
+            Some(Ordering::Greater),
+            "2e300 Ym > 1e300 ly"
+        );
+    }
+
+    /// A correctly converted value must still compare equal.
+    #[test]
+    fn converted_value_is_equal() {
+        let ly = Quantity::<LightYear>::new(1.0);
+        let ym: Quantity<Yottameter> = ly.to();
+        assert_eq!(ly, ym, "1 ly must equal its Yottameter equivalent");
+        assert_eq!(ym, ly, "symmetry: Ym equivalent == original ly");
+    }
+
+    /// Ordering is consistent: `cmp(a, b)` reverses `cmp(b, a)`.
+    #[test]
+    fn partial_cmp_consistency() {
+        let ly = Quantity::<LightYear>::new(1.0);
+        let ym: Quantity<Yottameter> = ly.to();
+        let fwd = ly.partial_cmp(&ym);
+        let rev = ym.partial_cmp(&ly);
+        match (fwd, rev) {
+            (Some(Ordering::Less), Some(Ordering::Greater))
+            | (Some(Ordering::Greater), Some(Ordering::Less))
+            | (Some(Ordering::Equal), Some(Ordering::Equal)) => {}
+            (None, None) => {}
+            other => panic!("partial_cmp inconsistent: {other:?}"),
+        }
+    }
+}

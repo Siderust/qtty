@@ -35,3 +35,56 @@ fn downstream_custom_unit_multiplies_with_builtins() {
     let product: Quantity<qtty::Prod<Smoot, qtty::unit::Meter>> = smoots * meters;
     assert!((product.value() - 6.0).abs() < 1e-12);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Regression: __impl_cross_ops_one_to_many! large-magnitude overflow
+//
+// impl_unit_cross_unit_ops_between! cannot be invoked from an integration-test
+// crate (orphan rule E0117 — Quantity<Smoot> has a foreign outer type
+// constructor).  The equivalent built-in path (astro units that go through the
+// same helper) is covered by `qtty-core/tests/audit_regressions.rs` under the
+// `cross_unit_one_to_many_overflow` module.  The facade-level surface for those
+// same impls is exercised below via the qtty re-exported astro types.
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[cfg(all(feature = "astro", feature = "cross-unit-ops"))]
+mod cross_unit_one_to_many_overflow_via_facade {
+    use core::cmp::Ordering;
+    use qtty::unit::{LightYear, Yottameter};
+    use qtty::Quantity;
+
+    /// Distinct large-magnitude astro/SI quantities must not compare equal
+    /// through the qtty facade (re-exports the fixed __impl_cross_ops_one_to_many!).
+    #[test]
+    fn large_magnitude_distinct_values_are_not_equal() {
+        let ly = Quantity::<LightYear>::new(1e300);
+        let ym = Quantity::<Yottameter>::new(2e300);
+        assert_ne!(ly, ym, "1e300 ly must not equal 2e300 Ym");
+        assert_ne!(ym, ly, "symmetry");
+    }
+
+    /// A correctly converted value must still compare equal.
+    #[test]
+    fn converted_value_is_equal() {
+        let ly = Quantity::<LightYear>::new(1.0);
+        let ym: Quantity<Yottameter> = ly.to();
+        assert_eq!(ly, ym, "1 ly must equal its Ym equivalent");
+        assert_eq!(ym, ly, "symmetry");
+    }
+
+    /// Ordering is consistent across the facade.
+    #[test]
+    fn partial_cmp_consistency() {
+        let ly = Quantity::<LightYear>::new(1.0);
+        let ym: Quantity<Yottameter> = ly.to();
+        let fwd = ly.partial_cmp(&ym);
+        let rev = ym.partial_cmp(&ly);
+        match (fwd, rev) {
+            (Some(Ordering::Less), Some(Ordering::Greater))
+            | (Some(Ordering::Greater), Some(Ordering::Less))
+            | (Some(Ordering::Equal), Some(Ordering::Equal)) => {}
+            (None, None) => {}
+            other => panic!("partial_cmp inconsistent: {other:?}"),
+        }
+    }
+}

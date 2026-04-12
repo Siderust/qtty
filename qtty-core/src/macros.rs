@@ -224,6 +224,10 @@ macro_rules! __impl_from_each_extra_to_bases {
 
 /// Helper: generate cross-unit `PartialEq` + `PartialOrd` between one extra
 /// unit and every base unit.
+///
+/// Uses the same smaller-ratio algorithm as [`impl_unit_cross_unit_ops!`] to
+/// avoid multiplying large values by absolute ratios that can overflow to `±inf`,
+/// which would collapse distinct quantities into spurious equality.
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __impl_cross_ops_one_to_many {
@@ -232,36 +236,54 @@ macro_rules! __impl_cross_ops_one_to_many {
             impl<S: $crate::scalar::Real> PartialEq<$crate::Quantity<$base, S>> for $crate::Quantity<$one, S> {
                 #[inline]
                 fn eq(&self, other: &$crate::Quantity<$base, S>) -> bool {
-                    let lhs = self.value() * S::from_f64(<$one as $crate::Unit>::RATIO);
-                    let rhs = other.value() * S::from_f64(<$base as $crate::Unit>::RATIO);
-                    lhs == rhs
+                    const R_ONE:  f64 = <$one  as $crate::Unit>::RATIO;
+                    const R_BASE: f64 = <$base as $crate::Unit>::RATIO;
+                    if R_ONE >= R_BASE {
+                        // one is the larger unit; scale *base* value by ratio ≤ 1
+                        self.value() == other.value() * S::from_f64(R_BASE / R_ONE)
+                    } else {
+                        // base is the larger unit; scale *one* value by ratio ≤ 1
+                        self.value() * S::from_f64(R_ONE / R_BASE) == other.value()
+                    }
                 }
             }
 
             impl<S: $crate::scalar::Real> PartialEq<$crate::Quantity<$one, S>> for $crate::Quantity<$base, S> {
                 #[inline]
                 fn eq(&self, other: &$crate::Quantity<$one, S>) -> bool {
-                    let lhs = self.value() * S::from_f64(<$base as $crate::Unit>::RATIO);
-                    let rhs = other.value() * S::from_f64(<$one as $crate::Unit>::RATIO);
-                    lhs == rhs
+                    const R_ONE:  f64 = <$one  as $crate::Unit>::RATIO;
+                    const R_BASE: f64 = <$base as $crate::Unit>::RATIO;
+                    if R_BASE >= R_ONE {
+                        self.value() == other.value() * S::from_f64(R_ONE / R_BASE)
+                    } else {
+                        self.value() * S::from_f64(R_BASE / R_ONE) == other.value()
+                    }
                 }
             }
 
             impl<S: $crate::scalar::Real> PartialOrd<$crate::Quantity<$base, S>> for $crate::Quantity<$one, S> {
                 #[inline]
                 fn partial_cmp(&self, other: &$crate::Quantity<$base, S>) -> Option<core::cmp::Ordering> {
-                    let lhs = self.value() * S::from_f64(<$one as $crate::Unit>::RATIO);
-                    let rhs = other.value() * S::from_f64(<$base as $crate::Unit>::RATIO);
-                    lhs.partial_cmp(&rhs)
+                    const R_ONE:  f64 = <$one  as $crate::Unit>::RATIO;
+                    const R_BASE: f64 = <$base as $crate::Unit>::RATIO;
+                    if R_ONE >= R_BASE {
+                        self.value().partial_cmp(&(other.value() * S::from_f64(R_BASE / R_ONE)))
+                    } else {
+                        (self.value() * S::from_f64(R_ONE / R_BASE)).partial_cmp(&other.value())
+                    }
                 }
             }
 
             impl<S: $crate::scalar::Real> PartialOrd<$crate::Quantity<$one, S>> for $crate::Quantity<$base, S> {
                 #[inline]
                 fn partial_cmp(&self, other: &$crate::Quantity<$one, S>) -> Option<core::cmp::Ordering> {
-                    let lhs = self.value() * S::from_f64(<$base as $crate::Unit>::RATIO);
-                    let rhs = other.value() * S::from_f64(<$one as $crate::Unit>::RATIO);
-                    lhs.partial_cmp(&rhs)
+                    const R_ONE:  f64 = <$one  as $crate::Unit>::RATIO;
+                    const R_BASE: f64 = <$base as $crate::Unit>::RATIO;
+                    if R_BASE >= R_ONE {
+                        self.value().partial_cmp(&(other.value() * S::from_f64(R_ONE / R_BASE)))
+                    } else {
+                        (self.value() * S::from_f64(R_BASE / R_ONE)).partial_cmp(&other.value())
+                    }
                 }
             }
         )+
