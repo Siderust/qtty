@@ -283,7 +283,7 @@ pub const MRAD: Milliradians = Milliradians::new(1.0);
 
 /// Turn (full revolution; `360` degrees).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "turn", dimension = Angular, ratio = 360.0)]
+#[unit(symbol = "tr", dimension = Angular, ratio = 360.0)]
 pub struct Turn;
 /// Convenience alias for a turn quantity.
 pub type Turns = Quantity<Turn>;
@@ -320,16 +320,31 @@ impl Degrees {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// From conversions: default units
-// ─────────────────────────────────────────────────────────────────────────────
-crate::impl_unit_from_conversions!(Degree, Radian, Milliradian, Turn);
+/// Canonical list of always-available (base) angular units.
+///
+/// Exported (`#[doc(hidden)]`) for use in `qtty`'s scalar alias generation and
+/// compile-time consistency checks.  Feature-gated units (astro, navigation)
+/// are in their sub-modules and registered via `register_builtin_units_extend!`.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! angular_units {
+    ($cb:path) => {
+        $cb!(Degree, Radian, Milliradian, Turn);
+    };
+}
+
+// Generate bidirectional From impls between base angular units.
+angular_units!(crate::impl_unit_from_conversions);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cross-unit ops: default units
 // ─────────────────────────────────────────────────────────────────────────────
 #[cfg(feature = "cross-unit-ops")]
-crate::impl_unit_cross_unit_ops!(Degree, Radian, Milliradian, Turn);
+angular_units!(crate::impl_unit_cross_unit_ops);
+
+// Compile-time check: every base angular unit is registered as BuiltinUnit.
+#[cfg(test)]
+angular_units!(crate::assert_units_are_builtin);
 
 #[cfg(all(test, feature = "std"))]
 mod tests {

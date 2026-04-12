@@ -103,24 +103,35 @@ si_watt!(Exawatt, "EW", 1e18, EW, Exawatts, EW_1);
 si_watt!(Zettawatt, "ZW", 1e21, ZW, Zettawatts, ZW_1);
 si_watt!(Yottawatt, "YW", 1e24, YW, Yottawatts, YW_1);
 
-// ─────────────────────────────────────────────────────────────────────────────
-// From conversions: default (metric) units
-// ─────────────────────────────────────────────────────────────────────────────
-crate::impl_unit_from_conversions!(
-    Watt, Yoctowatt, Zeptowatt, Attowatt, Femtowatt, Picowatt, Nanowatt, Microwatt, Milliwatt,
-    Deciwatt, Decawatt, Hectowatt, Kilowatt, Megawatt, Gigawatt, Terawatt, Petawatt, Exawatt,
-    Zettawatt, Yottawatt
-);
+/// Canonical list of always-available (metric SI) power units.
+///
+/// Exported (`#[doc(hidden)]`) for use in `qtty`\'s scalar alias generation and
+/// compile-time consistency checks.  Feature-gated units (astro, customary,
+/// fundamental-physics) are in their sub-modules.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! power_units {
+    ($cb:path) => {
+        $cb!(
+            Watt, Yoctowatt, Zeptowatt, Attowatt, Femtowatt, Picowatt, Nanowatt, Microwatt,
+            Milliwatt, Deciwatt, Decawatt, Hectowatt, Kilowatt, Megawatt, Gigawatt, Terawatt,
+            Petawatt, Exawatt, Zettawatt, Yottawatt
+        );
+    };
+}
+
+// Generate bidirectional From impls between base metric SI power units.
+power_units!(crate::impl_unit_from_conversions);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cross-unit ops: default (metric) units
 // ─────────────────────────────────────────────────────────────────────────────
 #[cfg(feature = "cross-unit-ops")]
-crate::impl_unit_cross_unit_ops!(
-    Watt, Yoctowatt, Zeptowatt, Attowatt, Femtowatt, Picowatt, Nanowatt, Microwatt, Milliwatt,
-    Deciwatt, Decawatt, Hectowatt, Kilowatt, Megawatt, Gigawatt, Terawatt, Petawatt, Exawatt,
-    Zettawatt, Yottawatt
-);
+power_units!(crate::impl_unit_cross_unit_ops);
+
+// Compile-time check: every base power unit is registered as BuiltinUnit.
+#[cfg(test)]
+power_units!(crate::assert_units_are_builtin);
 
 #[cfg(all(test, feature = "std"))]
 mod tests {

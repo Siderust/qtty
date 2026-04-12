@@ -29,3 +29,14 @@ crate::impl_unit_cross_unit_ops_between!(
     Petawatt, Exawatt, Zettawatt, Yottawatt;
     SolarLuminosity
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+#[macro_export]
+#[doc(hidden)]
+macro_rules! power_astro_units {
+    ($cb:path) => {
+        $cb!(SolarLuminosity,);
+    };
+}

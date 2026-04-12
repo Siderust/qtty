@@ -305,21 +305,35 @@ pub const YM: Yottameters = Yottameters::new(1.0);
 // ─────────────────────────────────────────────────────────────────────────────
 // From conversions: default (metric) units
 // ─────────────────────────────────────────────────────────────────────────────
-crate::impl_unit_from_conversions!(
-    Meter, Decimeter, Centimeter, Millimeter, Micrometer, Nanometer, Picometer, Femtometer,
-    Attometer, Zeptometer, Yoctometer, Decameter, Hectometer, Kilometer, Megameter, Gigameter,
-    Terameter, Petameter, Exameter, Zettameter, Yottameter
-);
+/// Canonical list of always-available (metric SI) length units.
+///
+/// Exported (`#[doc(hidden)]`) for use in `qtty`'s scalar alias generation and
+/// compile-time consistency checks.  Feature-gated units (astro, navigation,
+/// customary, fundamental-physics) are in their sub-modules.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! length_units {
+    ($cb:path) => {
+        $cb!(
+            Meter, Decimeter, Centimeter, Millimeter, Micrometer, Nanometer, Picometer, Femtometer,
+            Attometer, Zeptometer, Yoctometer, Decameter, Hectometer, Kilometer, Megameter,
+            Gigameter, Terameter, Petameter, Exameter, Zettameter, Yottameter
+        );
+    };
+}
+
+// Generate bidirectional From impls between base metric SI length units.
+length_units!(crate::impl_unit_from_conversions);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cross-unit ops: default (metric) units
 // ─────────────────────────────────────────────────────────────────────────────
 #[cfg(feature = "cross-unit-ops")]
-crate::impl_unit_cross_unit_ops!(
-    Meter, Decimeter, Centimeter, Millimeter, Micrometer, Nanometer, Picometer, Femtometer,
-    Attometer, Zeptometer, Yoctometer, Decameter, Hectometer, Kilometer, Megameter, Gigameter,
-    Terameter, Petameter, Exameter, Zettameter, Yottameter
-);
+length_units!(crate::impl_unit_cross_unit_ops);
+
+// Compile-time check: every base length unit is registered as BuiltinUnit.
+#[cfg(test)]
+length_units!(crate::assert_units_are_builtin);
 
 #[cfg(all(test, feature = "std"))]
 mod tests {

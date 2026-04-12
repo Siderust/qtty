@@ -23,3 +23,14 @@ pub struct JulianCentury;
 pub type JulianCenturies = Quantity<JulianCentury>;
 /// A constant representing one Julian century.
 pub const JULIAN_CENTURY: JulianCenturies = JulianCenturies::new(1.0);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+#[macro_export]
+#[doc(hidden)]
+macro_rules! time_julian_time_units {
+    ($cb:path) => {
+        $cb!(JulianYear, JulianCentury,);
+    };
+}

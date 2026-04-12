@@ -282,7 +282,7 @@ pub const DECADE: Decades = Decades::new(1.0);
 
 /// Century (`100` mean tropical years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "cent", dimension = Time, ratio = 100.0 * 365.242_5 * SECONDS_PER_DAY)]
+#[unit(symbol = "c", dimension = Time, ratio = 100.0 * 365.242_5 * SECONDS_PER_DAY)]
 pub struct Century;
 /// A quantity measured in centuries.
 pub type Centuries = Quantity<Century>;
@@ -297,6 +297,55 @@ pub struct Millennium;
 pub type Millennia = Quantity<Millennium>;
 /// A constant representing one millennium.
 pub const MILLENNIUM: Millennia = Millennia::new(1.0);
+
+/// Canonical list of always-available (SI + calendar) time units.
+///
+/// Exported (`#[doc(hidden)]`) for use in `qtty`'s scalar alias generation and
+/// compile-time consistency checks.  Feature-gated units (julian-time, astro)
+/// are in their sub-modules.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! time_units {
+    ($cb:path) => {
+        $cb!(
+            Attosecond,
+            Femtosecond,
+            Picosecond,
+            Nanosecond,
+            Microsecond,
+            Millisecond,
+            Centisecond,
+            Decisecond,
+            Second,
+            Decasecond,
+            Hectosecond,
+            Kilosecond,
+            Megasecond,
+            Gigasecond,
+            Terasecond,
+            Minute,
+            Hour,
+            Day,
+            Week,
+            Fortnight,
+            Year,
+            Decade,
+            Century,
+            Millennium
+        );
+    };
+}
+
+// Generate bidirectional From impls between base SI + calendar time units.
+time_units!(crate::impl_unit_from_conversions);
+
+// Optional cross-unit operator support.
+#[cfg(feature = "cross-unit-ops")]
+time_units!(crate::impl_unit_cross_unit_ops);
+
+// Compile-time check: every base time unit is registered as BuiltinUnit.
+#[cfg(test)]
+time_units!(crate::assert_units_are_builtin);
 
 #[cfg(all(test, feature = "std"))]
 mod tests {
@@ -378,7 +427,7 @@ mod tests {
     fn tropical_year_to_days() {
         let y = Years::new(1.0);
         let day = y.to::<Day>();
-        assert_abs_diff_eq!(day.value(), 365.2425, epsilon = 1e-9);
+        assert_abs_diff_eq!(day.value(), 365.242_5, epsilon = 1e-9);
     }
 
     #[test]
@@ -606,8 +655,8 @@ mod tests {
     fn synodic_month_to_days() {
         let q = SynodicMonths::new(1.0);
         let d = q.to::<Day>();
-        // 1 synodic month ≈ 29.530588 d
-        assert_abs_diff_eq!(d.value(), 29.530_588, epsilon = 1e-6);
+        // 1 synodic month ≈ 29.530590 d
+        assert_abs_diff_eq!(d.value(), 29.530_590, epsilon = 1e-6);
     }
 
     #[cfg(feature = "astro")]

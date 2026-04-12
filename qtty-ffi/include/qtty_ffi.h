@@ -995,11 +995,11 @@ const char *qtty_unit_name(uint32_t unit);
 
  # Returns
 
- * Non-negative: number of bytes written, **excluding** the NUL terminator.
+ * `QTTY_OK` on success (the buffer is filled with a NUL-terminated string).
  * `QTTY_ERR_NULL_OUT`        if `buf` is null.
  * `QTTY_ERR_UNKNOWN_UNIT`    if `qty.unit` is not a recognized unit ID.
- * `QTTY_ERR_BUFFER_TOO_SMALL` if `buf_len` is too small; the formatted string
-   (including the NUL terminator) requires `-return_value` bytes.
+ * `QTTY_ERR_BUFFER_TOO_SMALL` if `buf_len` is zero or too small for the
+   formatted string (including the NUL terminator).
 
  # Safety
 

@@ -19,9 +19,9 @@ pub const SIDEREAL_DAY: SiderealDays = SiderealDays::new(1.0);
 
 /// Mean synodic month (lunar phase cycle), expressed in seconds.
 ///
-/// Convention used: `1 synodic month ≈ 29.530588 d`.
+/// Convention used: `1 synodic month ≈ 29.530590 d`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "synmo", dimension = Time, ratio = 29.530_588 * SECONDS_PER_DAY)]
+#[unit(symbol = "synmo", dimension = Time, ratio = 29.530_590 * SECONDS_PER_DAY)]
 pub struct SynodicMonth;
 /// A quantity measured in synodic months.
 pub type SynodicMonths = Quantity<SynodicMonth>;
@@ -38,3 +38,14 @@ pub struct SiderealYear;
 pub type SiderealYears = Quantity<SiderealYear>;
 /// A constant representing one sidereal year.
 pub const SIDEREAL_YEAR: SiderealYears = SiderealYears::new(1.0);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+#[macro_export]
+#[doc(hidden)]
+macro_rules! time_astro_units {
+    ($cb:path) => {
+        $cb!(SiderealDay, SynodicMonth, SiderealYear,);
+    };
+}
