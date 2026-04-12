@@ -262,6 +262,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn symbols_are_correct() {
         // Prod-based aliases inherit the Prod Display ("m·m");
         // SYMBOL is empty but Display writes component symbols.

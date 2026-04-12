@@ -351,9 +351,15 @@ impl<U: Unit, S: Real> Quantity<U, S> {
     /// ```
     #[inline]
     pub fn eq_unit<V: Unit<Dim = U::Dim>>(self, other: &Quantity<V, S>) -> bool {
-        let lhs = self.0 * S::from_f64(U::RATIO);
-        let rhs = other.value() * S::from_f64(V::RATIO);
-        lhs == rhs
+        // Always multiply the value in the smaller-RATIO unit by the ratio
+        // (smaller/larger) ≤ 1, preventing overflow for near-MAX values while
+        // keeping both `a.eq_unit(&b)` and `b.eq_unit(&a)` numerically
+        // identical (preserving symmetry).
+        if U::RATIO >= V::RATIO {
+            self.0 == other.value() * S::from_f64(V::RATIO / U::RATIO)
+        } else {
+            self.0 * S::from_f64(U::RATIO / V::RATIO) == other.value()
+        }
     }
 
     /// Compares with a quantity of a different unit in the same dimension.
@@ -373,9 +379,12 @@ impl<U: Unit, S: Real> Quantity<U, S> {
     /// ```
     #[inline]
     pub fn cmp_unit<V: Unit<Dim = U::Dim>>(self, other: &Quantity<V, S>) -> Option<Ordering> {
-        let lhs = self.0 * S::from_f64(U::RATIO);
-        let rhs = other.value() * S::from_f64(V::RATIO);
-        lhs.partial_cmp(&rhs)
+        if U::RATIO >= V::RATIO {
+            self.0
+                .partial_cmp(&(other.value() * S::from_f64(V::RATIO / U::RATIO)))
+        } else {
+            (self.0 * S::from_f64(U::RATIO / V::RATIO)).partial_cmp(&other.value())
+        }
     }
 }
 

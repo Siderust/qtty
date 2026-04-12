@@ -134,6 +134,26 @@ crate::__impl_cross_ops_each_extra_to_bases!(
 #[cfg(test)]
 force_units!(crate::assert_units_are_builtin);
 
+/// Canonical list of `fundamental-physics`-gated force units (CGS dyne).
+#[cfg(feature = "fundamental-physics")]
+#[macro_export]
+#[doc(hidden)]
+macro_rules! force_fundamental_physics_units {
+    ($cb:path) => {
+        $cb!(Dyne);
+    };
+}
+
+/// Canonical list of `customary`-gated force units (pound-force).
+#[cfg(feature = "customary")]
+#[macro_export]
+#[doc(hidden)]
+macro_rules! force_customary_units {
+    ($cb:path) => {
+        $cb!(PoundForce);
+    };
+}
+
 #[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;

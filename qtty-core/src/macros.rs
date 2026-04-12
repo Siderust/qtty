@@ -49,15 +49,25 @@ macro_rules! impl_unit_cross_unit_ops {
         $(
             // Cross-unit PartialEq: first == rest
             //
-            // Both operands are converted to the reference (SI) unit by
-            // multiplying their raw value by their RATIO.  This makes the
-            // comparison symmetric: `a == b` iff `b == a`.
+            // To avoid multiplying near-MAX values by large absolute ratios
+            // (which overflows to ±inf, collapsing distinct quantities to
+            // inf == inf → true), we always multiply the value in the
+            // *smaller*-RATIO unit by (smaller_ratio / larger_ratio) ≤ 1.
+            //
+            // Both `first == rest` and `rest == first` therefore reduce to the
+            // same floating-point expression, preserving IEEE 754 symmetry.
             impl<S: $crate::scalar::Real> PartialEq<$crate::Quantity<$rest, S>> for $crate::Quantity<$first, S> {
                 #[inline]
                 fn eq(&self, other: &$crate::Quantity<$rest, S>) -> bool {
-                    let lhs = self.value() * S::from_f64(<$first as $crate::Unit>::RATIO);
-                    let rhs = other.value() * S::from_f64(<$rest as $crate::Unit>::RATIO);
-                    lhs == rhs
+                    const R_FIRST: f64 = <$first as $crate::Unit>::RATIO;
+                    const R_REST:  f64 = <$rest  as $crate::Unit>::RATIO;
+                    if R_FIRST >= R_REST {
+                        // first is the larger unit; multiply *rest* val by ratio ≤ 1
+                        self.value() == other.value() * S::from_f64(R_REST / R_FIRST)
+                    } else {
+                        // rest is the larger unit; multiply *first* val by ratio ≤ 1
+                        self.value() * S::from_f64(R_FIRST / R_REST) == other.value()
+                    }
                 }
             }
 
@@ -65,9 +75,13 @@ macro_rules! impl_unit_cross_unit_ops {
             impl<S: $crate::scalar::Real> PartialEq<$crate::Quantity<$first, S>> for $crate::Quantity<$rest, S> {
                 #[inline]
                 fn eq(&self, other: &$crate::Quantity<$first, S>) -> bool {
-                    let lhs = self.value() * S::from_f64(<$rest as $crate::Unit>::RATIO);
-                    let rhs = other.value() * S::from_f64(<$first as $crate::Unit>::RATIO);
-                    lhs == rhs
+                    const R_FIRST: f64 = <$first as $crate::Unit>::RATIO;
+                    const R_REST:  f64 = <$rest  as $crate::Unit>::RATIO;
+                    if R_REST >= R_FIRST {
+                        self.value() == other.value() * S::from_f64(R_FIRST / R_REST)
+                    } else {
+                        self.value() * S::from_f64(R_REST / R_FIRST) == other.value()
+                    }
                 }
             }
 
@@ -75,9 +89,13 @@ macro_rules! impl_unit_cross_unit_ops {
             impl<S: $crate::scalar::Real> PartialOrd<$crate::Quantity<$rest, S>> for $crate::Quantity<$first, S> {
                 #[inline]
                 fn partial_cmp(&self, other: &$crate::Quantity<$rest, S>) -> Option<core::cmp::Ordering> {
-                    let lhs = self.value() * S::from_f64(<$first as $crate::Unit>::RATIO);
-                    let rhs = other.value() * S::from_f64(<$rest as $crate::Unit>::RATIO);
-                    lhs.partial_cmp(&rhs)
+                    const R_FIRST: f64 = <$first as $crate::Unit>::RATIO;
+                    const R_REST:  f64 = <$rest  as $crate::Unit>::RATIO;
+                    if R_FIRST >= R_REST {
+                        self.value().partial_cmp(&(other.value() * S::from_f64(R_REST / R_FIRST)))
+                    } else {
+                        (self.value() * S::from_f64(R_FIRST / R_REST)).partial_cmp(&other.value())
+                    }
                 }
             }
 
@@ -85,9 +103,13 @@ macro_rules! impl_unit_cross_unit_ops {
             impl<S: $crate::scalar::Real> PartialOrd<$crate::Quantity<$first, S>> for $crate::Quantity<$rest, S> {
                 #[inline]
                 fn partial_cmp(&self, other: &$crate::Quantity<$first, S>) -> Option<core::cmp::Ordering> {
-                    let lhs = self.value() * S::from_f64(<$rest as $crate::Unit>::RATIO);
-                    let rhs = other.value() * S::from_f64(<$first as $crate::Unit>::RATIO);
-                    lhs.partial_cmp(&rhs)
+                    const R_FIRST: f64 = <$first as $crate::Unit>::RATIO;
+                    const R_REST:  f64 = <$rest  as $crate::Unit>::RATIO;
+                    if R_REST >= R_FIRST {
+                        self.value().partial_cmp(&(other.value() * S::from_f64(R_FIRST / R_REST)))
+                    } else {
+                        (self.value() * S::from_f64(R_REST / R_FIRST)).partial_cmp(&other.value())
+                    }
                 }
             }
         )+
