@@ -586,7 +586,7 @@ fn test_quantity_format_zero_buf_len_returns_err() {
     let qty = QttyQuantity::new(1.0, UnitId::Meter);
     let mut buf = [0i8; 64];
     let status = unsafe { qtty_quantity_format(qty, -1, 0, buf.as_mut_ptr(), 0) };
-    assert_eq!(status, QttyStatus::NullOut);
+    assert_eq!(status, QttyStatus::BufferTooSmall);
 }
 
 #[test]

@@ -29,3 +29,14 @@ crate::impl_unit_cross_unit_ops_between!(
     Teragram, Petagram, Exagram, Zettagram, Yottagram, Tonne;
     SolarMass
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+#[macro_export]
+#[doc(hidden)]
+macro_rules! mass_astro_units {
+    ($cb:path) => {
+        $cb!(SolarMass,);
+    };
+}

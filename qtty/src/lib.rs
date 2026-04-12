@@ -135,11 +135,11 @@
 extern crate alloc;
 
 pub use qtty_core::{
-    Acceleration, AmountOfSubstance, Angular, AngularRateDim, Area, Current, Dimension,
-    Dimensionless, Energy, Exact, Force, IntegerScalar, Length, LuminousIntensity, Mass, Per,
-    Power, Prod, Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16, QuantityI32,
-    QuantityI64, QuantityI8, Real, Scalar, Temperature, Time, Transcendental, Unit, UnitDiv,
-    UnitMul, VelocityDim, Volume,
+    Acceleration, AmountOfSubstance, Angular, AngularRate, Area, Current, Dimension, Dimensionless,
+    Energy, Exact, Force, IntegerScalar, Length, LuminousIntensity, Mass, Per, Power, Prod,
+    Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16, QuantityI32, QuantityI64,
+    QuantityI8, Real, Scalar, Temperature, Time, Transcendental, Unit, UnitDiv, UnitMul, Velocity,
+    Volume,
 };
 
 #[doc(hidden)]
@@ -161,11 +161,78 @@ pub use qtty_core::serde_scalar;
 pub use qtty_derive::Unit;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Internal macro for scalar-specific modules
+// Internal macros for inventory-driven generation
 // ─────────────────────────────────────────────────────────────────────────────
 
-#[macro_use]
-mod scalar_aliases;
+/// Invoke a callback macro with every qtty-core dimension inventory.
+///
+/// The callback is invoked once per dimension (8 total). This is usable for
+/// additive generation (aliases, assertions) where the callback doesn't need
+/// to know which dimension/module the units come from.
+macro_rules! invoke_all_inventories {
+    ($cb:path) => {
+        qtty_core::angular_units!($cb);
+        qtty_core::length_units!($cb);
+        qtty_core::time_units!($cb);
+        qtty_core::mass_units!($cb);
+        qtty_core::power_units!($cb);
+        qtty_core::area_units!($cb);
+        qtty_core::volume_units!($cb);
+        qtty_core::acceleration_units!($cb);
+        qtty_core::force_units!($cb);
+        qtty_core::energy_units!($cb);
+    };
+}
+
+/// Invoke a callback macro with feature-gated qtty-core dimension inventories.
+///
+/// This keeps the crate-root quantity aliases aligned with the unit markers
+/// re-exported from [`crate::unit`] whenever optional unit families are enabled.
+macro_rules! invoke_optional_inventories {
+    ($cb:path) => {
+        #[cfg(feature = "astro")]
+        qtty_core::angular_astro_units!($cb);
+        #[cfg(feature = "astro")]
+        qtty_core::length_astro_units!($cb);
+        #[cfg(feature = "astro")]
+        qtty_core::length_nominal_units!($cb);
+        #[cfg(feature = "astro")]
+        qtty_core::mass_astro_units!($cb);
+        #[cfg(feature = "astro")]
+        qtty_core::power_astro_units!($cb);
+        #[cfg(feature = "astro")]
+        qtty_core::time_astro_units!($cb);
+
+        #[cfg(feature = "navigation")]
+        qtty_core::angular_navigation_units!($cb);
+        #[cfg(feature = "navigation")]
+        qtty_core::length_navigation_units!($cb);
+
+        #[cfg(feature = "land-area")]
+        qtty_core::area_land_area_units!($cb);
+
+        #[cfg(feature = "customary")]
+        qtty_core::area_customary_units!($cb);
+        #[cfg(feature = "customary")]
+        qtty_core::length_customary_units!($cb);
+        #[cfg(feature = "customary")]
+        qtty_core::mass_customary_units!($cb);
+        #[cfg(feature = "customary")]
+        qtty_core::power_customary_units!($cb);
+        #[cfg(feature = "customary")]
+        qtty_core::volume_customary_units!($cb);
+
+        #[cfg(feature = "fundamental-physics")]
+        qtty_core::length_fundamental_physics_units!($cb);
+        #[cfg(feature = "fundamental-physics")]
+        qtty_core::mass_fundamental_physics_units!($cb);
+        #[cfg(feature = "fundamental-physics")]
+        qtty_core::power_fundamental_physics_units!($cb);
+
+        #[cfg(feature = "julian-time")]
+        qtty_core::time_julian_time_units!($cb);
+    };
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Scalar-specific modules
@@ -183,8 +250,11 @@ pub mod i8;
 // Dimension modules (re-exported from qtty-core)
 // ─────────────────────────────────────────────────────────────────────────────
 
+pub use qtty_core::units::acceleration;
 pub use qtty_core::units::angular;
 pub use qtty_core::units::area;
+pub use qtty_core::units::energy;
+pub use qtty_core::units::force;
 pub use qtty_core::units::length;
 pub use qtty_core::units::mass;
 pub use qtty_core::units::power;
@@ -269,6 +339,26 @@ pub mod unit {
     #[cfg(feature = "customary")]
     pub use qtty_core::units::power::{HorsepowerElectric, HorsepowerMetric};
 
+    pub use qtty_core::units::acceleration::{
+        AccelerationUnit, MeterPerSecondSquared, StandardGravity,
+    };
+
+    #[cfg(feature = "fundamental-physics")]
+    pub use qtty_core::units::force::Dyne;
+    #[cfg(feature = "customary")]
+    pub use qtty_core::units::force::PoundForce;
+    pub use qtty_core::units::force::{
+        ForceUnit, Giganewton, Kilonewton, Meganewton, Micronewton, Millinewton, Newton,
+    };
+
+    #[cfg(feature = "customary")]
+    pub use qtty_core::units::energy::{Calorie, Kilocalorie};
+    #[cfg(feature = "fundamental-physics")]
+    pub use qtty_core::units::energy::{Electronvolt, Erg, Kiloelectronvolt, Megaelectronvolt};
+    pub use qtty_core::units::energy::{
+        EnergyUnit, Gigajoule, Joule, Kilojoule, Megajoule, Microjoule, Millijoule, Terajoule,
+    };
+
     pub use qtty_core::units::time::{
         Attosecond, Centisecond, Century, Day, Decade, Decasecond, Decisecond, Femtosecond,
         Fortnight, Gigasecond, Hectosecond, Hour, Kilosecond, Megasecond, Microsecond, Millennium,
@@ -297,11 +387,25 @@ pub mod frequency {
     pub use qtty_core::units::frequency::{AngularRate, AngularRateUnit};
 }
 
+/// Acceleration quantities represented as `Length / Time²`.
+pub mod accel {
+    pub use qtty_core::units::acceleration::{Accel, AccelerationUnit};
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Convenience quantity aliases (default f64 scalar)
 // ─────────────────────────────────────────────────────────────────────────────
 
-scalar_aliases::define_scalar_aliases!(f64);
+macro_rules! _root_alias {
+    ($($unit:ident),+ $(,)?) => {
+        $(
+            #[doc = concat!(stringify!($unit), ".")]
+            pub type $unit<S = f64> = Quantity<unit::$unit, S>;
+        )+
+    };
+}
+invoke_all_inventories!(_root_alias);
+invoke_optional_inventories!(_root_alias);
 
 /// Dimensionless quantity alias.
 pub type Unitless<S = f64> = Quantity<unit::Unitless, S>;
@@ -312,8 +416,7 @@ pub use qtty_core::units::length::{AU, LY};
 pub use qtty_core::units::length::{KM, M};
 pub use qtty_core::units::time::{DAY, SEC};
 
-pub use frequency::AngularRate;
-pub use velocity::Velocity;
+pub use accel::Accel;
 
 #[doc(hidden)]
 pub mod __private {

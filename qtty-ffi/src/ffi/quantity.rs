@@ -14,8 +14,12 @@ fn map_convert_error(err: QttyStatus) -> QttyStatus {
     }
 }
 
+/// Maximum precision to prevent adversarial OOM from absurd values.
+const MAX_PRECISION: i32 = 100;
+
 fn format_quantity(qty: QttyQuantity, unit: UnitId, precision: i32, flags: u32) -> String {
     let symbol = unit.symbol();
+    let precision = precision.min(MAX_PRECISION);
 
     match flags {
         QTTY_FMT_LOWER_EXP => {
@@ -204,9 +208,9 @@ pub unsafe extern "C" fn qtty_quantity_convert_value(
 /// # Returns
 ///
 /// * `QttyStatus::Ok` and the buffer is filled on success.
+/// * `QttyStatus::BufferTooSmall` if `buf_len` is zero or insufficient.
 /// * `QttyStatus::NullOut` if `buf` is null.
 /// * `QttyStatus::UnknownUnit` if the quantity's unit is not recognized.
-/// * `QttyStatus::BufferTooSmall` if `buf_len` is insufficient.
 ///
 /// # Safety
 ///
@@ -221,7 +225,7 @@ pub unsafe extern "C" fn qtty_quantity_format(
 ) -> QttyStatus {
     catch_panic!({
         if buf_len == 0 {
-            return QttyStatus::NullOut;
+            return QttyStatus::BufferTooSmall;
         }
         let buf = match out_ptr(buf) {
             Ok(buf) => buf,

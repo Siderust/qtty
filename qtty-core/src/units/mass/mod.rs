@@ -125,24 +125,35 @@ pub type Tonnes = Quantity<T>;
 /// One metric tonne.
 pub const TONE: Tonnes = Tonnes::new(1.0);
 
-// ─────────────────────────────────────────────────────────────────────────────
-// From conversions: default (metric) units
-// ─────────────────────────────────────────────────────────────────────────────
-crate::impl_unit_from_conversions!(
-    Gram, Yoctogram, Zeptogram, Attogram, Femtogram, Picogram, Nanogram, Microgram, Milligram,
-    Centigram, Decigram, Decagram, Hectogram, Kilogram, Megagram, Gigagram, Teragram, Petagram,
-    Exagram, Zettagram, Yottagram, Tonne
-);
+/// Canonical list of always-available (metric SI) mass units.
+///
+/// Exported (`#[doc(hidden)]`) for use in `qtty`\'s scalar alias generation and
+/// compile-time consistency checks.  Feature-gated units (customary, astro,
+/// fundamental-physics) are in their sub-modules.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! mass_units {
+    ($cb:path) => {
+        $cb!(
+            Gram, Yoctogram, Zeptogram, Attogram, Femtogram, Picogram, Nanogram, Microgram,
+            Milligram, Centigram, Decigram, Decagram, Hectogram, Kilogram, Megagram, Gigagram,
+            Teragram, Petagram, Exagram, Zettagram, Yottagram, Tonne
+        );
+    };
+}
+
+// Generate bidirectional From impls between base metric SI mass units.
+mass_units!(crate::impl_unit_from_conversions);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cross-unit ops: default (metric) units
 // ─────────────────────────────────────────────────────────────────────────────
 #[cfg(feature = "cross-unit-ops")]
-crate::impl_unit_cross_unit_ops!(
-    Gram, Yoctogram, Zeptogram, Attogram, Femtogram, Picogram, Nanogram, Microgram, Milligram,
-    Centigram, Decigram, Decagram, Hectogram, Kilogram, Megagram, Gigagram, Teragram, Petagram,
-    Exagram, Zettagram, Yottagram, Tonne
-);
+mass_units!(crate::impl_unit_cross_unit_ops);
+
+// Compile-time check: every base mass unit is registered as BuiltinUnit.
+#[cfg(test)]
+mass_units!(crate::assert_units_are_builtin);
 
 #[cfg(all(test, feature = "std"))]
 mod tests {
@@ -282,8 +293,8 @@ mod tests {
     fn grain_to_milligram() {
         let gr = Grains::new(1.0);
         let mg = gr.to::<Milligram>();
-        // ratio in code: 6_479_891 / 1_000_000_000 g = 6.479891 mg
-        assert_relative_eq!(mg.value(), 6.479_891, max_relative = 1e-6);
+        // ratio in code: 6_479_891 / 100_000_000 g = 64.79891 mg
+        assert_relative_eq!(mg.value(), 64.798_91, max_relative = 1e-6);
     }
 
     #[test]

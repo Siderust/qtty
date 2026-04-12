@@ -28,4 +28,5 @@ quote = "1.0"
 
 [dev-dependencies]
 approx = "0.5"
+qtty-core = { version = "0.5.0", path = "../qtty-core" }
 serde_json = "1.0"

@@ -582,6 +582,7 @@ mod tests {
         assert_eq!(UnitId::from_u32(9999), None);
         assert_eq!(UnitId::from_u32(80000), None);
         assert_eq!(UnitId::from_u32(99999), None);
+        assert_eq!(UnitId::from_u32(u32::MAX), None);
     }
 
     #[test]

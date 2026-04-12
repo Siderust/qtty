@@ -17,7 +17,7 @@ pub const CT: Carats = Carats::new(1.0);
 
 /// Grain: `1 gr = 64.79891 mg` (exact) == `0.064_798_91 g`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "gr", dimension = Mass, ratio = 6_479_891.0 / 1_000_000_000.0)]
+#[unit(symbol = "gr", dimension = Mass, ratio = 6_479_891.0 / 100_000_000.0)]
 pub struct Grain;
 /// Shorthand type alias for [`Grain`].
 pub type Gr = Grain;
@@ -91,3 +91,14 @@ crate::impl_unit_cross_unit_ops_between!(
     Teragram, Petagram, Exagram, Zettagram, Yottagram, Tonne;
     Carat, Grain, Pound, Ounce, Stone, ShortTon, LongTon
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+#[macro_export]
+#[doc(hidden)]
+macro_rules! mass_customary_units {
+    ($cb:path) => {
+        $cb!(Carat, Grain, Pound, Ounce, Stone, ShortTon, LongTon,);
+    };
+}

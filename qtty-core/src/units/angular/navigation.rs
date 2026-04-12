@@ -25,3 +25,14 @@ crate::impl_unit_cross_unit_ops_between!(
     Degree, Radian, Milliradian, Turn;
     Gradian
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory macro (used by qtty-ffi build.rs)
+// ─────────────────────────────────────────────────────────────────────────────
+#[macro_export]
+#[doc(hidden)]
+macro_rules! angular_navigation_units {
+    ($cb:path) => {
+        $cb!(Gradian,);
+    };
+}

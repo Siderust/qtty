@@ -220,7 +220,7 @@ pub type Area = Dim<P2, Z0, Z0, Z0, Z0, Z0, Z0, Z0>;
 pub type Volume = Dim<P3, Z0, Z0, Z0, Z0, Z0, Z0, Z0>;
 
 /// Velocity (L¹ · T⁻¹).
-pub type VelocityDim = Dim<P1, N1, Z0, Z0, Z0, Z0, Z0, Z0>;
+pub type Velocity = Dim<P1, N1, Z0, Z0, Z0, Z0, Z0, Z0>;
 
 /// Acceleration (L¹ · T⁻²).
 pub type Acceleration = Dim<P1, N2, Z0, Z0, Z0, Z0, Z0, Z0>;
@@ -239,4 +239,4 @@ pub type Power = Dim<P2, N3, P1, Z0, Z0, Z0, Z0, Z0>;
 /// This dimension represents *angular frequency* (radians, degrees, etc. per
 /// unit time), **not** SI cycle frequency (Hz = cycles/s). If you need cycle
 /// frequency, model it as `T⁻¹` (inverse time) with dimensionless cycles.
-pub type AngularRateDim = Dim<Z0, N1, Z0, Z0, Z0, Z0, Z0, P1>;
+pub type AngularRate = Dim<Z0, N1, Z0, Z0, Z0, Z0, Z0, P1>;
