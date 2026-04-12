@@ -161,6 +161,26 @@ crate::__impl_cross_ops_each_extra_to_bases!(
 #[cfg(test)]
 energy_units!(crate::assert_units_are_builtin);
 
+/// Canonical list of `fundamental-physics`-gated energy units (Erg, eV family).
+#[cfg(feature = "fundamental-physics")]
+#[macro_export]
+#[doc(hidden)]
+macro_rules! energy_fundamental_physics_units {
+    ($cb:path) => {
+        $cb!(Erg, Electronvolt, Kiloelectronvolt, Megaelectronvolt);
+    };
+}
+
+/// Canonical list of `customary`-gated energy units (calorie, kilocalorie).
+#[cfg(feature = "customary")]
+#[macro_export]
+#[doc(hidden)]
+macro_rules! energy_customary_units {
+    ($cb:path) => {
+        $cb!(Calorie, Kilocalorie);
+    };
+}
+
 #[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;

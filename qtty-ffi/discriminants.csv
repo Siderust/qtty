@@ -11,13 +11,16 @@
 #
 # Discriminant encoding: DSSCC where D=dimension (1 digit), SS=system (2 digits), CC=counter (2 digits)
 # Units are grouped by dimension with ranges:
-#   Length: 1xxxx (10000-19999)
-#   Time:   2xxxx (20000-29999)
-#   Angle:  3xxxx (30000-39999)
-#   Mass:   4xxxx (40000-49999)
-#   Power:  5xxxx (50000-59999)
-#   Area:   6xxxx (60000-69999)
-#   Volume: 7xxxx (70000-79999)
+#   Length:       1xxxx (10000-19999)
+#   Time:         2xxxx (20000-29999)
+#   Angle:        3xxxx (30000-39999)
+#   Mass:         4xxxx (40000-49999)
+#   Power:        5xxxx (50000-59999)
+#   Area:         6xxxx (60000-69999)
+#   Volume:       7xxxx (70000-79999)
+#   Acceleration: 8xxxx (80000-89999)
+#   Force:        9xxxx (90000-99999)
+#   Energy:      10xxxx (100000-109999)  [DimensionId=10 → 6-digit prefix]
 #
 # ABI CONTRACT: Existing discriminant values MUST NEVER change.
 # New units may be appended with new discriminant values.
@@ -210,3 +213,35 @@
 70010,CubicFoot
 70011,UsGallon
 70012,UsFluidOunce
+
+# ─── Acceleration units ───────────────────────────────────────────────────────
+# 800xx=SI, 801xx=Other
+80000,MeterPerSecondSquared
+80001,StandardGravity
+
+# ─── Force units ──────────────────────────────────────────────────────────────
+# 900xx=SI, 910xx=fundamental-physics, 920xx=customary
+90000,Newton
+90001,Micronewton
+90002,Millinewton
+90003,Kilonewton
+90004,Meganewton
+90005,Giganewton
+91000,Dyne
+92000,PoundForce
+
+# ─── Energy units ─────────────────────────────────────────────────────────────
+# 100000=SI, 101xxx=fundamental-physics, 102xxx=customary
+100000,Joule
+100001,Microjoule
+100002,Millijoule
+100003,Kilojoule
+100004,Megajoule
+100005,Gigajoule
+100006,Terajoule
+101000,Erg
+101001,Electronvolt
+101002,Kiloelectronvolt
+101003,Megaelectronvolt
+102000,Calorie
+102001,Kilocalorie
