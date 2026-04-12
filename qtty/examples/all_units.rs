@@ -21,7 +21,7 @@
 //! cargo run -p qtty --example all_units
 //! ```
 
-use qtty::frequency::AngularRate;
+use qtty::angular_rate::AngularRate;
 use qtty::velocity::Velocity;
 use qtty::{
     AstronomicalUnit, CubicMeter, Kilogram, Kilometer, LightYear, Meter, Radian, Second,

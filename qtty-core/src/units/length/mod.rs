@@ -331,6 +331,119 @@ length_units!(crate::impl_unit_from_conversions);
 #[cfg(feature = "cross-unit-ops")]
 length_units!(crate::impl_unit_cross_unit_ops);
 
+// ── Per-family bridge helpers ─────────────────────────────────────────────────
+//
+// Each macro below holds ONE optional feature's length unit list and invokes
+// both the `From` and (when `cross-unit-ops` is enabled) the `PartialEq`/
+// `PartialOrd` generators.  The astro-length set is the largest family in this
+// module; defining it once here cuts its appearance count from once-per-pair
+// to one macro body.
+//
+// To add a new optional length family F:
+//   1. Define `__impl_length_bridges_with_F_as_base!` here with F's unit list.
+//   2. Add one call per existing family X (invoking whichever family's macro
+//      covers the larger set of length units).
+
+#[cfg(feature = "astro")]
+macro_rules! __impl_length_bridges_with_astro_as_base {
+    ($($extra:ty),+ $(,)?) => {
+        crate::__impl_from_each_extra_to_bases!(
+            {
+                AstronomicalUnit, LightYear, Parsec, Kiloparsec, Megaparsec, Gigaparsec,
+                nominal::SolarRadius, nominal::SolarDiameter, nominal::EarthRadius,
+                nominal::EarthEquatorialRadius, nominal::EarthPolarRadius,
+                nominal::JupiterRadius, nominal::LunarRadius, nominal::LunarDistance
+            }
+            $($extra),+
+        );
+        #[cfg(feature = "cross-unit-ops")]
+        crate::__impl_cross_ops_each_extra_to_bases!(
+            {
+                AstronomicalUnit, LightYear, Parsec, Kiloparsec, Megaparsec, Gigaparsec,
+                nominal::SolarRadius, nominal::SolarDiameter, nominal::EarthRadius,
+                nominal::EarthEquatorialRadius, nominal::EarthPolarRadius,
+                nominal::JupiterRadius, nominal::LunarRadius, nominal::LunarDistance
+            }
+            $($extra),+
+        );
+    };
+}
+
+#[cfg(feature = "navigation")]
+macro_rules! __impl_length_bridges_with_navigation_as_base {
+    ($($extra:ty),+ $(,)?) => {
+        crate::__impl_from_each_extra_to_bases!(
+            {NauticalMile, Chain, Rod, Link, Fathom, EarthMeridionalCircumference, EarthEquatorialCircumference}
+            $($extra),+
+        );
+        #[cfg(feature = "cross-unit-ops")]
+        crate::__impl_cross_ops_each_extra_to_bases!(
+            {NauticalMile, Chain, Rod, Link, Fathom, EarthMeridionalCircumference, EarthEquatorialCircumference}
+            $($extra),+
+        );
+    };
+}
+
+// ── Cross-feature From/PartialEq/PartialOrd: length families ─────────────────
+//
+// Each feature-gated submodule registers its extra units against the base metric
+// set.  The calls below close the gap so that units from *different* optional
+// features also get bidirectional `From` and cross-unit comparison impls.
+//
+// The macro of the *larger* length family is always invoked so the smaller
+// family's (shorter) unit list appears at the call site.
+
+// astro (14 length units) — largest optional length family; always the base.
+#[cfg(all(feature = "astro", feature = "customary"))]
+__impl_length_bridges_with_astro_as_base!(Inch, Foot, Yard, Mile);
+
+#[cfg(all(feature = "astro", feature = "navigation"))]
+__impl_length_bridges_with_astro_as_base!(
+    NauticalMile,
+    Chain,
+    Rod,
+    Link,
+    Fathom,
+    EarthMeridionalCircumference,
+    EarthEquatorialCircumference
+);
+
+#[cfg(all(feature = "astro", feature = "fundamental-physics"))]
+__impl_length_bridges_with_astro_as_base!(
+    BohrRadius,
+    ClassicalElectronRadius,
+    PlanckLength,
+    ElectronReducedComptonWavelength
+);
+
+// navigation (7 length units) — base for its pairs with customary (4) and fp (4).
+#[cfg(all(feature = "customary", feature = "navigation"))]
+__impl_length_bridges_with_navigation_as_base!(Inch, Foot, Yard, Mile);
+
+#[cfg(all(feature = "navigation", feature = "fundamental-physics"))]
+__impl_length_bridges_with_navigation_as_base!(
+    BohrRadius,
+    ClassicalElectronRadius,
+    PlanckLength,
+    ElectronReducedComptonWavelength
+);
+
+// customary (4) and fundamental-physics (4) are equal in size; customary is base by convention.
+#[cfg(all(feature = "customary", feature = "fundamental-physics"))]
+crate::__impl_from_each_extra_to_bases!(
+    {Inch, Foot, Yard, Mile}
+    BohrRadius, ClassicalElectronRadius, PlanckLength, ElectronReducedComptonWavelength
+);
+#[cfg(all(
+    feature = "customary",
+    feature = "fundamental-physics",
+    feature = "cross-unit-ops"
+))]
+crate::__impl_cross_ops_each_extra_to_bases!(
+    {Inch, Foot, Yard, Mile}
+    BohrRadius, ClassicalElectronRadius, PlanckLength, ElectronReducedComptonWavelength
+);
+
 // Compile-time check: every base length unit is registered as BuiltinUnit.
 #[cfg(test)]
 length_units!(crate::assert_units_are_builtin);
@@ -850,10 +963,10 @@ mod tests {
     #[cfg(feature = "fundamental-physics")]
     fn classical_electron_radius_to_femtometers() {
         let q = ClassicalElectronRadii::new(1.0);
-        // re ≈ 2.81794 fm
+        // re ≈ 2.81794 fm (CODATA 2022)
         assert_relative_eq!(
             q.to::<Femtometer>().value(),
-            2.817_940_326_2,
+            2.817_940_320_5,
             max_relative = 1e-9
         );
     }
@@ -871,10 +984,10 @@ mod tests {
     #[cfg(feature = "fundamental-physics")]
     fn electron_compton_wavelength_to_femtometers() {
         let q = ElectronReducedComptonWavelengths::new(1.0);
-        // λ̄_e ≈ 386.159 fm
+        // λ̄_e ≈ 386.159 fm (CODATA 2022)
         assert_relative_eq!(
             q.to::<Femtometer>().value(),
-            386.159_267_96,
+            386.159_267_44,
             max_relative = 1e-7
         );
     }

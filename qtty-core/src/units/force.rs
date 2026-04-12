@@ -114,6 +114,22 @@ force_units!(crate::impl_unit_from_conversions);
 #[cfg(feature = "cross-unit-ops")]
 force_units!(crate::impl_unit_cross_unit_ops);
 
+// ── Cross-feature: customary × fundamental-physics ───────────────────────────
+#[cfg(all(feature = "customary", feature = "fundamental-physics"))]
+crate::__impl_from_each_extra_to_bases!(
+    {PoundForce}
+    Dyne
+);
+#[cfg(all(
+    feature = "customary",
+    feature = "fundamental-physics",
+    feature = "cross-unit-ops"
+))]
+crate::__impl_cross_ops_each_extra_to_bases!(
+    {PoundForce}
+    Dyne
+);
+
 // Compile-time check: every base force unit is registered as BuiltinUnit.
 #[cfg(test)]
 force_units!(crate::assert_units_are_builtin);

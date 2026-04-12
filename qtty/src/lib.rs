@@ -86,7 +86,8 @@
 //! `qtty::unit` for generic APIs such as `Quantity<U, S>` and `Velocity<N, D>`:
 //!
 //! - `qtty::velocity` (`Length / Time` aliases)
-//! - `qtty::frequency` (`Angular / Time` aliases)
+//! - `qtty::angular_rate` (`Angular / Time` aliases)
+//! - `qtty::acceleration`, `qtty::force`, `qtty::energy`
 //! - `qtty::unit` (type-level unit markers)
 //! - `qtty::f32` (all units with `f32` scalar)
 //! - `qtty::f64` (all units with `f64` scalar - same as root)
@@ -103,6 +104,28 @@
 //! - `alloc`: enables heap-backed helpers (like `qtty_vec!(vec ...)`) in `no_std` builds.
 //! - `serde`: enables `serde` support for `Quantity<U, S>`; serialization is the raw scalar value.
 //! - `scalar-rational`: enables `num_rational::Rational64` as a scalar type.
+//!
+//! # Custom Units
+//!
+//! `qtty` re-exports the derive macro plus the arithmetic/conversion macros
+//! from `qtty-core`, so downstream crates can define units without depending on
+//! `qtty-core` directly:
+//!
+//! ```ignore
+//! #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, qtty::Unit)]
+//! #[unit(crate = qtty, symbol = "smoot", dimension = qtty::Length, ratio = 1.7018)]
+//! pub struct Smoot;
+//!
+//! qtty::impl_unit_arithmetic_pairs_between!(qtty::unit::Meter, qtty::unit::Kilometer; Smoot);
+//! ```
+//!
+//! ## Limitations of downstream units
+//!
+//! Custom units participate in arithmetic (`*`, `/`) and `From`-based
+//! conversion via the macro registrations shown above.  However, due to Rust's
+//! orphan rules, the derive macro cannot generate `Display`/`LowerExp`/`UpperExp`
+//! impls for `Quantity<CustomUnit, S>` from a downstream crate.  Downstream
+//! units must implement formatting manually if needed.
 //!
 //! Disable default features for `no_std`:
 //!
@@ -128,6 +151,18 @@
 //! # SemVer and stability
 //!
 //! This workspace is currently `0.x`. Expect breaking changes between minor versions until `1.0`.
+//!
+//! The following items are **explicitly excluded from the semver guarantee**
+//! even though they appear in the compiled crate:
+//!
+//! - [`Dim`], [`DimDiv`], [`DimMul`] — typenum-driven dimension markers used
+//!   internally by `impl_unit_*` macros.  Their shape will change if the
+//!   underlying numeric representation is ever replaced.
+//! - [`UnitDiv`], [`UnitMul`] — arithmetic-layer traits whose associated-type
+//!   signatures depend on the dimension representation above.
+//!
+//! All five are marked `#[doc(hidden)]`.  Do not depend on their concrete
+//! types in downstream code.
 #![cfg_attr(not(feature = "std"), no_std)]
 #![forbid(unsafe_code)]
 
@@ -135,15 +170,43 @@
 extern crate alloc;
 
 pub use qtty_core::{
+    impl_unit_arithmetic_pairs, impl_unit_arithmetic_pairs_between, impl_unit_cross_unit_ops,
+    impl_unit_cross_unit_ops_between, impl_unit_division_pairs, impl_unit_division_pairs_between,
+    impl_unit_from_conversions, impl_unit_from_conversions_between, impl_unit_multiplication_pairs,
+    impl_unit_multiplication_pairs_between,
+};
+pub use qtty_core::{
     Acceleration, AmountOfSubstance, Angular, AngularRate, Area, Current, Dimension, Dimensionless,
     Energy, Exact, Force, IntegerScalar, Length, LuminousIntensity, Mass, Per, Power, Prod,
     Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16, QuantityI32, QuantityI64,
-    QuantityI8, Real, Scalar, Temperature, Time, Transcendental, Unit, UnitDiv, UnitMul, Velocity,
-    Volume,
+    QuantityI8, Real, Scalar, Temperature, Time, Transcendental, Unit, Velocity, Volume,
 };
 
+// `UnitDiv`, `UnitMul`, and the dimension-level traits are needed by the
+// `impl_unit_*` macros when they expand in downstream crates.  They are
+// also useful for writing generic code, but their associated types expose
+// typenum-based dimension markers.
+//
+// # Stability note
+//
+// `Dim`, `DimDiv`, `DimMul`, `UnitDiv`, and `UnitMul` are **excluded from
+// the semver stability guarantee** of this crate even though they are
+// technically re-exported.  They are marked `#[doc(hidden)]` because they
+// are implementation details of the macro-generated arithmetic layer.
+// Specifically:
+//
+// * `Dim` and its `DimDiv`/`DimMul` associated types are driven by
+//   `typenum` integers.  Replacing `typenum` would be a breaking change to
+//   these types, and that replacement is not considered a breaking change
+//   for `qtty`'s public API.
+// * The `impl_unit_*` macros re-export these at their expansion sites so
+//   downstream users are never expected to name them directly.
+//
+// If you find yourself writing `use qtty::{Dim, DimDiv, DimMul}` in
+// application code, consider opening an issue — that is a sign of a missing
+// ergonomic abstraction in the public API.
 #[doc(hidden)]
-pub use qtty_core::{Dim, DimDiv, DimMul};
+pub use qtty_core::{Dim, DimDiv, DimMul, UnitDiv, UnitMul};
 
 #[cfg(feature = "scalar-rational")]
 pub use qtty_core::QuantityRational;
@@ -154,10 +217,21 @@ pub use qtty_core::serde_with_unit;
 #[cfg(feature = "serde")]
 pub use qtty_core::serde_scalar;
 
-/// Derive macro used by `qtty-core` to define unit marker types.
+/// Derive macro used to define unit marker types.
 ///
-/// This macro expands in terms of `crate::Unit` and `crate::Quantity`, so it is intended for use inside `qtty-core`
-/// (or crates exposing the same crate-root API). Most users should not need this.
+/// Inside `qtty-core`, `#[derive(Unit)]` works with the default
+/// `#[unit(symbol = ..., dimension = ..., ratio = ...)]` form. Downstream crates
+/// should target the public facade explicitly:
+///
+/// ```ignore
+/// #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, qtty::Unit)]
+/// #[unit(crate = qtty, symbol = "smoot", dimension = qtty::Length, ratio = 1.7018)]
+/// pub struct Smoot;
+/// ```
+///
+/// Pair this with `qtty::impl_unit_arithmetic_pairs!` or
+/// `qtty::impl_unit_arithmetic_pairs_between!` when you want custom units to
+/// participate in `*` and `/` result-type inference.
 pub use qtty_derive::Unit;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -169,7 +243,9 @@ pub use qtty_derive::Unit;
 /// The callback is invoked once per dimension (8 total). This is usable for
 /// additive generation (aliases, assertions) where the callback doesn't need
 /// to know which dimension/module the units come from.
-macro_rules! invoke_all_inventories {
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __qtty_invoke_all_inventories {
     ($cb:path) => {
         qtty_core::angular_units!($cb);
         qtty_core::length_units!($cb);
@@ -188,7 +264,9 @@ macro_rules! invoke_all_inventories {
 ///
 /// This keeps the crate-root quantity aliases aligned with the unit markers
 /// re-exported from [`crate::unit`] whenever optional unit families are enabled.
-macro_rules! invoke_optional_inventories {
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __qtty_invoke_optional_inventories {
     ($cb:path) => {
         #[cfg(feature = "astro")]
         qtty_core::angular_astro_units!($cb);
@@ -382,9 +460,13 @@ pub mod velocity {
     pub use qtty_core::units::velocity::{Velocity, VelocityUnit};
 }
 
-/// Angular-rate quantities represented as one unit divided by another.
-pub mod frequency {
-    pub use qtty_core::units::frequency::{AngularRate, AngularRateUnit};
+/// Angular-rate quantities represented as one unit divided by another (`Angular / Time`).
+///
+/// This module models angular displacement per unit time (e.g. rad/s, deg/day).
+/// It does **not** model SI Hertz-style inverse-time frequency (`T⁻¹`); see
+/// [`qtty_core::angular_rate`] for the distinction.
+pub mod angular_rate {
+    pub use qtty_core::units::angular_rate::{AngularRate, AngularRateUnit};
 }
 
 /// Acceleration quantities represented as `Length / Time²`.
@@ -404,8 +486,8 @@ macro_rules! _root_alias {
         )+
     };
 }
-invoke_all_inventories!(_root_alias);
-invoke_optional_inventories!(_root_alias);
+__qtty_invoke_all_inventories!(_root_alias);
+__qtty_invoke_optional_inventories!(_root_alias);
 
 /// Dimensionless quantity alias.
 pub type Unitless<S = f64> = Quantity<unit::Unitless, S>;

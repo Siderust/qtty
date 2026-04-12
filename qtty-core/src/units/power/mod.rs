@@ -129,6 +129,48 @@ power_units!(crate::impl_unit_from_conversions);
 #[cfg(feature = "cross-unit-ops")]
 power_units!(crate::impl_unit_cross_unit_ops);
 
+// ── Cross-feature: power families ────────────────────────────────────────────
+#[cfg(all(feature = "astro", feature = "customary"))]
+crate::__impl_from_each_extra_to_bases!(
+    {SolarLuminosity}
+    HorsepowerMetric, HorsepowerElectric
+);
+#[cfg(all(feature = "astro", feature = "customary", feature = "cross-unit-ops"))]
+crate::__impl_cross_ops_each_extra_to_bases!(
+    {SolarLuminosity}
+    HorsepowerMetric, HorsepowerElectric
+);
+
+#[cfg(all(feature = "astro", feature = "fundamental-physics"))]
+crate::__impl_from_each_extra_to_bases!(
+    {SolarLuminosity}
+    ErgPerSecond
+);
+#[cfg(all(
+    feature = "astro",
+    feature = "fundamental-physics",
+    feature = "cross-unit-ops"
+))]
+crate::__impl_cross_ops_each_extra_to_bases!(
+    {SolarLuminosity}
+    ErgPerSecond
+);
+
+#[cfg(all(feature = "customary", feature = "fundamental-physics"))]
+crate::__impl_from_each_extra_to_bases!(
+    {HorsepowerMetric, HorsepowerElectric}
+    ErgPerSecond
+);
+#[cfg(all(
+    feature = "customary",
+    feature = "fundamental-physics",
+    feature = "cross-unit-ops"
+))]
+crate::__impl_cross_ops_each_extra_to_bases!(
+    {HorsepowerMetric, HorsepowerElectric}
+    ErgPerSecond
+);
+
 // Compile-time check: every base power unit is registered as BuiltinUnit.
 #[cfg(test)]
 power_units!(crate::assert_units_are_builtin);

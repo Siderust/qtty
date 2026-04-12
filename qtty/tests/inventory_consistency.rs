@@ -6,13 +6,15 @@
 //!
 //! ## What this checks
 //!
-//! Two invariants are enforced at compile time:
+//! Several invariants are enforced at compile time:
 //!
 //! 1. **Unit marker re-exports** (`qtty::unit::*`): every unit in a dimension
 //!    inventory is re-exported from `pub mod unit { ... }` in `qtty/src/lib.rs`.
 //! 2. **Scalar quantity aliases** (`qtty::*`): every unit in a dimension
 //!    inventory has a corresponding `pub type $name<S = f64>` alias generated
-//!    by `define_scalar_aliases!` in `qtty/src/scalar_aliases.rs`.
+//!    at the crate root in `qtty/src/lib.rs`.
+//! 3. **Scalar modules** (`qtty::f32::*`, `qtty::i32::*`, etc.): every unit in
+//!    the public inventory is available from each scalar-specific facade.
 //!
 //! ## How it works
 //!
@@ -25,8 +27,7 @@
 //! ## What to do when this fails
 //!
 //! Add the missing unit to the appropriate `pub use qtty_core::units::dim::...`
-//! block in `lib.rs`, or add the missing `pub type $name` alias to the
-//! `define_scalar_aliases!` macro in `scalar_aliases.rs`.
+//! block in `lib.rs`, or fix the alias-generation macros in `qtty/src/lib.rs`.
 
 /// Assert that every listed unit name resolves as `qtty::unit::$name`
 /// (marker struct re-export).
@@ -52,22 +53,99 @@ macro_rules! assert_alias_exists {
     };
 }
 
+macro_rules! assert_f32_alias_exists {
+    ($($name:ident),+ $(,)?) => {
+        $(
+            const _: () = {
+                fn _check(_: qtty::f32::$name) {}
+            };
+        )+
+    };
+}
+
+macro_rules! assert_f64_alias_exists {
+    ($($name:ident),+ $(,)?) => {
+        $(
+            const _: () = {
+                fn _check(_: qtty::f64::$name) {}
+            };
+        )+
+    };
+}
+
+macro_rules! assert_i8_alias_exists {
+    ($($name:ident),+ $(,)?) => {
+        $(
+            const _: () = {
+                fn _check(_: qtty::i8::$name) {}
+            };
+        )+
+    };
+}
+
+macro_rules! assert_i16_alias_exists {
+    ($($name:ident),+ $(,)?) => {
+        $(
+            const _: () = {
+                fn _check(_: qtty::i16::$name) {}
+            };
+        )+
+    };
+}
+
+macro_rules! assert_i32_alias_exists {
+    ($($name:ident),+ $(,)?) => {
+        $(
+            const _: () = {
+                fn _check(_: qtty::i32::$name) {}
+            };
+        )+
+    };
+}
+
+macro_rules! assert_i64_alias_exists {
+    ($($name:ident),+ $(,)?) => {
+        $(
+            const _: () = {
+                fn _check(_: qtty::i64::$name) {}
+            };
+        )+
+    };
+}
+
+macro_rules! assert_i128_alias_exists {
+    ($($name:ident),+ $(,)?) => {
+        $(
+            const _: () = {
+                fn _check(_: qtty::i128::$name) {}
+            };
+        )+
+    };
+}
+
 // ── Unit marker re-exports (qtty::unit::*) ──────────────────────────────────
 
-qtty_core::angular_units!(assert_unit_reexported);
-qtty_core::length_units!(assert_unit_reexported);
-qtty_core::time_units!(assert_unit_reexported);
-qtty_core::mass_units!(assert_unit_reexported);
-qtty_core::power_units!(assert_unit_reexported);
-qtty_core::area_units!(assert_unit_reexported);
-qtty_core::volume_units!(assert_unit_reexported);
+qtty::__qtty_invoke_all_inventories!(assert_unit_reexported);
+qtty::__qtty_invoke_optional_inventories!(assert_unit_reexported);
 
 // ── Scalar quantity aliases (qtty::*) ───────────────────────────────────────
 
-qtty_core::angular_units!(assert_alias_exists);
-qtty_core::length_units!(assert_alias_exists);
-qtty_core::time_units!(assert_alias_exists);
-qtty_core::mass_units!(assert_alias_exists);
-qtty_core::power_units!(assert_alias_exists);
-qtty_core::area_units!(assert_alias_exists);
-qtty_core::volume_units!(assert_alias_exists);
+qtty::__qtty_invoke_all_inventories!(assert_alias_exists);
+qtty::__qtty_invoke_optional_inventories!(assert_alias_exists);
+
+// ── Scalar module aliases (qtty::f32::*, qtty::i8::*, …) ───────────────────
+
+qtty::__qtty_invoke_all_inventories!(assert_f32_alias_exists);
+qtty::__qtty_invoke_optional_inventories!(assert_f32_alias_exists);
+qtty::__qtty_invoke_all_inventories!(assert_f64_alias_exists);
+qtty::__qtty_invoke_optional_inventories!(assert_f64_alias_exists);
+qtty::__qtty_invoke_all_inventories!(assert_i8_alias_exists);
+qtty::__qtty_invoke_optional_inventories!(assert_i8_alias_exists);
+qtty::__qtty_invoke_all_inventories!(assert_i16_alias_exists);
+qtty::__qtty_invoke_optional_inventories!(assert_i16_alias_exists);
+qtty::__qtty_invoke_all_inventories!(assert_i32_alias_exists);
+qtty::__qtty_invoke_optional_inventories!(assert_i32_alias_exists);
+qtty::__qtty_invoke_all_inventories!(assert_i64_alias_exists);
+qtty::__qtty_invoke_optional_inventories!(assert_i64_alias_exists);
+qtty::__qtty_invoke_all_inventories!(assert_i128_alias_exists);
+qtty::__qtty_invoke_optional_inventories!(assert_i128_alias_exists);

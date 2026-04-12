@@ -166,6 +166,18 @@ impl Unit for CustomLengthB {
 // Register custom units for arithmetic.
 qtty_core::impl_unit_arithmetic_pairs!(CustomLengthA, CustomLengthB);
 
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+pub enum CustomLengthC {}
+impl Unit for CustomLengthC {
+    const RATIO: f64 = 1.7018;
+    type Dim = Length;
+    const SYMBOL: &'static str = "clc";
+}
+
+// Register a custom unit against selected built-ins without regenerating
+// built-in/built-in impls.
+qtty_core::impl_unit_arithmetic_pairs_between!(Meter, Kilometer; CustomLengthC);
+
 #[test]
 fn custom_unit_same_division_gives_unitless() {
     let a = Quantity::<CustomLengthA>::new(10.0);
@@ -195,6 +207,30 @@ fn custom_unit_self_multiplication() {
     let a = Quantity::<CustomLengthA>::new(3.0);
     let b = Quantity::<CustomLengthA>::new(4.0);
     let product: Quantity<Prod<CustomLengthA, CustomLengthA>> = a * b;
+    assert!((product.value() - 12.0).abs() < 1e-12);
+}
+
+#[test]
+fn custom_unit_between_group_division() {
+    let distance = Quantity::<Meter>::new(10.0);
+    let custom = Quantity::<CustomLengthC>::new(2.0);
+    let ratio: Quantity<Per<Meter, CustomLengthC>> = distance / custom;
+    assert!((ratio.value() - 5.0).abs() < 1e-12);
+}
+
+#[test]
+fn custom_unit_between_group_multiplication() {
+    let custom = Quantity::<CustomLengthC>::new(3.0);
+    let distance = Quantity::<Kilometer>::new(4.0);
+    let product: Quantity<Prod<CustomLengthC, Kilometer>> = custom * distance;
+    assert!((product.value() - 12.0).abs() < 1e-12);
+}
+
+#[test]
+fn custom_unit_between_group_self_multiplication() {
+    let a = Quantity::<CustomLengthC>::new(3.0);
+    let b = Quantity::<CustomLengthC>::new(4.0);
+    let product: Quantity<Prod<CustomLengthC, CustomLengthC>> = a * b;
     assert!((product.value() - 12.0).abs() < 1e-12);
 }
 

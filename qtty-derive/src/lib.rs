@@ -3,9 +3,10 @@
 
 //! Derive macro implementation used by `qtty-core`.
 //!
-//! `qtty-derive` is an implementation detail of this workspace. The `Unit` derive expands in terms of `crate::Unit`
-//! and `crate::Quantity`, so it is intended to be used by `qtty-core` (or by crates that expose an identical
-//! crate-root API).
+//! `qtty-derive` is an implementation detail of this workspace. By default the
+//! `Unit` derive expands in terms of `crate::Unit` and `crate::Quantity`, which
+//! matches `qtty-core`. Downstream crates can target the public `qtty` facade by
+//! adding `crate = qtty` to the helper attribute.
 //!
 //! Most users should depend on `qtty` instead and use the predefined units.
 //!
@@ -14,7 +15,8 @@
 //! For a unit marker type `MyUnit`, the derive implements:
 //!
 //! - `crate::Unit for MyUnit`
-//! - `core::fmt::Display for crate::Quantity<MyUnit>` (formats as `<value> <symbol>`)
+//! - when targeting the defining crate itself, formatting impls for
+//!   `crate::Quantity<MyUnit, S>` (`Display`, `LowerExp`, `UpperExp`)
 //!
 //! # Attributes
 //!
@@ -23,6 +25,7 @@
 //! - `symbol = "m"`: displayed unit symbol
 //! - `dimension = SomeDim`: dimension marker type
 //! - `ratio = 1000.0`: conversion ratio to the canonical unit of the dimension
+//! - `crate = qtty`: optional crate path when deriving from a downstream crate
 
 #![deny(missing_docs)]
 #![forbid(unsafe_code)]
@@ -31,13 +34,19 @@ use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::{
+    ext::IdentExt,
     parse::{Parse, ParseStream},
-    parse_macro_input, Attribute, DeriveInput, Expr, Ident, LitStr, Token,
+    parse_macro_input, Attribute, DeriveInput, Expr, Ident, LitStr, Path, Token,
 };
 
 /// Derive `crate::Unit` and a `Display` impl for `crate::Quantity<ThisUnit>`.
 ///
-/// The derive must be paired with a `#[unit(...)]` attribute providing `symbol`, `dimension`, and `ratio`.
+/// The derive must be paired with a `#[unit(...)]` attribute providing
+/// `symbol`, `dimension`, and `ratio`. Downstream crates using the public
+/// `qtty` facade should also set `crate = qtty`.
+///
+/// Note that downstream crates only receive the `Unit` impl. Formatting impls
+/// for `qtty::Quantity<CustomUnit, S>` would violate Rust's orphan rules.
 ///
 /// This macro is intended for use by `qtty-core`.
 #[proc_macro_derive(Unit, attributes(unit))]
@@ -59,39 +68,58 @@ fn derive_unit_impl(input: DeriveInput) -> syn::Result<TokenStream2> {
     let symbol = &unit_attr.symbol;
     let dimension = &unit_attr.dimension;
     let ratio = &unit_attr.ratio;
+    let emit_quantity_formatting = unit_attr
+        .crate_path
+        .as_ref()
+        .is_none_or(|path| path.is_ident("crate"));
+    let crate_path = unit_attr
+        .crate_path
+        .as_ref()
+        .map(|path| quote!(#path))
+        .unwrap_or_else(|| quote!(crate));
 
     let expanded = quote! {
-        impl crate::Unit for #name {
+        impl #crate_path::Unit for #name {
             const RATIO: f64 = #ratio;
             type Dim = #dimension;
             const SYMBOL: &'static str = #symbol;
         }
 
-        impl<S: crate::scalar::Scalar + ::core::fmt::Display> ::core::fmt::Display for crate::Quantity<#name, S> {
-            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                // Forward all format flags (precision, width, fill, …) to the
-                // inner scalar so that e.g. `format!("{:.9}", my_au)` works.
-                ::core::fmt::Display::fmt(&self.value(), f)?;
-                write!(f, " {}", <#name as crate::Unit>::SYMBOL)
-            }
-        }
-
-        impl<S: crate::scalar::Scalar + ::core::fmt::LowerExp> ::core::fmt::LowerExp for crate::Quantity<#name, S> {
-            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                ::core::fmt::LowerExp::fmt(&self.value(), f)?;
-                write!(f, " {}", <#name as crate::Unit>::SYMBOL)
-            }
-        }
-
-        impl<S: crate::scalar::Scalar + ::core::fmt::UpperExp> ::core::fmt::UpperExp for crate::Quantity<#name, S> {
-            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                ::core::fmt::UpperExp::fmt(&self.value(), f)?;
-                write!(f, " {}", <#name as crate::Unit>::SYMBOL)
-            }
-        }
     };
 
-    Ok(expanded)
+    let formatting = if emit_quantity_formatting {
+        quote! {
+            impl<S: #crate_path::Scalar + ::core::fmt::Display> ::core::fmt::Display for #crate_path::Quantity<#name, S> {
+                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                    // Forward all format flags (precision, width, fill, …) to the
+                    // inner scalar so that e.g. `format!("{:.9}", my_au)` works.
+                    ::core::fmt::Display::fmt(&self.value(), f)?;
+                    write!(f, " {}", <#name as #crate_path::Unit>::SYMBOL)
+                }
+            }
+
+            impl<S: #crate_path::Scalar + ::core::fmt::LowerExp> ::core::fmt::LowerExp for #crate_path::Quantity<#name, S> {
+                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                    ::core::fmt::LowerExp::fmt(&self.value(), f)?;
+                    write!(f, " {}", <#name as #crate_path::Unit>::SYMBOL)
+                }
+            }
+
+            impl<S: #crate_path::Scalar + ::core::fmt::UpperExp> ::core::fmt::UpperExp for #crate_path::Quantity<#name, S> {
+                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                    ::core::fmt::UpperExp::fmt(&self.value(), f)?;
+                    write!(f, " {}", <#name as #crate_path::Unit>::SYMBOL)
+                }
+            }
+        }
+    } else {
+        TokenStream2::new()
+    };
+
+    Ok(quote! {
+        #expanded
+        #formatting
+    })
 }
 
 /// Parsed contents of the `#[unit(...)]` attribute.
@@ -99,6 +127,7 @@ struct UnitAttribute {
     symbol: LitStr,
     dimension: Expr,
     ratio: Expr,
+    crate_path: Option<Path>,
     // Future extensions:
     // long_name: Option<LitStr>,
     // plural: Option<LitStr>,
@@ -112,12 +141,16 @@ impl Parse for UnitAttribute {
         let mut symbol: Option<LitStr> = None;
         let mut dimension: Option<Expr> = None;
         let mut ratio: Option<Expr> = None;
+        let mut crate_path: Option<Path> = None;
 
         while !input.is_empty() {
-            let ident: Ident = input.parse()?;
+            let ident = Ident::parse_any(input)?;
             input.parse::<Token![=]>()?;
 
             match ident.to_string().as_str() {
+                "crate" => {
+                    crate_path = Some(input.parse()?);
+                }
                 "symbol" => {
                     symbol = Some(input.parse()?);
                 }
@@ -159,6 +192,7 @@ impl Parse for UnitAttribute {
             symbol,
             dimension,
             ratio,
+            crate_path,
         })
     }
 }
@@ -191,6 +225,20 @@ mod tests {
 
         let attr = parse_unit_attribute(&input.attrs).unwrap();
         assert_eq!(attr.symbol.value(), "m");
+        assert!(attr.crate_path.is_none());
+    }
+
+    #[test]
+    fn test_parse_unit_attribute_with_crate_path() {
+        let input: DeriveInput = parse_quote! {
+            #[unit(crate = qtty, symbol = "m", dimension = qtty::Length, ratio = 1.0)]
+            pub enum Meter {}
+        };
+
+        let attr = parse_unit_attribute(&input.attrs).unwrap();
+        assert_eq!(attr.symbol.value(), "m");
+        let crate_path = attr.crate_path.as_ref().unwrap();
+        assert_eq!(quote!(#crate_path).to_string(), "qtty");
     }
 
     #[test]
@@ -291,6 +339,21 @@ mod tests {
         let tokens = result.unwrap();
         let code = tokens.to_string();
         assert!(code.contains("const RATIO : f64 = 1000.0"));
+    }
+
+    #[test]
+    fn test_derive_unit_impl_with_downstream_crate_path() {
+        let input: DeriveInput = parse_quote! {
+            #[unit(crate = qtty, symbol = "smoot", dimension = qtty::Length, ratio = 1.7018)]
+            pub enum Smoot {}
+        };
+
+        let result = derive_unit_impl(input);
+        assert!(result.is_ok());
+        let tokens = result.unwrap();
+        let code = tokens.to_string();
+        assert!(code.contains("impl qtty :: Unit for Smoot"));
+        assert!(!code.contains("for qtty :: Quantity < Smoot , S >"));
     }
 
     #[test]
