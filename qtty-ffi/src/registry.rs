@@ -113,9 +113,19 @@ pub fn convert_value(v: f64, src: UnitId, dst: UnitId) -> Result<f64, QttyStatus
         return Ok(v);
     }
 
-    // Convert: v_canonical = v * src_scale, then v_dst = v_canonical / dst_scale
-    let v_canonical = v * src_meta.scale_to_canonical;
-    let v_dst = v_canonical / dst_meta.scale_to_canonical;
+    // Avoid intermediate overflow: always multiply the value in the *smaller*-scale
+    // unit by the ratio of the two scales, which is ≤ 1 from that unit's perspective.
+    // This mirrors `qtty_core::Quantity::to()` and prevents intermediate `inf` even
+    // when the final result is representable (e.g. 1e292 Ym → ~1.057e300 ly).
+    let s = src_meta.scale_to_canonical;
+    let d = dst_meta.scale_to_canonical;
+    let v_dst = if s >= d {
+        // src has the larger scale; multiply *dst* side (scale ≤ 1)
+        v * (s / d)
+    } else {
+        // dst has the larger scale; multiply *src* side (scale ≤ 1)
+        v / (d / s)
+    };
 
     Ok(v_dst)
 }
@@ -226,5 +236,45 @@ mod tests {
         let neg_inf_result =
             convert_value(f64::NEG_INFINITY, UnitId::Second, UnitId::Minute).unwrap();
         assert!(neg_inf_result.is_infinite() && neg_inf_result.is_sign_negative());
+    }
+
+    /// Regression: large-magnitude conversion must not overflow to inf in the
+    /// intermediate step when the final result is still representable.
+    ///
+    /// Old path: `v * src_scale` → `1e292 * 1e24` → inf before dividing.
+    /// Fixed:    scale only the smaller-scale side by ratio ≤ 1.
+    ///
+    /// LightYear scale ≈ 9.461e15 m, Yottameter scale = 1e24 m.
+    /// 1e292 Ym ≈ 1.057e300 ly (finite, < f64::MAX ≈ 1.798e308).
+    #[test]
+    fn test_convert_large_magnitude_no_intermediate_overflow() {
+        let result = convert_value(1e292, UnitId::Yottameter, UnitId::LightYear);
+        let result = result.expect("conversion must succeed");
+        assert!(
+            result.is_finite(),
+            "1e292 Ym → ly must be finite, got {result}"
+        );
+        // Cross-check against the expected value (1e292 * (1e24 / METERS_PER_LY))
+        let meters_per_ly: f64 = 299_792_458.0 * 86_400.0 * 365.25;
+        let expected = 1e292 * (1e24 / meters_per_ly);
+        assert!(
+            (result / expected - 1.0).abs() < 1e-10,
+            "expected ~{expected:e}, got {result:e}"
+        );
+    }
+
+    /// Regression: the reverse direction (smaller → larger scale) must also
+    /// stay finite for large magnitudes.
+    #[test]
+    fn test_convert_large_magnitude_reverse_no_intermediate_overflow() {
+        // 1e300 ly → Ym: ly has smaller scale, Ym has larger scale.
+        // The fixed path divides by (dst_scale / src_scale) ≤ 1 from the src side.
+        let result = convert_value(1e300, UnitId::LightYear, UnitId::Yottameter);
+        let result = result.expect("conversion must succeed");
+        // 1e300 ly * METERS_PER_LY / 1e24 ≈ 9.46e291, which is finite.
+        assert!(
+            result.is_finite(),
+            "1e300 ly → Ym must be finite, got {result}"
+        );
     }
 }

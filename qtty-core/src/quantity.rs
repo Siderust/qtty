@@ -174,8 +174,12 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
         if (a >= S::ZERO) == (b >= S::ZERO) {
             let ha = a / two;
             let hb = b / two;
-            let ra = a - ha * two;
-            let rb = b - hb * two;
+            // For ±∞: a / 2 == a (infinity halved is still infinity), so
+            // `a - ha * two` would compute ∞ − ∞ = NaN.  Treat the
+            // remainder as zero in that case; the half already carries the
+            // full infinite magnitude.
+            let ra = if ha == a { S::ZERO } else { a - ha * two };
+            let rb = if hb == b { S::ZERO } else { b - hb * two };
             Self::new(ha + hb + (ra + rb) / two)
         } else {
             Self::new((a + b) / two)

@@ -709,6 +709,47 @@ mod tests {
         );
     }
 
+    /// Regression: mixed finite/infinite same-sign operands must stay infinite.
+    ///
+    /// The split-half path computed `∞ - ∞ = NaN` for these cases before the fix.
+    #[test]
+    fn mean_pos_infinity_with_finite_stays_infinite() {
+        let inf = TU::INFINITY;
+        let fin = TU::new(1.0);
+        let result = inf.mean(fin);
+        assert!(
+            result.value().is_infinite() && result.value() > 0.0,
+            "+∞.mean(1.0) must be +∞, got {:?}",
+            result.value()
+        );
+        // symmetry
+        let result2 = fin.mean(inf);
+        assert!(
+            result2.value().is_infinite() && result2.value() > 0.0,
+            "1.0.mean(+∞) must be +∞, got {:?}",
+            result2.value()
+        );
+    }
+
+    #[test]
+    fn mean_neg_infinity_with_finite_stays_infinite() {
+        let neg_inf = TU::NEG_INFINITY;
+        let fin = TU::new(-1.0);
+        let result = neg_inf.mean(fin);
+        assert!(
+            result.value().is_infinite() && result.value() < 0.0,
+            "-∞.mean(-1.0) must be -∞, got {:?}",
+            result.value()
+        );
+        // symmetry
+        let result2 = fin.mean(neg_inf);
+        assert!(
+            result2.value().is_infinite() && result2.value() < 0.0,
+            "-1.0.mean(-∞) must be -∞, got {:?}",
+            result2.value()
+        );
+    }
+
     #[cfg(feature = "serde")]
     mod serde_tests {
         use super::*;
