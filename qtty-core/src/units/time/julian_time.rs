@@ -24,6 +24,24 @@ pub type JulianCenturies = Quantity<JulianCentury>;
 /// A constant representing one Julian century.
 pub const JULIAN_CENTURY: JulianCenturies = JulianCenturies::new(1.0);
 
+// ── Conversions: julian time ↔ base time ─────────────────────────────────────
+crate::impl_unit_from_conversions_between!(
+    Attosecond, Femtosecond, Picosecond, Nanosecond, Microsecond, Millisecond,
+    Centisecond, Decisecond, Second, Decasecond, Hectosecond, Kilosecond,
+    Megasecond, Gigasecond, Terasecond, Minute, Hour, Day, Week, Fortnight,
+    Year, Decade, Century, Millennium;
+    JulianYear, JulianCentury
+);
+
+#[cfg(feature = "cross-unit-ops")]
+crate::impl_unit_cross_unit_ops_between!(
+    Attosecond, Femtosecond, Picosecond, Nanosecond, Microsecond, Millisecond,
+    Centisecond, Decisecond, Second, Decasecond, Hectosecond, Kilosecond,
+    Megasecond, Gigasecond, Terasecond, Minute, Hour, Day, Week, Fortnight,
+    Year, Decade, Century, Millennium;
+    JulianYear, JulianCentury
+);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Inventory macro (used by qtty-ffi build.rs)
 // ─────────────────────────────────────────────────────────────────────────────

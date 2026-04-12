@@ -141,6 +141,22 @@ energy_units!(crate::impl_unit_from_conversions);
 #[cfg(feature = "cross-unit-ops")]
 energy_units!(crate::impl_unit_cross_unit_ops);
 
+// ── Cross-feature: customary × fundamental-physics ───────────────────────────
+#[cfg(all(feature = "customary", feature = "fundamental-physics"))]
+crate::__impl_from_each_extra_to_bases!(
+    {Calorie, Kilocalorie}
+    Erg, Electronvolt, Kiloelectronvolt, Megaelectronvolt
+);
+#[cfg(all(
+    feature = "customary",
+    feature = "fundamental-physics",
+    feature = "cross-unit-ops"
+))]
+crate::__impl_cross_ops_each_extra_to_bases!(
+    {Calorie, Kilocalorie}
+    Erg, Electronvolt, Kiloelectronvolt, Megaelectronvolt
+);
+
 // Compile-time check: every base energy unit is registered as BuiltinUnit.
 #[cfg(test)]
 energy_units!(crate::assert_units_are_builtin);
