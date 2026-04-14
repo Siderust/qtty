@@ -149,7 +149,6 @@ where
     }
 }
 
-
 #[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
@@ -224,5 +223,4 @@ mod tests {
 
     // ── Unitless: LowerExp, UpperExp ──────────────────────────────────────────
     // (tests removed — Unitless is no longer a type; same-unit division returns S)
-
 }

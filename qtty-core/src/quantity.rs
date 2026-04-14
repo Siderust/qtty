@@ -5,7 +5,7 @@
 
 use crate::scalar::{Exact, Real, Scalar, Transcendental};
 use crate::unit::Unit;
-use crate::unit_arithmetic::{UnitDiv, UnitMul, QuantityDivOutput};
+use crate::unit_arithmetic::{QuantityDivOutput, UnitDiv, UnitMul};
 use core::cmp::Ordering;
 use core::iter::Sum;
 use core::marker::PhantomData;

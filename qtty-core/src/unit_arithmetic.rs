@@ -28,9 +28,9 @@
 //! regenerating built-in/built-in impls.
 
 use crate::dimension::{DimDiv, DimMul, Dimension};
-use crate::unit::{Per, Prod, Unit};
 use crate::quantity::Quantity;
 use crate::scalar::Scalar;
+use crate::unit::{Per, Prod, Unit};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Core traits
