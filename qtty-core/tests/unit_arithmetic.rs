@@ -241,24 +241,21 @@ fn custom_unit_between_group_self_multiplication() {
 #[test]
 fn same_unit_ratio_asin() {
     let ratio: f64 = Quantity::<Meter>::new(1.0) / Quantity::<Meter>::new(2.0);
-    let angle: Quantity<qtty_core::units::angular::Radian> =
-        Quantity::new(ratio.asin());
+    let angle: Quantity<qtty_core::units::angular::Radian> = Quantity::new(ratio.asin());
     assert!((angle.value() - core::f64::consts::FRAC_PI_6).abs() < 1e-12);
 }
 
 #[test]
 fn same_unit_ratio_acos() {
     let ratio: f64 = Quantity::<Meter>::new(1.0) / Quantity::<Meter>::new(2.0);
-    let angle: Quantity<qtty_core::units::angular::Radian> =
-        Quantity::new(ratio.acos());
+    let angle: Quantity<qtty_core::units::angular::Radian> = Quantity::new(ratio.acos());
     assert!((angle.value() - core::f64::consts::FRAC_PI_3).abs() < 1e-12);
 }
 
 #[test]
 fn same_unit_ratio_atan() {
     let ratio: f64 = Quantity::<Meter>::new(1.0) / Quantity::<Meter>::new(1.0);
-    let angle: Quantity<qtty_core::units::angular::Radian> =
-        Quantity::new(ratio.atan());
+    let angle: Quantity<qtty_core::units::angular::Radian> = Quantity::new(ratio.atan());
     assert!((angle.value() - core::f64::consts::FRAC_PI_4).abs() < 1e-12);
 }
 
