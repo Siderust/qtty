@@ -3,7 +3,7 @@
 
 //! Unit types and traits.
 
-use crate::dimension::{DimDiv, DimMul, Dimension, Dimensionless};
+use crate::dimension::{DimDiv, DimMul, Dimension};
 use crate::scalar::Scalar;
 use crate::Quantity;
 use core::fmt::{Debug, Display, Formatter, LowerExp, Result, UpperExp};
@@ -149,42 +149,6 @@ where
     }
 }
 
-/// Zero-sized marker type for dimensionless quantities.
-///
-/// `Unitless` represents a dimensionless unit with a conversion ratio of 1.0
-/// and an empty symbol. It is used to model same-unit ratios (e.g.,
-/// `Meters / Meters`) as a plain "number-like" `Quantity<Unitless>`.
-///
-/// Unlike a type alias to `f64`, this is a proper zero-sized type, which ensures
-/// that only explicitly constructed `Quantity<Unitless>` values are treated as
-/// dimensionless, not bare `f64` primitives.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-pub struct Unitless;
-
-impl Unit for Unitless {
-    const RATIO: f64 = 1.0;
-    type Dim = Dimensionless;
-    const SYMBOL: &'static str = "";
-}
-
-impl<S: Scalar + Display> Display for Quantity<Unitless, S> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        Display::fmt(&self.value(), f)
-    }
-}
-
-impl<S: Scalar + LowerExp> LowerExp for Quantity<Unitless, S> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        LowerExp::fmt(&self.value(), f)
-    }
-}
-
-impl<S: Scalar + UpperExp> UpperExp for Quantity<Unitless, S> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        UpperExp::fmt(&self.value(), f)
-    }
-}
-
 #[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
@@ -258,23 +222,5 @@ mod tests {
     }
 
     // ── Unitless: LowerExp, UpperExp ──────────────────────────────────────────
-
-    #[test]
-    fn unitless_lower_exp_formats_correctly() {
-        let qty: Quantity<Unitless> = Quantity::new(0.5);
-        let s = format!("{qty:e}");
-        assert!(s.contains("e"), "Expected scientific notation, got: {s}");
-        // No unit symbol for Unitless
-        assert!(
-            !s.contains(' '),
-            "Unitless should not have a space, got: {s}"
-        );
-    }
-
-    #[test]
-    fn unitless_upper_exp_formats_correctly() {
-        let qty: Quantity<Unitless> = Quantity::new(0.5);
-        let s = format!("{qty:E}");
-        assert!(s.contains("E"), "Expected uppercase-E notation, got: {s}");
-    }
+    // (tests removed — Unitless is no longer a type; same-unit division returns S)
 }

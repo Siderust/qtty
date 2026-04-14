@@ -264,9 +264,12 @@ pub type Fortnights = Quantity<Fortnight>;
 /// A constant representing one fortnight.
 pub const FORTNIGHT: Fortnights = Fortnights::new(1.0);
 
-/// Mean tropical year, as a conventional mean length.
+/// Mean Gregorian year (`365.2425 d`).
 ///
-/// Convention used: `365.2425 d`.
+/// This is the **Gregorian calendar mean year** — the average year length
+/// in the proleptic Gregorian calendar (`365 + 97/400 = 365.2425 d`), not the
+/// astronomical mean tropical year (≈ 365.242 19 d).  The two differ by about
+/// 27 seconds per year.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "yr", dimension = Time, ratio = DAYS_PER_GREGORIAN_YEAR * SECONDS_PER_DAY)]
 pub struct Year;
@@ -275,7 +278,7 @@ pub type Years = Quantity<Year>;
 /// A constant representing one year.
 pub const YEAR: Years = Years::new(1.0);
 
-/// Decade (`10` mean tropical years).
+/// Decade (`10` mean Gregorian years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "dec", dimension = Time, ratio = 10.0 * DAYS_PER_GREGORIAN_YEAR * SECONDS_PER_DAY)]
 pub struct Decade;
@@ -284,7 +287,7 @@ pub type Decades = Quantity<Decade>;
 /// A constant representing one decade.
 pub const DECADE: Decades = Decades::new(1.0);
 
-/// Century (`100` mean tropical years).
+/// Century (`100` mean Gregorian years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "c", dimension = Time, ratio = 100.0 * DAYS_PER_GREGORIAN_YEAR * SECONDS_PER_DAY)]
 pub struct Century;
@@ -293,7 +296,7 @@ pub type Centuries = Quantity<Century>;
 /// A constant representing one century.
 pub const CENTURY: Centuries = Centuries::new(1.0);
 
-/// Millennium (`1000` mean tropical years).
+/// Millennium (`1000` mean Gregorian years).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "mill", dimension = Time, ratio = 1000.0 * DAYS_PER_GREGORIAN_YEAR * SECONDS_PER_DAY)]
 pub struct Millennium;
