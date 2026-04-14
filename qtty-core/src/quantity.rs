@@ -4,8 +4,8 @@
 //! Quantity type and its implementations.
 
 use crate::scalar::{Exact, Real, Scalar, Transcendental};
-use crate::unit::{Unit, Unitless};
-use crate::unit_arithmetic::{UnitDiv, UnitMul};
+use crate::unit::Unit;
+use crate::unit_arithmetic::{QuantityDivOutput, UnitDiv, UnitMul};
 use core::cmp::Ordering;
 use core::iter::Sum;
 use core::marker::PhantomData;
@@ -174,8 +174,12 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
         if (a >= S::ZERO) == (b >= S::ZERO) {
             let ha = a / two;
             let hb = b / two;
-            let ra = a - ha * two;
-            let rb = b - hb * two;
+            // For ±∞: a / 2 == a (infinity halved is still infinity), so
+            // `a - ha * two` would compute ∞ − ∞ = NaN.  Treat the
+            // remainder as zero in that case; the half already carries the
+            // full infinite magnitude.
+            let ra = if ha == a { S::ZERO } else { a - ha * two };
+            let rb = if hb == b { S::ZERO } else { b - hb * two };
             Self::new(ha + hb + (ra + rb) / two)
         } else {
             Self::new((a + b) / two)
@@ -194,29 +198,28 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
         Self::new(S::ONE)
     }
 
-    /// Erases the unit tag, producing `Quantity<Unitless, S>`.
+    /// Erases the unit tag, returning the raw stored scalar `S`.
     ///
-    /// **This is a lossy operation**: the raw stored number is copied as-is,
+    /// **This is a lossy operation**: the raw stored number is returned as-is,
     /// without any normalization to the canonical (SI) unit. Use this only
     /// when you explicitly intend to discard dimensional information, e.g.
     /// for adapter layers or debugging.
     ///
     /// For a true dimensionless ratio, divide two quantities of the same unit
-    /// instead (`a / b` where both are `Quantity<U>`).
+    /// instead (`a / b` where both are `Quantity<U, S>`).
     ///
     /// # Example
     ///
     /// ```rust
     /// use qtty_core::length::Kilometers;
-    /// use qtty_core::{Quantity, Unitless};
     ///
     /// let km = Kilometers::new(1.0);
-    /// let u: Quantity<Unitless> = km.erase_unit_raw();
-    /// assert_eq!(u.value(), 1.0); // raw stored number, NOT 1000.0
+    /// let raw: f64 = km.erase_unit_raw();
+    /// assert_eq!(raw, 1.0); // raw stored number, NOT 1000.0
     /// ```
     #[inline]
-    pub fn erase_unit_raw(self) -> Quantity<Unitless, S> {
-        Quantity::new(self.0)
+    pub fn erase_unit_raw(self) -> S {
+        self.0
     }
 }
 
@@ -351,9 +354,15 @@ impl<U: Unit, S: Real> Quantity<U, S> {
     /// ```
     #[inline]
     pub fn eq_unit<V: Unit<Dim = U::Dim>>(self, other: &Quantity<V, S>) -> bool {
-        let lhs = self.0 * S::from_f64(U::RATIO);
-        let rhs = other.value() * S::from_f64(V::RATIO);
-        lhs == rhs
+        // Always multiply the value in the smaller-RATIO unit by the ratio
+        // (smaller/larger) ≤ 1, preventing overflow for near-MAX values while
+        // keeping both `a.eq_unit(&b)` and `b.eq_unit(&a)` numerically
+        // identical (preserving symmetry).
+        if U::RATIO >= V::RATIO {
+            self.0 == other.value() * S::from_f64(V::RATIO / U::RATIO)
+        } else {
+            self.0 * S::from_f64(U::RATIO / V::RATIO) == other.value()
+        }
     }
 
     /// Compares with a quantity of a different unit in the same dimension.
@@ -373,9 +382,12 @@ impl<U: Unit, S: Real> Quantity<U, S> {
     /// ```
     #[inline]
     pub fn cmp_unit<V: Unit<Dim = U::Dim>>(self, other: &Quantity<V, S>) -> Option<Ordering> {
-        let lhs = self.0 * S::from_f64(U::RATIO);
-        let rhs = other.value() * S::from_f64(V::RATIO);
-        lhs.partial_cmp(&rhs)
+        if U::RATIO >= V::RATIO {
+            self.0
+                .partial_cmp(&(other.value() * S::from_f64(V::RATIO / U::RATIO)))
+        } else {
+            (self.0 * S::from_f64(U::RATIO / V::RATIO)).partial_cmp(&other.value())
+        }
     }
 }
 
@@ -848,17 +860,22 @@ impl<'a, U: Unit, S: Scalar> Sum<&'a Quantity<U, S>> for Quantity<U, S> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Division delegating to UnitDiv
+// Division delegating to UnitDiv + QuantityDivOutput
 // ─────────────────────────────────────────────────────────────────────────────
 
+// When the two units are the same (`N = D`), `UnitDiv` returns `SameDivOutput`
+// and `QuantityDivOutput` maps that to `S` — the raw scalar.
+// For different units, `UnitDiv` returns a composite unit and `QuantityDivOutput`
+// wraps it in `Quantity<..., S>`.
 impl<N: Unit, D: Unit, S: Scalar> Div<Quantity<D, S>> for Quantity<N, S>
 where
     N: UnitDiv<D>,
+    <N as UnitDiv<D>>::Output: QuantityDivOutput<S>,
 {
-    type Output = Quantity<<N as UnitDiv<D>>::Output, S>;
+    type Output = <<N as UnitDiv<D>>::Output as QuantityDivOutput<S>>::Output;
     #[inline]
     fn div(self, rhs: Quantity<D, S>) -> Self::Output {
-        Quantity::new(self.0 / rhs.0)
+        <<N as UnitDiv<D>>::Output as QuantityDivOutput<S>>::wrap(self.0 / rhs.0)
     }
 }
 
@@ -879,20 +896,29 @@ where
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Special methods for Unitless quantities
+// Trig helpers for dimensionless quantities
 // ─────────────────────────────────────────────────────────────────────────────
 
-impl<S: Transcendental> Quantity<Unitless, S> {
+impl<U, S> Quantity<U, S>
+where
+    U: Unit<Dim = crate::dimension::Dimensionless>,
+    S: Transcendental,
+{
     /// Arc sine returning a typed angle in radians.
+    ///
+    /// Applicable to any quantity whose dimension is `Dimensionless`, such as
+    /// `Quantity<Per<Meter, Meter>, f64>` — the result of dividing different
+    /// length units that share the same dimension.
     ///
     /// ```rust
     /// use qtty_core::angular::{Degree, Radian};
-    /// use qtty_core::length::Meters;
-    /// use qtty_core::Quantity;
+    /// use qtty_core::length::{Kilometer, Meter, Kilometers, Meters};
+    /// use qtty_core::{Per, Quantity};
     ///
-    /// let ratio = Meters::new(1.0) / Meters::new(2.0);
-    /// let angle: Quantity<Radian> = ratio.asin_angle();
-    /// assert!((angle.value() - core::f64::consts::FRAC_PI_6).abs() < 1e-12);
+    /// // Cross-unit ratio: 1 km / 2000 m  =  0.5  (dimensionless)
+    /// let km_per_m: Quantity<Per<Kilometer, Meter>> = Quantity::new(0.5);
+    /// let angle: Quantity<Radian> = km_per_m.asin_angle();
+    /// assert!((angle.value() - 0.5_f64.asin()).abs() < 1e-12);
     ///
     /// // Convert to degrees:
     /// let deg: Quantity<Degree> = angle.to();

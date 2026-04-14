@@ -78,7 +78,7 @@ mod tests {
     fn deg_per_day_to_deg_per_year() {
         let f: AngularRate<Degree, Day> = AngularRate::new(1.0);
         let f_year: AngularRate<Degree, Year> = f.to();
-        // 1 deg/day = 365.2425 deg/year (tropical year)
+        // 1 deg/day = 365.2425 deg/year (Gregorian year)
         assert_relative_eq!(f_year.value(), 365.2425, max_relative = 1e-6);
     }
 

@@ -305,6 +305,58 @@ fn build_inventories() -> Vec<InventoryConfig> {
             dimension: "Volume",
             ffi_name_prefix: None,
         },
+        // ── Acceleration units ──────────────────────────────────────────────
+        InventoryConfig {
+            macro_name: "acceleration_units",
+            file: "acceleration.rs",
+            module_prefix: "qtty::acceleration",
+            dimension: "Acceleration",
+            ffi_name_prefix: None,
+        },
+        // ── Force units ─────────────────────────────────────────────────────
+        InventoryConfig {
+            macro_name: "force_units",
+            file: "force.rs",
+            module_prefix: "qtty::force",
+            dimension: "Force",
+            ffi_name_prefix: None,
+        },
+        InventoryConfig {
+            macro_name: "force_fundamental_physics_units",
+            file: "force.rs",
+            module_prefix: "qtty::force",
+            dimension: "Force",
+            ffi_name_prefix: None,
+        },
+        InventoryConfig {
+            macro_name: "force_customary_units",
+            file: "force.rs",
+            module_prefix: "qtty::force",
+            dimension: "Force",
+            ffi_name_prefix: None,
+        },
+        // ── Energy units ────────────────────────────────────────────────────
+        InventoryConfig {
+            macro_name: "energy_units",
+            file: "energy.rs",
+            module_prefix: "qtty::energy",
+            dimension: "Energy",
+            ffi_name_prefix: None,
+        },
+        InventoryConfig {
+            macro_name: "energy_fundamental_physics_units",
+            file: "energy.rs",
+            module_prefix: "qtty::energy",
+            dimension: "Energy",
+            ffi_name_prefix: None,
+        },
+        InventoryConfig {
+            macro_name: "energy_customary_units",
+            file: "energy.rs",
+            module_prefix: "qtty::energy",
+            dimension: "Energy",
+            ffi_name_prefix: None,
+        },
     ]
 }
 

@@ -79,10 +79,13 @@ pub struct Dyne;
 #[cfg(feature = "fundamental-physics")]
 pub type Dynes = Quantity<Dyne>;
 
-/// Pound-force (1 lbf = g₀ × 1 lb ≈ 4.448 222 N).
+/// Pound-force (1 lbf = g₀ × 1 lb = 4.448 221 615 260 5 N exactly).
+///
+/// Derived from the exact definitions: `1 lb = 0.453 592 37 kg` and
+/// `g₀ = 9.806 65 m/s²`. NIST SP 1247 conversion factor.
 #[cfg(feature = "customary")]
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "lbf", dimension = Force, ratio = 4.448_222_615_260_5)]
+#[unit(symbol = "lbf", dimension = Force, ratio = 4.448_221_615_260_5)]
 pub struct PoundForce;
 /// A quantity measured in pounds-force.
 #[cfg(feature = "customary")]
@@ -134,6 +137,26 @@ crate::__impl_cross_ops_each_extra_to_bases!(
 #[cfg(test)]
 force_units!(crate::assert_units_are_builtin);
 
+/// Canonical list of `fundamental-physics`-gated force units (CGS dyne).
+#[cfg(feature = "fundamental-physics")]
+#[macro_export]
+#[doc(hidden)]
+macro_rules! force_fundamental_physics_units {
+    ($cb:path) => {
+        $cb!(Dyne);
+    };
+}
+
+/// Canonical list of `customary`-gated force units (pound-force).
+#[cfg(feature = "customary")]
+#[macro_export]
+#[doc(hidden)]
+macro_rules! force_customary_units {
+    ($cb:path) => {
+        $cb!(PoundForce);
+    };
+}
+
 #[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
@@ -164,7 +187,7 @@ mod tests {
     #[test]
     #[cfg(feature = "customary")]
     fn newton_to_lbf() {
-        let n = Newtons::new(4.448_222_615_260_5);
+        let n = Newtons::new(4.448_221_615_260_5);
         let lbf: PoundsForce = n.to();
         assert_abs_diff_eq!(lbf.value(), 1.0, epsilon = 1e-9);
     }

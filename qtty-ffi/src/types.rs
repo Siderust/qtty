@@ -100,6 +100,12 @@ pub enum DimensionId {
     Area = 6,
     /// Volume dimension (e.g., cubic metres, litres).
     Volume = 7,
+    /// Acceleration dimension (e.g., m/s², standard gravity).
+    Acceleration = 8,
+    /// Force dimension (e.g., newtons, kilonewtons).
+    Force = 9,
+    /// Energy dimension (e.g., joules, kilojoules).
+    Energy = 10,
 }
 
 // =============================================================================
@@ -580,7 +586,10 @@ mod tests {
     fn unit_id_from_u32_rejects_invalid() {
         assert_eq!(UnitId::from_u32(0), None);
         assert_eq!(UnitId::from_u32(9999), None);
-        assert_eq!(UnitId::from_u32(80000), None);
+        // These ranges are unassigned as of the current discriminants.csv.
+        // 80002+ (only 80000-80001 assigned for Acceleration)
+        assert_eq!(UnitId::from_u32(80002), None);
+        // 99999 is in Force range but unassigned (90000-92000 are used)
         assert_eq!(UnitId::from_u32(99999), None);
         assert_eq!(UnitId::from_u32(u32::MAX), None);
     }

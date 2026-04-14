@@ -1336,7 +1336,17 @@ mod rational_impl {
 
         #[inline]
         fn from_f64_approx(value: f64) -> Self {
-            Rational64::approximate_float(value).unwrap_or(Rational64::new_raw(0, 1))
+            Rational64::approximate_float(value).unwrap_or_else(|| {
+                // Saturate, matching integer `as` semantics:
+                // NaN → 0, ±∞ / out-of-range → MIN or MAX.
+                if value.is_nan() {
+                    Rational64::new_raw(0, 1)
+                } else if value > 0.0 {
+                    Rational64::new_raw(i64::MAX, 1)
+                } else {
+                    Rational64::new_raw(i64::MIN, 1)
+                }
+            })
         }
 
         #[inline]
@@ -1398,7 +1408,15 @@ mod rational_impl {
 
         #[inline]
         fn from_f64_approx(value: f64) -> Self {
-            Rational32::approximate_float(value).unwrap_or(Rational32::new_raw(0, 1))
+            Rational32::approximate_float(value).unwrap_or_else(|| {
+                if value.is_nan() {
+                    Rational32::new_raw(0, 1)
+                } else if value > 0.0 {
+                    Rational32::new_raw(i32::MAX, 1)
+                } else {
+                    Rational32::new_raw(i32::MIN, 1)
+                }
+            })
         }
 
         #[inline]

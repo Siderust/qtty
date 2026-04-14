@@ -9,7 +9,7 @@
 use qtty_core::length::{Kilometer, Meter};
 use qtty_core::scalar::{Exact, IntegerScalar};
 use qtty_core::time::Second;
-use qtty_core::{Per, Quantity, QuantityI32, QuantityI64, Unitless};
+use qtty_core::{Per, Quantity, QuantityI32, QuantityI64};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Basic construction and value access
@@ -211,11 +211,11 @@ fn test_i32_per_display() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 #[test]
-fn test_i32_same_unit_division_gives_unitless() {
+fn test_i32_same_unit_division_gives_raw_scalar() {
     let a = Quantity::<Meter, i32>::new(10);
     let b = Quantity::<Meter, i32>::new(2);
-    let unitless: Quantity<Unitless, i32> = a / b;
-    assert_eq!(unitless.value(), 5);
+    let ratio: i32 = a / b;
+    assert_eq!(ratio, 5);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
