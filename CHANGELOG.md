@@ -122,6 +122,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
   `b == a` after a floating-point round-trip.
 
 ### Fixed
+- **Pound-force value corrected** (`qtty-core::force`, feature `customary`) —
+  `PoundForce::RATIO` was `4.448_222_615_260_5` (typo in digit 6) instead of the
+  exact NIST SP 1247 value `4.448_221_615_260_5 N` (= `g₀ × 1 lb`). The error
+  was one part per million and affected all conversions involving `PoundForce`.
+  The accompanying test and docstring were updated to match.
+
+- **Year/Decade/Century/Millennium docstrings** (`qtty-core::time`) — doc
+  comments incorrectly described the `Year` struct and its multiples as *"mean
+  tropical year"*. The ratio used (`365.242 5 d = DAYS_PER_GREGORIAN_YEAR`) is the
+  **Gregorian calendar mean year** (`365 + 97/400`), not the astronomical mean
+  tropical year (≈ 365.242 19 d, which differs by ~27 s/yr). Docstrings for
+  `Year`, `Decade`, `Century`, and `Millennium` now correctly say "mean Gregorian
+  year" and explain the distinction. A stale `// (tropical year)` test comment in
+  `angular_rate.rs` was corrected to match.
+
+- **Removed `unitless.rs` tombstone file** (`qtty-core`) — a file containing only
+  a comment ("The `Unitless` type has been removed") was left dangling after the
+  removal of the `Unitless` type in a prior release. It was never included in any
+  `mod` declaration and served no purpose; deleted to avoid confusion.
+
 - **`f32` `to_const` precision** — ratio conversion for `f32`-backed quantities
   now performs the `U::RATIO / T::RATIO` division in `f64` before casting to
   `f32`, matching the `f64` code path and avoiding doubled rounding error from

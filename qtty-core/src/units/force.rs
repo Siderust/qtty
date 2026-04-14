@@ -79,10 +79,13 @@ pub struct Dyne;
 #[cfg(feature = "fundamental-physics")]
 pub type Dynes = Quantity<Dyne>;
 
-/// Pound-force (1 lbf = g₀ × 1 lb ≈ 4.448 222 N).
+/// Pound-force (1 lbf = g₀ × 1 lb = 4.448 221 615 260 5 N exactly).
+///
+/// Derived from the exact definitions: `1 lb = 0.453 592 37 kg` and
+/// `g₀ = 9.806 65 m/s²`. NIST SP 1247 conversion factor.
 #[cfg(feature = "customary")]
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "lbf", dimension = Force, ratio = 4.448_222_615_260_5)]
+#[unit(symbol = "lbf", dimension = Force, ratio = 4.448_221_615_260_5)]
 pub struct PoundForce;
 /// A quantity measured in pounds-force.
 #[cfg(feature = "customary")]
@@ -184,7 +187,7 @@ mod tests {
     #[test]
     #[cfg(feature = "customary")]
     fn newton_to_lbf() {
-        let n = Newtons::new(4.448_222_615_260_5);
+        let n = Newtons::new(4.448_221_615_260_5);
         let lbf: PoundsForce = n.to();
         assert_abs_diff_eq!(lbf.value(), 1.0, epsilon = 1e-9);
     }
