@@ -329,10 +329,34 @@ impl<U: Unit, S: Real> Quantity<U, S> {
         self.0.sqrt()
     }
 
+    /// Returns the largest integer quantity less than or equal to this value.
+    #[inline]
+    pub fn floor(self) -> Self {
+        Self::new(self.0.floor())
+    }
+
     /// Returns the smallest integer quantity greater than or equal to this value.
     #[inline]
     pub fn ceil(self) -> Self {
         Self::new(self.0.ceil())
+    }
+
+    /// Returns the nearest integer quantity to this value.
+    #[inline]
+    pub fn round(self) -> Self {
+        Self::new(self.0.round())
+    }
+
+    /// Returns the integer part of this quantity.
+    #[inline]
+    pub fn trunc(self) -> Self {
+        Self::new(self.0.trunc())
+    }
+
+    /// Returns the fractional part of this quantity.
+    #[inline]
+    pub fn fract(self) -> Self {
+        Self::new(self.0.fract())
     }
 
     /// Checks equality with a quantity of a different unit in the same dimension.
