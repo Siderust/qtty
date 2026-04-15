@@ -5,9 +5,14 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - yyyy-mm-dd
+## [Unreleased] - 2026-04-15
 
 ### Added
+
+- **Quantity-level real-number rounding helpers** (`qtty-core`, re-exported by
+  `qtty`) — `Quantity<U, S>` for `S: Real` now exposes `floor()`, `ceil()`,
+  `round()`, `trunc()`, and `fract()`, matching the scalar `Real` surface while
+  preserving unit types through common rounding workflows.
 
 - **`assert_units_are_builtin!`** (`qtty-core`, `#[doc(hidden)]`) — compile-time
   assertion macro driven by each dimension's inventory macro under `#[cfg(test)]`.
@@ -75,6 +80,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - **Breaking:** Removed deprecated `Quantity<Unitless>::asin()`, `acos()`, and `atan()` scalar-returning methods. Use `asin_angle()`, `acos_angle()`, and `atan_angle()` instead.
 
 ### Changed
+- Downstream crates can now keep more rounding and timestamp-normalization logic
+  in typed quantities instead of erasing units to raw floating-point values for
+  `floor`/`ceil`/`round`/fractional extraction.
+
 - **CODATA 2018 → 2022** (`fundamental-physics`) — Updated Bohr radius,
   classical electron radius, and electron reduced Compton wavelength to the
   CODATA 2022 recommended values. Planck length and atomic mass unit are
