@@ -62,6 +62,32 @@ fn quantity_ceil() {
 }
 
 #[test]
+fn quantity_floor() {
+    assert_eq!(TU::new(3.7).floor().value(), 3.0);
+    assert_eq!(TU::new(-3.7).floor().value(), -4.0);
+    assert_eq!(TU::new(5.0).floor().value(), 5.0);
+}
+
+#[test]
+fn quantity_round() {
+    assert_eq!(TU::new(3.5).round().value(), 4.0);
+    assert_eq!(TU::new(3.4).round().value(), 3.0);
+    assert_eq!(TU::new(-3.5).round().value(), -4.0);
+}
+
+#[test]
+fn quantity_trunc() {
+    assert_eq!(TU::new(3.9).trunc().value(), 3.0);
+    assert_eq!(TU::new(-3.9).trunc().value(), -3.0);
+}
+
+#[test]
+fn quantity_fract() {
+    assert!((TU::new(3.75).fract().value() - 0.75).abs() < 1e-12);
+    assert!((TU::new(-3.75).fract().value() + 0.75).abs() < 1e-12);
+}
+
+#[test]
 fn quantity_from_f64() {
     let q: TU = 123.456.into();
     assert_eq!(q.value(), 123.456);
