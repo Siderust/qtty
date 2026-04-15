@@ -142,6 +142,12 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
         Self::new(self.0.max(other.0))
     }
 
+    /// Clamps this quantity to `[min_val, max_val]`.
+    #[inline]
+    pub fn clamp(self, min_val: Self, max_val: Self) -> Self {
+        self.max(min_val).min(max_val)
+    }
+
     /// Returns the arithmetic mean (midpoint) of this quantity and another.
     ///
     /// For integer-backed quantities this uses integer division semantics
