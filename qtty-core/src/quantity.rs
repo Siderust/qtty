@@ -142,6 +142,12 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
         Self::new(self.0.max(other.0))
     }
 
+    /// Clamps this quantity to `[min_val, max_val]`.
+    #[inline]
+    pub fn clamp(self, min_val: Self, max_val: Self) -> Self {
+        self.max(min_val).min(max_val)
+    }
+
     /// Returns the arithmetic mean (midpoint) of this quantity and another.
     ///
     /// For integer-backed quantities this uses integer division semantics
@@ -329,10 +335,34 @@ impl<U: Unit, S: Real> Quantity<U, S> {
         self.0.sqrt()
     }
 
+    /// Returns the largest integer quantity less than or equal to this value.
+    #[inline]
+    pub fn floor(self) -> Self {
+        Self::new(self.0.floor())
+    }
+
     /// Returns the smallest integer quantity greater than or equal to this value.
     #[inline]
     pub fn ceil(self) -> Self {
         Self::new(self.0.ceil())
+    }
+
+    /// Returns the nearest integer quantity to this value.
+    #[inline]
+    pub fn round(self) -> Self {
+        Self::new(self.0.round())
+    }
+
+    /// Returns the integer part of this quantity.
+    #[inline]
+    pub fn trunc(self) -> Self {
+        Self::new(self.0.trunc())
+    }
+
+    /// Returns the fractional part of this quantity.
+    #[inline]
+    pub fn fract(self) -> Self {
+        Self::new(self.0.fract())
     }
 
     /// Checks equality with a quantity of a different unit in the same dimension.
