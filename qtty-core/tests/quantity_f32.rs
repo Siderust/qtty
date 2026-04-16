@@ -136,6 +136,32 @@ fn f32_quantity_ceil() {
 }
 
 #[test]
+fn f32_quantity_floor() {
+    assert_eq!(TU32::new(3.7).floor().value(), 3.0_f32);
+    assert_eq!(TU32::new(-3.7).floor().value(), -4.0_f32);
+    assert_eq!(TU32::new(5.0).floor().value(), 5.0_f32);
+}
+
+#[test]
+fn f32_quantity_round() {
+    assert_eq!(TU32::new(3.5).round().value(), 4.0_f32);
+    assert_eq!(TU32::new(3.4).round().value(), 3.0_f32);
+    assert_eq!(TU32::new(-3.5).round().value(), -4.0_f32);
+}
+
+#[test]
+fn f32_quantity_trunc() {
+    assert_eq!(TU32::new(3.9).trunc().value(), 3.0_f32);
+    assert_eq!(TU32::new(-3.9).trunc().value(), -3.0_f32);
+}
+
+#[test]
+fn f32_quantity_fract() {
+    assert!((TU32::new(3.75).fract().value() - 0.75).abs() < 1e-6);
+    assert!((TU32::new(-3.75).fract().value() + 0.75).abs() < 1e-6);
+}
+
+#[test]
 fn f32_quantity_cast() {
     let q = TU32::new(42.5);
     let q_f64: Quantity<TestUnit, f64> = q.cast();
