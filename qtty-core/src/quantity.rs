@@ -7,6 +7,7 @@ use crate::scalar::{Exact, Real, Scalar, Transcendental};
 use crate::unit::Unit;
 use crate::unit_arithmetic::{QuantityDivOutput, UnitDiv, UnitMul};
 use core::cmp::Ordering;
+use core::hash::{Hash, Hasher};
 use core::iter::Sum;
 use core::marker::PhantomData;
 use core::ops::*;
@@ -145,6 +146,10 @@ impl<U: Unit, S: Scalar> Quantity<U, S> {
     /// Clamps this quantity to `[min_val, max_val]`.
     #[inline]
     pub fn clamp(self, min_val: Self, max_val: Self) -> Self {
+        debug_assert!(
+            min_val.0 <= max_val.0,
+            "Quantity::clamp requires min_val <= max_val"
+        );
         self.max(min_val).min(max_val)
     }
 
@@ -857,6 +862,14 @@ impl<U: Unit, S: Scalar> PartialOrd for Quantity<U, S> {
 
 // Eq for scalar types that support total equality (integers, rationals, decimals)
 impl<U: Unit, S: Scalar + Eq> Eq for Quantity<U, S> {}
+
+// Hash for scalar types that support hashing, enabling Quantity in HashMap/HashSet.
+impl<U: Unit, S: Scalar + Hash> Hash for Quantity<U, S> {
+    #[inline]
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.hash(state);
+    }
+}
 
 // Ord for scalar types that support total ordering (integers, rationals, decimals)
 impl<U: Unit, S: Scalar + Ord> Ord for Quantity<U, S> {

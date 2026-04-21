@@ -152,6 +152,21 @@ fn const_min() {
 }
 
 #[test]
+fn quantity_clamp_with_valid_bounds() {
+    let q = TU::new(7.5);
+    assert_eq!(q.clamp(TU::new(0.0), TU::new(10.0)).value(), 7.5);
+    assert_eq!(q.clamp(TU::new(8.0), TU::new(10.0)).value(), 8.0);
+    assert_eq!(q.clamp(TU::new(0.0), TU::new(7.0)).value(), 7.0);
+}
+
+#[cfg(debug_assertions)]
+#[test]
+#[should_panic(expected = "Quantity::clamp requires min_val <= max_val")]
+fn quantity_clamp_panics_on_inverted_bounds_in_debug() {
+    let _ = TU::new(5.0).clamp(TU::new(10.0), TU::new(0.0));
+}
+
+#[test]
 fn operator_add() {
     let a = TU::new(3.0);
     let b = TU::new(7.0);

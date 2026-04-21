@@ -312,7 +312,8 @@ impl Degrees {
 
     /// Construct from explicit sign and magnitude components.
     ///
-    /// `sign` should be −1, 0, or +1 (0 treated as +1 unless all components are zero).
+    /// `sign < 0` produces a negative result; any other value (including `0`)
+    /// produces a positive result.
     pub const fn from_dms_sign(sign: i8, deg: u32, min: u32, sec: f64) -> Self {
         let s = if sign < 0 { -1.0 } else { 1.0 };
         let total = (deg as f64) + (min as f64) / 60.0 + (sec / 3600.0);
@@ -782,6 +783,12 @@ mod tests {
         let neg = Degrees::from_dms_sign(-1, 45, 30, 0.0);
         assert_abs_diff_eq!(pos.value(), 45.5, epsilon = 1e-12);
         assert_abs_diff_eq!(neg.value(), -45.5, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn degrees_from_dms_sign_zero_is_positive() {
+        let zero_sign = Degrees::from_dms_sign(0, 45, 30, 0.0);
+        assert_abs_diff_eq!(zero_sign.value(), 45.5, epsilon = 1e-12);
     }
 
     #[test]

@@ -10,6 +10,7 @@ use qtty_core::length::{Kilometer, Meter};
 use qtty_core::scalar::{Exact, IntegerScalar};
 use qtty_core::time::Second;
 use qtty_core::{Per, Quantity, QuantityI32, QuantityI64};
+use std::collections::{HashMap, HashSet};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Basic construction and value access
@@ -154,6 +155,20 @@ fn test_i64_rem() {
 fn test_i32_partial_eq_scalar() {
     let a = Quantity::<Meter, i32>::new(42);
     assert_eq!(a, Quantity::<Meter, i32>::new(42));
+}
+
+#[test]
+fn test_i32_quantity_hashmap_hashset_keys() {
+    let a = Quantity::<Meter, i32>::new(42);
+    let b = Quantity::<Meter, i32>::new(42);
+
+    let mut set = HashSet::new();
+    set.insert(a);
+    assert!(set.contains(&b));
+
+    let mut map = HashMap::new();
+    map.insert(a, "answer");
+    assert_eq!(map.get(&b), Some(&"answer"));
 }
 
 #[test]
