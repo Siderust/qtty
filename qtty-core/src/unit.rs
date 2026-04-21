@@ -16,6 +16,10 @@ use core::marker::PhantomData;
 ///   because `1 km = 1000 m`.
 ///
 /// * `SYMBOL` is the printable string (e.g. `"m"` or `"km"`).
+///   For some composite generic units (such as [`Per`] and [`Prod`]), this is
+///   currently an empty string because Rust does not yet support composing
+///   generic unit symbols as a `const`. Use `Display`/`LowerExp`/`UpperExp` on
+///   [`Quantity`] for user-facing formatting of composite units.
 ///
 /// * `Dim` ties the unit to its underlying [`Dimension`].
 ///
@@ -62,6 +66,8 @@ where
 {
     const RATIO: f64 = N::RATIO / D::RATIO;
     type Dim = <N::Dim as DimDiv<D::Dim>>::Output;
+    // Generic const-string composition is not yet available; formatted symbols
+    // are provided by Display/LowerExp/UpperExp impls for Quantity<Per<...>, S>.
     const SYMBOL: &'static str = "";
 }
 
@@ -113,6 +119,8 @@ where
 {
     const RATIO: f64 = A::RATIO * B::RATIO;
     type Dim = <A::Dim as DimMul<B::Dim>>::Output;
+    // Generic const-string composition is not yet available; formatted symbols
+    // are provided by Display/LowerExp/UpperExp impls for Quantity<Prod<...>, S>.
     const SYMBOL: &'static str = "";
 }
 
