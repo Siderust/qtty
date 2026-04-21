@@ -47,10 +47,10 @@
 //!
 //! ```rust
 //! use qtty::length::Meters;
-//! use qtty_ffi::{QttyQuantity, UnitId};
+//! use qtty_ffi::{QttyQuantity, QttyStatus, UnitId};
 //!
 //! let time_qty = QttyQuantity::new(60.0, UnitId::Second);
-//! let result: Result<Meters, i32> = time_qty.try_into();
+//! let result: Result<Meters, QttyStatus> = time_qty.try_into();
 //! assert!(result.is_err());
 //! ```
 
@@ -118,8 +118,8 @@ mod tests {
     fn test_incompatible_conversion_fails() {
         let meters = qtty::length::Meters::new(100.0);
         let ffi: QttyQuantity = meters.into();
-        let result: Result<qtty::time::Seconds, i32> = ffi.try_into();
-        assert_eq!(result, Err(QttyStatus::IncompatibleDim as i32));
+        let result: Result<qtty::time::Seconds, QttyStatus> = ffi.try_into();
+        assert_eq!(result, Err(QttyStatus::IncompatibleDim));
     }
 
     #[test]
