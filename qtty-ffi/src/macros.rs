@@ -106,12 +106,12 @@ macro_rules! impl_unit_ffi {
         }
 
         impl core::convert::TryFrom<$crate::QttyQuantity> for $qty_type {
-            type Error = i32;
+            type Error = $crate::QttyStatus;
 
             #[inline]
             fn try_from(qty: $crate::QttyQuantity) -> Result<Self, Self::Error> {
-                let src_unit = $crate::UnitId::from_u32(qty.unit)
-                    .ok_or($crate::QttyStatus::UnknownUnit as i32)?;
+                let src_unit =
+                    $crate::UnitId::from_u32(qty.unit).ok_or($crate::QttyStatus::UnknownUnit)?;
 
                 // If already the right unit, just wrap
                 if src_unit == $unit_id {
