@@ -455,6 +455,11 @@ pub mod unit {
     pub use qtty_core::units::volume::{CubicFoot, CubicInch, UsFluidOunce, UsGallon};
 }
 
+/// Plural alias for [`unit`]. `qtty::units::Meter` resolves to the same
+/// type-level marker as `qtty::unit::Meter`, mirroring the user-facing
+/// expectation that singular and plural module names both work.
+pub use unit as units;
+
 /// Velocity quantities represented as one unit divided by another.
 pub mod velocity {
     pub use qtty_core::units::velocity::{Velocity, VelocityUnit};
