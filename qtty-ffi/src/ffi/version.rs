@@ -3,17 +3,15 @@
 
 /// Returns the FFI ABI version (major*10000 + minor*100 + patch).
 ///
-/// Current version: 0.6.0 → 600
+/// Current version: 0.6.1 → 601
 ///
-/// # Breaking change (0.6.0)
-///
-/// `QttyQuantity.unit` and `QttyDerivedQuantity.{numerator,denominator}` are
-/// now raw `u32` instead of `UnitId` enums.  This eliminates UB from invalid
-/// discriminants constructed by C callers.
+/// The 0.6.x ABI uses raw `u32` unit identifiers in `QttyQuantity` and
+/// `QttyDerivedQuantity` so C callers cannot construct invalid Rust enum
+/// discriminants across the FFI boundary.
 #[allow(clippy::erasing_op, clippy::identity_op)]
 #[no_mangle]
 pub extern "C" fn qtty_ffi_version() -> u32 {
-    0 * 10000 + 6 * 100 + 0
+    0 * 10000 + 6 * 100 + 1
 }
 
 #[cfg(test)]
@@ -22,6 +20,6 @@ mod tests {
 
     #[test]
     fn test_version() {
-        assert_eq!(qtty_ffi_version(), 600);
+        assert_eq!(qtty_ffi_version(), 601);
     }
 }

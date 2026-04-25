@@ -5,15 +5,15 @@
 //!
 //! Generates FFI bindings by combining:
 //! 1. Stable discriminant values from `discriminants.csv` (ABI contract)
-//! 2. Unit metadata (ratio, symbol, dimension) from `qtty-core`'s `Unit` trait
+//! 2. Unit metadata (ratio, symbol, type path) from `qtty`'s `Unit` trait
 //!
 //! This ensures zero drift between the FFI layer and the canonical Rust types:
-//! all metadata is derived from qtty-core at compile time.
+//! all metadata is derived from the published crate itself at compile time.
 
 use std::collections::HashMap;
 use std::env;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 fn main() {
     let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
@@ -21,21 +21,15 @@ fn main() {
 
     // Re-run triggers
     println!("cargo:rerun-if-changed=discriminants.csv");
-    // We read qtty-core sources for inventory extraction
-    let qtty_core_units_dir = PathBuf::from(&crate_dir).join("../qtty-core/src/units");
-    println!("cargo::rerun-if-changed={}", qtty_core_units_dir.display());
 
     // Step 1: Parse discriminant mapping (ABI contract)
     let disc_map = parse_discriminants(&crate_dir);
 
-    // Step 2: Build inventory → (module_path, DimensionId, ffi_name_resolver) mappings
-    let inventories = build_inventories();
-
-    // Step 3: Extract unit type names from qtty-core inventory macros
-    let resolved = resolve_units(&qtty_core_units_dir, &inventories, &disc_map);
+    // Step 2: Resolve discriminants to qtty::unit type paths.
+    let resolved = resolve_units(&disc_map);
 
     eprintln!(
-        "cargo:warning=Resolved {} FFI units from discriminants.csv + qtty-core inventories",
+        "cargo:warning=Resolved {} FFI units from discriminants.csv",
         resolved.len()
     );
 
@@ -68,23 +62,6 @@ struct ResolvedUnit {
     dimension: String,
     /// Fully qualified Rust type path (e.g., "qtty::length::Meter")
     rust_type_path: String,
-}
-
-/// Configuration for one inventory macro in qtty-core.
-#[derive(Debug)]
-struct InventoryConfig {
-    /// Macro name in qtty-core (e.g., "length_units")
-    macro_name: &'static str,
-    /// Source file relative to qtty-core/src/units/
-    file: &'static str,
-    /// Module path prefix under `qtty::` (e.g., "qtty::length")
-    module_prefix: &'static str,
-    /// DimensionId variant (e.g., "Length")
-    dimension: &'static str,
-    /// Optional: maps inventory names to FFI names when they differ.
-    /// If None, inventory name == FFI name.
-    /// If Some, provides a function that maps inventory name → FFI name.
-    ffi_name_prefix: Option<&'static str>,
 }
 
 // =============================================================================
@@ -121,351 +98,40 @@ fn parse_discriminants(crate_dir: &str) -> HashMap<String, u32> {
 // Step 2: Inventory configuration
 // =============================================================================
 
-fn build_inventories() -> Vec<InventoryConfig> {
-    vec![
-        InventoryConfig {
-            macro_name: "angular_units",
-            file: "angular/mod.rs",
-            module_prefix: "qtty::angular",
-            dimension: "Angle",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "length_units",
-            file: "length/mod.rs",
-            module_prefix: "qtty::length",
-            dimension: "Length",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "length_nominal_units",
-            file: "length/astro.rs",
-            module_prefix: "qtty::length::nominal",
-            dimension: "Length",
-            ffi_name_prefix: Some("Nominal"),
-        },
-        InventoryConfig {
-            macro_name: "time_units",
-            file: "time/mod.rs",
-            module_prefix: "qtty::time",
-            dimension: "Time",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "mass_units",
-            file: "mass/mod.rs",
-            module_prefix: "qtty::mass",
-            dimension: "Mass",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "power_units",
-            file: "power/mod.rs",
-            module_prefix: "qtty::power",
-            dimension: "Power",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "area_units",
-            file: "area/mod.rs",
-            module_prefix: "qtty::area",
-            dimension: "Area",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "volume_units",
-            file: "volume/mod.rs",
-            module_prefix: "qtty::volume",
-            dimension: "Volume",
-            ffi_name_prefix: None,
-        },
-        // ── Angular feature-gated units ─────────────────────────────────────
-        InventoryConfig {
-            macro_name: "angular_astro_units",
-            file: "angular/astro.rs",
-            module_prefix: "qtty::angular",
-            dimension: "Angle",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "angular_navigation_units",
-            file: "angular/navigation.rs",
-            module_prefix: "qtty::angular",
-            dimension: "Angle",
-            ffi_name_prefix: None,
-        },
-        // ── Length feature-gated units ──────────────────────────────────────
-        InventoryConfig {
-            macro_name: "length_astro_units",
-            file: "length/astro.rs",
-            module_prefix: "qtty::length",
-            dimension: "Length",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "length_fundamental_physics_units",
-            file: "length/fundamental_physics.rs",
-            module_prefix: "qtty::length",
-            dimension: "Length",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "length_customary_units",
-            file: "length/customary.rs",
-            module_prefix: "qtty::length",
-            dimension: "Length",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "length_navigation_units",
-            file: "length/navigation.rs",
-            module_prefix: "qtty::length",
-            dimension: "Length",
-            ffi_name_prefix: None,
-        },
-        // ── Time feature-gated units ────────────────────────────────────────
-        InventoryConfig {
-            macro_name: "time_julian_time_units",
-            file: "time/julian_time.rs",
-            module_prefix: "qtty::time",
-            dimension: "Time",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "time_astro_units",
-            file: "time/astro.rs",
-            module_prefix: "qtty::time",
-            dimension: "Time",
-            ffi_name_prefix: None,
-        },
-        // ── Mass feature-gated units ────────────────────────────────────────
-        InventoryConfig {
-            macro_name: "mass_astro_units",
-            file: "mass/astro.rs",
-            module_prefix: "qtty::mass",
-            dimension: "Mass",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "mass_customary_units",
-            file: "mass/customary.rs",
-            module_prefix: "qtty::mass",
-            dimension: "Mass",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "mass_fundamental_physics_units",
-            file: "mass/fundamental_physics.rs",
-            module_prefix: "qtty::mass",
-            dimension: "Mass",
-            ffi_name_prefix: None,
-        },
-        // ── Power feature-gated units ───────────────────────────────────────
-        InventoryConfig {
-            macro_name: "power_astro_units",
-            file: "power/astro.rs",
-            module_prefix: "qtty::power",
-            dimension: "Power",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "power_customary_units",
-            file: "power/customary.rs",
-            module_prefix: "qtty::power",
-            dimension: "Power",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "power_fundamental_physics_units",
-            file: "power/fundamental_physics.rs",
-            module_prefix: "qtty::power",
-            dimension: "Power",
-            ffi_name_prefix: None,
-        },
-        // ── Area feature-gated units ────────────────────────────────────────
-        InventoryConfig {
-            macro_name: "area_customary_units",
-            file: "area/customary.rs",
-            module_prefix: "qtty::area",
-            dimension: "Area",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "area_land_area_units",
-            file: "area/land_area.rs",
-            module_prefix: "qtty::area",
-            dimension: "Area",
-            ffi_name_prefix: None,
-        },
-        // ── Volume feature-gated units ──────────────────────────────────────
-        InventoryConfig {
-            macro_name: "volume_customary_units",
-            file: "volume/customary.rs",
-            module_prefix: "qtty::volume",
-            dimension: "Volume",
-            ffi_name_prefix: None,
-        },
-        // ── Acceleration units ──────────────────────────────────────────────
-        InventoryConfig {
-            macro_name: "acceleration_units",
-            file: "acceleration.rs",
-            module_prefix: "qtty::acceleration",
-            dimension: "Acceleration",
-            ffi_name_prefix: None,
-        },
-        // ── Force units ─────────────────────────────────────────────────────
-        InventoryConfig {
-            macro_name: "force_units",
-            file: "force.rs",
-            module_prefix: "qtty::force",
-            dimension: "Force",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "force_fundamental_physics_units",
-            file: "force.rs",
-            module_prefix: "qtty::force",
-            dimension: "Force",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "force_customary_units",
-            file: "force.rs",
-            module_prefix: "qtty::force",
-            dimension: "Force",
-            ffi_name_prefix: None,
-        },
-        // ── Energy units ────────────────────────────────────────────────────
-        InventoryConfig {
-            macro_name: "energy_units",
-            file: "energy.rs",
-            module_prefix: "qtty::energy",
-            dimension: "Energy",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "energy_fundamental_physics_units",
-            file: "energy.rs",
-            module_prefix: "qtty::energy",
-            dimension: "Energy",
-            ffi_name_prefix: None,
-        },
-        InventoryConfig {
-            macro_name: "energy_customary_units",
-            file: "energy.rs",
-            module_prefix: "qtty::energy",
-            dimension: "Energy",
-            ffi_name_prefix: None,
-        },
-    ]
-}
+fn resolve_units(disc_map: &HashMap<String, u32>) -> Vec<ResolvedUnit> {
+    let mut resolved: Vec<_> = disc_map
+        .iter()
+        .map(|(ffi_name, &discriminant)| ResolvedUnit {
+            ffi_name: ffi_name.clone(),
+            discriminant,
+            dimension: dimension_from_discriminant(discriminant).to_string(),
+            rust_type_path: rust_type_path_from_ffi_name(ffi_name),
+        })
+        .collect();
 
-// =============================================================================
-// Step 3: Resolve inventory types to FFI units
-// =============================================================================
-
-fn resolve_units(
-    units_dir: &Path,
-    inventories: &[InventoryConfig],
-    disc_map: &HashMap<String, u32>,
-) -> Vec<ResolvedUnit> {
-    let mut resolved = Vec::new();
-    let mut seen_ffi_names: HashMap<String, bool> = HashMap::new();
-
-    for inv in inventories {
-        let path = units_dir.join(inv.file);
-        let src = fs::read_to_string(&path)
-            .unwrap_or_else(|e| panic!("failed to read {}: {e}", path.display()));
-
-        let types = extract_inventory_types(&src, inv.macro_name)
-            .unwrap_or_else(|| panic!("could not find macro `{}` in {}", inv.macro_name, inv.file));
-
-        for core_name in &types {
-            // Map inventory name to FFI name
-            let ffi_name = match inv.ffi_name_prefix {
-                Some(prefix) => format!("{prefix}{core_name}"),
-                None => core_name.clone(),
-            };
-
-            // Look up discriminant
-            let discriminant = match disc_map.get(&ffi_name) {
-                Some(&d) => d,
-                None => {
-                    // Unit exists in qtty-core inventory but not in discriminants.csv.
-                    // This is expected for units that haven't been assigned an FFI discriminant yet.
-                    eprintln!(
-                        "cargo:warning=Skipping inventory unit '{core_name}' (ffi: '{ffi_name}'): \
-                         not in discriminants.csv"
-                    );
-                    continue;
-                }
-            };
-
-            let rust_type_path = format!("{}::{}", inv.module_prefix, core_name);
-
-            resolved.push(ResolvedUnit {
-                ffi_name: ffi_name.clone(),
-                discriminant,
-                dimension: inv.dimension.to_string(),
-                rust_type_path,
-            });
-            seen_ffi_names.insert(ffi_name, true);
-        }
-    }
-
-    // Verify all discriminants.csv entries were resolved
-    for name in disc_map.keys() {
-        if !seen_ffi_names.contains_key(name) {
-            panic!(
-                "discriminants.csv contains '{name}' but it was not found in any qtty-core \
-                 inventory. Either add it to the appropriate inventory macro or remove it from \
-                 discriminants.csv."
-            );
-        }
-    }
-
-    // Sort by discriminant for deterministic output
-    resolved.sort_by_key(|u| u.discriminant);
+    resolved.sort_by_key(|unit| unit.discriminant);
     resolved
 }
 
-/// Extract the list of unit type identifiers from a `$name!` inventory macro.
-///
-/// Reuses the same approach as qtty-core's build.rs.
-fn extract_inventory_types(source: &str, macro_name: &str) -> Option<Vec<String>> {
-    let marker = format!("macro_rules! {macro_name}");
-    let macro_start = source.find(&marker)?;
-    let after_marker = &source[macro_start + marker.len()..];
-
-    let cb_marker = "$cb!(";
-    let cb_pos = after_marker.find(cb_marker)?;
-    let after_cb = &after_marker[cb_pos + cb_marker.len()..];
-
-    let mut depth: u32 = 1;
-    let mut end = None;
-    for (i, ch) in after_cb.char_indices() {
-        match ch {
-            '(' => depth += 1,
-            ')' => {
-                depth -= 1;
-                if depth == 0 {
-                    end = Some(i);
-                    break;
-                }
-            }
-            _ => {}
-        }
+fn dimension_from_discriminant(discriminant: u32) -> &'static str {
+    match discriminant {
+        10_000..=19_999 => "Length",
+        20_000..=29_999 => "Time",
+        30_000..=39_999 => "Angle",
+        40_000..=49_999 => "Mass",
+        50_000..=59_999 => "Power",
+        60_000..=69_999 => "Area",
+        70_000..=79_999 => "Volume",
+        80_000..=89_999 => "Acceleration",
+        90_000..=99_999 => "Force",
+        100_000..=109_999 => "Energy",
+        _ => panic!("Unknown discriminant range for {discriminant}"),
     }
-    let end = end?;
-    let body = &after_cb[..end];
+}
 
-    let types: Vec<String> = body
-        .split(',')
-        .map(|s| s.trim().to_string())
-        .filter(|s| !s.is_empty())
-        .collect();
-
-    Some(types)
+fn rust_type_path_from_ffi_name(ffi_name: &str) -> String {
+    let rust_type_name = ffi_name.strip_prefix("Nominal").unwrap_or(ffi_name);
+    format!("qtty::unit::{rust_type_name}")
 }
 
 // =============================================================================
@@ -474,7 +140,7 @@ fn extract_inventory_types(source: &str, macro_name: &str) -> Option<Vec<String>
 
 fn generate_unit_enum(units: &[ResolvedUnit], out_dir: &str) {
     let mut code = String::from(
-        "// Auto-generated by build.rs from discriminants.csv + qtty-core inventories.\n\
+        "// Auto-generated by build.rs from discriminants.csv + qtty::unit type paths.\n\
          // Do not edit manually.\n\n",
     );
     code.push_str("/// Unit identifier for FFI.\n");

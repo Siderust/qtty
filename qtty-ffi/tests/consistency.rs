@@ -16,9 +16,10 @@
 //!    is impossible by construction.  A lightweight runtime smoke-test confirms
 //!    the trait-derived values match what qtty-core reports.
 //!
-//! 3. **Reverse (discriminants → inventory)**: `build.rs` panics at build time
-//!    if any entry in `discriminants.csv` cannot be resolved to a qtty-core
-//!    inventory unit.  This file does not need to duplicate that check.
+//! 3. **Reverse (discriminants → Rust type)**: `build.rs` generates references
+//!    to `qtty::unit::*` marker types for every discriminant. Missing or stale
+//!    entries fail compilation during the crate build, so this file does not
+//!    need to duplicate that check.
 //!
 //! Dimensions currently covered: Angle, Length, Mass, Power, Time, Area, Volume.
 
