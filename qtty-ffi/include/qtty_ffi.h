@@ -1047,7 +1047,7 @@ int32_t qtty_derived_convert(struct qtty_derived_quantity_t src,
  This can be used by consumers to verify compatibility. The version is
  incremented when breaking changes are made to the ABI.
 
- Current version: 500
+ Current version: 600
  */
 uint32_t qtty_ffi_version(void);
 

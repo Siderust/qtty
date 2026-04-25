@@ -5,7 +5,9 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2026-04-15
+## [Unreleased]
+
+## [0.6.0] - 2026-04-25
 
 ### Added
 
@@ -73,7 +75,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ### Removed
 - **`qtty-ffi` `units.csv`** — hardcoded ratio/symbol data removed; metadata is now derived from qtty-core trait constants so divergence is impossible at compile time.
-- **`qtty-ffi` deprecated helper functions** — `meters_into_ffi`, `try_into_meters`, `kilometers_into_ffi`, `try_into_kilometers`, `seconds_into_ffi`, `try_into_seconds`, `minutes_into_ffi`, `try_into_minutes`, `hours_into_ffi`, `try_into_hours`, `days_into_ffi`, `try_into_days`, `radians_into_ffi`, `try_into_radians`, `degrees_into_ffi`, `try_into_degrees` (all deprecated since 0.5.1) have been removed. Use `From`/`TryFrom` directly (`qty.into()`, `qty.try_into()`).
+- **`qtty-ffi` deprecated helper functions** — `meters_into_ffi`, `try_into_meters`, `kilometers_into_ffi`, `try_into_kilometers`, `seconds_into_ffi`, `try_into_seconds`, `minutes_into_ffi`, `try_into_minutes`, `hours_into_ffi`, `try_into_hours`, `days_into_ffi`, `try_into_days`, `radians_into_ffi`, `try_into_radians`, `degrees_into_ffi`, `try_into_degrees` have been removed. Use `From`/`TryFrom` directly (`qty.into()`, `qty.try_into()`).
 - Removed the `scalar-decimal` feature and `rust_decimal` scalar support from `qtty-core` and the `qtty` facade crate.
 - **Breaking:** Removed the public `Simplify` trait and `.simplify()` method from `qtty-core` and the `qtty` facade crate; unit arithmetic now resolves these cases at compile time.
 - **Breaking:** Removed the deprecated `frequency` alias modules from `qtty-core` and `qtty`. Use `angular_rate` for `Angular / Time` quantities.
@@ -115,7 +117,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - **Breaking:** `Per<N, D> * D` and `D * Per<N, D>` now directly return the numerator quantity (e.g., `Quantity<Meter>`) instead of `Quantity<Prod<Per<N, D>, D>>`. The `.to()` call to recover the numerator is no longer needed.
 - **Breaking:** `N / Per<N, D>` now directly returns the denominator quantity (e.g., `Quantity<Second>`) instead of `Quantity<Per<N, Per<N, D>>>`.
 - **Breaking:** `asin`/`acos`/`atan` are now on `Quantity<Unitless>` instead of `Quantity<Per<U, U>>`. Since same-unit division now yields `Unitless` directly, this is transparent for `(a / b).asin()` patterns.
-- `qtty-ffi` quantity carrier fields and C-facing unit parameters now use raw `u32`/`uint32_t` unit IDs, and `qtty_ffi_version()` now reports ABI version `500`.
+- `qtty-ffi` quantity carrier fields and C-facing unit parameters now use raw `u32`/`uint32_t` unit IDs, and `qtty_ffi_version()` now reports ABI version `600`.
 - `Quantity::sqrt()` was renamed to `Quantity::scalar_sqrt()` to make it explicit that the operation returns the underlying scalar rather than a quantity with the original unit type.
 - **Breaking:** Dimension aliases `VelocityDim` and `AngularRateDim` are now
   `Velocity` and `AngularRate`. At the `qtty` crate root, `Velocity` and
@@ -161,7 +163,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - Fixed `qtty-core` pure `no_std` test builds by gating std-dependent internal test modules behind the `std` feature.
 - Fixed `qtty` pure `no_std` test/example target checks by gating std-only integration tests and the `all_units` example.
 - Generalized generated pairwise unit `From`/`Into` conversions across `Real` scalar types so non-default scalar modules such as `qtty::f32` get the same conversion ergonomics as the default `f64` surface.
-- Updated crate docs and README dependency snippets to the current `0.5.0` release line.
+- Refreshed the workspace and crate READMEs to match the current public API and publishing layout, including the `all_units` example command and the `qtty-ffi` package README.
+- Updated crate docs and README dependency snippets to the current `0.6.0` release line.
 - Integer `abs()` no longer panics in debug builds on the minimum signed
   value (e.g. `i32::MIN`); it now uses `saturating_abs()`, returning
   `i32::MAX`. (QTTY-002)
