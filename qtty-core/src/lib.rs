@@ -61,7 +61,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! qtty-core = { version = "0.6.0", default-features = false }
+//! qtty-core = { version = "0.6.1", default-features = false }
 //! ```
 //!
 //! When `std` is disabled, floating-point math that isn't available in `core` is provided via `libm`.

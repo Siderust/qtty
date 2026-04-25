@@ -7,6 +7,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-04-25
+
+### Fixed
+
+- `qtty-ffi` packaged builds no longer depend on sibling workspace paths during
+  `build.rs`; `cargo package`/`cargo publish` now verify cleanly from the
+  packaged crate source.
+
+- Updated crate docs, README dependency snippets, and the FFI version helper to
+  the `0.6.1` release line (`qtty_ffi_version() == 601`).
+
 ## [0.6.0] - 2026-04-25
 
 ### Added
