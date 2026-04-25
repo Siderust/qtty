@@ -20,21 +20,21 @@ code without giving up ergonomics.
 
 ```toml
 [dependencies]
-qtty = "0.6.0"
+qtty = "0.6.1"
 ```
 
 Disable default features for `no_std`:
 
 ```toml
 [dependencies]
-qtty = { version = "0.6.0", default-features = false }
+qtty = { version = "0.6.1", default-features = false }
 ```
 
 Enable heap-backed helpers in `no_std`:
 
 ```toml
 [dependencies]
-qtty = { version = "0.6.0", default-features = false, features = ["alloc"] }
+qtty = { version = "0.6.1", default-features = false, features = ["alloc"] }
 ```
 
 ## Quick start
