@@ -54,7 +54,7 @@ compile time while valid conversions stay explicit and cheap.
 | **Broad Unit Catalog** | Built-in modules cover angular, time, length, mass, power, area, volume, velocity, angular-rate, and unitless quantities. |
 | **Astronomy-Friendly Units** | Includes `AstronomicalUnit`, `LightYear`, `Parsec`, `SolarMass`, `SolarLuminosity`, sidereal time units, and related helpers. |
 | **Multiple Scalar Families** | Use `f64`, `f32`, signed integers, and optional decimal/rational scalars depending on your precision model. |
-| **Interop Options** | Optional `serde`, `ffi`, `pyo3`, `diesel`, `tiberius`, plus a separate `qtty-ffi` crate for C-compatible consumers. |
+| **Interop Options** | Optional `serde`, `pyo3`, `diesel`, and `tiberius` support in Rust, plus a separate `qtty-ffi` crate for C-compatible consumers. |
 
 ---
 
@@ -64,28 +64,28 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-qtty = "0.5.0"
+qtty = "0.6.0"
 ```
 
 Minimal `no_std` build:
 
 ```toml
 [dependencies]
-qtty = { version = "0.5.0", default-features = false }
+qtty = { version = "0.6.0", default-features = false }
 ```
 
 `no_std` with heap-backed vectors/macros:
 
 ```toml
 [dependencies]
-qtty = { version = "0.5.0", default-features = false, features = ["alloc"] }
+qtty = { version = "0.6.0", default-features = false, features = ["alloc"] }
 ```
 
 Serde support:
 
 ```toml
 [dependencies]
-qtty = { version = "0.5.0", features = ["serde"] }
+qtty = { version = "0.6.0", features = ["serde"] }
 ```
 
 ---
@@ -147,8 +147,8 @@ The facade crate re-exports the built-in unit modules from `qtty-core` at the cr
 - **Mass**: gram-family units, kilograms, tonnes, solar mass
 - **Power**: watts, metric/electric horsepower, solar luminosity
 - **Area / Volume**: square and cubic derived units plus liter-family and land units
-- **Velocity / Frequency**: generic `Per`-based derived quantities
-- **Unitless**: ratios and simplified dimensionless results
+- **Velocity / Angular Rate**: generic `Per`-based derived quantities
+- **Dimensionless**: ratios and simplified same-unit division results
 
 ---
 
@@ -159,7 +159,7 @@ Run the shipped examples from the workspace root:
 ```bash
 cargo run -p qtty --example quickstart
 cargo run -p qtty --example dimensional_arithmetic
-cargo run -p qtty --example all_units
+cargo run -p qtty --example all_units --features all-units
 ```
 
 Additional examples cover angles, astronomy, ratios, serialization, and Python interop.
@@ -190,7 +190,7 @@ Need a stable C ABI or adapter boundary? Use `qtty-ffi`, which exposes:
 - ABI-stable `UnitId`, `DimensionId`, and quantity structs
 - Conversion and formatting helpers for C/C++
 - Generated `include/qtty_ffi.h`
-- Optional JSON and Python-facing integration layers
+- Optional Rust-side `qtty_serde` carrier serialization and PyO3 helpers
 
 See [`qtty-ffi/README.md`](qtty-ffi/README.md) for details.
 

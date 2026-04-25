@@ -1,83 +1,52 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 Vallés Puig, Ramon
 
-//! C-compatible FFI bindings for `qtty` physical quantities and unit conversions.
+//! C-compatible FFI bindings for `qtty`.
 //!
-//! `qtty-ffi` provides a stable C ABI for `qtty`, enabling interoperability with C/C++ code
-//! and other languages with C FFI support. It also provides helper types and macros for
-//! downstream Rust crates that need to expose their own FFI APIs using `qtty` quantities.
+//! `qtty-ffi` exposes a stable ABI around `qtty`'s unit registry and
+//! conversion logic. It is intended for C and C++ adapters, and for Rust
+//! crates that need to mirror `qtty` quantities across an FFI boundary.
 //!
-//! # Features
+//! # What this crate provides
 //!
-//! - **ABI-stable types**: `#[repr(C)]` and `#[repr(u32)]` types safe for FFI
-//! - **Unit registry**: Mapping between FFI unit IDs and conversion factors
-//! - **C API**: `extern "C"` functions for raw quantity construction, conversion, and formatting
-//! - **Rust helpers**: Macros and trait implementations for downstream integration
+//! - ABI-stable carrier structs such as [`QttyQuantity`] and
+//!   [`QttyDerivedQuantity`]
+//! - stable [`UnitId`] and [`DimensionId`] discriminants
+//! - `extern "C"` functions for construction, conversion, validation, and
+//!   formatting
+//! - a generated public header at `include/qtty_ffi.h`
+//! - optional Rust-side `qtty_serde` and `pyo3` helpers
 //!
 //! # Quick Start (C/C++)
-//!
-//! Include the generated header and link against the library:
 //!
 //! ```c
 //! #include "qtty_ffi.h"
 //!
-//! // Create a quantity
-//! QttyQuantity meters;
-//! qtty_quantity_make(1000.0, UnitId_Meter, &meters);
+//! qtty_quantity_t meters;
+//! qtty_quantity_make(1000.0, UNIT_ID_METER, &meters);
 //!
-//! // Convert to kilometers
-//! QttyQuantity kilometers;
-//! int32_t status = qtty_quantity_convert(meters, UnitId_Kilometer, &kilometers);
-//! if (status == QTTY_OK) {
-//!     // kilometers.value == 1.0
+//! qtty_quantity_t kilometers;
+//! if (qtty_quantity_convert(meters, UNIT_ID_KILOMETER, &kilometers) == QTTY_OK) {
+//!     /* kilometers.value == 1.0 */
 //! }
 //! ```
 //!
 //! # Quick Start (Rust)
 //!
-//! Use the helper traits and macros for seamless conversion:
-//!
 //! ```rust
-//! use qtty::length::{Meters, Kilometers};
+//! use qtty::Meter;
 //! use qtty_ffi::{QttyQuantity, UnitId};
 //!
-//! // Convert Rust type to FFI
-//! let meters = Meters::new(1000.0);
-//! let ffi_qty: QttyQuantity = meters.into();
-//!
-//! // Convert FFI back to Rust type (with automatic unit conversion)
-//! let km: Kilometers = ffi_qty.try_into().unwrap();
-//! assert!((km.value() - 1.0).abs() < 1e-12);
+//! let qty: QttyQuantity = Meter::new(12.5).into();
+//! assert_eq!(qty.unit, UnitId::Meter as u32);
 //! ```
 //!
 //! # ABI Stability
 //!
-//! The following are part of the ABI contract and will never change:
-//!
-//! - [`UnitId`] discriminant values (existing variants)
-//! - [`DimensionId`] discriminant values (existing variants)
-//! - [`QttyQuantity`] memory layout
-//! - Status code values ([`QTTY_OK`], [`QTTY_ERR_UNKNOWN_UNIT`], etc.)
-//! - Function signatures of exported `extern "C"` functions
-//!
-//! New variants may be added to enums (with new discriminant values), and new functions
-//! may be added, but existing items will remain stable.
-//!
-//! # Supported Units (v1)
-//!
-//! ## Length
-//! - [`UnitId::Meter`] - SI base unit
-//! - [`UnitId::Kilometer`] - 1000 meters
-//!
-//! ## Time
-//! - [`UnitId::Second`] - SI base unit
-//! - [`UnitId::Minute`] - 60 seconds
-//! - [`UnitId::Hour`] - 3600 seconds
-//! - [`UnitId::Day`] - 86400 seconds
-//!
-//! ## Angle
-//! - [`UnitId::Radian`] - SI unit
-//! - [`UnitId::Degree`] - π/180 radians
+//! Existing [`UnitId`] and [`DimensionId`] values, carrier layouts, status
+//! codes, and exported function signatures are part of the ABI contract.
+//! New units or functions may be added in future releases, but existing values
+//! remain stable.
 //!
 //! # Error Handling
 //!

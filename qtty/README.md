@@ -20,21 +20,21 @@ code without giving up ergonomics.
 
 ```toml
 [dependencies]
-qtty = "0.5.0"
+qtty = "0.6.0"
 ```
 
 Disable default features for `no_std`:
 
 ```toml
 [dependencies]
-qtty = { version = "0.5.0", default-features = false }
+qtty = { version = "0.6.0", default-features = false }
 ```
 
 Enable heap-backed helpers in `no_std`:
 
 ```toml
 [dependencies]
-qtty = { version = "0.5.0", default-features = false, features = ["alloc"] }
+qtty = { version = "0.6.0", default-features = false, features = ["alloc"] }
 ```
 
 ## Quick start
@@ -71,10 +71,12 @@ assert!((speed.value() - 10.0).abs() < 1e-12);
 ## Modules
 
 - `angular`, `time`, `length`, `mass`, `power`
-- `area`, `volume`, `acceleration`, `force`, `energy`
-- `velocity`, `angular_rate`, `accel`
-- `unitless`
+- `area`, `volume`, `force`, `energy`
+- `velocity`, `angular_rate`, `accel`, `unit`
 - scalar-specific facades: `f32`, `f64`, `i8`, `i16`, `i32`, `i64`, `i128`
+
+Same-unit division yields a dimensionless quantity, but there is no dedicated
+`unitless` module in the facade crate.
 
 ## Custom units
 
@@ -94,7 +96,7 @@ qtty::impl_unit_arithmetic_pairs_between!(qtty::unit::Meter, qtty::unit::Kilomet
 ```bash
 cargo run -p qtty --example quickstart
 cargo run -p qtty --example dimensional_arithmetic
-cargo run -p qtty --example all_units
+cargo run -p qtty --example all_units --features all-units
 ```
 
 ## Related crates

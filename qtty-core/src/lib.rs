@@ -8,7 +8,7 @@
 //! - A *unit* is a zero-sized marker type implementing [`Unit`].
 //! - A value tagged with a unit is a [`Quantity<U, S>`], where `S` is the scalar
 //!   type (defaults to `f64`). Supported scalars include `f64`, `f32`, signed
-//!   integers (`i8`–`i128`), and optionally `Rational64`/`Rational32`.
+//!   integers (`i8`–`i128`), and optionally `Rational64`.
 //! - Conversion is an explicit, type-checked scaling via [`Quantity::to`] (for
 //!   [`Real`] scalars) or [`Quantity::to_lossy`] (for [`Exact`] scalars).
 //! - Derived units like velocity are expressed as [`Per<N, D>`] (e.g. `Meter/Second`).
@@ -19,8 +19,11 @@
 //!
 //! - Compile-time separation of dimensions (length vs time vs angle, …).
 //! - Zero runtime overhead for unit tags (phantom types only).
-//! - Full dimensional arithmetic: `m * m → Prod<Meter, Meter>`, `m / s → Per<Meter, Second>`, `m / m → f64`.
-//!   Named derived units (e.g. `SquareMeter`) are obtained via `.to()`.//! - Automatic compile-time verification that multiplied/divided quantities produce the correct dimension.
+//! - Full dimensional arithmetic: `m * m → Prod<Meter, Meter>`,
+//!   `m / s → Per<Meter, Second>`, `m / m → Quantity<Unitless>`.
+//!   Named derived units (e.g. `SquareMeter`) are obtained via `.to()`.
+//! - Automatic compile-time verification that multiplied/divided quantities
+//!   produce the correct dimension.
 //!
 //! # What this crate does not try to solve
 //!
@@ -58,7 +61,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! qtty-core = { version = "0.1.0", default-features = false }
+//! qtty-core = { version = "0.6.0", default-features = false }
 //! ```
 //!
 //! When `std` is disabled, floating-point math that isn't available in `core` is provided via `libm`.
