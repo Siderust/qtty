@@ -87,7 +87,8 @@
 //!
 //! - `qtty::velocity` (`Length / Time` aliases)
 //! - `qtty::angular_rate` (`Angular / Time` aliases)
-//! - `qtty::acceleration`, `qtty::force`, `qtty::energy`
+//! - `qtty::area`, `qtty::volume`, `qtty::force`, `qtty::energy`
+//! - `qtty::accel` (`Length / Time²` aliases)
 //! - `qtty::unit` (type-level unit markers)
 //! - `qtty::f32` (all units with `f32` scalar)
 //! - `qtty::f64` (all units with `f64` scalar - same as root)
@@ -131,14 +132,14 @@
 //!
 //! ```toml
 //! [dependencies]
-//! qtty = { version = "0.5.0", default-features = false }
+//! qtty = { version = "0.6.0", default-features = false }
 //! ```
 //!
 //! If you need `qtty_vec!(vec ...)` in `no_std`, enable `alloc`:
 //!
 //! ```toml
 //! [dependencies]
-//! qtty = { version = "0.5.0", default-features = false, features = ["alloc"] }
+//! qtty = { version = "0.6.0", default-features = false, features = ["alloc"] }
 //! ```
 //!
 //! # Panics and errors
@@ -240,7 +241,8 @@ pub use qtty_derive::Unit;
 
 /// Invoke a callback macro with every qtty-core dimension inventory.
 ///
-/// The callback is invoked once per dimension (8 total). This is usable for
+/// The callback is invoked once per always-available dimension family (10
+/// total). This is usable for
 /// additive generation (aliases, assertions) where the callback doesn't need
 /// to know which dimension/module the units come from.
 #[doc(hidden)]
