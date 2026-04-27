@@ -624,7 +624,11 @@ macro_rules! with_base_units {
             crate::units::energy::Kilojoule,
             crate::units::energy::Megajoule,
             crate::units::energy::Gigajoule,
-            crate::units::energy::Terajoule
+            crate::units::energy::Terajoule,
+            // ── Solid angle (composed from base angular units) ────────────────────
+            crate::units::solid_angle::SquareDegree,
+            crate::units::solid_angle::Steradian,
+            crate::units::solid_angle::SquareMilliradian
         );
     };
 }
@@ -664,7 +668,9 @@ macro_rules! extend_with_astro {
             crate::units::angular::MilliArcsecond,
             crate::units::angular::MicroArcsecond,
             crate::units::angular::HourAngle,
-            crate::units::power::SolarLuminosity
+            crate::units::power::SolarLuminosity,
+            crate::units::solid_angle::SquareArcminute,
+            crate::units::solid_angle::SquareArcsecond
         );
     };
 }

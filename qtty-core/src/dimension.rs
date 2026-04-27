@@ -234,9 +234,37 @@ pub type Energy = Dim<P2, N2, P1, Z0, Z0, Z0, Z0, Z0>;
 /// Power (M¹ · L² · T⁻³).
 pub type Power = Dim<P2, N3, P1, Z0, Z0, Z0, Z0, Z0>;
 
+/// Solid angle (A²) — plane angle squared (e.g. steradian, square degree).
+///
+/// Square degree (`Prod<Degree, Degree>`) is the canonical scaling unit
+/// for this dimension because [`Angular`]'s canonical is degree.
+pub type SolidAngle = Dim<Z0, Z0, Z0, Z0, Z0, Z0, Z0, P2>;
+
 /// Angular rate (A¹ · T⁻¹) — angular displacement per unit time.
 ///
 /// This dimension represents *angular frequency* (radians, degrees, etc. per
 /// unit time), **not** SI cycle frequency (Hz = cycles/s). If you need cycle
 /// frequency, model it as `T⁻¹` (inverse time) with dimensionless cycles.
 pub type AngularRate = Dim<Z0, N1, Z0, Z0, Z0, Z0, Z0, P1>;
+
+/// Radiance (M¹ · T⁻³ · A⁻²) — radiant power per unit area per unit solid
+/// angle (e.g. W·m⁻²·sr⁻¹).
+pub type Radiance = Dim<Z0, N3, P1, Z0, Z0, Z0, Z0, N2>;
+
+/// Spectral radiance per unit wavelength (L⁻¹ · M¹ · T⁻³ · A⁻²) — radiance
+/// per unit wavelength (e.g. W·m⁻²·sr⁻¹·nm⁻¹).
+pub type SpectralRadiance = Dim<N1, N3, P1, Z0, Z0, Z0, Z0, N2>;
+
+/// Photon radiance (L⁻² · T⁻¹ · A⁻²) — photon count per area per time per
+/// solid angle (e.g. ph·cm⁻²·s⁻¹·sr⁻¹). Photons are treated as
+/// dimensionless counts.
+pub type PhotonRadiance = Dim<N2, N1, Z0, Z0, Z0, Z0, Z0, N2>;
+
+/// Spectral photon radiance per unit wavelength (L⁻³ · T⁻¹ · A⁻²) — photon
+/// radiance per unit wavelength (e.g. ph·cm⁻²·s⁻¹·sr⁻¹·Å⁻¹).
+pub type SpectralPhotonRadiance = Dim<N3, N1, Z0, Z0, Z0, Z0, Z0, N2>;
+
+/// Inverse solid angle (A⁻²) — used by photometric brightness scales such as
+/// the [`S10`](crate::units::radiometry::S10) "10th-magnitude stars per
+/// square degree" unit.
+pub type InverseSolidAngle = Dim<Z0, Z0, Z0, Z0, Z0, Z0, Z0, N2>;

@@ -7,6 +7,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ## [Unreleased]
 
+### Added
+
+- **Solid-angle units** in `qtty-core::units::solid_angle` (re-exported by
+  `qtty::solid_angle` / `qtty::unit`). Always available: `SquareDegree`
+  (canonical), `Steradian`, `SquareMilliradian`. Behind `astro`:
+  `SquareArcminute`, `SquareArcsecond`. Bidirectional `From` conversions and
+  cross-feature `PartialEq` / `PartialOrd` cover all pairs. New
+  `SolidAngle = Dim<…, A=P2>` dimension alias added to `qtty-core::dimension`.
+
+- **`radiometry` feature** (`qtty-core`, forwarded by `qtty`, implies
+  `fundamental-physics`) introducing `qtty_core::units::radiometry` with:
+  - `Radiance` / `SpectralRadiance` / `PhotonRadiance` /
+    `SpectralPhotonRadiance` / `InverseSolidAngle` dimension aliases.
+  - SI and CGS unit markers: `WattPerSquareMeterSteradian`,
+    `ErgPerSecondSquareCentimeterSteradian`, the per-metre / per-nanometre /
+    per-ångström spectral-radiance markers, and the `ph·…` / `ph·cm⁻²·s⁻¹·sr⁻¹`,
+    `ph·cm⁻²·ns⁻¹·sr⁻¹`, `ph·cm⁻²·s⁻¹·sr⁻¹·Å⁻¹`, `ph·cm⁻²·s⁻¹·sr⁻¹·nm⁻¹`
+    photon-radiance markers.
+  - `S10` ("10th-magnitude stars per square degree") on `InverseSolidAngle`,
+    matching the Leinert et al. zodiacal-light tables.
+  - `erg_to_photon(spectral_energy_radiance, lambda)` typed helper using the
+    exact `1 / (h · c)` constant `≈ 5.034 × 10⁷ ph / (erg · Å)`.
+
 ## [0.6.1] - 2026-04-25
 
 ### Fixed

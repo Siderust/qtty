@@ -63,6 +63,11 @@ assert!((speed.value() - 10.0).abs() < 1e-12);
 - `cross-unit-ops` (default): enables direct cross-unit comparison operators for compatible built-in units
 - `alloc`: enables heap-backed helpers such as `qtty::qtty_vec!(vec ...)` in `no_std`
 - `serde`: enables serialization helpers for quantities
+- `astro`, `navigation`, `fundamental-physics`, `customary`, `land-area`,
+  `julian-time`: optional unit families forwarded to `qtty-core`.
+- `radiometry`: enables the `qtty::radiometry` module (radiance, photon
+  radiance, S10, `erg_to_photon`). Implies `fundamental-physics`.
+- `all-units`: shorthand that turns on every unit-family feature.
 - `scalar-rational`: enables `num_rational::Rational64`
 - `pyo3`: enables PyO3 conversions and Python-facing helpers
 - `tiberius`: enables SQL Server integration helpers
@@ -71,8 +76,9 @@ assert!((speed.value() - 10.0).abs() < 1e-12);
 ## Modules
 
 - `angular`, `time`, `length`, `mass`, `power`
-- `area`, `volume`, `force`, `energy`
+- `area`, `volume`, `force`, `energy`, `solid_angle`
 - `velocity`, `angular_rate`, `accel`, `unit`
+- `radiometry` (feature: `radiometry`)
 - scalar-specific facades: `f32`, `f64`, `i8`, `i16`, `i32`, `i64`, `i128`
 
 Same-unit division yields a dimensionless quantity, but there is no dedicated
