@@ -26,7 +26,8 @@ customary = ["qtty-core/customary"]
 land-area = ["qtty-core/land-area"]
 julian-time = ["qtty-core/julian-time"]
 radiometry = ["qtty-core/radiometry", "fundamental-physics"]
-all-units = ["astro", "navigation", "fundamental-physics", "customary", "land-area", "julian-time", "radiometry"]
+photometry = ["qtty-core/photometry"]
+all-units = ["astro", "navigation", "fundamental-physics", "customary", "land-area", "julian-time", "radiometry", "photometry"]
 
 # Scalar type support
 scalar-rational = ["qtty-core/scalar-rational"]

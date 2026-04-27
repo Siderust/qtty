@@ -186,6 +186,8 @@ pub use units::length;
 pub use units::mass;
 pub use units::power;
 pub use units::pressure;
+#[cfg(feature = "photometry")]
+pub use units::photometry;
 #[cfg(feature = "radiometry")]
 pub use units::radiometry;
 pub use units::solid_angle;
