@@ -134,6 +134,7 @@ pub use dimension::{
     LuminousIntensity,
     Mass,
     Power,
+    Pressure,
     Radiance,
     SolidAngle,
     SpectralPhotonRadiance,
@@ -184,6 +185,7 @@ pub use units::force;
 pub use units::length;
 pub use units::mass;
 pub use units::power;
+pub use units::pressure;
 #[cfg(feature = "radiometry")]
 pub use units::radiometry;
 pub use units::solid_angle;
