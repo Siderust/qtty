@@ -35,6 +35,8 @@ pub mod length;
 pub mod mass;
 pub mod power;
 pub mod pressure;
+#[cfg(feature = "photometry")]
+pub mod photometry;
 #[cfg(feature = "radiometry")]
 pub mod radiometry;
 pub mod solid_angle;

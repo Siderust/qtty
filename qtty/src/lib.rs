@@ -344,6 +344,8 @@ pub use qtty_core::units::length;
 pub use qtty_core::units::mass;
 pub use qtty_core::units::power;
 pub use qtty_core::units::pressure;
+#[cfg(feature = "photometry")]
+pub use qtty_core::units::photometry;
 #[cfg(feature = "radiometry")]
 pub use qtty_core::units::radiometry;
 pub use qtty_core::units::solid_angle;
