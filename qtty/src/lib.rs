@@ -89,6 +89,7 @@
 //! - `qtty::angular_rate` (`Angular / Time` aliases)
 //! - `qtty::area`, `qtty::volume`, `qtty::force`, `qtty::energy`
 //! - `qtty::accel` (`Length / Time²` aliases)
+//! - `qtty::pressure` (pressure units: Pa, hPa, kPa, bar)
 //! - `qtty::unit` (type-level unit markers)
 //! - `qtty::f32` (all units with `f32` scalar)
 //! - `qtty::f64` (all units with `f64` scalar - same as root)
@@ -178,8 +179,8 @@ pub use qtty_core::{
 };
 pub use qtty_core::{
     Acceleration, AmountOfSubstance, Angular, AngularRate, Area, Current, Dimension, Dimensionless,
-    Energy, Exact, Force, IntegerScalar, Length, LuminousIntensity, Mass, Per, Power, Prod,
-    Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16, QuantityI32, QuantityI64,
+    Energy, Exact, Force, IntegerScalar, Length, LuminousIntensity, Mass, Per, Power, Pressure,
+    Prod, Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16, QuantityI32, QuantityI64,
     QuantityI8, Real, Scalar, Temperature, Time, Transcendental, Unit, Velocity, Volume,
 };
 
@@ -241,7 +242,7 @@ pub use qtty_derive::Unit;
 
 /// Invoke a callback macro with every qtty-core dimension inventory.
 ///
-/// The callback is invoked once per always-available dimension family (10
+/// The callback is invoked once per always-available dimension family (11
 /// total). This is usable for
 /// additive generation (aliases, assertions) where the callback doesn't need
 /// to know which dimension/module the units come from.
@@ -260,6 +261,7 @@ macro_rules! __qtty_invoke_all_inventories {
         qtty_core::acceleration_units!($cb);
         qtty_core::force_units!($cb);
         qtty_core::energy_units!($cb);
+        qtty_core::pressure_units!($cb);
     };
 }
 
@@ -341,6 +343,7 @@ pub use qtty_core::units::force;
 pub use qtty_core::units::length;
 pub use qtty_core::units::mass;
 pub use qtty_core::units::power;
+pub use qtty_core::units::pressure;
 #[cfg(feature = "radiometry")]
 pub use qtty_core::units::radiometry;
 pub use qtty_core::units::solid_angle;
@@ -439,6 +442,10 @@ pub mod unit {
     pub use qtty_core::units::force::PoundForce;
     pub use qtty_core::units::force::{
         ForceUnit, Giganewton, Kilonewton, Meganewton, Micronewton, Millinewton, Newton,
+    };
+
+    pub use qtty_core::units::pressure::{
+        Bar, Gigapascal, Hectopascal, Kilopascal, Megapascal, Millipascal, Pascal, PressureUnit,
     };
 
     #[cfg(feature = "customary")]

@@ -625,6 +625,14 @@ macro_rules! with_base_units {
             crate::units::energy::Megajoule,
             crate::units::energy::Gigajoule,
             crate::units::energy::Terajoule,
+            // ── Pressure (SI pascals + bar) ───────────────────────────────────────
+            crate::units::pressure::Pascal,
+            crate::units::pressure::Millipascal,
+            crate::units::pressure::Hectopascal,
+            crate::units::pressure::Kilopascal,
+            crate::units::pressure::Megapascal,
+            crate::units::pressure::Gigapascal,
+            crate::units::pressure::Bar,
             // ── Solid angle (composed from base angular units) ────────────────────
             crate::units::solid_angle::SquareDegree,
             crate::units::solid_angle::Steradian,

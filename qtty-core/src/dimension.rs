@@ -234,6 +234,9 @@ pub type Energy = Dim<P2, N2, P1, Z0, Z0, Z0, Z0, Z0>;
 /// Power (M¹ · L² · T⁻³).
 pub type Power = Dim<P2, N3, P1, Z0, Z0, Z0, Z0, Z0>;
 
+/// Pressure (M¹ · L⁻¹ · T⁻²) — equivalently, force per unit area (N/m²).
+pub type Pressure = Dim<N1, N2, P1, Z0, Z0, Z0, Z0, Z0>;
+
 /// Solid angle (A²) — plane angle squared (e.g. steradian, square degree).
 ///
 /// Square degree (`Prod<Degree, Degree>`) is the canonical scaling unit

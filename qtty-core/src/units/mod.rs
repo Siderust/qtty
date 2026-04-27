@@ -19,6 +19,7 @@
 //! - [`force`]: force units (SI newton is canonical scaling unit).
 //! - [`energy`]: energy units (SI joule is canonical scaling unit).
 //! - [`power`]: power units (watt is canonical scaling unit).
+//! - [`pressure`]: pressure units (SI pascal is canonical scaling unit).
 //! - [`radiometry`] (feature: `radiometry`): radiance, photon-radiance, S10.
 //! - [`solid_angle`]: solid-angle units (square degree is canonical scaling unit).
 //! - [`angular_rate`]: angular-rate aliases (`Angular / Time`) built from [`angular`] and [`time`].
@@ -33,6 +34,7 @@ pub mod force;
 pub mod length;
 pub mod mass;
 pub mod power;
+pub mod pressure;
 #[cfg(feature = "radiometry")]
 pub mod radiometry;
 pub mod solid_angle;
