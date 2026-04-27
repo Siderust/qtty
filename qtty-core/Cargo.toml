@@ -24,7 +24,8 @@ fundamental-physics = []
 customary = []
 land-area = []
 julian-time = []
-all-units = ["astro", "navigation", "fundamental-physics", "customary", "land-area", "julian-time"]
+radiometry = ["fundamental-physics"]
+all-units = ["astro", "navigation", "fundamental-physics", "customary", "land-area", "julian-time", "radiometry"]
 
 # Optional support
 scalar-rational = ["num-rational"]
