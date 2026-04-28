@@ -22,6 +22,7 @@
 //! - [`pressure`]: pressure units (SI pascal is canonical scaling unit).
 //! - [`radiometry`] (feature: `radiometry`): radiance, photon-radiance, S10.
 //! - [`solid_angle`]: solid-angle units (square degree is canonical scaling unit).
+//! - [`temperature`]: thermodynamic temperature units (kelvin is canonical scaling unit).
 //! - [`angular_rate`]: angular-rate aliases (`Angular / Time`) built from [`angular`] and [`time`].
 //!   This is **not** SI Hertz-style inverse-time frequency (`T⁻¹`); see the module docs.
 
@@ -40,6 +41,7 @@ pub mod photometry;
 #[cfg(feature = "radiometry")]
 pub mod radiometry;
 pub mod solid_angle;
+pub mod temperature;
 pub mod time;
 pub mod velocity;
 pub mod volume;
