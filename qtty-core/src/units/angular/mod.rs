@@ -200,6 +200,182 @@ impl<U: AngularUnit + Copy> Quantity<U> {
         let sep = self.signed_separation(other);
         Self::new(sep.value().abs())
     }
+
+    /// Normalize into the signed half-open interval `(-HALF_TURN, +HALF_TURN]`.
+    ///
+    /// For radians this is `(-π, π]`; for degrees this is `(-180°, 180°]`. This is the conventional
+    /// "shortest signed difference" range. It is an alias for [`Self::wrap_signed`] provided to
+    /// match the naming used by downstream callers (e.g. NSB).
+    ///
+    /// IEEE‑754 note: `NaN`/`±∞` inputs generally produce `NaN`.
+    ///
+    /// # Examples
+    ///
+    /// In‑range value:
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// use core::f64::consts::FRAC_PI_2;
+    /// assert!((Radians::new(FRAC_PI_2).wrap_to_signed_pi().value() - FRAC_PI_2).abs() < 1e-12);
+    /// ```
+    ///
+    /// Slightly out of range (just past π):
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// use core::f64::consts::PI;
+    /// let v = Radians::new(PI + 0.1).wrap_to_signed_pi().value();
+    /// assert!((v - (-PI + 0.1)).abs() < 1e-12);
+    /// ```
+    ///
+    /// Far out of range (7π wraps to π):
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// use core::f64::consts::PI;
+    /// let v = Radians::new(7.0 * PI).wrap_to_signed_pi().value();
+    /// assert!((v - PI).abs() < 1e-12);
+    /// ```
+    ///
+    /// Boundary at +π is inclusive:
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// use core::f64::consts::PI;
+    /// assert!((Radians::new(PI).wrap_to_signed_pi().value() - PI).abs() < 1e-12);
+    /// ```
+    ///
+    /// Negative values:
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// use core::f64::consts::PI;
+    /// let v = Radians::new(-3.0 * PI / 2.0).wrap_to_signed_pi().value();
+    /// assert!((v - PI / 2.0).abs() < 1e-12);
+    /// ```
+    ///
+    /// `NaN` propagates:
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// assert!(Radians::new(f64::NAN).wrap_to_signed_pi().value().is_nan());
+    /// ```
+    #[inline]
+    pub fn wrap_to_signed_pi(self) -> Self {
+        self.wrap_signed()
+    }
+
+    /// Normalize into the unsigned range `[0, FULL_TURN)`.
+    ///
+    /// For radians this is `[0, 2π)`; for degrees this is `[0°, 360°)`. Alias for
+    /// [`Self::wrap_pos`] provided to match the naming used by downstream callers (e.g. NSB).
+    ///
+    /// IEEE‑754 note: `NaN`/`±∞` inputs generally produce `NaN`.
+    ///
+    /// # Examples
+    ///
+    /// In‑range value passes through:
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// use core::f64::consts::FRAC_PI_2;
+    /// assert!((Radians::new(FRAC_PI_2).wrap_to_unsigned_pi().value() - FRAC_PI_2).abs() < 1e-12);
+    /// ```
+    ///
+    /// Slightly out of range:
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// use core::f64::consts::TAU;
+    /// let v = Radians::new(TAU + 0.5).wrap_to_unsigned_pi().value();
+    /// assert!((v - 0.5).abs() < 1e-12);
+    /// ```
+    ///
+    /// Far out of range (7π → π):
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// use core::f64::consts::PI;
+    /// let v = Radians::new(7.0 * PI).wrap_to_unsigned_pi().value();
+    /// assert!((v - PI).abs() < 1e-12);
+    /// ```
+    ///
+    /// Boundary 2π folds back to 0:
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// use core::f64::consts::TAU;
+    /// assert!(Radians::new(TAU).wrap_to_unsigned_pi().value().abs() < 1e-12);
+    /// ```
+    ///
+    /// Negative values are folded into the positive range:
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// use core::f64::consts::{PI, TAU};
+    /// let v = Radians::new(-PI / 2.0).wrap_to_unsigned_pi().value();
+    /// assert!((v - (TAU - PI / 2.0)).abs() < 1e-12);
+    /// ```
+    ///
+    /// `NaN` propagates:
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// assert!(Radians::new(f64::NAN).wrap_to_unsigned_pi().value().is_nan());
+    /// ```
+    #[inline]
+    pub fn wrap_to_unsigned_pi(self) -> Self {
+        self.wrap_pos()
+    }
+
+    /// Fold into the closed interval `[0, HALF_TURN]`.
+    ///
+    /// For radians this is `[0, π]`; for degrees this is `[0°, 180°]`. This is the magnitude of
+    /// the shortest signed angular distance from the origin and matches the semantics used by
+    /// callers such as NSB when reducing ecliptic longitude separations.
+    ///
+    /// Implementation: takes the absolute value of [`Self::wrap_signed`], so the result is in
+    /// `[0, HALF_TURN]` (the upper bound is reachable when the input maps to exactly `+HALF_TURN`).
+    ///
+    /// IEEE‑754 note: `NaN`/`±∞` inputs generally produce `NaN`.
+    ///
+    /// # Examples
+    ///
+    /// In‑range value:
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// use core::f64::consts::FRAC_PI_3;
+    /// assert!((Radians::new(FRAC_PI_3).fold_to_pi().value() - FRAC_PI_3).abs() < 1e-12);
+    /// ```
+    ///
+    /// Slightly out of range (just past π folds back symmetrically):
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// use core::f64::consts::PI;
+    /// let v = Radians::new(PI + 0.1).fold_to_pi().value();
+    /// assert!((v - (PI - 0.1)).abs() < 1e-12);
+    /// ```
+    ///
+    /// Far out of range (7π folds to π):
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// use core::f64::consts::PI;
+    /// let v = Radians::new(7.0 * PI).fold_to_pi().value();
+    /// assert!((v - PI).abs() < 1e-12);
+    /// ```
+    ///
+    /// Boundary at π is reachable:
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// use core::f64::consts::PI;
+    /// assert!((Radians::new(PI).fold_to_pi().value() - PI).abs() < 1e-12);
+    /// ```
+    ///
+    /// Negative values are folded:
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// use core::f64::consts::PI;
+    /// let v = Radians::new(-PI / 4.0).fold_to_pi().value();
+    /// assert!((v - PI / 4.0).abs() < 1e-12);
+    /// ```
+    ///
+    /// `NaN` propagates:
+    /// ```
+    /// use qtty_core::angular::Radians;
+    /// assert!(Radians::new(f64::NAN).fold_to_pi().value().is_nan());
+    /// ```
+    #[inline]
+    pub fn fold_to_pi(self) -> Self {
+        Self::new(self.wrap_signed().value().abs())
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -748,6 +924,168 @@ mod tests {
         let b = Degrees::new(50.0);
         assert_abs_diff_eq!(a.abs_separation(b).value(), 20.0, epsilon = 1e-12);
         assert_abs_diff_eq!(b.abs_separation(a).value(), 20.0, epsilon = 1e-12);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // wrap_to_signed_pi / wrap_to_unsigned_pi / fold_to_pi
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn wrap_to_signed_pi_matches_wrap_signed_radians() {
+        for &x in &[-7.0 * PI, -PI - 0.1, -PI, -1.0, 0.0, 1.0, PI, PI + 0.1, 7.0 * PI] {
+            let a = Radians::new(x);
+            assert_abs_diff_eq!(
+                a.wrap_to_signed_pi().value(),
+                a.wrap_signed().value(),
+                epsilon = 1e-12
+            );
+        }
+    }
+
+    #[test]
+    fn wrap_to_signed_pi_degree_analog() {
+        // The same generic helper provides the (-180°, 180°] semantics for Degrees.
+        assert_abs_diff_eq!(
+            Degrees::new(190.0).wrap_to_signed_pi().value(),
+            -170.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(180.0).wrap_to_signed_pi().value(),
+            180.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-180.0).wrap_to_signed_pi().value(),
+            180.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(7.0 * 180.0).wrap_to_signed_pi().value(),
+            180.0,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn wrap_to_unsigned_pi_matches_wrap_pos_radians() {
+        for &x in &[-7.0 * PI, -PI, -1.0, 0.0, 1.0, PI, TAU, 7.0 * PI] {
+            let a = Radians::new(x);
+            assert_abs_diff_eq!(
+                a.wrap_to_unsigned_pi().value(),
+                a.wrap_pos().value(),
+                epsilon = 1e-12
+            );
+        }
+    }
+
+    #[test]
+    fn wrap_to_unsigned_pi_degree_analog() {
+        assert_abs_diff_eq!(
+            Degrees::new(370.0).wrap_to_unsigned_pi().value(),
+            10.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-10.0).wrap_to_unsigned_pi().value(),
+            350.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(360.0).wrap_to_unsigned_pi().value(),
+            0.0,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn fold_to_pi_radians() {
+        assert_abs_diff_eq!(
+            Radians::new(0.5).fold_to_pi().value(),
+            0.5,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Radians::new(-0.5).fold_to_pi().value(),
+            0.5,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Radians::new(PI + 0.1).fold_to_pi().value(),
+            PI - 0.1,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Radians::new(7.0 * PI).fold_to_pi().value(),
+            PI,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(Radians::new(PI).fold_to_pi().value(), PI, epsilon = 1e-12);
+        assert_abs_diff_eq!(Radians::new(0.0).fold_to_pi().value(), 0.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn fold_to_pi_degree_analog() {
+        assert_abs_diff_eq!(
+            Degrees::new(190.0).fold_to_pi().value(),
+            170.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(-30.0).fold_to_pi().value(),
+            30.0,
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(
+            Degrees::new(360.0 * 7.0 + 50.0).fold_to_pi().value(),
+            50.0,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn fold_to_pi_nan_propagates() {
+        assert!(Radians::new(f64::NAN).fold_to_pi().value().is_nan());
+        assert!(Degrees::new(f64::NAN).fold_to_pi().value().is_nan());
+    }
+
+    /// Parity with NSB's existing fold semantics: `delta_lambda.to_degrees().abs().min(180.0)`
+    /// applied to the signed difference of two ecliptic longitudes must equal
+    /// `(a - b).fold_to_pi()` (in degrees).
+    #[test]
+    fn fold_to_pi_matches_nsb_legacy_loop() {
+        // Reference implementation mirroring the historic NSB normalization
+        // (`while delta > π { delta -= 2π } / while delta < -π { delta += 2π }` then `.abs()`).
+        fn nsb_legacy_fold(mut delta: f64) -> f64 {
+            while delta > PI {
+                delta -= TAU;
+            }
+            while delta < -PI {
+                delta += TAU;
+            }
+            delta.abs()
+        }
+
+        let samples = [
+            -7.5 * PI,
+            -PI - 1e-9,
+            -PI,
+            -PI / 2.0,
+            -1e-12,
+            0.0,
+            1e-12,
+            PI / 4.0,
+            PI - 1e-9,
+            PI,
+            PI + 1e-9,
+            3.0 * PI / 2.0,
+            7.5 * PI,
+        ];
+        for &x in &samples {
+            let helper = Radians::new(x).fold_to_pi().value();
+            let legacy = nsb_legacy_fold(x);
+            assert_abs_diff_eq!(helper, legacy, epsilon = 1e-9);
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
