@@ -633,6 +633,8 @@ macro_rules! with_base_units {
             crate::units::pressure::Megapascal,
             crate::units::pressure::Gigapascal,
             crate::units::pressure::Bar,
+            // ── Temperature (SI kelvin) ───────────────────────────────────────────
+            crate::units::temperature::Kelvin,
             // ── Solid angle (composed from base angular units) ────────────────────
             crate::units::solid_angle::SquareDegree,
             crate::units::solid_angle::Steradian,

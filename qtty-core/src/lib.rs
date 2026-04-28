@@ -191,6 +191,7 @@ pub use units::photometry;
 #[cfg(feature = "radiometry")]
 pub use units::radiometry;
 pub use units::solid_angle;
+pub use units::temperature;
 pub use units::time;
 pub use units::velocity;
 pub use units::volume;

@@ -90,6 +90,7 @@
 //! - `qtty::area`, `qtty::volume`, `qtty::force`, `qtty::energy`
 //! - `qtty::accel` (`Length / Time²` aliases)
 //! - `qtty::pressure` (pressure units: Pa, hPa, kPa, bar)
+//! - `qtty::temperature` (thermodynamic temperature units: K)
 //! - `qtty::unit` (type-level unit markers)
 //! - `qtty::f32` (all units with `f32` scalar)
 //! - `qtty::f64` (all units with `f64` scalar - same as root)
@@ -262,6 +263,7 @@ macro_rules! __qtty_invoke_all_inventories {
         qtty_core::force_units!($cb);
         qtty_core::energy_units!($cb);
         qtty_core::pressure_units!($cb);
+        qtty_core::temperature_units!($cb);
     };
 }
 
@@ -344,6 +346,7 @@ pub use qtty_core::units::length;
 pub use qtty_core::units::mass;
 pub use qtty_core::units::power;
 pub use qtty_core::units::pressure;
+pub use qtty_core::units::temperature;
 #[cfg(feature = "photometry")]
 pub use qtty_core::units::photometry;
 #[cfg(feature = "radiometry")]
@@ -449,6 +452,8 @@ pub mod unit {
     pub use qtty_core::units::pressure::{
         Bar, Gigapascal, Hectopascal, Kilopascal, Megapascal, Millipascal, Pascal, PressureUnit,
     };
+
+    pub use qtty_core::units::temperature::{Kelvin, TemperatureUnit};
 
     #[cfg(feature = "customary")]
     pub use qtty_core::units::energy::{Calorie, Kilocalorie};
