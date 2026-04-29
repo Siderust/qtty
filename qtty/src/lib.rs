@@ -209,7 +209,7 @@ pub use qtty_core::{
 // application code, consider opening an issue — that is a sign of a missing
 // ergonomic abstraction in the public API.
 #[doc(hidden)]
-pub use qtty_core::{Dim, DimDiv, DimMul, UnitDiv, UnitMul};
+pub use qtty_core::{Dim, DimDiv, DimMul, UnitDiv, UnitMul, UnitSqrt};
 
 #[cfg(feature = "scalar-rational")]
 pub use qtty_core::QuantityRational;
@@ -365,7 +365,7 @@ pub use qtty_core::units::volume;
 /// [`Second`]. Use this module when generic code needs the unit marker itself,
 /// for example `Quantity<unit::Meter, S>` or `to::<unit::Kilometer>()`.
 pub mod unit {
-    pub use qtty_core::{Per, Prod, Unit, UnitDiv, UnitMul};
+    pub use qtty_core::{Per, Prod, Unit, UnitDiv, UnitMul, UnitSqrt};
 
     #[cfg(feature = "navigation")]
     pub use qtty_core::units::angular::Gradian;

@@ -155,7 +155,7 @@ pub use quantity::{
 };
 pub use scalar::{Exact, IntegerScalar, Real, Scalar, Transcendental};
 pub use unit::{Per, Prod, Unit};
-pub use unit_arithmetic::{QuantityDivOutput, SameDivOutput, UnitDiv, UnitMul};
+pub use unit_arithmetic::{QuantityDivOutput, SameDivOutput, UnitDiv, UnitMul, UnitSqrt};
 
 #[cfg(feature = "scalar-rational")]
 pub use quantity::QuantityRational;

@@ -56,6 +56,36 @@ pub trait UnitMul<Rhs: Unit>: Unit {
     type Output: Unit;
 }
 
+/// Inverse of squaring at the type level: maps a "squared" unit back to its
+/// scalar root unit.
+///
+/// Implemented blanketly for [`Prod<U, U>`](Prod), so any unit that arises as
+/// the dimensional square of another unit (e.g. `Prod<Meter, Meter>` ≡
+/// `SquareMeter`) carries a `Root = U` and can be square-rooted via
+/// [`Quantity::sqrt`](crate::Quantity::sqrt).
+///
+/// This is the dimensionally correct inverse of the `Quantity<U> *
+/// Quantity<U> -> Quantity<Prod<U, U>>` `Mul` impl provided through
+/// [`UnitMul`].
+///
+/// # Note
+///
+/// The blanket impl deliberately only covers the **symmetric** product
+/// `Prod<U, U>`; mixed products like `Prod<Meter, Second>` have no
+/// well-defined square root in this system.
+pub trait UnitSqrt: Unit {
+    /// The unit obtained by taking the dimensional square root of `Self`.
+    type Root: Unit;
+}
+
+impl<U: Unit> UnitSqrt for Prod<U, U>
+where
+    U::Dim: DimMul<U::Dim>,
+    <U::Dim as DimMul<U::Dim>>::Output: Dimension,
+{
+    type Root = U;
+}
+
 // Marker for plain built-in units. This lets built-in multiplication use a
 // single generic impl instead of an O(n²) generated impl table.
 pub(crate) trait BuiltinUnit: Unit {}
