@@ -5,7 +5,7 @@
 
 use crate::scalar::{Exact, Real, Scalar, Transcendental};
 use crate::unit::Unit;
-use crate::unit_arithmetic::{QuantityDivOutput, UnitDiv, UnitMul};
+use crate::unit_arithmetic::{QuantityDivOutput, UnitDiv, UnitMul, UnitSqrt};
 use core::cmp::Ordering;
 use core::hash::{Hash, Hasher};
 use core::iter::Sum;
@@ -563,6 +563,15 @@ impl<U: Unit + Copy> Quantity<U, f64> {
             other
         }
     }
+
+    /// Returns the least non-negative remainder of `self.value() % rhs`.
+    ///
+    /// Equivalent to `f64::rem_euclid`: always returns a value in `[0, rhs)` for `rhs > 0`.
+    /// Useful for canonicalising angular quantities to `[0°, 360°)` without extracting the inner value.
+    #[inline]
+    pub fn rem_euclid(self, rhs: f64) -> Self {
+        Self::new(self.0.rem_euclid(rhs))
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -941,6 +950,45 @@ where
 // ─────────────────────────────────────────────────────────────────────────────
 // Trig helpers for dimensionless quantities
 // ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dimensionally-typed square root
+// ─────────────────────────────────────────────────────────────────────────────
+
+impl<U, S> Quantity<U, S>
+where
+    U: UnitSqrt,
+    S: Real,
+{
+    /// Dimensionally-typed square root.
+    ///
+    /// For any squared unit `U = Prod<R, R>` (e.g. `SquareMeter ≡ Prod<Meter, Meter>`),
+    /// this returns a `Quantity<R, S>` whose value is the scalar square root.
+    ///
+    /// This is the inverse of the `Quantity<R> * Quantity<R> -> Quantity<Prod<R, R>>`
+    /// multiplication produced by [`UnitMul`].
+    ///
+    /// Only nonneg values make dimensional sense; for negative scalars the
+    /// returned quantity carries `S::sqrt(neg)` (typically NaN for real
+    /// scalars). Callers that need explicit signed-safety should branch on
+    /// [`signum`](Self::signum) first.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use qtty_core::area::SquareMeters;
+    /// use qtty_core::length::{Meter, Meters};
+    /// use qtty_core::Quantity;
+    ///
+    /// let area = SquareMeters::new(25.0);
+    /// let side: Quantity<Meter> = area.sqrt();
+    /// assert!((side.value() - 5.0).abs() < 1e-12);
+    /// ```
+    #[inline]
+    pub fn sqrt(self) -> Quantity<U::Root, S> {
+        Quantity::new(self.0.sqrt())
+    }
+}
 
 impl<U, S> Quantity<U, S>
 where

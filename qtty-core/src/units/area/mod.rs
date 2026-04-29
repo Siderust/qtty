@@ -262,6 +262,42 @@ mod tests {
     }
 
     #[test]
+    fn sqrt_recovers_length_unit() {
+        use crate::length::{Meter, Meters};
+
+        let area = SquareMeters::new(36.0);
+        let side: crate::Quantity<Meter> = area.sqrt();
+        assert_abs_diff_eq!(side.value(), 6.0, epsilon = 1e-12);
+
+        // Round-trip: side² == area
+        let again: SquareMeters = side * side;
+        assert_abs_diff_eq!(again.value(), area.value(), epsilon = 1e-12);
+
+        // Pure type-level: sqrt of (Meters * Meters) is Meters
+        let s = Meters::new(7.0);
+        let a = s * s;
+        let r: Meters = a.sqrt();
+        assert_abs_diff_eq!(r.value(), 7.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn squared_unit_conversion_uses_squared_scale() {
+        // 1 km² = 1_000_000 m² (scale factor squared)
+        let one_sqkm = SquareKilometers::new(1.0);
+        let in_sqm: SquareMeters = one_sqkm.to();
+        assert_abs_diff_eq!(in_sqm.value(), 1.0e6, epsilon = 1e-6);
+    }
+
+    #[test]
+    #[cfg(feature = "std")]
+    fn squared_unit_formatter_output() {
+        // Display: "value sym·sym"
+        assert_eq!(format!("{}", SquareMeters::new(2.5)), "2.5 m·m");
+        // LowerExp uses scientific notation on the value, same symbol layout.
+        assert_eq!(format!("{:e}", SquareMeters::new(1234.0)), "1.234e3 m·m");
+    }
+
+    #[test]
     #[cfg(feature = "std")]
     fn symbols_are_correct() {
         // Prod-based aliases inherit the Prod Display ("m·m");
