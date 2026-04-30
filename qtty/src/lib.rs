@@ -344,14 +344,14 @@ pub use qtty_core::units::energy;
 pub use qtty_core::units::force;
 pub use qtty_core::units::length;
 pub use qtty_core::units::mass;
-pub use qtty_core::units::power;
-pub use qtty_core::units::pressure;
-pub use qtty_core::units::temperature;
 #[cfg(feature = "photometry")]
 pub use qtty_core::units::photometry;
+pub use qtty_core::units::power;
+pub use qtty_core::units::pressure;
 #[cfg(feature = "radiometry")]
 pub use qtty_core::units::radiometry;
 pub use qtty_core::units::solid_angle;
+pub use qtty_core::units::temperature;
 pub use qtty_core::units::time;
 pub use qtty_core::units::volume;
 
@@ -433,9 +433,9 @@ pub mod unit {
     #[cfg(feature = "customary")]
     pub use qtty_core::units::power::{HorsepowerElectric, HorsepowerMetric};
 
-    pub use qtty_core::units::solid_angle::{Steradian, SquareDegree, SquareMilliradian};
     #[cfg(feature = "astro")]
     pub use qtty_core::units::solid_angle::{SquareArcminute, SquareArcsecond};
+    pub use qtty_core::units::solid_angle::{SquareDegree, SquareMilliradian, Steradian};
 
     pub use qtty_core::units::acceleration::{
         AccelerationUnit, MeterPerSecondSquared, StandardGravity,

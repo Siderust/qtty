@@ -78,9 +78,9 @@ pub type Hectopascals = Quantity<HPa>;
 pub const HECTOPASCAL: Hectopascals = Hectopascals::new(1.0);
 
 si_pascal!(Millipascal, "mPa", 1e-3, MPa, Millipascals, MILLIPASCAL);
-si_pascal!(Kilopascal,  "kPa", 1e3,  KPa, Kilopascals,  KILOPASCAL);
-si_pascal!(Megapascal,  "MPa", 1e6,  MpaPa, Megapascals,  MEGAPASCAL);
-si_pascal!(Gigapascal,  "GPa", 1e9,  GPa, Gigapascals,  GIGAPASCAL);
+si_pascal!(Kilopascal, "kPa", 1e3, KPa, Kilopascals, KILOPASCAL);
+si_pascal!(Megapascal, "MPa", 1e6, MpaPa, Megapascals, MEGAPASCAL);
+si_pascal!(Gigapascal, "GPa", 1e9, GPa, Gigapascals, GIGAPASCAL);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Non-SI but common: bar

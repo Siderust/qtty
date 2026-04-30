@@ -932,7 +932,17 @@ mod tests {
 
     #[test]
     fn wrap_to_signed_pi_matches_wrap_signed_radians() {
-        for &x in &[-7.0 * PI, -PI - 0.1, -PI, -1.0, 0.0, 1.0, PI, PI + 0.1, 7.0 * PI] {
+        for &x in &[
+            -7.0 * PI,
+            -PI - 0.1,
+            -PI,
+            -1.0,
+            0.0,
+            1.0,
+            PI,
+            PI + 0.1,
+            7.0 * PI,
+        ] {
             let a = Radians::new(x);
             assert_abs_diff_eq!(
                 a.wrap_to_signed_pi().value(),
@@ -1000,11 +1010,7 @@ mod tests {
 
     #[test]
     fn fold_to_pi_radians() {
-        assert_abs_diff_eq!(
-            Radians::new(0.5).fold_to_pi().value(),
-            0.5,
-            epsilon = 1e-12
-        );
+        assert_abs_diff_eq!(Radians::new(0.5).fold_to_pi().value(), 0.5, epsilon = 1e-12);
         assert_abs_diff_eq!(
             Radians::new(-0.5).fold_to_pi().value(),
             0.5,
