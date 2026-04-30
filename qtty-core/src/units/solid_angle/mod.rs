@@ -160,8 +160,8 @@ mod tests {
     use crate::angular::{Degrees, Radians};
     use approx::assert_relative_eq;
 
-    const STERADIAN_IN_SQDEG: f64 = (180.0 / core::f64::consts::PI)
-        * (180.0 / core::f64::consts::PI);
+    const STERADIAN_IN_SQDEG: f64 =
+        (180.0 / core::f64::consts::PI) * (180.0 / core::f64::consts::PI);
 
     #[test]
     fn square_degree_is_canonical() {

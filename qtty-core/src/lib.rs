@@ -130,9 +130,11 @@ pub use dimension::{
     Dimensionless,
     Energy,
     Force,
+    InverseSolidAngle,
     Length,
     LuminousIntensity,
     Mass,
+    PhotonRadiance,
     Power,
     Pressure,
     Radiance,
@@ -184,10 +186,10 @@ pub use units::energy;
 pub use units::force;
 pub use units::length;
 pub use units::mass;
-pub use units::power;
-pub use units::pressure;
 #[cfg(feature = "photometry")]
 pub use units::photometry;
+pub use units::power;
+pub use units::pressure;
 #[cfg(feature = "radiometry")]
 pub use units::radiometry;
 pub use units::solid_angle;
