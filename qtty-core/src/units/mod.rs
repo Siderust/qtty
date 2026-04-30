@@ -34,10 +34,10 @@ pub mod energy;
 pub mod force;
 pub mod length;
 pub mod mass;
-pub mod power;
-pub mod pressure;
 #[cfg(feature = "photometry")]
 pub mod photometry;
+pub mod power;
+pub mod pressure;
 #[cfg(feature = "radiometry")]
 pub mod radiometry;
 pub mod solid_angle;

@@ -285,7 +285,10 @@ mod tests {
         let legacy = 5.03e7_f64;
         let exact = p_rad.value();
         let rel = (exact - legacy).abs() / exact;
-        assert!(rel < 1.0e-3, "exact = {exact}, legacy = {legacy}, rel = {rel}");
+        assert!(
+            rel < 1.0e-3,
+            "exact = {exact}, legacy = {legacy}, rel = {rel}"
+        );
     }
 
     #[test]

@@ -224,14 +224,22 @@ mod tests {
     #[test]
     fn flux_to_mag_unit_flux() {
         let m = flux_to_magnitude(1.0, 0.0);
-        assert!((m.value() - 0.0).abs() < 1e-12, "expected 0, got {}", m.value());
+        assert!(
+            (m.value() - 0.0).abs() < 1e-12,
+            "expected 0, got {}",
+            m.value()
+        );
     }
 
     /// 100× flux ratio = 5 mag (Pogson's definition)
     #[test]
     fn flux_to_mag_hundred_to_one() {
         let m = flux_to_magnitude(100.0, 0.0);
-        assert!((m.value() - (-5.0)).abs() < 1e-12, "expected -5, got {}", m.value());
+        assert!(
+            (m.value() - (-5.0)).abs() < 1e-12,
+            "expected -5, got {}",
+            m.value()
+        );
     }
 
     /// Round-trip `flux → mag → flux` is bit-equivalent for representative inputs.
@@ -250,7 +258,11 @@ mod tests {
     #[test]
     fn nsb_zero_point() {
         let m = flux_to_magnitude(1.0, 27.78);
-        assert!((m.value() - 27.78).abs() < 1e-12, "expected 27.78, got {}", m.value());
+        assert!(
+            (m.value() - 27.78).abs() < 1e-12,
+            "expected 27.78, got {}",
+            m.value()
+        );
     }
 
     /// Magnitude subtraction yields a difference.
