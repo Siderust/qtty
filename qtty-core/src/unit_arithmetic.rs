@@ -820,6 +820,30 @@ macro_rules! extend_with_land_area {
 #[cfg(feature = "land-area")]
 with_base_units!(extend_with_land_area);
 
+#[cfg(feature = "radiometry")]
+macro_rules! extend_with_radiometry {
+    ($($base:ty),+) => {
+        register_builtin_units_extend!(
+            $($base),+;
+            crate::units::radiometry::WattPerSquareMeterSteradian,
+            crate::units::radiometry::ErgPerSecondSquareCentimeterSteradian,
+            crate::units::radiometry::WattPerSquareMeterSteradianMeter,
+            crate::units::radiometry::WattPerSquareMeterSteradianNanometer,
+            crate::units::radiometry::ErgPerSecondSquareCentimeterSteradianAngstrom,
+            crate::units::radiometry::PhotonPerSquareMeterSecondSteradian,
+            crate::units::radiometry::PhotonPerSquareCentimeterSecondSteradian,
+            crate::units::radiometry::PhotonPerSquareCentimeterNanosecondSteradian,
+            crate::units::radiometry::PhotonPerSquareMeterSecondSteradianMeter,
+            crate::units::radiometry::PhotonPerSquareCentimeterSecondSteradianAngstrom,
+            crate::units::radiometry::PhotonPerSquareCentimeterSecondSteradianNanometer,
+            crate::units::radiometry::PhotonPerSquareCentimeterNanosecondSteradianNanometer,
+            crate::units::radiometry::S10
+        );
+    };
+}
+#[cfg(feature = "radiometry")]
+with_base_units!(extend_with_radiometry);
+
 // ── Per-feature "as-base" UnitDiv helpers ─────────────────────────────────────
 //
 // Each macro below holds ONE optional feature's complete unit list.  When two

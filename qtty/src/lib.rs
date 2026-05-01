@@ -318,6 +318,17 @@ macro_rules! __qtty_invoke_optional_inventories {
 
         #[cfg(feature = "julian-time")]
         qtty_core::time_julian_time_units!($cb);
+
+        #[cfg(feature = "radiometry")]
+        qtty_core::radiance_units!($cb);
+        #[cfg(feature = "radiometry")]
+        qtty_core::spectral_radiance_units!($cb);
+        #[cfg(feature = "radiometry")]
+        qtty_core::photon_radiance_units!($cb);
+        #[cfg(feature = "radiometry")]
+        qtty_core::spectral_photon_radiance_units!($cb);
+        #[cfg(feature = "radiometry")]
+        qtty_core::inverse_solid_angle_units!($cb);
     };
 }
 
@@ -454,6 +465,18 @@ pub mod unit {
     };
 
     pub use qtty_core::units::temperature::{Kelvin, TemperatureUnit};
+
+    #[cfg(feature = "radiometry")]
+    pub use qtty_core::units::radiometry::{
+        ErgPerSecondSquareCentimeterSteradian, ErgPerSecondSquareCentimeterSteradianAngstrom,
+        InverseSolidAngleUnit, PhotonPerSquareCentimeterNanosecondSteradian,
+        PhotonPerSquareCentimeterNanosecondSteradianNanometer,
+        PhotonPerSquareCentimeterSecondSteradian, PhotonPerSquareCentimeterSecondSteradianAngstrom,
+        PhotonPerSquareCentimeterSecondSteradianNanometer, PhotonPerSquareMeterSecondSteradian,
+        PhotonPerSquareMeterSecondSteradianMeter, PhotonRadianceUnit, RadianceUnit,
+        SpectralPhotonRadianceUnit, SpectralRadianceUnit, WattPerSquareMeterSteradian,
+        WattPerSquareMeterSteradianMeter, WattPerSquareMeterSteradianNanometer, S10,
+    };
 
     #[cfg(feature = "customary")]
     pub use qtty_core::units::energy::{Calorie, Kilocalorie};

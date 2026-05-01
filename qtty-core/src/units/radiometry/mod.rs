@@ -32,12 +32,36 @@
 //! assert_eq!(l.value(), 1.0);
 //! ```
 
-use crate::Quantity;
+use crate::{Quantity, Unit};
 use qtty_derive::Unit;
 
 pub use crate::dimension::{
     InverseSolidAngle, PhotonRadiance, Radiance, SpectralPhotonRadiance, SpectralRadiance,
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Marker traits
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Marker trait for any [`Unit`] whose dimension is [`Radiance`].
+pub trait RadianceUnit: Unit<Dim = Radiance> {}
+impl<T: Unit<Dim = Radiance>> RadianceUnit for T {}
+
+/// Marker trait for any [`Unit`] whose dimension is [`SpectralRadiance`].
+pub trait SpectralRadianceUnit: Unit<Dim = SpectralRadiance> {}
+impl<T: Unit<Dim = SpectralRadiance>> SpectralRadianceUnit for T {}
+
+/// Marker trait for any [`Unit`] whose dimension is [`PhotonRadiance`].
+pub trait PhotonRadianceUnit: Unit<Dim = PhotonRadiance> {}
+impl<T: Unit<Dim = PhotonRadiance>> PhotonRadianceUnit for T {}
+
+/// Marker trait for any [`Unit`] whose dimension is [`SpectralPhotonRadiance`].
+pub trait SpectralPhotonRadianceUnit: Unit<Dim = SpectralPhotonRadiance> {}
+impl<T: Unit<Dim = SpectralPhotonRadiance>> SpectralPhotonRadianceUnit for T {}
+
+/// Marker trait for any [`Unit`] whose dimension is [`InverseSolidAngle`].
+pub trait InverseSolidAngleUnit: Unit<Dim = InverseSolidAngle> {}
+impl<T: Unit<Dim = InverseSolidAngle>> InverseSolidAngleUnit for T {}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Radiance — W · m⁻² · sr⁻¹
@@ -172,6 +196,17 @@ pub struct PhotonPerSquareCentimeterSecondSteradianNanometer;
 pub type PhotonsPerSquareCentimeterSecondSteradianNanometer =
     Quantity<PhotonPerSquareCentimeterSecondSteradianNanometer>;
 
+/// Spectral photon radiance — `ph·cm⁻²·ns⁻¹·sr⁻¹·nm⁻¹`.
+///
+/// 1 ph·cm⁻²·ns⁻¹·sr⁻¹·nm⁻¹ = 1×10²² ph·m⁻²·s⁻¹·sr⁻¹·m⁻¹
+/// (10⁴ for cm⁻²→m⁻², 10⁹ for ns⁻¹→s⁻¹, and 10⁹ for nm⁻¹→m⁻¹).
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
+#[unit(symbol = "ph·cm⁻²·ns⁻¹·sr⁻¹·nm⁻¹", dimension = SpectralPhotonRadiance, ratio = 1.0e22)]
+pub struct PhotonPerSquareCentimeterNanosecondSteradianNanometer;
+/// A quantity measured in ph·cm⁻²·ns⁻¹·sr⁻¹·nm⁻¹.
+pub type PhotonsPerSquareCentimeterNanosecondSteradianNanometer =
+    Quantity<PhotonPerSquareCentimeterNanosecondSteradianNanometer>;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // S10 — 10th-magnitude stars per square degree
 // ─────────────────────────────────────────────────────────────────────────────
@@ -194,6 +229,99 @@ pub struct S10;
 pub type S10s = Quantity<S10>;
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Unit inventory macros — one per dimension group
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Canonical list of radiance units (power per area per solid angle).
+#[macro_export]
+#[doc(hidden)]
+macro_rules! radiance_units {
+    ($cb:path) => {
+        $cb!(
+            WattPerSquareMeterSteradian,
+            ErgPerSecondSquareCentimeterSteradian
+        );
+    };
+}
+
+/// Canonical list of spectral-radiance units (radiance per unit wavelength).
+#[macro_export]
+#[doc(hidden)]
+macro_rules! spectral_radiance_units {
+    ($cb:path) => {
+        $cb!(
+            WattPerSquareMeterSteradianMeter,
+            WattPerSquareMeterSteradianNanometer,
+            ErgPerSecondSquareCentimeterSteradianAngstrom
+        );
+    };
+}
+
+/// Canonical list of photon-radiance units (photon count per area per time per solid angle).
+#[macro_export]
+#[doc(hidden)]
+macro_rules! photon_radiance_units {
+    ($cb:path) => {
+        $cb!(
+            PhotonPerSquareMeterSecondSteradian,
+            PhotonPerSquareCentimeterSecondSteradian,
+            PhotonPerSquareCentimeterNanosecondSteradian
+        );
+    };
+}
+
+/// Canonical list of spectral-photon-radiance units.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! spectral_photon_radiance_units {
+    ($cb:path) => {
+        $cb!(
+            PhotonPerSquareMeterSecondSteradianMeter,
+            PhotonPerSquareCentimeterSecondSteradianAngstrom,
+            PhotonPerSquareCentimeterSecondSteradianNanometer,
+            PhotonPerSquareCentimeterNanosecondSteradianNanometer
+        );
+    };
+}
+
+/// Canonical list of inverse-solid-angle units.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! inverse_solid_angle_units {
+    ($cb:path) => {
+        $cb!(S10);
+    };
+}
+
+// Generate bidirectional From impls between units within each dimension group.
+radiance_units!(crate::impl_unit_from_conversions);
+spectral_radiance_units!(crate::impl_unit_from_conversions);
+photon_radiance_units!(crate::impl_unit_from_conversions);
+spectral_photon_radiance_units!(crate::impl_unit_from_conversions);
+// inverse_solid_angle_units! has only one unit; no From conversions to generate.
+
+#[cfg(feature = "cross-unit-ops")]
+radiance_units!(crate::impl_unit_cross_unit_ops);
+#[cfg(feature = "cross-unit-ops")]
+spectral_radiance_units!(crate::impl_unit_cross_unit_ops);
+#[cfg(feature = "cross-unit-ops")]
+photon_radiance_units!(crate::impl_unit_cross_unit_ops);
+#[cfg(feature = "cross-unit-ops")]
+spectral_photon_radiance_units!(crate::impl_unit_cross_unit_ops);
+
+// Compile-time check: every radiometry unit is registered as BuiltinUnit.
+#[cfg(test)]
+radiance_units!(crate::assert_units_are_builtin);
+#[cfg(test)]
+spectral_radiance_units!(crate::assert_units_are_builtin);
+#[cfg(test)]
+photon_radiance_units!(crate::assert_units_are_builtin);
+#[cfg(test)]
+spectral_photon_radiance_units!(crate::assert_units_are_builtin);
+#[cfg(test)]
+inverse_solid_angle_units!(crate::assert_units_are_builtin);
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Conversion helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -203,6 +331,9 @@ pub type S10s = Quantity<S10>;
 /// `5.034_116_5 × 10⁷ ph / (erg · Å)`, was historically rounded to
 /// `5.03e7` in `NSB_Utils.py`.
 const HC_ERG_ANGSTROM: f64 = 1.986_445_857_148_968e-8;
+
+/// Photon energy `E = h · c` in **joule metre** units (CODATA 2018).
+const HC_JOULE_METER: f64 = 1.986_445_857_148_968e-25;
 
 /// Convert spectral *energy* radiance (CGS, erg·s⁻¹·cm⁻²·sr⁻¹·Å⁻¹) to
 /// spectral *photon* radiance (ph·s⁻¹·cm⁻²·sr⁻¹·Å⁻¹) at wavelength
@@ -234,6 +365,23 @@ pub fn erg_to_photon(
     PhotonsPerSquareCentimeterSecondSteradianAngstrom::new(
         energy_radiance.value() * lambda_angstrom / HC_ERG_ANGSTROM,
     )
+}
+
+/// Convert spectral *energy* radiance in SI wavelength units
+/// (`W·m⁻²·sr⁻¹·nm⁻¹`) to spectral *photon* radiance in the NSB/SkyCalc
+/// optical convention (`ph·cm⁻²·ns⁻¹·sr⁻¹·nm⁻¹`).
+///
+/// This is the typed equivalent of the legacy `erg * wavelength_A * 5.03e7`
+/// pipeline followed by `s⁻¹ → ns⁻¹`; it keeps both wavelength and radiance
+/// units explicit at the call site.
+#[inline]
+pub fn spectral_radiance_to_photon_radiance_ns_nm(
+    energy_radiance: WattsPerSquareMeterSteradianNanometer,
+    lambda: crate::length::Nanometers,
+) -> PhotonsPerSquareCentimeterNanosecondSteradianNanometer {
+    let lambda_m = lambda.value() * 1.0e-9;
+    let photons_per_s_m2_nm = energy_radiance.value() * lambda_m / HC_JOULE_METER;
+    PhotonsPerSquareCentimeterNanosecondSteradianNanometer::new(photons_per_s_m2_nm * 1.0e-13)
 }
 
 #[cfg(all(test, feature = "std"))]
@@ -288,6 +436,25 @@ mod tests {
         assert!(
             rel < 1.0e-3,
             "exact = {exact}, legacy = {legacy}, rel = {rel}"
+        );
+    }
+
+    #[test]
+    fn si_spectral_radiance_to_photon_radiance_matches_legacy_path() {
+        let lambda = crate::length::Nanometers::new(550.0);
+        let e_rad = WattsPerSquareMeterSteradianNanometer::new(1.0);
+        let got = spectral_radiance_to_photon_radiance_ns_nm(e_rad, lambda);
+
+        // Legacy NSB path:
+        // 1 W m^-2 sr^-1 nm^-1 = 100 erg s^-1 cm^-2 sr^-1 A^-1
+        // photons/A/s = erg * 5.03e7 * lambda_A
+        // A^-1 -> nm^-1: *10; s^-1 -> ns^-1: *1e-9
+        let legacy = 100.0 * 5.03e7 * 5500.0 * 10.0 * 1.0e-9;
+        let rel = (got.value() - legacy).abs() / got.value();
+        assert!(
+            rel < 1.0e-3,
+            "typed = {}, legacy = {legacy}, rel = {rel}",
+            got.value()
         );
     }
 

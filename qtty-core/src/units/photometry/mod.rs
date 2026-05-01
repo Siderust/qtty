@@ -212,6 +212,29 @@ pub fn band_flux_to_surface_brightness(flux: f64, zero_point: f64) -> SurfaceBri
     SurfaceBrightness(zero_point - 2.5 * flux.log10())
 }
 
+/// Typed variant of [`band_flux_to_surface_brightness`] that accepts an
+/// [`S10s`] flux quantity directly, avoiding the need to call `.value()`.
+///
+/// Requires both the `photometry` and `radiometry` features.
+///
+/// # Example
+/// ```rust
+/// use qtty_core::photometry::s10_to_surface_brightness;
+/// use qtty_core::radiometry::S10s;
+///
+/// let flux = S10s::new(1.0);
+/// let sb = s10_to_surface_brightness(flux, 27.78);
+/// assert!((sb.value() - 27.78).abs() < 1e-12);
+/// ```
+#[cfg(feature = "radiometry")]
+#[inline]
+pub fn s10_to_surface_brightness(
+    flux: crate::units::radiometry::S10s,
+    zero_point: f64,
+) -> SurfaceBrightness {
+    band_flux_to_surface_brightness(flux.value(), zero_point)
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Tests
 // ─────────────────────────────────────────────────────────────────────────────

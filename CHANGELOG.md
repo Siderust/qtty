@@ -9,6 +9,55 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ### Added
 
+- **Pressure units** in `qtty-core::units::pressure` (re-exported by `qtty::pressure` /
+  `qtty::unit`). Always available: `Pascal` (canonical SI unit), `Hectopascal` (hPa,
+  widely used in observatory site metadata), `Millipascal`, `Kilopascal`, `Megapascal`,
+  `Gigapascal`, and `Bar` (= 10⁵ Pa). Bidirectional `From` conversions and
+  cross-feature `PartialEq` / `PartialOrd` cover all pairs via `pressure_units!`.
+  Named constants `PASCAL`, `HECTOPASCAL`, `BAR`, etc. for quick construction.
+  New `Pressure` dimension alias added to `qtty-core::dimension`.
+
+- **Temperature units** in `qtty-core::units::temperature` (re-exported by
+  `qtty::temperature` / `qtty::unit`). Always available: `Kelvin` (SI base unit, the
+  only linear-scale thermodynamic temperature unit provided — affine-offset scales
+  such as Celsius and Fahrenheit are intentionally omitted). Inventory macro
+  `temperature_units!`, `TemperatureUnit` marker trait, `KELVIN` constant.
+  New `Temperature` dimension alias added to `qtty-core::dimension`.
+
+- **Photometry module** (`qtty-core::units::photometry`, behind the `photometry`
+  feature, re-exported by `qtty::photometry`). Uses a deliberate newtype design (not
+  `Quantity<U>`) for logarithmic quantities where addition is not physically meaningful:
+  - `Magnitude` — stellar magnitude scale (more negative = brighter).
+  - `SurfaceBrightness` — magnitudes per square arcsecond.
+  - `flux_to_magnitude(flux, zero_point)` / `magnitude_to_flux(mag, zero_point)` —
+    typed conversion helpers.
+  - `band_flux_to_surface_brightness(s10, zero_point)` — converts S10 surface flux
+    density to a `SurfaceBrightness` magnitude.
+  - `s10_to_surface_brightness(flux, zero_point)` — typed variant accepting a typed
+    `S10s` quantity and returning `SurfaceBrightness`; requires `radiometry` feature.
+
+- **Angular wrap helpers** on `Quantity<U>` for any `U: AngularUnit`:
+  - `wrap_to_signed_pi()` — folds any angle into `(−π, +π]` (i.e. `(−180°, +180°]`).
+  - `wrap_to_unsigned_pi()` — folds any angle into `[0, 2π)` (i.e. `[0°, 360°)`).
+  - `fold_to_pi()` — folds any angle into `[0, π]` (i.e. `[0°, 180°]`), useful for
+    unsigned angular separations.
+
+- **Typed square root** (`UnitSqrt` trait, `qtty-core`):
+  - `UnitSqrt` — implemented automatically for `Prod<U, U>` (a unit multiplied by
+    itself, i.e. a squared unit).
+  - `Quantity<Prod<U, U>, S>::sqrt()` — returns `Quantity<U, S>` with the correct
+    halved dimension; the result type is inferred from the input unit, so no
+    annotation is needed at the call site.
+  - Re-exported from `qtty` as `qtty::UnitSqrt`.
+
+- **Radiometry additions** (extending the initial `radiometry` feature):
+  - `PhotonPerSquareCentimeterNanosecondSteradian` (`ph·cm⁻²·ns⁻¹·sr⁻¹`) photon
+    radiance unit, matching the NSB/darknsb pipeline output convention.
+  - `spectral_radiance_to_photon_radiance_ns_nm(energy_radiance, lambda)` — converts
+    SI spectral energy radiance (`W·m⁻²·sr⁻¹·nm⁻¹`) to spectral photon radiance
+    in the NSB/SkyCalc optical convention (`ph·cm⁻²·ns⁻¹·sr⁻¹·nm⁻¹`) using the
+    exact `1 / (h · c)` constant.
+
 - **Solid-angle units** in `qtty-core::units::solid_angle` (re-exported by
   `qtty::solid_angle` / `qtty::unit`). Always available: `SquareDegree`
   (canonical), `Steradian`, `SquareMilliradian`. Behind `astro`:
@@ -29,6 +78,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
     matching the Leinert et al. zodiacal-light tables.
   - `erg_to_photon(spectral_energy_radiance, lambda)` typed helper using the
     exact `1 / (h · c)` constant `≈ 5.034 × 10⁷ ph / (erg · Å)`.
+
+### Changed
+
+- **`radiometry` module** now follows the standard qtty unit-module architecture:
+  - Per-dimension marker traits (`RadianceUnit`, `SpectralRadianceUnit`,
+    `PhotonRadianceUnit`, `SpectralPhotonRadianceUnit`, `InverseSolidAngleUnit`).
+  - Per-dimension inventory macros (`radiance_units!`, `spectral_radiance_units!`,
+    `photon_radiance_units!`, `spectral_photon_radiance_units!`,
+    `inverse_solid_angle_units!`) with bidirectional `From` conversions and
+    `cross-unit-ops` `PartialEq` / `PartialOrd` within each dimension group.
+  - All 13 unit markers registered as `BuiltinUnit` and covered by
+    `assert_units_are_builtin` compile-time drift checks.
+  - Unit markers re-exported from `qtty::unit` (e.g. `qtty::unit::S10`,
+    `qtty::unit::WattPerSquareMeterSteradian`); quantity aliases generated at the
+    `qtty` crate root (e.g. `qtty::S10s`, `qtty::WattsPerSquareMeterSteradian`)
+    when the `radiometry` feature is enabled.
 
 ## [0.6.1] - 2026-04-25
 
