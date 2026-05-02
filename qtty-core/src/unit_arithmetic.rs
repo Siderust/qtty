@@ -647,14 +647,18 @@ macro_rules! with_base_units {
             crate::units::force::Kilonewton,
             crate::units::force::Meganewton,
             crate::units::force::Giganewton,
-            // ── Energy (SI joules) ────────────────────────────────────────────────
+            // ── Energy (SI joules + watt-hours) ──────────────────────────────────
             crate::units::energy::Joule,
+            crate::units::energy::Picojoule,
+            crate::units::energy::Nanojoule,
             crate::units::energy::Microjoule,
             crate::units::energy::Millijoule,
             crate::units::energy::Kilojoule,
             crate::units::energy::Megajoule,
             crate::units::energy::Gigajoule,
             crate::units::energy::Terajoule,
+            crate::units::energy::WattHour,
+            crate::units::energy::KilowattHour,
             // ── Pressure (SI pascals + bar) ───────────────────────────────────────
             crate::units::pressure::Pascal,
             crate::units::pressure::Millipascal,
@@ -663,8 +667,9 @@ macro_rules! with_base_units {
             crate::units::pressure::Megapascal,
             crate::units::pressure::Gigapascal,
             crate::units::pressure::Bar,
-            // ── Temperature (SI kelvin) ───────────────────────────────────────────
+            // ── Temperature (SI kelvin + Rankine) ────────────────────────────────
             crate::units::temperature::Kelvin,
+            crate::units::temperature::Rankine,
             // ── Solid angle (composed from base angular units) ────────────────────
             crate::units::solid_angle::SquareDegree,
             crate::units::solid_angle::Steradian,
@@ -758,7 +763,14 @@ macro_rules! extend_with_customary {
             crate::units::volume::UsFluidOunce,
             crate::units::force::PoundForce,
             crate::units::energy::Calorie,
-            crate::units::energy::Kilocalorie
+            crate::units::energy::Kilocalorie,
+            crate::units::energy::BritishThermalUnit,
+            crate::units::energy::Therm,
+            crate::units::pressure::Atmosphere,
+            crate::units::pressure::Torr,
+            crate::units::pressure::MillimeterOfMercury,
+            crate::units::pressure::PoundPerSquareInch,
+            crate::units::pressure::InchOfMercury
         );
     };
 }
@@ -843,6 +855,124 @@ macro_rules! extend_with_radiometry {
 }
 #[cfg(feature = "radiometry")]
 with_base_units!(extend_with_radiometry);
+
+#[cfg(feature = "frequency")]
+macro_rules! extend_with_frequency {
+    ($($base:ty),+) => {
+        register_builtin_units_extend!(
+            $($base),+;
+            crate::units::frequency::Hertz,
+            crate::units::frequency::Millihertz,
+            crate::units::frequency::Kilohertz,
+            crate::units::frequency::Megahertz,
+            crate::units::frequency::Gigahertz,
+            crate::units::frequency::Terahertz
+        );
+    };
+}
+#[cfg(feature = "frequency")]
+with_base_units!(extend_with_frequency);
+
+#[cfg(feature = "chemistry")]
+macro_rules! extend_with_chemistry {
+    ($($base:ty),+) => {
+        register_builtin_units_extend!(
+            $($base),+;
+            crate::units::amount::Nanomole,
+            crate::units::amount::Micromole,
+            crate::units::amount::Millimole,
+            crate::units::amount::Mole,
+            crate::units::amount::Kilomole
+        );
+    };
+}
+#[cfg(feature = "chemistry")]
+with_base_units!(extend_with_chemistry);
+
+#[cfg(feature = "electrical")]
+macro_rules! extend_with_electrical {
+    ($($base:ty),+) => {
+        register_builtin_units_extend!(
+            $($base),+;
+            crate::units::electrical::Ampere,
+            crate::units::electrical::Microampere,
+            crate::units::electrical::Milliampere,
+            crate::units::electrical::Kiloampere,
+            crate::units::electrical::Coulomb,
+            crate::units::electrical::Millicoulomb,
+            crate::units::electrical::Microcoulomb,
+            crate::units::electrical::Kilocoulomb,
+            crate::units::electrical::Volt,
+            crate::units::electrical::Microvolt,
+            crate::units::electrical::Millivolt,
+            crate::units::electrical::Kilovolt,
+            crate::units::electrical::Megavolt,
+            crate::units::electrical::Ohm,
+            crate::units::electrical::Milliohm,
+            crate::units::electrical::Kilohm,
+            crate::units::electrical::Megaohm,
+            crate::units::electrical::Farad,
+            crate::units::electrical::Picofarad,
+            crate::units::electrical::Nanofarad,
+            crate::units::electrical::Microfarad,
+            crate::units::electrical::Millifarad,
+            crate::units::electrical::Henry,
+            crate::units::electrical::Microhenry,
+            crate::units::electrical::Millihenry,
+            crate::units::electrical::Weber,
+            crate::units::electrical::Milliweber,
+            crate::units::electrical::Tesla,
+            crate::units::electrical::Microtesla,
+            crate::units::electrical::Millitesla
+        );
+    };
+}
+#[cfg(feature = "electrical")]
+with_base_units!(extend_with_electrical);
+
+#[cfg(feature = "density")]
+macro_rules! extend_with_density {
+    ($($base:ty),+) => {
+        register_builtin_units_extend!(
+            $($base),+;
+            crate::units::density::KilogramPerCubicMeter,
+            crate::units::density::GramPerCubicCentimeter,
+            crate::units::density::GramPerMilliliter
+        );
+    };
+}
+#[cfg(feature = "density")]
+with_base_units!(extend_with_density);
+
+#[cfg(all(feature = "density", feature = "customary"))]
+macro_rules! extend_density_with_customary {
+    ($($base:ty),+) => {
+        register_builtin_units_extend!(
+            $($base),+;
+            crate::units::density::PoundPerCubicFoot
+        );
+    };
+}
+#[cfg(all(feature = "density", feature = "customary"))]
+with_base_units!(extend_density_with_customary);
+
+#[cfg(feature = "photometry")]
+macro_rules! extend_with_photometry {
+    ($($base:ty),+) => {
+        register_builtin_units_extend!(
+            $($base),+;
+            crate::units::photometry::Candela,
+            crate::units::photometry::Lumen,
+            crate::units::photometry::Millilumen,
+            crate::units::photometry::Kilolumen,
+            crate::units::photometry::Lux,
+            crate::units::photometry::Millilux,
+            crate::units::photometry::Kilolux
+        );
+    };
+}
+#[cfg(feature = "photometry")]
+with_base_units!(extend_with_photometry);
 
 // ── Per-feature "as-base" UnitDiv helpers ─────────────────────────────────────
 //
@@ -976,6 +1106,112 @@ macro_rules! __impl_div_pairs_with_land_area_as_base {
                 crate::units::area::Hectare,
                 crate::units::area::Are,
                 crate::units::area::Acre
+            }
+            $($extra),+
+        );
+    };
+}
+
+#[cfg(feature = "frequency")]
+macro_rules! __impl_div_pairs_with_frequency_as_base {
+    ($($extra:ty),+ $(,)?) => {
+        crate::__impl_div_pairs_each_extra_to_bases!(
+            {
+                crate::units::frequency::Hertz,
+                crate::units::frequency::Millihertz,
+                crate::units::frequency::Kilohertz,
+                crate::units::frequency::Megahertz,
+                crate::units::frequency::Gigahertz,
+                crate::units::frequency::Terahertz
+            }
+            $($extra),+
+        );
+    };
+}
+
+#[cfg(feature = "chemistry")]
+macro_rules! __impl_div_pairs_with_chemistry_as_base {
+    ($($extra:ty),+ $(,)?) => {
+        crate::__impl_div_pairs_each_extra_to_bases!(
+            {
+                crate::units::amount::Nanomole,
+                crate::units::amount::Micromole,
+                crate::units::amount::Millimole,
+                crate::units::amount::Mole,
+                crate::units::amount::Kilomole
+            }
+            $($extra),+
+        );
+    };
+}
+
+#[cfg(feature = "electrical")]
+macro_rules! __impl_div_pairs_with_electrical_as_base {
+    ($($extra:ty),+ $(,)?) => {
+        crate::__impl_div_pairs_each_extra_to_bases!(
+            {
+                crate::units::electrical::Ampere,
+                crate::units::electrical::Microampere,
+                crate::units::electrical::Milliampere,
+                crate::units::electrical::Kiloampere,
+                crate::units::electrical::Coulomb,
+                crate::units::electrical::Millicoulomb,
+                crate::units::electrical::Microcoulomb,
+                crate::units::electrical::Kilocoulomb,
+                crate::units::electrical::Volt,
+                crate::units::electrical::Microvolt,
+                crate::units::electrical::Millivolt,
+                crate::units::electrical::Kilovolt,
+                crate::units::electrical::Megavolt,
+                crate::units::electrical::Ohm,
+                crate::units::electrical::Milliohm,
+                crate::units::electrical::Kilohm,
+                crate::units::electrical::Megaohm,
+                crate::units::electrical::Farad,
+                crate::units::electrical::Picofarad,
+                crate::units::electrical::Nanofarad,
+                crate::units::electrical::Microfarad,
+                crate::units::electrical::Millifarad,
+                crate::units::electrical::Henry,
+                crate::units::electrical::Microhenry,
+                crate::units::electrical::Millihenry,
+                crate::units::electrical::Weber,
+                crate::units::electrical::Milliweber,
+                crate::units::electrical::Tesla,
+                crate::units::electrical::Microtesla,
+                crate::units::electrical::Millitesla
+            }
+            $($extra),+
+        );
+    };
+}
+
+#[cfg(feature = "density")]
+macro_rules! __impl_div_pairs_with_density_as_base {
+    ($($extra:ty),+ $(,)?) => {
+        crate::__impl_div_pairs_each_extra_to_bases!(
+            {
+                crate::units::density::KilogramPerCubicMeter,
+                crate::units::density::GramPerCubicCentimeter,
+                crate::units::density::GramPerMilliliter
+            }
+            $($extra),+
+        );
+    };
+}
+
+#[cfg(feature = "photometry")]
+macro_rules! __impl_div_pairs_with_photometry_as_base {
+    ($($extra:ty),+ $(,)?) => {
+        crate::__impl_div_pairs_each_extra_to_bases!(
+            {
+                crate::units::photometry::Candela,
+                crate::units::photometry::Lumen,
+                crate::units::photometry::Millilumen,
+                crate::units::photometry::Kilolumen,
+                crate::units::photometry::Lux,
+                crate::units::photometry::Millilux,
+                crate::units::photometry::Kilolux
             }
             $($extra),+
         );

@@ -57,12 +57,32 @@ macro_rules! si_joule {
     };
 }
 
+si_joule!(Nanojoule, "nJ", 1e-9, Nanojoules, NANOJOULE);
+si_joule!(Picojoule, "pJ", 1e-12, Picojoules, PICOJOULE);
 si_joule!(Microjoule, "µJ", 1e-6, Microjoules, MICROJOULE);
 si_joule!(Millijoule, "mJ", 1e-3, Millijoules, MILLIJOULE);
 si_joule!(Kilojoule, "kJ", 1e3, Kilojoules, KILOJOULE);
 si_joule!(Megajoule, "MJ", 1e6, Megajoules, MEGAJOULE);
 si_joule!(Gigajoule, "GJ", 1e9, Gigajoules, GIGAJOULE);
 si_joule!(Terajoule, "TJ", 1e12, Terajoules, TERAJOULE);
+
+/// Watt-hour — 1 Wh = 3 600 J (exact).
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
+#[unit(symbol = "Wh", dimension = Energy, ratio = 3_600.0)]
+pub struct WattHour;
+/// A quantity measured in watt-hours.
+pub type WattHours = Quantity<WattHour>;
+/// One watt-hour.
+pub const WATT_HOUR: WattHours = WattHours::new(1.0);
+
+/// Kilowatt-hour — 1 kWh = 3 600 000 J (exact).
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
+#[unit(symbol = "kWh", dimension = Energy, ratio = 3_600_000.0)]
+pub struct KilowattHour;
+/// A quantity measured in kilowatt-hours.
+pub type KilowattHours = Quantity<KilowattHour>;
+/// One kilowatt-hour.
+pub const KILOWATT_HOUR: KilowattHours = KilowattHours::new(1.0);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Feature-gated units
@@ -122,6 +142,24 @@ pub struct Kilocalorie;
 #[cfg(feature = "customary")]
 pub type Kilocalories = Quantity<Kilocalorie>;
 
+/// British Thermal Unit — 1 BTU ≈ 1 055.05585262 J (ISO 31-4).
+#[cfg(feature = "customary")]
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
+#[unit(symbol = "BTU", dimension = Energy, ratio = 1_055.05585262)]
+pub struct BritishThermalUnit;
+/// A quantity measured in British thermal units.
+#[cfg(feature = "customary")]
+pub type BritishThermalUnits = Quantity<BritishThermalUnit>;
+
+/// Therm — 1 therm = 100 000 BTU = 105 505 585.262 J.
+#[cfg(feature = "customary")]
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
+#[unit(symbol = "therm", dimension = Energy, ratio = 105_505_585.262)]
+pub struct Therm;
+/// A quantity measured in therms.
+#[cfg(feature = "customary")]
+pub type Therms = Quantity<Therm>;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Unit inventory macro
 // ─────────────────────────────────────────────────────────────────────────────
@@ -131,7 +169,19 @@ pub type Kilocalories = Quantity<Kilocalorie>;
 #[doc(hidden)]
 macro_rules! energy_units {
     ($cb:path) => {
-        $cb!(Joule, Microjoule, Millijoule, Kilojoule, Megajoule, Gigajoule, Terajoule);
+        $cb!(
+            Joule,
+            Picojoule,
+            Nanojoule,
+            Microjoule,
+            Millijoule,
+            Kilojoule,
+            Megajoule,
+            Gigajoule,
+            Terajoule,
+            WattHour,
+            KilowattHour
+        );
     };
 }
 
@@ -144,7 +194,7 @@ energy_units!(crate::impl_unit_cross_unit_ops);
 // ── Cross-feature: customary × fundamental-physics ───────────────────────────
 #[cfg(all(feature = "customary", feature = "fundamental-physics"))]
 crate::__impl_from_each_extra_to_bases!(
-    {Calorie, Kilocalorie}
+    {Calorie, Kilocalorie, BritishThermalUnit, Therm}
     Erg, Electronvolt, Kiloelectronvolt, Megaelectronvolt
 );
 #[cfg(all(
@@ -153,7 +203,7 @@ crate::__impl_from_each_extra_to_bases!(
     feature = "cross-unit-ops"
 ))]
 crate::__impl_cross_ops_each_extra_to_bases!(
-    {Calorie, Kilocalorie}
+    {Calorie, Kilocalorie, BritishThermalUnit, Therm}
     Erg, Electronvolt, Kiloelectronvolt, Megaelectronvolt
 );
 
@@ -171,13 +221,13 @@ macro_rules! energy_fundamental_physics_units {
     };
 }
 
-/// Canonical list of `customary`-gated energy units (calorie, kilocalorie).
+/// Canonical list of `customary`-gated energy units (calorie, kilocalorie, BTU, therm).
 #[cfg(feature = "customary")]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! energy_customary_units {
     ($cb:path) => {
-        $cb!(Calorie, Kilocalorie);
+        $cb!(Calorie, Kilocalorie, BritishThermalUnit, Therm);
     };
 }
 
@@ -237,5 +287,42 @@ mod tests {
         let kcal = Kilocalories::new(1.0);
         let j: Joules = kcal.to();
         assert_abs_diff_eq!(j.value(), 4184.0, epsilon = 1e-9);
+    }
+
+    #[test]
+    fn watt_hour_to_joule() {
+        let wh = WattHours::new(1.0);
+        let j: Joules = wh.to();
+        assert_abs_diff_eq!(j.value(), 3_600.0, epsilon = 1e-10);
+    }
+
+    #[test]
+    fn kilowatt_hour_to_joule() {
+        let kwh = KilowattHours::new(1.0);
+        let j: Joules = kwh.to();
+        assert_abs_diff_eq!(j.value(), 3_600_000.0, epsilon = 1e-6);
+    }
+
+    #[test]
+    fn nanojoule_to_picojoule() {
+        let nj = Nanojoules::new(1.0);
+        let pj: Picojoules = nj.to();
+        assert_abs_diff_eq!(pj.value(), 1_000.0, epsilon = 1e-9);
+    }
+
+    #[test]
+    #[cfg(feature = "customary")]
+    fn btu_to_joule() {
+        let btu = BritishThermalUnits::new(1.0);
+        let j: Joules = btu.to();
+        assert_abs_diff_eq!(j.value(), 1_055.05585262, epsilon = 1e-6);
+    }
+
+    #[test]
+    #[cfg(feature = "customary")]
+    fn therm_to_btu() {
+        let therm = Therms::new(1.0);
+        let btu: BritishThermalUnits = therm.to();
+        assert_abs_diff_eq!(btu.value(), 100_000.0, epsilon = 1e-3);
     }
 }

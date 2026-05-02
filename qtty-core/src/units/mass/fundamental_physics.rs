@@ -42,3 +42,33 @@ macro_rules! mass_fundamental_physics_units {
         $cb!(AtomicMassUnit,);
     };
 }
+
+#[cfg(all(test, feature = "std"))]
+mod tests {
+    use super::*;
+    use approx::assert_abs_diff_eq;
+    use proptest::prelude::*;
+
+    #[test]
+    fn atomic_mass_unit_to_grams() {
+        let u = AtomicMassUnits::new(1.0);
+        let grams: Grams = u.to();
+        assert_abs_diff_eq!(grams.value(), 1.660_539_068_92e-24, epsilon = 1e-36);
+    }
+
+    #[test]
+    fn grams_to_atomic_mass_units() {
+        let grams = Grams::new(1.660_539_068_92e-24);
+        let u: AtomicMassUnits = grams.to();
+        assert_abs_diff_eq!(u.value(), 1.0, epsilon = 1e-12);
+    }
+
+    proptest! {
+        #[test]
+        fn atomic_mass_unit_gram_roundtrip(v in -1.0e12_f64..1.0e12_f64) {
+            let u = AtomicMassUnits::new(v);
+            let roundtrip: AtomicMassUnits = u.to::<Gram>().to();
+            prop_assert!((roundtrip.value() - v).abs() <= v.abs().max(1.0) * 1e-12);
+        }
+    }
+}

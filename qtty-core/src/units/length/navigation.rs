@@ -105,3 +105,33 @@ macro_rules! length_navigation_units {
         );
     };
 }
+
+#[cfg(all(test, feature = "std"))]
+mod tests {
+    use super::*;
+    use approx::assert_abs_diff_eq;
+    use proptest::prelude::*;
+
+    #[test]
+    fn nautical_mile_to_meter_exact() {
+        let nmi = NauticalMiles::new(1.0);
+        let meters: Meters = nmi.to();
+        assert_abs_diff_eq!(meters.value(), 1_852.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn chain_to_links() {
+        let chain = Chains::new(1.0);
+        let links: Links = chain.to();
+        assert_abs_diff_eq!(links.value(), 100.0, epsilon = 1e-12);
+    }
+
+    proptest! {
+        #[test]
+        fn fathom_meter_roundtrip(v in -1.0e9_f64..1.0e9_f64) {
+            let fathoms = Fathoms::new(v);
+            let roundtrip: Fathoms = fathoms.to::<Meter>().to();
+            prop_assert!((roundtrip.value() - v).abs() <= v.abs().max(1.0) * 1e-12);
+        }
+    }
+}

@@ -67,3 +67,33 @@ macro_rules! time_astro_units {
         $cb!(SiderealDay, SynodicMonth, SiderealYear,);
     };
 }
+
+#[cfg(all(test, feature = "std"))]
+mod tests {
+    use super::*;
+    use approx::assert_abs_diff_eq;
+    use proptest::prelude::*;
+
+    #[test]
+    fn sidereal_day_to_seconds() {
+        let day = SiderealDays::new(1.0);
+        let seconds: Seconds = day.to();
+        assert_abs_diff_eq!(seconds.value(), 86_164.090_5, epsilon = 1e-9);
+    }
+
+    #[test]
+    fn synodic_month_to_days() {
+        let month = SynodicMonths::new(1.0);
+        let days: Days = month.to();
+        assert_abs_diff_eq!(days.value(), 29.530_590, epsilon = 1e-12);
+    }
+
+    proptest! {
+        #[test]
+        fn sidereal_year_second_roundtrip(v in -1.0e6_f64..1.0e6_f64) {
+            let years = SiderealYears::new(v);
+            let roundtrip: SiderealYears = years.to::<Second>().to();
+            prop_assert!((roundtrip.value() - v).abs() <= v.abs().max(1.0) * 1e-12);
+        }
+    }
+}

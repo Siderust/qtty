@@ -179,10 +179,12 @@ pub use qtty_core::{
     impl_unit_multiplication_pairs_between,
 };
 pub use qtty_core::{
-    Acceleration, AmountOfSubstance, Angular, AngularRate, Area, Current, Dimension, Dimensionless,
-    Energy, Exact, Force, IntegerScalar, Length, LuminousIntensity, Mass, Per, Power, Pressure,
-    Prod, Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16, QuantityI32, QuantityI64,
-    QuantityI8, Real, Scalar, Temperature, Time, Transcendental, Unit, Velocity, Volume,
+    Acceleration, AmountOfSubstance, Angular, AngularRate, Area, Capacitance, Charge, Current,
+    Density, Dimension, Dimensionless, Energy, Exact, Force, Frequency, Illuminance, Inductance,
+    IntegerScalar, Length, LuminousFlux, LuminousIntensity, MagneticFlux, MagneticFluxDensity,
+    Mass, Per, Power, Pressure, Prod, Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16,
+    QuantityI32, QuantityI64, QuantityI8, Real, Resistance, Scalar, Temperature, Time,
+    Transcendental, Unit, Velocity, Voltage, Volume,
 };
 
 // `UnitDiv`, `UnitMul`, and the dimension-level traits are needed by the
@@ -301,14 +303,20 @@ macro_rules! __qtty_invoke_optional_inventories {
         #[cfg(feature = "customary")]
         qtty_core::area_customary_units!($cb);
         #[cfg(feature = "customary")]
+        qtty_core::energy_customary_units!($cb);
+        #[cfg(feature = "customary")]
         qtty_core::length_customary_units!($cb);
         #[cfg(feature = "customary")]
         qtty_core::mass_customary_units!($cb);
         #[cfg(feature = "customary")]
         qtty_core::power_customary_units!($cb);
         #[cfg(feature = "customary")]
+        qtty_core::pressure_customary_units!($cb);
+        #[cfg(feature = "customary")]
         qtty_core::volume_customary_units!($cb);
 
+        #[cfg(feature = "fundamental-physics")]
+        qtty_core::energy_fundamental_physics_units!($cb);
         #[cfg(feature = "fundamental-physics")]
         qtty_core::length_fundamental_physics_units!($cb);
         #[cfg(feature = "fundamental-physics")]
@@ -329,6 +337,41 @@ macro_rules! __qtty_invoke_optional_inventories {
         qtty_core::spectral_photon_radiance_units!($cb);
         #[cfg(feature = "radiometry")]
         qtty_core::inverse_solid_angle_units!($cb);
+
+        #[cfg(feature = "photometry")]
+        qtty_core::candela_units!($cb);
+        #[cfg(feature = "photometry")]
+        qtty_core::lumen_units!($cb);
+        #[cfg(feature = "photometry")]
+        qtty_core::lux_units!($cb);
+
+        #[cfg(feature = "frequency")]
+        qtty_core::frequency_units!($cb);
+
+        #[cfg(feature = "chemistry")]
+        qtty_core::amount_units!($cb);
+
+        #[cfg(feature = "electrical")]
+        qtty_core::ampere_units!($cb);
+        #[cfg(feature = "electrical")]
+        qtty_core::coulomb_units!($cb);
+        #[cfg(feature = "electrical")]
+        qtty_core::volt_units!($cb);
+        #[cfg(feature = "electrical")]
+        qtty_core::ohm_units!($cb);
+        #[cfg(feature = "electrical")]
+        qtty_core::farad_units!($cb);
+        #[cfg(feature = "electrical")]
+        qtty_core::henry_units!($cb);
+        #[cfg(feature = "electrical")]
+        qtty_core::weber_units!($cb);
+        #[cfg(feature = "electrical")]
+        qtty_core::tesla_units!($cb);
+
+        #[cfg(feature = "density")]
+        qtty_core::density_units!($cb);
+        #[cfg(all(feature = "density", feature = "customary"))]
+        qtty_core::density_customary_units!($cb);
     };
 }
 
@@ -365,6 +408,15 @@ pub use qtty_core::units::solid_angle;
 pub use qtty_core::units::temperature;
 pub use qtty_core::units::time;
 pub use qtty_core::units::volume;
+
+#[cfg(feature = "chemistry")]
+pub use qtty_core::units::amount;
+#[cfg(feature = "density")]
+pub use qtty_core::units::density;
+#[cfg(feature = "electrical")]
+pub use qtty_core::units::electrical;
+#[cfg(feature = "frequency")]
+pub use qtty_core::units::frequency;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Type-level unit markers
@@ -460,11 +512,15 @@ pub mod unit {
         ForceUnit, Giganewton, Kilonewton, Meganewton, Micronewton, Millinewton, Newton,
     };
 
+    #[cfg(feature = "customary")]
+    pub use qtty_core::units::pressure::{
+        Atmosphere, InchOfMercury, MillimeterOfMercury, PoundPerSquareInch, Torr,
+    };
     pub use qtty_core::units::pressure::{
         Bar, Gigapascal, Hectopascal, Kilopascal, Megapascal, Millipascal, Pascal, PressureUnit,
     };
 
-    pub use qtty_core::units::temperature::{Kelvin, TemperatureUnit};
+    pub use qtty_core::units::temperature::{Kelvin, Rankine, TemperatureUnit};
 
     #[cfg(feature = "radiometry")]
     pub use qtty_core::units::radiometry::{
@@ -479,11 +535,12 @@ pub mod unit {
     };
 
     #[cfg(feature = "customary")]
-    pub use qtty_core::units::energy::{Calorie, Kilocalorie};
+    pub use qtty_core::units::energy::{BritishThermalUnit, Calorie, Kilocalorie, Therm};
     #[cfg(feature = "fundamental-physics")]
     pub use qtty_core::units::energy::{Electronvolt, Erg, Kiloelectronvolt, Megaelectronvolt};
     pub use qtty_core::units::energy::{
-        EnergyUnit, Gigajoule, Joule, Kilojoule, Megajoule, Microjoule, Millijoule, Terajoule,
+        EnergyUnit, Gigajoule, Joule, Kilojoule, KilowattHour, Megajoule, Microjoule, Millijoule,
+        Nanojoule, Picojoule, Terajoule, WattHour,
     };
 
     pub use qtty_core::units::time::{
@@ -502,6 +559,36 @@ pub mod unit {
     };
     #[cfg(feature = "customary")]
     pub use qtty_core::units::volume::{CubicFoot, CubicInch, UsFluidOunce, UsGallon};
+
+    #[cfg(feature = "photometry")]
+    pub use qtty_core::units::photometry::{
+        Candela, Kilolumen, Kilolux, Lumen, Lux, Millilumen, Millilux,
+    };
+
+    #[cfg(feature = "frequency")]
+    pub use qtty_core::units::frequency::{
+        FrequencyUnit, Gigahertz, Hertz, Kilohertz, Megahertz, Millihertz, Terahertz,
+    };
+
+    #[cfg(feature = "chemistry")]
+    pub use qtty_core::units::amount::{
+        AmountUnit, Kilomole, Micromole, Millimole, Mole, Nanomole,
+    };
+
+    #[cfg(feature = "electrical")]
+    pub use qtty_core::units::electrical::{
+        Ampere, Coulomb, Farad, Henry, Kiloampere, Kilocoulomb, Kilohm, Kilovolt, Megaohm,
+        Megavolt, Microampere, Microcoulomb, Microfarad, Microhenry, Microtesla, Microvolt,
+        Milliampere, Millicoulomb, Millifarad, Millihenry, Milliohm, Millitesla, Millivolt,
+        Milliweber, Nanofarad, Ohm, Picofarad, Tesla, Volt, Weber,
+    };
+
+    #[cfg(all(feature = "density", feature = "customary"))]
+    pub use qtty_core::units::density::PoundPerCubicFoot;
+    #[cfg(feature = "density")]
+    pub use qtty_core::units::density::{
+        DensityUnit, GramPerCubicCentimeter, GramPerMilliliter, KilogramPerCubicMeter,
+    };
 }
 
 /// Plural alias for [`unit`]. `qtty::units::Meter` resolves to the same

@@ -9,6 +9,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ### Added
 
+- Expanded the built-in unit inventory:
+  - `frequency` feature with hertz units from millihertz through terahertz.
+  - `chemistry` feature with mole units from nanomole through kilomole.
+  - `electrical` feature with current, charge, voltage, resistance, capacitance,
+    inductance, magnetic-flux, and magnetic-flux-density units.
+  - `density` feature with SI density units and `customary` `PoundPerCubicFoot`.
+  - Additional energy units: `Picojoule`, `Nanojoule`, `WattHour`,
+    `KilowattHour`, and `customary` `BritishThermalUnit` / `Therm`.
+  - `photometry` linear SI units: `Candela`, `Lumen`, and `Lux`.
+  - `Rankine` as a linear absolute temperature unit.
+
+- Added local tests for feature-gated length, time, mass, and angular submodules,
+  including known-value conversions and proptest round-trips.
+
 - **Pressure units** in `qtty-core::units::pressure` (re-exported by `qtty::pressure` /
   `qtty::unit`). Always available: `Pascal` (canonical SI unit), `Hectopascal` (hPa,
   widely used in observatory site metadata), `Millipascal`, `Kilopascal`, `Megapascal`,
@@ -80,6 +94,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
     exact `1 / (h · c)` constant `≈ 5.034 × 10⁷ ph / (erg · Å)`.
 
 ### Changed
+
+- **Breaking:** corrected public SI aliases so `pressure::MPa` now means
+  `Megapascal` instead of `Millipascal`; use `MilliPa` for millipascal. Also
+  added the expected `force::MN` alias for `Meganewton`.
 
 - **`radiometry` module** now follows the standard qtty unit-module architecture:
   - Per-dimension marker traits (`RadianceUnit`, `SpectralRadianceUnit`,

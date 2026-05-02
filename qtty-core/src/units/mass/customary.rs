@@ -102,3 +102,33 @@ macro_rules! mass_customary_units {
         $cb!(Carat, Grain, Pound, Ounce, Stone, ShortTon, LongTon,);
     };
 }
+
+#[cfg(all(test, feature = "std"))]
+mod tests {
+    use super::*;
+    use approx::assert_abs_diff_eq;
+    use proptest::prelude::*;
+
+    #[test]
+    fn pound_to_grams() {
+        let pounds = Pounds::new(1.0);
+        let grams: Grams = pounds.to();
+        assert_abs_diff_eq!(grams.value(), 453.592_37, epsilon = 1e-10);
+    }
+
+    #[test]
+    fn stone_to_pounds() {
+        let stone = Stones::new(1.0);
+        let pounds: Pounds = stone.to();
+        assert_abs_diff_eq!(pounds.value(), 14.0, epsilon = 1e-12);
+    }
+
+    proptest! {
+        #[test]
+        fn ounce_gram_roundtrip(v in -1.0e9_f64..1.0e9_f64) {
+            let ounces = Ounces::new(v);
+            let roundtrip: Ounces = ounces.to::<Gram>().to();
+            prop_assert!((roundtrip.value() - v).abs() <= v.abs().max(1.0) * 1e-12);
+        }
+    }
+}

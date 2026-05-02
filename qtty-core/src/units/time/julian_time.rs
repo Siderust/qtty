@@ -52,3 +52,33 @@ macro_rules! time_julian_time_units {
         $cb!(JulianYear, JulianCentury,);
     };
 }
+
+#[cfg(all(test, feature = "std"))]
+mod tests {
+    use super::*;
+    use approx::assert_abs_diff_eq;
+    use proptest::prelude::*;
+
+    #[test]
+    fn julian_year_to_days() {
+        let year = JulianYears::new(1.0);
+        let days: Days = year.to();
+        assert_abs_diff_eq!(days.value(), 365.25, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn julian_century_to_julian_years() {
+        let century = JulianCenturies::new(1.0);
+        let years: JulianYears = century.to();
+        assert_abs_diff_eq!(years.value(), 100.0, epsilon = 1e-12);
+    }
+
+    proptest! {
+        #[test]
+        fn julian_year_second_roundtrip(v in -1.0e6_f64..1.0e6_f64) {
+            let years = JulianYears::new(v);
+            let roundtrip: JulianYears = years.to::<Second>().to();
+            prop_assert!((roundtrip.value() - v).abs() <= v.abs().max(1.0) * 1e-12);
+        }
+    }
+}

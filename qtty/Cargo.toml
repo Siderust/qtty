@@ -27,7 +27,11 @@ land-area = ["qtty-core/land-area"]
 julian-time = ["qtty-core/julian-time"]
 radiometry = ["qtty-core/radiometry", "fundamental-physics"]
 photometry = ["qtty-core/photometry"]
-all-units = ["astro", "navigation", "fundamental-physics", "customary", "land-area", "julian-time", "radiometry", "photometry"]
+frequency = ["qtty-core/frequency"]
+chemistry = ["qtty-core/chemistry"]
+electrical = ["qtty-core/electrical"]
+density = ["qtty-core/density"]
+all-units = ["astro", "navigation", "fundamental-physics", "customary", "land-area", "julian-time", "radiometry", "photometry", "frequency", "chemistry", "electrical", "density"]
 
 # Scalar type support
 scalar-rational = ["qtty-core/scalar-rational"]

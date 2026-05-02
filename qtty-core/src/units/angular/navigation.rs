@@ -36,3 +36,33 @@ macro_rules! angular_navigation_units {
         $cb!(Gradian,);
     };
 }
+
+#[cfg(all(test, feature = "std"))]
+mod tests {
+    use super::*;
+    use approx::assert_abs_diff_eq;
+    use proptest::prelude::*;
+
+    #[test]
+    fn gradian_to_degrees() {
+        let gradian = Gradians::new(100.0);
+        let degrees: Degrees = gradian.to();
+        assert_abs_diff_eq!(degrees.value(), 90.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn full_turn_to_gradians() {
+        let turn = Turns::new(1.0);
+        let gradians: Gradians = turn.to();
+        assert_abs_diff_eq!(gradians.value(), 400.0, epsilon = 1e-12);
+    }
+
+    proptest! {
+        #[test]
+        fn gradian_degree_roundtrip(v in -1.0e9_f64..1.0e9_f64) {
+            let gradians = Gradians::new(v);
+            let roundtrip: Gradians = gradians.to::<Degree>().to();
+            prop_assert!((roundtrip.value() - v).abs() <= v.abs().max(1.0) * 1e-12);
+        }
+    }
+}

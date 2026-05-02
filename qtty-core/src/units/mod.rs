@@ -45,3 +45,12 @@ pub mod temperature;
 pub mod time;
 pub mod velocity;
 pub mod volume;
+
+#[cfg(feature = "chemistry")]
+pub mod amount;
+#[cfg(feature = "density")]
+pub mod density;
+#[cfg(feature = "electrical")]
+pub mod electrical;
+#[cfg(feature = "frequency")]
+pub mod frequency;

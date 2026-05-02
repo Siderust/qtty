@@ -112,3 +112,33 @@ macro_rules! angular_astro_units {
         );
     };
 }
+
+#[cfg(all(test, feature = "std"))]
+mod tests {
+    use super::*;
+    use approx::assert_abs_diff_eq;
+    use proptest::prelude::*;
+
+    #[test]
+    fn arcminute_to_degrees() {
+        let arcm = Arcminutes::new(60.0);
+        let degrees: Degrees = arcm.to();
+        assert_abs_diff_eq!(degrees.value(), 1.0, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn hour_angle_to_degrees() {
+        let hour = HourAngles::new(1.0);
+        let degrees: Degrees = hour.to();
+        assert_abs_diff_eq!(degrees.value(), 15.0, epsilon = 1e-12);
+    }
+
+    proptest! {
+        #[test]
+        fn arcsecond_degree_roundtrip(v in -1.0e9_f64..1.0e9_f64) {
+            let arcseconds = Arcseconds::new(v);
+            let roundtrip: Arcseconds = arcseconds.to::<Degree>().to();
+            prop_assert!((roundtrip.value() - v).abs() <= v.abs().max(1.0) * 1e-12);
+        }
+    }
+}

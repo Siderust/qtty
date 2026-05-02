@@ -48,6 +48,21 @@ pub type Kelvins = Quantity<Kelvin>;
 /// One kelvin.
 pub const KELVIN: Kelvins = Kelvins::new(1.0);
 
+/// Rankine (°R) — absolute temperature scale; 1 °R = 5/9 K exactly.
+///
+/// The Rankine degree equals one Fahrenheit degree, starting from absolute
+/// zero. Used primarily in US engineering. The conversion to kelvin is
+/// exact: `T_K = T_R × 5/9`.
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
+#[unit(symbol = "°R", dimension = Temperature, ratio = 5.0 / 9.0)]
+pub struct Rankine;
+/// Type alias shorthand for [`Rankine`].
+pub type R = Rankine;
+/// A quantity measured in rankine.
+pub type Rankines = Quantity<Rankine>;
+/// One rankine.
+pub const RANKINE: Rankines = Rankines::new(1.0);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Unit inventory macro
 // ─────────────────────────────────────────────────────────────────────────────
@@ -57,7 +72,7 @@ pub const KELVIN: Kelvins = Kelvins::new(1.0);
 #[doc(hidden)]
 macro_rules! temperature_units {
     ($cb:path) => {
-        $cb!(Kelvin);
+        $cb!(Kelvin, Rankine);
     };
 }
 
@@ -89,5 +104,29 @@ mod tests {
         let b = Kelvins::new(184.65);
         let c = a + b;
         assert_abs_diff_eq!(c.value(), 284.65, epsilon = 1e-12);
+    }
+
+    #[test]
+    fn rankine_to_kelvin() {
+        // 1 °R = 5/9 K exactly
+        let r = Rankines::new(1.0);
+        let k: Kelvins = r.to();
+        assert_abs_diff_eq!(k.value(), 5.0 / 9.0, epsilon = 1e-15);
+    }
+
+    #[test]
+    fn rankine_absolute_zero() {
+        // 0 °R = 0 K
+        let r = Rankines::new(0.0);
+        let k: Kelvins = r.to();
+        assert_abs_diff_eq!(k.value(), 0.0, epsilon = 1e-15);
+    }
+
+    #[test]
+    fn kelvin_to_rankine() {
+        // 273.15 K = 491.67 °R
+        let k = Kelvins::new(273.15);
+        let r: Rankines = k.to();
+        assert_abs_diff_eq!(r.value(), 491.67, epsilon = 1e-9);
     }
 }

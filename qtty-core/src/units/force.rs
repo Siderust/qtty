@@ -63,8 +63,8 @@ macro_rules! si_newton {
 si_newton!(Micronewton, "µN", 1e-6, Un, Micronewtons, MICRONEWTON);
 si_newton!(Millinewton, "mN", 1e-3, Mn, Millinewtons, MILLINEWTON);
 si_newton!(Kilonewton, "kN", 1e3, Kn, Kilonewtons, KILONEWTON);
-si_newton!(Meganewton, "MN", 1e6, MnAlias, Meganewtons, MEGANEWTON);
-si_newton!(Giganewton, "GN", 1e9, GnAlias, Giganewtons, GIGANEWTON);
+si_newton!(Meganewton, "MN", 1e6, MN, Meganewtons, MEGANEWTON);
+si_newton!(Giganewton, "GN", 1e9, GN, Giganewtons, GIGANEWTON);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Feature-gated units

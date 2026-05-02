@@ -125,25 +125,42 @@ pub use dimension::{
     Angular,
     AngularRate,
     Area,
+    // New electrical/magnetic derived dimensions
+    Capacitance,
+    Charge,
     Current,
+    // New density dimension
+    Density,
     Dimension,
     Dimensionless,
     Energy,
     Force,
+    // New frequency dimension
+    Frequency,
+    // New luminous-flux / illuminance dimensions
+    Illuminance,
+    // New magnetic dimensions
+    Inductance,
     InverseSolidAngle,
     Length,
+    LuminousFlux,
     LuminousIntensity,
+    MagneticFlux,
+    MagneticFluxDensity,
     Mass,
     PhotonRadiance,
     Power,
     Pressure,
     Radiance,
+    // New resistance / voltage dimensions
+    Resistance,
     SolidAngle,
     SpectralPhotonRadiance,
     SpectralRadiance,
     Temperature,
     Time,
     Velocity,
+    Voltage,
     Volume,
 };
 
@@ -197,6 +214,15 @@ pub use units::temperature;
 pub use units::time;
 pub use units::velocity;
 pub use units::volume;
+
+#[cfg(feature = "chemistry")]
+pub use units::amount;
+#[cfg(feature = "density")]
+pub use units::density;
+#[cfg(feature = "electrical")]
+pub use units::electrical;
+#[cfg(feature = "frequency")]
+pub use units::frequency;
 
 #[cfg(all(test, feature = "std"))]
 mod tests {

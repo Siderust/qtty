@@ -66,3 +66,33 @@ macro_rules! length_customary_units {
         $cb!(Inch, Foot, Yard, Mile,);
     };
 }
+
+#[cfg(all(test, feature = "std"))]
+mod tests {
+    use super::*;
+    use approx::assert_abs_diff_eq;
+    use proptest::prelude::*;
+
+    #[test]
+    fn inch_to_meter_exact() {
+        let inch = Inches::new(1.0);
+        let meter: Meters = inch.to();
+        assert_abs_diff_eq!(meter.value(), 0.0254, epsilon = 1e-15);
+    }
+
+    #[test]
+    fn mile_to_feet() {
+        let mile = Miles::new(1.0);
+        let feet: Feet = mile.to();
+        assert_abs_diff_eq!(feet.value(), 5_280.0, epsilon = 1e-9);
+    }
+
+    proptest! {
+        #[test]
+        fn foot_meter_roundtrip(v in -1.0e9_f64..1.0e9_f64) {
+            let feet = Feet::new(v);
+            let roundtrip: Feet = feet.to::<Meter>().to();
+            prop_assert!((roundtrip.value() - v).abs() <= v.abs().max(1.0) * 1e-12);
+        }
+    }
+}

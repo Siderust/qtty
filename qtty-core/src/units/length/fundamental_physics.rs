@@ -76,3 +76,33 @@ macro_rules! length_fundamental_physics_units {
         );
     };
 }
+
+#[cfg(all(test, feature = "std"))]
+mod tests {
+    use super::*;
+    use approx::assert_abs_diff_eq;
+    use proptest::prelude::*;
+
+    #[test]
+    fn bohr_radius_to_meters() {
+        let a0 = BohrRadii::new(1.0);
+        let meters: Meters = a0.to();
+        assert_abs_diff_eq!(meters.value(), 5.291_772_105_44e-11, epsilon = 1e-24);
+    }
+
+    #[test]
+    fn reduced_compton_to_femtometers() {
+        let lambda = ElectronReducedComptonWavelengths::new(1.0);
+        let femtometers: Femtometers = lambda.to();
+        assert_abs_diff_eq!(femtometers.value(), 386.159_267_44, epsilon = 1e-10);
+    }
+
+    proptest! {
+        #[test]
+        fn bohr_meter_roundtrip(v in -1.0e12_f64..1.0e12_f64) {
+            let a0 = BohrRadii::new(v);
+            let roundtrip: BohrRadii = a0.to::<Meter>().to();
+            prop_assert!((roundtrip.value() - v).abs() <= v.abs().max(1.0) * 1e-12);
+        }
+    }
+}

@@ -180,7 +180,7 @@ where
 // Base dimension aliases
 // ─────────────────────────────────────────────────────────────────────────────
 
-use typenum::{N1, N2, N3, P1, P2, P3, Z0};
+use typenum::{N1, N2, N3, P1, P2, P3, P4, Z0};
 
 /// Dimensionless (all exponents zero).
 pub type Dimensionless = Dim<Z0, Z0, Z0, Z0, Z0, Z0, Z0, Z0>;
@@ -271,3 +271,43 @@ pub type SpectralPhotonRadiance = Dim<N3, N1, Z0, Z0, Z0, Z0, Z0, N2>;
 /// the [`S10`](crate::units::radiometry::S10) "10th-magnitude stars per
 /// square degree" unit.
 pub type InverseSolidAngle = Dim<Z0, Z0, Z0, Z0, Z0, Z0, Z0, N2>;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Additional derived dimension aliases
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Frequency (T⁻¹) — reciprocal time, SI unit: hertz (Hz = s⁻¹).
+pub type Frequency = Dim<Z0, N1, Z0, Z0, Z0, Z0, Z0, Z0>;
+
+/// Mass density (M¹ · L⁻³) — SI unit: kg·m⁻³.
+pub type Density = Dim<N3, Z0, P1, Z0, Z0, Z0, Z0, Z0>;
+
+/// Luminous flux (J¹ · A²) — radiant power weighted by the luminosity
+/// function; SI unit: lumen (lm = cd·sr).
+pub type LuminousFlux = Dim<Z0, Z0, Z0, Z0, Z0, Z0, P1, P2>;
+
+/// Illuminance (J¹ · A² · L⁻²) — luminous flux per unit area;
+/// SI unit: lux (lx = lm·m⁻²).
+pub type Illuminance = Dim<N2, Z0, Z0, Z0, Z0, Z0, P1, P2>;
+
+/// Electric charge (I¹ · T¹) — SI unit: coulomb (C = A·s).
+pub type Charge = Dim<Z0, P1, Z0, Z0, P1, Z0, Z0, Z0>;
+
+/// Voltage / electromotive force (M¹ · L² · T⁻³ · I⁻¹) — SI unit: volt (V).
+pub type Voltage = Dim<P2, N3, P1, Z0, N1, Z0, Z0, Z0>;
+
+/// Electrical resistance (M¹ · L² · T⁻³ · I⁻²) — SI unit: ohm (Ω).
+pub type Resistance = Dim<P2, N3, P1, Z0, N2, Z0, Z0, Z0>;
+
+/// Electrical capacitance (M⁻¹ · L⁻² · T⁴ · I²) — SI unit: farad (F).
+pub type Capacitance = Dim<N2, P4, N1, Z0, P2, Z0, Z0, Z0>;
+
+/// Electrical inductance (M¹ · L² · T⁻² · I⁻²) — SI unit: henry (H).
+pub type Inductance = Dim<P2, N2, P1, Z0, N2, Z0, Z0, Z0>;
+
+/// Magnetic flux (M¹ · L² · T⁻² · I⁻¹) — SI unit: weber (Wb).
+pub type MagneticFlux = Dim<P2, N2, P1, Z0, N1, Z0, Z0, Z0>;
+
+/// Magnetic flux density / magnetic field (M¹ · T⁻² · I⁻¹) —
+/// SI unit: tesla (T).
+pub type MagneticFluxDensity = Dim<Z0, N2, P1, Z0, N1, Z0, Z0, Z0>;

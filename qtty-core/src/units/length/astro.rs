@@ -253,3 +253,40 @@ macro_rules! length_astro_units {
         );
     };
 }
+
+#[cfg(all(test, feature = "std"))]
+mod tests {
+    use super::*;
+    use approx::{assert_abs_diff_eq, assert_relative_eq};
+    use proptest::prelude::*;
+
+    #[test]
+    fn astronomical_unit_to_meters() {
+        let au = AstronomicalUnits::new(1.0);
+        let meters: Meters = au.to();
+        assert_abs_diff_eq!(meters.value(), 149_597_870_700.0, epsilon = 1e-3);
+    }
+
+    #[test]
+    fn parsec_to_au() {
+        let parsec = Parsecs::new(1.0);
+        let au: AstronomicalUnits = parsec.to();
+        assert_relative_eq!(au.value(), 648_000.0 / PI, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn solar_diameter_is_two_solar_radii() {
+        let diameter = nominal::SolarDiameters::new(1.0);
+        let radius: nominal::SolarRadiuses = diameter.to();
+        assert_abs_diff_eq!(radius.value(), 2.0, epsilon = 1e-12);
+    }
+
+    proptest! {
+        #[test]
+        fn au_meter_roundtrip(v in -1.0e6_f64..1.0e6_f64) {
+            let au = AstronomicalUnits::new(v);
+            let roundtrip: AstronomicalUnits = au.to::<Meter>().to();
+            prop_assert!((roundtrip.value() - v).abs() <= v.abs().max(1.0) * 1e-12);
+        }
+    }
+}
