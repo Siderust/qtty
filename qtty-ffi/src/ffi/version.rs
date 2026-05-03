@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: BSD-3-Clause
 // Copyright (C) 2026 Vallés Puig, Ramon
 
 /// Returns the FFI ABI version (major*10000 + minor*100 + patch).

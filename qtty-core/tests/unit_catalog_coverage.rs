@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: BSD-3-Clause
 // Copyright (C) 2026 Vallés Puig, Ramon
 
 #![cfg(feature = "std")]
@@ -49,8 +49,8 @@ fn length_inventory_units_have_runtime_coverage() {
 #[cfg(feature = "astro")]
 #[test]
 fn length_astro_inventory_units_have_runtime_coverage() {
-    use qtty_core::length::*;
     use qtty_core::length::nominal::*;
+    use qtty_core::length::*;
 
     qtty_core::length_astro_units!(touch_units);
     qtty_core::length_nominal_units!(touch_units);

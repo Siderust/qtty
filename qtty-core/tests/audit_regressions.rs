@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: BSD-3-Clause
 // Copyright (C) 2026 Vallés Puig, Ramon
 
 //! Regression tests for issues identified in the QTTY audit report (2026-04-08).

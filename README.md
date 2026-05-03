@@ -206,4 +206,4 @@ See [`qtty-ffi/README.md`](qtty-ffi/README.md) for details.
 
 ## License
 
-AGPL-3.0. See [`LICENSE`](LICENSE).
+BSD-3-Clause. See [`LICENSE`](LICENSE).

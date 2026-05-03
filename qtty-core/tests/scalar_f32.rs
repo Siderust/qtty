@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: BSD-3-Clause
 // Copyright (C) 2026 Vallés Puig, Ramon
 
 //! Tests for f32 Scalar + Real + Transcendental trait methods (coverage for scalar.rs).

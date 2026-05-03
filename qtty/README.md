@@ -118,4 +118,4 @@ Repository docs:
 
 ## License
 
-AGPL-3.0 (see `../LICENSE`).
+BSD-3-Clause (see `../LICENSE`).
