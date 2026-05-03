@@ -793,6 +793,139 @@ mod tests {
         );
     }
 
+    macro_rules! touch_units_for_coverage {
+        ($($unit:ident),+ $(,)?) => {{
+            $(
+                let _ = <$unit as Unit>::RATIO;
+                let _ = <$unit as Unit>::SYMBOL;
+                let rendered = format!("{}", Quantity::<$unit>::new(1.25));
+                assert!(!rendered.is_empty());
+            )+
+        }};
+    }
+
+    #[test]
+    fn coverage_touch_length_inventories() {
+        use crate::length::*;
+
+        crate::length_units!(touch_units_for_coverage);
+
+        #[cfg(feature = "astro")]
+        {
+            use crate::length::nominal::*;
+            crate::length_astro_units!(touch_units_for_coverage);
+            crate::length_nominal_units!(touch_units_for_coverage);
+        }
+
+        #[cfg(feature = "navigation")]
+        crate::length_navigation_units!(touch_units_for_coverage);
+
+        #[cfg(feature = "customary")]
+        crate::length_customary_units!(touch_units_for_coverage);
+
+        #[cfg(feature = "fundamental-physics")]
+        crate::length_fundamental_physics_units!(touch_units_for_coverage);
+    }
+
+    #[test]
+    fn coverage_touch_time_inventories() {
+        use crate::time::*;
+
+        crate::time_units!(touch_units_for_coverage);
+
+        #[cfg(feature = "astro")]
+        crate::time_astro_units!(touch_units_for_coverage);
+
+        #[cfg(feature = "julian-time")]
+        crate::time_julian_time_units!(touch_units_for_coverage);
+    }
+
+    #[test]
+    fn coverage_touch_energy_inventories() {
+        use crate::energy::*;
+
+        crate::energy_units!(touch_units_for_coverage);
+
+        #[cfg(feature = "fundamental-physics")]
+        crate::energy_fundamental_physics_units!(touch_units_for_coverage);
+
+        #[cfg(feature = "customary")]
+        crate::energy_customary_units!(touch_units_for_coverage);
+    }
+
+    #[test]
+    fn coverage_touch_pressure_inventories() {
+        use crate::pressure::*;
+
+        crate::pressure_units!(touch_units_for_coverage);
+
+        #[cfg(feature = "customary")]
+        crate::pressure_customary_units!(touch_units_for_coverage);
+    }
+
+    #[cfg(feature = "electrical")]
+    #[test]
+    fn coverage_touch_electrical_inventories() {
+        use crate::electrical::*;
+
+        crate::ampere_units!(touch_units_for_coverage);
+        crate::coulomb_units!(touch_units_for_coverage);
+        crate::volt_units!(touch_units_for_coverage);
+        crate::ohm_units!(touch_units_for_coverage);
+        crate::farad_units!(touch_units_for_coverage);
+        crate::henry_units!(touch_units_for_coverage);
+        crate::weber_units!(touch_units_for_coverage);
+        crate::tesla_units!(touch_units_for_coverage);
+    }
+
+    #[cfg(feature = "photometry")]
+    #[test]
+    fn coverage_touch_photometry_inventories() {
+        use crate::photometry::*;
+
+        crate::candela_units!(touch_units_for_coverage);
+        crate::lumen_units!(touch_units_for_coverage);
+        crate::lux_units!(touch_units_for_coverage);
+    }
+
+    #[cfg(feature = "radiometry")]
+    #[test]
+    fn coverage_touch_radiometry_inventories() {
+        use crate::radiometry::*;
+
+        crate::radiance_units!(touch_units_for_coverage);
+        crate::spectral_radiance_units!(touch_units_for_coverage);
+        crate::photon_radiance_units!(touch_units_for_coverage);
+        crate::spectral_photon_radiance_units!(touch_units_for_coverage);
+        crate::inverse_solid_angle_units!(touch_units_for_coverage);
+    }
+
+    #[test]
+    fn coverage_touch_volume_inventories() {
+        use crate::volume::*;
+
+        crate::volume_units!(touch_units_for_coverage);
+
+        #[cfg(feature = "customary")]
+        crate::volume_customary_units!(touch_units_for_coverage);
+    }
+
+    #[test]
+    fn coverage_touch_power_inventories() {
+        use crate::power::*;
+
+        crate::power_units!(touch_units_for_coverage);
+
+        #[cfg(feature = "astro")]
+        crate::power_astro_units!(touch_units_for_coverage);
+
+        #[cfg(feature = "customary")]
+        crate::power_customary_units!(touch_units_for_coverage);
+
+        #[cfg(feature = "fundamental-physics")]
+        crate::power_fundamental_physics_units!(touch_units_for_coverage);
+    }
+
     #[cfg(feature = "serde")]
     mod serde_tests {
         use super::*;
