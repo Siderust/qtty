@@ -52,6 +52,27 @@ fn test_rational64_exact_conversion() {
 }
 
 #[test]
+fn test_rational64_exact_conversion_special_values() {
+    assert_eq!(
+        <Rational64 as Exact>::from_f64_approx(f64::NAN),
+        Rational64::new_raw(0, 1)
+    );
+    assert_eq!(
+        <Rational64 as Exact>::from_f64_approx(f64::INFINITY),
+        Rational64::new_raw(i64::MAX, 1)
+    );
+    assert_eq!(
+        <Rational64 as Exact>::from_f64_approx(f64::NEG_INFINITY),
+        Rational64::new_raw(i64::MIN, 1)
+    );
+    assert_eq!(<Rational64 as Exact>::checked_from_f64(f64::INFINITY), None);
+    assert_eq!(
+        <Rational64 as Exact>::checked_from_f64(0.25),
+        Some(Rational64::new(1, 4))
+    );
+}
+
+#[test]
 fn test_rational64_quantity() {
     let m = Quantity::<Meter, Rational64>::new(Rational64::from_integer(100));
     assert_eq!(m.value(), Rational64::from_integer(100));
@@ -106,6 +127,27 @@ fn test_rational32_exact_conversion() {
     assert_eq!(f64_val, 0.5);
     let back: Rational32 = Exact::from_f64_approx(f64_val);
     assert!((Exact::to_f64_approx(back) - 0.5).abs() < 0.01);
+}
+
+#[test]
+fn test_rational32_exact_conversion_special_values() {
+    assert_eq!(
+        <Rational32 as Exact>::from_f64_approx(f64::NAN),
+        Rational32::new_raw(0, 1)
+    );
+    assert_eq!(
+        <Rational32 as Exact>::from_f64_approx(f64::INFINITY),
+        Rational32::new_raw(i32::MAX, 1)
+    );
+    assert_eq!(
+        <Rational32 as Exact>::from_f64_approx(f64::NEG_INFINITY),
+        Rational32::new_raw(i32::MIN, 1)
+    );
+    assert_eq!(<Rational32 as Exact>::checked_from_f64(f64::NAN), None);
+    assert_eq!(
+        <Rational32 as Exact>::checked_from_f64(0.5),
+        Some(Rational32::new(1, 2))
+    );
 }
 
 #[test]
@@ -213,6 +255,13 @@ fn test_rational32_min_second_smaller() {
     let a = Rational32::from_integer(7);
     let b = Rational32::from_integer(3);
     assert_eq!(Scalar::min(a, b), b);
+}
+
+#[test]
+fn test_rational32_max_first_larger() {
+    let a = Rational32::from_integer(7);
+    let b = Rational32::from_integer(3);
+    assert_eq!(Scalar::max(a, b), a);
 }
 
 #[test]

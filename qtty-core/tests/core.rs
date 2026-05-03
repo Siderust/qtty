@@ -94,10 +94,23 @@ fn quantity_from_f64() {
 }
 
 #[test]
+fn quantity_has_scalar_layout() {
+    assert_eq!(core::mem::size_of::<TU>(), core::mem::size_of::<f64>());
+    assert_eq!(core::mem::align_of::<TU>(), core::mem::align_of::<f64>());
+}
+
+#[test]
 fn quantity_conversion_to_same_unit() {
     let q = TU::new(10.0);
     let converted = q.to::<TestUnit>();
     assert_eq!(converted.value(), 10.0);
+}
+
+#[test]
+fn exact_checked_lossy_same_ratio_preserves_large_integer() {
+    let q = Quantity::<TestUnit, i64>::new(i64::MAX);
+    let converted = q.checked_to_lossy::<TestUnit>().unwrap();
+    assert_eq!(converted.value(), i64::MAX);
 }
 
 #[test]
@@ -318,6 +331,25 @@ fn dimensionless_asin_angle_boundary_values() {
 }
 
 #[test]
+fn asin_angle_to_degrees() {
+    use qtty_core::units::angular::{Degree, Radian};
+
+    let ratio: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(0.5);
+    let angle: Quantity<Radian> = ratio.asin_angle();
+    let deg: Quantity<Degree> = angle.to();
+
+    assert!((deg.value() - 30.0).abs() < 1e-10);
+}
+
+#[test]
+fn asin_angle_sin_roundtrip() {
+    let ratio: Quantity<Per<TestUnit, DoubleTestUnit>> = Quantity::new(0.75);
+    let angle = ratio.asin_angle();
+
+    assert!((angle.sin() - 0.75).abs() < 1e-12);
+}
+
+#[test]
 fn display_simple_quantity() {
     let q = TU::new(42.5);
     let s = format!("{} {}", q.value(), TestUnit::SYMBOL);
@@ -374,6 +406,53 @@ fn edge_case_infinity() {
     assert!(neg_inf.value().is_infinite());
     assert_eq!(inf.value().signum(), 1.0);
     assert_eq!(neg_inf.value().signum(), -1.0);
+}
+
+#[test]
+fn mean_positive_infinity_stays_infinite() {
+    let inf = TU::INFINITY;
+    assert!(inf.mean(inf).value().is_infinite());
+    assert!(inf.mean(inf).value() > 0.0);
+}
+
+#[test]
+fn mean_negative_infinity_stays_infinite() {
+    let neg_inf = TU::NEG_INFINITY;
+    assert!(neg_inf.mean(neg_inf).value().is_infinite());
+    assert!(neg_inf.mean(neg_inf).value() < 0.0);
+}
+
+#[test]
+fn mean_finite_values_unaffected() {
+    assert_eq!(TU::new(10.0).mean(TU::new(14.0)).value(), 12.0);
+    assert_eq!(
+        TU::new(i64::MAX as f64)
+            .mean(TU::new(i64::MAX as f64))
+            .value(),
+        i64::MAX as f64
+    );
+}
+
+#[test]
+fn mean_pos_infinity_with_finite_stays_infinite() {
+    let inf = TU::INFINITY;
+    let fin = TU::new(1.0);
+
+    assert!(inf.mean(fin).value().is_infinite());
+    assert!(inf.mean(fin).value() > 0.0);
+    assert!(fin.mean(inf).value().is_infinite());
+    assert!(fin.mean(inf).value() > 0.0);
+}
+
+#[test]
+fn mean_neg_infinity_with_finite_stays_infinite() {
+    let neg_inf = TU::NEG_INFINITY;
+    let fin = TU::new(-1.0);
+
+    assert!(neg_inf.mean(fin).value().is_infinite());
+    assert!(neg_inf.mean(fin).value() < 0.0);
+    assert!(fin.mean(neg_inf).value().is_infinite());
+    assert!(fin.mean(neg_inf).value() < 0.0);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -492,9 +571,23 @@ fn test_min_const() {
 }
 
 #[test]
+fn test_min_const_else_branch() {
+    let a = TU::new(7.0);
+    let b = TU::new(3.0);
+    assert_eq!(a.min_const(b).value(), 3.0);
+}
+
+#[test]
 fn test_max_const() {
     let a = TU::new(3.0);
     let b = TU::new(7.0);
+    assert_eq!(a.max_const(b).value(), 7.0);
+}
+
+#[test]
+fn test_max_const_then_branch() {
+    let a = TU::new(7.0);
+    let b = TU::new(3.0);
     assert_eq!(a.max_const(b).value(), 7.0);
 }
 

@@ -305,6 +305,14 @@ fn test_i32_min_max_const() {
 }
 
 #[test]
+fn test_i32_min_max_const_opposite_order() {
+    let a = Quantity::<Meter, i32>::new(7);
+    let b = Quantity::<Meter, i32>::new(3);
+    assert_eq!(a.min_const(b).value(), 3);
+    assert_eq!(a.max_const(b).value(), 7);
+}
+
+#[test]
 fn test_i64_const_methods() {
     let a = Quantity::<Meter, i64>::new(100);
     let b = Quantity::<Meter, i64>::new(200);

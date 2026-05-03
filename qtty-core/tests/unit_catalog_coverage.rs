@@ -12,6 +12,10 @@ macro_rules! touch_units {
 
             let rendered = format!("{}", Quantity::<$unit>::new(1.25));
             assert!(!rendered.is_empty());
+            let lower_exp = format!("{:e}", Quantity::<$unit>::new(1.25));
+            assert!(!lower_exp.is_empty());
+            let upper_exp = format!("{:E}", Quantity::<$unit>::new(1.25));
+            assert!(!upper_exp.is_empty());
         )+
     }};
 }
