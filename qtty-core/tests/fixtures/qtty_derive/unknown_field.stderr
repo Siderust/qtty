@@ -1,0 +1,5 @@
+error: unknown attribute `unknown`
+ --> tests/fixtures/qtty_derive/unknown_field.rs:7:5
+  |
+7 |     unknown = "field"
+  |     ^^^^^^^

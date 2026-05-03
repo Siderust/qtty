@@ -1,0 +1,7 @@
+error: missing #[unit(...)] attribute
+ --> tests/fixtures/qtty_derive/missing_unit_attribute.rs:1:53
+  |
+1 | #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, qtty_derive::Unit)]
+  |                                                     ^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the derive macro `qtty_derive::Unit` (in Nightly builds, run with -Z macro-backtrace for more info)

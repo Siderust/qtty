@@ -1,0 +1,5 @@
+error: missing required attribute `dimension`
+ --> tests/fixtures/qtty_derive/missing_dimension.rs:2:54
+  |
+2 | #[unit(crate = qtty_core, symbol = "bad", ratio = 1.0)]
+  |                                                      ^
