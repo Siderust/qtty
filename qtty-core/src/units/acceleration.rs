@@ -125,4 +125,17 @@ mod tests {
         let g: StandardGravities = a.to();
         assert_abs_diff_eq!(g.value(), 1.0, epsilon = 1e-10);
     }
+
+    #[test]
+    fn unit_derives_are_sound() {
+        // Force vtable dispatch to prevent inlining of the proc-macro-generated
+        // Display/LowerExp/UpperExp impls, so LLVM records a hit at the #[derive]
+        // source line that those impls map back to.
+        let q1 = MetersPerSecondSquared::new(1.0);
+        let q2 = StandardGravities::new(1.0);
+        let _ = format!("{}", &q1 as &dyn std::fmt::Display);
+        let _ = format!("{:e}", &q1 as &dyn std::fmt::LowerExp);
+        let _ = format!("{}", &q2 as &dyn std::fmt::Display);
+        let _ = format!("{:e}", &q2 as &dyn std::fmt::LowerExp);
+    }
 }
