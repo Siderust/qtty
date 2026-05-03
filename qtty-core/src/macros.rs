@@ -324,3 +324,44 @@ macro_rules! __impl_cross_ops_each_extra_to_bases {
         $crate::__impl_cross_ops_each_extra_to_bases!({$($base),+} $($rest),+);
     };
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{Length, Quantity, Unit};
+    use core::cmp::Ordering;
+
+    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+    struct LargeTestUnit;
+
+    impl Unit for LargeTestUnit {
+        const RATIO: f64 = 1_000.0;
+        type Dim = Length;
+        const SYMBOL: &'static str = "ltu";
+    }
+
+    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+    struct SmallTestUnit;
+
+    impl Unit for SmallTestUnit {
+        const RATIO: f64 = 1.0;
+        type Dim = Length;
+        const SYMBOL: &'static str = "stu";
+    }
+
+    crate::impl_unit_cross_unit_ops!(LargeTestUnit, SmallTestUnit);
+
+    type LargeQuantity = Quantity<LargeTestUnit>;
+    type SmallQuantity = Quantity<SmallTestUnit>;
+
+    #[test]
+    fn cross_unit_ops_cover_larger_first_branches() {
+        let large = LargeQuantity::new(1.0);
+        let equal_small = SmallQuantity::new(1_000.0);
+        let smaller_small = SmallQuantity::new(500.0);
+
+        assert_eq!(large, equal_small);
+        assert_eq!(equal_small, large);
+        assert_eq!(large.partial_cmp(&smaller_small), Some(Ordering::Greater));
+        assert_eq!(smaller_small.partial_cmp(&large), Some(Ordering::Less));
+    }
+}

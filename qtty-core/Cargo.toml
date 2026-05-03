@@ -52,3 +52,4 @@ qtty-derive = { version = "0.6.1", path = "../qtty-derive" }
 approx = "0.5"
 proptest = "1.4"
 serde_json = "1.0"
+trybuild = "1.0"
