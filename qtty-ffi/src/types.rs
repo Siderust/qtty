@@ -106,6 +106,50 @@ pub enum DimensionId {
     Force = 9,
     /// Energy dimension (e.g., joules, kilojoules).
     Energy = 10,
+    /// Pressure dimension (e.g., pascals, bars).
+    Pressure = 11,
+    /// Solid-angle dimension (e.g., square degrees, steradians).
+    SolidAngle = 12,
+    /// Thermodynamic temperature dimension (e.g., kelvin, rankine).
+    Temperature = 13,
+    /// Radiance dimension (e.g., W·m^-2·sr^-1).
+    Radiance = 14,
+    /// Spectral-radiance dimension (e.g., W·m^-2·sr^-1·nm^-1).
+    SpectralRadiance = 15,
+    /// Photon-radiance dimension (e.g., ph·cm^-2·s^-1·sr^-1).
+    PhotonRadiance = 16,
+    /// Spectral-photon-radiance dimension.
+    SpectralPhotonRadiance = 17,
+    /// Inverse-solid-angle dimension (e.g., S10).
+    InverseSolidAngle = 18,
+    /// Luminous-intensity dimension (e.g., candela).
+    LuminousIntensity = 19,
+    /// Luminous-flux dimension (e.g., lumen).
+    LuminousFlux = 20,
+    /// Illuminance dimension (e.g., lux).
+    Illuminance = 21,
+    /// Frequency dimension (e.g., hertz).
+    Frequency = 22,
+    /// Amount-of-substance dimension (e.g., mole).
+    AmountOfSubstance = 23,
+    /// Electric-current dimension (e.g., ampere).
+    Current = 24,
+    /// Electric-charge dimension (e.g., coulomb).
+    Charge = 25,
+    /// Voltage dimension (e.g., volt).
+    Voltage = 26,
+    /// Resistance dimension (e.g., ohm).
+    Resistance = 27,
+    /// Capacitance dimension (e.g., farad).
+    Capacitance = 28,
+    /// Inductance dimension (e.g., henry).
+    Inductance = 29,
+    /// Magnetic-flux dimension (e.g., weber).
+    MagneticFlux = 30,
+    /// Magnetic-flux-density dimension (e.g., tesla).
+    MagneticFluxDensity = 31,
+    /// Density dimension (e.g., kg/m^3).
+    Density = 32,
 }
 
 // =============================================================================
@@ -563,6 +607,9 @@ mod tests {
         assert_eq!(DimensionId::Length as u32, 1);
         assert_eq!(DimensionId::Time as u32, 2);
         assert_eq!(DimensionId::Angle as u32, 3);
+        assert_eq!(DimensionId::Energy as u32, 10);
+        assert_eq!(DimensionId::Pressure as u32, 11);
+        assert_eq!(DimensionId::Density as u32, 32);
     }
 
     #[test]
@@ -586,11 +633,13 @@ mod tests {
     fn unit_id_from_u32_rejects_invalid() {
         assert_eq!(UnitId::from_u32(0), None);
         assert_eq!(UnitId::from_u32(9999), None);
-        // These ranges are unassigned as of the current discriminants.csv.
+        // These values are currently unassigned within otherwise valid ranges.
         // 80002+ (only 80000-80001 assigned for Acceleration)
         assert_eq!(UnitId::from_u32(80002), None);
         // 99999 is in Force range but unassigned (90000-92000 are used)
         assert_eq!(UnitId::from_u32(99999), None);
+        // 320999 is in Density's customary sub-range but unassigned.
+        assert_eq!(UnitId::from_u32(320999), None);
         assert_eq!(UnitId::from_u32(u32::MAX), None);
     }
 

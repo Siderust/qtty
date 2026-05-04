@@ -7,6 +7,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-05-04
+
 ### Added
 
 - Expanded the built-in unit inventory:
@@ -94,6 +96,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
     exact `1 / (h · c)` constant `≈ 5.034 × 10⁷ ph / (erg · Å)`.
 
 ### Changed
+
+- **`qtty-ffi` full linear unit coverage** — the stable FFI registry now
+  exports every linear unit family exposed by `qtty`'s `all-units` feature,
+  including pressure, solid angle, temperature, radiometry, photometric SI
+  units, frequency, chemistry, electrical, and density. Existing discriminants
+  remain stable; new dimensions were appended with explicit `DimensionId`
+  values 11 through 32 and new `11xxxx`–`32xxxx` discriminant ranges.
+- **`qtty-ffi` energy inventory parity** — added the missing `Picojoule`,
+  `Nanojoule`, `WattHour`, `KilowattHour`, `BritishThermalUnit`, and `Therm`
+  FFI unit IDs so the ABI now matches the Rust `energy` module exactly.
+- **`qtty-ffi` release line** — ABI version now reports `700`
+  (`qtty_ffi_version() == 700`) for the `0.7.0` release.
 
 - **Breaking:** corrected public SI aliases so `pressure::MPa` now means
   `Megapascal` instead of `Millipascal`; use `MilliPa` for millipascal. Also

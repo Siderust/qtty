@@ -58,6 +58,15 @@ fn test_unit_dimensions_are_correct() {
         (UnitId::Day, DimensionId::Time),
         (UnitId::Radian, DimensionId::Angle),
         (UnitId::Degree, DimensionId::Angle),
+        (UnitId::Pascal, DimensionId::Pressure),
+        (UnitId::SquareDegree, DimensionId::SolidAngle),
+        (UnitId::Kelvin, DimensionId::Temperature),
+        (UnitId::Hertz, DimensionId::Frequency),
+        (UnitId::Mole, DimensionId::AmountOfSubstance),
+        (UnitId::Ampere, DimensionId::Current),
+        (UnitId::WattPerSquareMeterSteradian, DimensionId::Radiance),
+        (UnitId::Candela, DimensionId::LuminousIntensity),
+        (UnitId::KilogramPerCubicMeter, DimensionId::Density),
     ];
     for (unit, expected_dim) in test_cases {
         let mut dim = DimensionId::Length;
@@ -94,6 +103,10 @@ fn test_compatible_units() {
         (UnitId::Second, UnitId::Day),
         (UnitId::Minute, UnitId::Hour),
         (UnitId::Radian, UnitId::Degree),
+        (UnitId::Pascal, UnitId::Bar),
+        (UnitId::Kelvin, UnitId::Rankine),
+        (UnitId::Hertz, UnitId::Gigahertz),
+        (UnitId::Ampere, UnitId::Milliampere),
     ];
     for (a, b) in compatible_pairs {
         let mut result = false;
@@ -191,6 +204,33 @@ fn test_conversion_1_hour_to_60_minutes() {
     let status = unsafe { qtty_quantity_convert(src, UnitId::Minute as u32, &mut dst) };
     assert_eq!(status, QttyStatus::Ok);
     assert_relative_eq!(dst.value, 60.0, epsilon = 1e-12);
+}
+
+#[test]
+fn test_conversion_bar_to_pascal() {
+    let src = QttyQuantity::new(1.0, UnitId::Bar);
+    let mut dst = QttyQuantity::default();
+    let status = unsafe { qtty_quantity_convert(src, UnitId::Pascal as u32, &mut dst) };
+    assert_eq!(status, QttyStatus::Ok);
+    assert_relative_eq!(dst.value, 100_000.0, epsilon = 1e-9);
+}
+
+#[test]
+fn test_conversion_rankine_to_kelvin() {
+    let src = QttyQuantity::new(491.67, UnitId::Rankine);
+    let mut dst = QttyQuantity::default();
+    let status = unsafe { qtty_quantity_convert(src, UnitId::Kelvin as u32, &mut dst) };
+    assert_eq!(status, QttyStatus::Ok);
+    assert_relative_eq!(dst.value, 273.15, epsilon = 1e-9);
+}
+
+#[test]
+fn test_conversion_kilohertz_to_hertz() {
+    let src = QttyQuantity::new(1.0, UnitId::Kilohertz);
+    let mut dst = QttyQuantity::default();
+    let status = unsafe { qtty_quantity_convert(src, UnitId::Hertz as u32, &mut dst) };
+    assert_eq!(status, QttyStatus::Ok);
+    assert_relative_eq!(dst.value, 1_000.0, epsilon = 1e-12);
 }
 
 // =============================================================================
@@ -349,8 +389,8 @@ fn test_unit_name_invalid_id_returns_null() {
 
 #[test]
 fn test_ffi_version() {
-    // 0.6.1 → 601
-    assert_eq!(qtty_ffi_version(), 601);
+    // 0.7.0 → 700
+    assert_eq!(qtty_ffi_version(), 700);
 }
 
 // =============================================================================

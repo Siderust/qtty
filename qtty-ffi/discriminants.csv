@@ -9,18 +9,41 @@
 # Unit trait implementations at compile time — this file does NOT duplicate
 # that information.
 #
-# Discriminant encoding: DSSCC where D=dimension (1 digit), SS=system (2 digits), CC=counter (2 digits)
+# Discriminant encoding: <dimension><system><counter>, where the dimension code
+# uses 1-2 digits, followed by a 2-digit system code and a 2-digit counter.
 # Units are grouped by dimension with ranges:
-#   Length:       1xxxx (10000-19999)
-#   Time:         2xxxx (20000-29999)
-#   Angle:        3xxxx (30000-39999)
-#   Mass:         4xxxx (40000-49999)
-#   Power:        5xxxx (50000-59999)
-#   Area:         6xxxx (60000-69999)
-#   Volume:       7xxxx (70000-79999)
-#   Acceleration: 8xxxx (80000-89999)
-#   Force:        9xxxx (90000-99999)
-#   Energy:      10xxxx (100000-109999)  [DimensionId=10 → 6-digit prefix]
+#   Length:                  1xxxx   (10000-19999)
+#   Time:                    2xxxx   (20000-29999)
+#   Angle:                   3xxxx   (30000-39999)
+#   Mass:                    4xxxx   (40000-49999)
+#   Power:                   5xxxx   (50000-59999)
+#   Area:                    6xxxx   (60000-69999)
+#   Volume:                  7xxxx   (70000-79999)
+#   Acceleration:            8xxxx   (80000-89999)
+#   Force:                   9xxxx   (90000-99999)
+#   Energy:                 10xxxx   (100000-109999)
+#   Pressure:               11xxxx   (110000-119999)
+#   SolidAngle:             12xxxx   (120000-129999)
+#   Temperature:            13xxxx   (130000-139999)
+#   Radiance:               14xxxx   (140000-149999)
+#   SpectralRadiance:       15xxxx   (150000-159999)
+#   PhotonRadiance:         16xxxx   (160000-169999)
+#   SpectralPhotonRadiance: 17xxxx   (170000-179999)
+#   InverseSolidAngle:      18xxxx   (180000-189999)
+#   LuminousIntensity:      19xxxx   (190000-199999)
+#   LuminousFlux:           20xxxx   (200000-209999)
+#   Illuminance:            21xxxx   (210000-219999)
+#   Frequency:              22xxxx   (220000-229999)
+#   AmountOfSubstance:      23xxxx   (230000-239999)
+#   Current:                24xxxx   (240000-249999)
+#   Charge:                 25xxxx   (250000-259999)
+#   Voltage:                26xxxx   (260000-269999)
+#   Resistance:             27xxxx   (270000-279999)
+#   Capacitance:            28xxxx   (280000-289999)
+#   Inductance:             29xxxx   (290000-299999)
+#   MagneticFlux:           30xxxx   (300000-309999)
+#   MagneticFluxDensity:    31xxxx   (310000-319999)
+#   Density:                32xxxx   (320000-329999)
 #
 # ABI CONTRACT: Existing discriminant values MUST NEVER change.
 # New units may be appended with new discriminant values.
@@ -233,15 +256,132 @@
 # ─── Energy units ─────────────────────────────────────────────────────────────
 # 100000=SI, 101xxx=fundamental-physics, 102xxx=customary
 100000,Joule
-100001,Microjoule
-100002,Millijoule
-100003,Kilojoule
-100004,Megajoule
-100005,Gigajoule
-100006,Terajoule
+100001,Picojoule
+100002,Nanojoule
+100003,Microjoule
+100004,Millijoule
+100005,Kilojoule
+100006,Megajoule
+100007,Gigajoule
+100008,Terajoule
+100009,WattHour
+100010,KilowattHour
 101000,Erg
 101001,Electronvolt
 101002,Kiloelectronvolt
 101003,Megaelectronvolt
 102000,Calorie
 102001,Kilocalorie
+102002,BritishThermalUnit
+102003,Therm
+
+# ─── Pressure units ───────────────────────────────────────────────────────────
+# 1100xx=SI, 1110xx=Common/customary
+110000,Pascal
+110001,Millipascal
+110002,Hectopascal
+110003,Kilopascal
+110004,Megapascal
+110005,Gigapascal
+110006,Bar
+111000,Atmosphere
+111001,Torr
+111002,MillimeterOfMercury
+111003,PoundPerSquareInch
+111004,InchOfMercury
+
+# ─── Solid-angle units ────────────────────────────────────────────────────────
+# 1200xx=Base, 1210xx=Astronomical
+120000,SquareDegree
+120001,Steradian
+120002,SquareMilliradian
+121000,SquareArcminute
+121001,SquareArcsecond
+
+# ─── Temperature units ────────────────────────────────────────────────────────
+130000,Kelvin
+130001,Rankine
+
+# ─── Radiometry units ─────────────────────────────────────────────────────────
+# 1400xx=Radiance, 1500xx=Spectral radiance, 1600xx=Photon radiance,
+# 1700xx=Spectral photon radiance, 1800xx=Inverse solid angle
+140000,WattPerSquareMeterSteradian
+140001,ErgPerSecondSquareCentimeterSteradian
+150000,WattPerSquareMeterSteradianMeter
+150001,WattPerSquareMeterSteradianNanometer
+150002,ErgPerSecondSquareCentimeterSteradianAngstrom
+160000,PhotonPerSquareMeterSecondSteradian
+160001,PhotonPerSquareCentimeterSecondSteradian
+160002,PhotonPerSquareCentimeterNanosecondSteradian
+170000,PhotonPerSquareMeterSecondSteradianMeter
+170001,PhotonPerSquareCentimeterSecondSteradianAngstrom
+170002,PhotonPerSquareCentimeterSecondSteradianNanometer
+170003,PhotonPerSquareCentimeterNanosecondSteradianNanometer
+180000,S10
+
+# ─── Photometric SI units ─────────────────────────────────────────────────────
+# 1900xx=Luminous intensity, 2000xx=Luminous flux, 2100xx=Illuminance
+190000,Candela
+200000,Lumen
+200001,Millilumen
+200002,Kilolumen
+210000,Lux
+210001,Millilux
+210002,Kilolux
+
+# ─── Frequency units ──────────────────────────────────────────────────────────
+220000,Hertz
+220001,Millihertz
+220002,Kilohertz
+220003,Megahertz
+220004,Gigahertz
+220005,Terahertz
+
+# ─── Amount-of-substance units ────────────────────────────────────────────────
+230000,Mole
+230001,Nanomole
+230002,Micromole
+230003,Millimole
+230004,Kilomole
+
+# ─── Electrical units ─────────────────────────────────────────────────────────
+# 2400xx=Current, 2500xx=Charge, 2600xx=Voltage, 2700xx=Resistance,
+# 2800xx=Capacitance, 2900xx=Inductance, 3000xx=Magnetic flux,
+# 3100xx=Magnetic flux density
+240000,Ampere
+240001,Microampere
+240002,Milliampere
+240003,Kiloampere
+250000,Coulomb
+250001,Millicoulomb
+250002,Microcoulomb
+250003,Kilocoulomb
+260000,Volt
+260001,Microvolt
+260002,Millivolt
+260003,Kilovolt
+260004,Megavolt
+270000,Ohm
+270001,Milliohm
+270002,Kilohm
+270003,Megaohm
+280000,Farad
+280001,Picofarad
+280002,Nanofarad
+280003,Microfarad
+280004,Millifarad
+290000,Henry
+290001,Microhenry
+290002,Millihenry
+300000,Weber
+300001,Milliweber
+310000,Tesla
+310001,Millitesla
+310002,Microtesla
+
+# ─── Density units ────────────────────────────────────────────────────────────
+# 3200xx=SI, 3210xx=Customary
+320000,KilogramPerCubicMeter
+320001,GramPerCubicCentimeter
+320002,GramPerMilliliter
+321000,PoundPerCubicFoot

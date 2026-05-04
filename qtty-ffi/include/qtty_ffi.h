@@ -435,6 +435,186 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
  Format flag: default decimal notation (e.g. `"1234.57 m"`).
  */
@@ -554,6 +734,94 @@ enum DimensionId
    Energy dimension (e.g., joules, kilojoules).
    */
   DIMENSION_ID_ENERGY = 10,
+  /*
+   Pressure dimension (e.g., pascals, bars).
+   */
+  DIMENSION_ID_PRESSURE = 11,
+  /*
+   Solid-angle dimension (e.g., square degrees, steradians).
+   */
+  DIMENSION_ID_SOLID_ANGLE = 12,
+  /*
+   Thermodynamic temperature dimension (e.g., kelvin, rankine).
+   */
+  DIMENSION_ID_TEMPERATURE = 13,
+  /*
+   Radiance dimension (e.g., W·m^-2·sr^-1).
+   */
+  DIMENSION_ID_RADIANCE = 14,
+  /*
+   Spectral-radiance dimension (e.g., W·m^-2·sr^-1·nm^-1).
+   */
+  DIMENSION_ID_SPECTRAL_RADIANCE = 15,
+  /*
+   Photon-radiance dimension (e.g., ph·cm^-2·s^-1·sr^-1).
+   */
+  DIMENSION_ID_PHOTON_RADIANCE = 16,
+  /*
+   Spectral-photon-radiance dimension.
+   */
+  DIMENSION_ID_SPECTRAL_PHOTON_RADIANCE = 17,
+  /*
+   Inverse-solid-angle dimension (e.g., S10).
+   */
+  DIMENSION_ID_INVERSE_SOLID_ANGLE = 18,
+  /*
+   Luminous-intensity dimension (e.g., candela).
+   */
+  DIMENSION_ID_LUMINOUS_INTENSITY = 19,
+  /*
+   Luminous-flux dimension (e.g., lumen).
+   */
+  DIMENSION_ID_LUMINOUS_FLUX = 20,
+  /*
+   Illuminance dimension (e.g., lux).
+   */
+  DIMENSION_ID_ILLUMINANCE = 21,
+  /*
+   Frequency dimension (e.g., hertz).
+   */
+  DIMENSION_ID_FREQUENCY = 22,
+  /*
+   Amount-of-substance dimension (e.g., mole).
+   */
+  DIMENSION_ID_AMOUNT_OF_SUBSTANCE = 23,
+  /*
+   Electric-current dimension (e.g., ampere).
+   */
+  DIMENSION_ID_CURRENT = 24,
+  /*
+   Electric-charge dimension (e.g., coulomb).
+   */
+  DIMENSION_ID_CHARGE = 25,
+  /*
+   Voltage dimension (e.g., volt).
+   */
+  DIMENSION_ID_VOLTAGE = 26,
+  /*
+   Resistance dimension (e.g., ohm).
+   */
+  DIMENSION_ID_RESISTANCE = 27,
+  /*
+   Capacitance dimension (e.g., farad).
+   */
+  DIMENSION_ID_CAPACITANCE = 28,
+  /*
+   Inductance dimension (e.g., henry).
+   */
+  DIMENSION_ID_INDUCTANCE = 29,
+  /*
+   Magnetic-flux dimension (e.g., weber).
+   */
+  DIMENSION_ID_MAGNETIC_FLUX = 30,
+  /*
+   Magnetic-flux-density dimension (e.g., tesla).
+   */
+  DIMENSION_ID_MAGNETIC_FLUX_DENSITY = 31,
+  /*
+   Density dimension (e.g., kg/m^3).
+   */
+  DIMENSION_ID_DENSITY = 32,
 };
 #ifndef __cplusplus
 typedef uint32_t DimensionId;
@@ -1287,29 +1555,45 @@ enum UnitId
    */
   UNIT_ID_JOULE = 100000,
   /*
+   Picojoule (Energy dimension)
+   */
+  UNIT_ID_PICOJOULE = 100001,
+  /*
+   Nanojoule (Energy dimension)
+   */
+  UNIT_ID_NANOJOULE = 100002,
+  /*
    Microjoule (Energy dimension)
    */
-  UNIT_ID_MICROJOULE = 100001,
+  UNIT_ID_MICROJOULE = 100003,
   /*
    Millijoule (Energy dimension)
    */
-  UNIT_ID_MILLIJOULE = 100002,
+  UNIT_ID_MILLIJOULE = 100004,
   /*
    Kilojoule (Energy dimension)
    */
-  UNIT_ID_KILOJOULE = 100003,
+  UNIT_ID_KILOJOULE = 100005,
   /*
    Megajoule (Energy dimension)
    */
-  UNIT_ID_MEGAJOULE = 100004,
+  UNIT_ID_MEGAJOULE = 100006,
   /*
    Gigajoule (Energy dimension)
    */
-  UNIT_ID_GIGAJOULE = 100005,
+  UNIT_ID_GIGAJOULE = 100007,
   /*
    Terajoule (Energy dimension)
    */
-  UNIT_ID_TERAJOULE = 100006,
+  UNIT_ID_TERAJOULE = 100008,
+  /*
+   WattHour (Energy dimension)
+   */
+  UNIT_ID_WATT_HOUR = 100009,
+  /*
+   KilowattHour (Energy dimension)
+   */
+  UNIT_ID_KILOWATT_HOUR = 100010,
   /*
    Erg (Energy dimension)
    */
@@ -1334,6 +1618,350 @@ enum UnitId
    Kilocalorie (Energy dimension)
    */
   UNIT_ID_KILOCALORIE = 102001,
+  /*
+   BritishThermalUnit (Energy dimension)
+   */
+  UNIT_ID_BRITISH_THERMAL_UNIT = 102002,
+  /*
+   Therm (Energy dimension)
+   */
+  UNIT_ID_THERM = 102003,
+  /*
+   Pascal (Pressure dimension)
+   */
+  UNIT_ID_PASCAL = 110000,
+  /*
+   Millipascal (Pressure dimension)
+   */
+  UNIT_ID_MILLIPASCAL = 110001,
+  /*
+   Hectopascal (Pressure dimension)
+   */
+  UNIT_ID_HECTOPASCAL = 110002,
+  /*
+   Kilopascal (Pressure dimension)
+   */
+  UNIT_ID_KILOPASCAL = 110003,
+  /*
+   Megapascal (Pressure dimension)
+   */
+  UNIT_ID_MEGAPASCAL = 110004,
+  /*
+   Gigapascal (Pressure dimension)
+   */
+  UNIT_ID_GIGAPASCAL = 110005,
+  /*
+   Bar (Pressure dimension)
+   */
+  UNIT_ID_BAR = 110006,
+  /*
+   Atmosphere (Pressure dimension)
+   */
+  UNIT_ID_ATMOSPHERE = 111000,
+  /*
+   Torr (Pressure dimension)
+   */
+  UNIT_ID_TORR = 111001,
+  /*
+   MillimeterOfMercury (Pressure dimension)
+   */
+  UNIT_ID_MILLIMETER_OF_MERCURY = 111002,
+  /*
+   PoundPerSquareInch (Pressure dimension)
+   */
+  UNIT_ID_POUND_PER_SQUARE_INCH = 111003,
+  /*
+   InchOfMercury (Pressure dimension)
+   */
+  UNIT_ID_INCH_OF_MERCURY = 111004,
+  /*
+   SquareDegree (SolidAngle dimension)
+   */
+  UNIT_ID_SQUARE_DEGREE = 120000,
+  /*
+   Steradian (SolidAngle dimension)
+   */
+  UNIT_ID_STERADIAN = 120001,
+  /*
+   SquareMilliradian (SolidAngle dimension)
+   */
+  UNIT_ID_SQUARE_MILLIRADIAN = 120002,
+  /*
+   SquareArcminute (SolidAngle dimension)
+   */
+  UNIT_ID_SQUARE_ARCMINUTE = 121000,
+  /*
+   SquareArcsecond (SolidAngle dimension)
+   */
+  UNIT_ID_SQUARE_ARCSECOND = 121001,
+  /*
+   Kelvin (Temperature dimension)
+   */
+  UNIT_ID_KELVIN = 130000,
+  /*
+   Rankine (Temperature dimension)
+   */
+  UNIT_ID_RANKINE = 130001,
+  /*
+   WattPerSquareMeterSteradian (Radiance dimension)
+   */
+  UNIT_ID_WATT_PER_SQUARE_METER_STERADIAN = 140000,
+  /*
+   ErgPerSecondSquareCentimeterSteradian (Radiance dimension)
+   */
+  UNIT_ID_ERG_PER_SECOND_SQUARE_CENTIMETER_STERADIAN = 140001,
+  /*
+   WattPerSquareMeterSteradianMeter (SpectralRadiance dimension)
+   */
+  UNIT_ID_WATT_PER_SQUARE_METER_STERADIAN_METER = 150000,
+  /*
+   WattPerSquareMeterSteradianNanometer (SpectralRadiance dimension)
+   */
+  UNIT_ID_WATT_PER_SQUARE_METER_STERADIAN_NANOMETER = 150001,
+  /*
+   ErgPerSecondSquareCentimeterSteradianAngstrom (SpectralRadiance dimension)
+   */
+  UNIT_ID_ERG_PER_SECOND_SQUARE_CENTIMETER_STERADIAN_ANGSTROM = 150002,
+  /*
+   PhotonPerSquareMeterSecondSteradian (PhotonRadiance dimension)
+   */
+  UNIT_ID_PHOTON_PER_SQUARE_METER_SECOND_STERADIAN = 160000,
+  /*
+   PhotonPerSquareCentimeterSecondSteradian (PhotonRadiance dimension)
+   */
+  UNIT_ID_PHOTON_PER_SQUARE_CENTIMETER_SECOND_STERADIAN = 160001,
+  /*
+   PhotonPerSquareCentimeterNanosecondSteradian (PhotonRadiance dimension)
+   */
+  UNIT_ID_PHOTON_PER_SQUARE_CENTIMETER_NANOSECOND_STERADIAN = 160002,
+  /*
+   PhotonPerSquareMeterSecondSteradianMeter (SpectralPhotonRadiance dimension)
+   */
+  UNIT_ID_PHOTON_PER_SQUARE_METER_SECOND_STERADIAN_METER = 170000,
+  /*
+   PhotonPerSquareCentimeterSecondSteradianAngstrom (SpectralPhotonRadiance dimension)
+   */
+  UNIT_ID_PHOTON_PER_SQUARE_CENTIMETER_SECOND_STERADIAN_ANGSTROM = 170001,
+  /*
+   PhotonPerSquareCentimeterSecondSteradianNanometer (SpectralPhotonRadiance dimension)
+   */
+  UNIT_ID_PHOTON_PER_SQUARE_CENTIMETER_SECOND_STERADIAN_NANOMETER = 170002,
+  /*
+   PhotonPerSquareCentimeterNanosecondSteradianNanometer (SpectralPhotonRadiance dimension)
+   */
+  UNIT_ID_PHOTON_PER_SQUARE_CENTIMETER_NANOSECOND_STERADIAN_NANOMETER = 170003,
+  /*
+   S10 (InverseSolidAngle dimension)
+   */
+  UNIT_ID_S10 = 180000,
+  /*
+   Candela (LuminousIntensity dimension)
+   */
+  UNIT_ID_CANDELA = 190000,
+  /*
+   Lumen (LuminousFlux dimension)
+   */
+  UNIT_ID_LUMEN = 200000,
+  /*
+   Millilumen (LuminousFlux dimension)
+   */
+  UNIT_ID_MILLILUMEN = 200001,
+  /*
+   Kilolumen (LuminousFlux dimension)
+   */
+  UNIT_ID_KILOLUMEN = 200002,
+  /*
+   Lux (Illuminance dimension)
+   */
+  UNIT_ID_LUX = 210000,
+  /*
+   Millilux (Illuminance dimension)
+   */
+  UNIT_ID_MILLILUX = 210001,
+  /*
+   Kilolux (Illuminance dimension)
+   */
+  UNIT_ID_KILOLUX = 210002,
+  /*
+   Hertz (Frequency dimension)
+   */
+  UNIT_ID_HERTZ = 220000,
+  /*
+   Millihertz (Frequency dimension)
+   */
+  UNIT_ID_MILLIHERTZ = 220001,
+  /*
+   Kilohertz (Frequency dimension)
+   */
+  UNIT_ID_KILOHERTZ = 220002,
+  /*
+   Megahertz (Frequency dimension)
+   */
+  UNIT_ID_MEGAHERTZ = 220003,
+  /*
+   Gigahertz (Frequency dimension)
+   */
+  UNIT_ID_GIGAHERTZ = 220004,
+  /*
+   Terahertz (Frequency dimension)
+   */
+  UNIT_ID_TERAHERTZ = 220005,
+  /*
+   Mole (AmountOfSubstance dimension)
+   */
+  UNIT_ID_MOLE = 230000,
+  /*
+   Nanomole (AmountOfSubstance dimension)
+   */
+  UNIT_ID_NANOMOLE = 230001,
+  /*
+   Micromole (AmountOfSubstance dimension)
+   */
+  UNIT_ID_MICROMOLE = 230002,
+  /*
+   Millimole (AmountOfSubstance dimension)
+   */
+  UNIT_ID_MILLIMOLE = 230003,
+  /*
+   Kilomole (AmountOfSubstance dimension)
+   */
+  UNIT_ID_KILOMOLE = 230004,
+  /*
+   Ampere (Current dimension)
+   */
+  UNIT_ID_AMPERE = 240000,
+  /*
+   Microampere (Current dimension)
+   */
+  UNIT_ID_MICROAMPERE = 240001,
+  /*
+   Milliampere (Current dimension)
+   */
+  UNIT_ID_MILLIAMPERE = 240002,
+  /*
+   Kiloampere (Current dimension)
+   */
+  UNIT_ID_KILOAMPERE = 240003,
+  /*
+   Coulomb (Charge dimension)
+   */
+  UNIT_ID_COULOMB = 250000,
+  /*
+   Millicoulomb (Charge dimension)
+   */
+  UNIT_ID_MILLICOULOMB = 250001,
+  /*
+   Microcoulomb (Charge dimension)
+   */
+  UNIT_ID_MICROCOULOMB = 250002,
+  /*
+   Kilocoulomb (Charge dimension)
+   */
+  UNIT_ID_KILOCOULOMB = 250003,
+  /*
+   Volt (Voltage dimension)
+   */
+  UNIT_ID_VOLT = 260000,
+  /*
+   Microvolt (Voltage dimension)
+   */
+  UNIT_ID_MICROVOLT = 260001,
+  /*
+   Millivolt (Voltage dimension)
+   */
+  UNIT_ID_MILLIVOLT = 260002,
+  /*
+   Kilovolt (Voltage dimension)
+   */
+  UNIT_ID_KILOVOLT = 260003,
+  /*
+   Megavolt (Voltage dimension)
+   */
+  UNIT_ID_MEGAVOLT = 260004,
+  /*
+   Ohm (Resistance dimension)
+   */
+  UNIT_ID_OHM = 270000,
+  /*
+   Milliohm (Resistance dimension)
+   */
+  UNIT_ID_MILLIOHM = 270001,
+  /*
+   Kilohm (Resistance dimension)
+   */
+  UNIT_ID_KILOHM = 270002,
+  /*
+   Megaohm (Resistance dimension)
+   */
+  UNIT_ID_MEGAOHM = 270003,
+  /*
+   Farad (Capacitance dimension)
+   */
+  UNIT_ID_FARAD = 280000,
+  /*
+   Picofarad (Capacitance dimension)
+   */
+  UNIT_ID_PICOFARAD = 280001,
+  /*
+   Nanofarad (Capacitance dimension)
+   */
+  UNIT_ID_NANOFARAD = 280002,
+  /*
+   Microfarad (Capacitance dimension)
+   */
+  UNIT_ID_MICROFARAD = 280003,
+  /*
+   Millifarad (Capacitance dimension)
+   */
+  UNIT_ID_MILLIFARAD = 280004,
+  /*
+   Henry (Inductance dimension)
+   */
+  UNIT_ID_HENRY = 290000,
+  /*
+   Microhenry (Inductance dimension)
+   */
+  UNIT_ID_MICROHENRY = 290001,
+  /*
+   Millihenry (Inductance dimension)
+   */
+  UNIT_ID_MILLIHENRY = 290002,
+  /*
+   Weber (MagneticFlux dimension)
+   */
+  UNIT_ID_WEBER = 300000,
+  /*
+   Milliweber (MagneticFlux dimension)
+   */
+  UNIT_ID_MILLIWEBER = 300001,
+  /*
+   Tesla (MagneticFluxDensity dimension)
+   */
+  UNIT_ID_TESLA = 310000,
+  /*
+   Millitesla (MagneticFluxDensity dimension)
+   */
+  UNIT_ID_MILLITESLA = 310001,
+  /*
+   Microtesla (MagneticFluxDensity dimension)
+   */
+  UNIT_ID_MICROTESLA = 310002,
+  /*
+   KilogramPerCubicMeter (Density dimension)
+   */
+  UNIT_ID_KILOGRAM_PER_CUBIC_METER = 320000,
+  /*
+   GramPerCubicCentimeter (Density dimension)
+   */
+  UNIT_ID_GRAM_PER_CUBIC_CENTIMETER = 320001,
+  /*
+   GramPerMilliliter (Density dimension)
+   */
+  UNIT_ID_GRAM_PER_MILLILITER = 320002,
+  /*
+   PoundPerCubicFoot (Density dimension)
+   */
+  UNIT_ID_POUND_PER_CUBIC_FOOT = 321000,
 };
 #ifndef __cplusplus
 typedef uint32_t UnitId;
@@ -1636,11 +2264,12 @@ const char *qtty_unit_name(uint32_t unit_id);
 /*
  Returns the FFI ABI version (major*10000 + minor*100 + patch).
 
- Current version: 0.6.1 → 601
+ Current version: 0.7.0 → 700
 
- The 0.6.x ABI uses raw `u32` unit identifiers in `QttyQuantity` and
- `QttyDerivedQuantity` so C callers cannot construct invalid Rust enum
- discriminants across the FFI boundary.
+ The 0.7.x ABI extends the FFI unit catalog to cover the full `qtty`
+ linear-unit inventory while continuing to use raw `u32` unit identifiers in
+ `QttyQuantity` and `QttyDerivedQuantity` so C callers cannot construct
+ invalid Rust enum discriminants across the FFI boundary.
  */
 uint32_t qtty_ffi_version(void);
 

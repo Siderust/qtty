@@ -134,14 +134,14 @@
 //!
 //! ```toml
 //! [dependencies]
-//! qtty = { version = "0.6.1", default-features = false }
+//! qtty = { version = "0.7.0", default-features = false }
 //! ```
 //!
 //! If you need `qtty_vec!(vec ...)` in `no_std`, enable `alloc`:
 //!
 //! ```toml
 //! [dependencies]
-//! qtty = { version = "0.6.1", default-features = false, features = ["alloc"] }
+//! qtty = { version = "0.7.0", default-features = false, features = ["alloc"] }
 //! ```
 //!
 //! # Panics and errors

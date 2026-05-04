@@ -51,7 +51,7 @@ compile time while valid conversions stay explicit and cheap.
 | **Typed Quantities** | `Quantity<U, S>` keeps the unit `U` and scalar `S` at the type level, preventing invalid arithmetic across dimensions. |
 | **Explicit Conversion** | Convert with `.to::<TargetUnit>()`, or use `.to_lossy()` for integer-backed quantities. |
 | **Dimensional Arithmetic** | Multiplication and division compose dimensions at compile time: `Length * Length -> Area`, `Length / Time -> Velocity`, and more. |
-| **Broad Unit Catalog** | Built-in modules cover angular, time, length, mass, power, area, volume, velocity, angular-rate, and unitless quantities. |
+| **Broad Unit Catalog** | Built-in modules cover angular, time, length, mass, power, area, volume, pressure, solid angle, temperature, frequency, chemistry, electrical, density, velocity, angular-rate, and unitless quantities. |
 | **Astronomy-Friendly Units** | Includes `AstronomicalUnit`, `LightYear`, `Parsec`, `SolarMass`, `SolarLuminosity`, sidereal time units, and related helpers. |
 | **Multiple Scalar Families** | Use `f64`, `f32`, signed integers, and optional decimal/rational scalars depending on your precision model. |
 | **Interop Options** | Optional `serde`, `pyo3`, `diesel`, and `tiberius` support in Rust, plus a separate `qtty-ffi` crate for C-compatible consumers. |
@@ -64,28 +64,28 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-qtty = "0.6.1"
+qtty = "0.7.0"
 ```
 
 Minimal `no_std` build:
 
 ```toml
 [dependencies]
-qtty = { version = "0.6.1", default-features = false }
+qtty = { version = "0.7.0", default-features = false }
 ```
 
 `no_std` with heap-backed vectors/macros:
 
 ```toml
 [dependencies]
-qtty = { version = "0.6.1", default-features = false, features = ["alloc"] }
+qtty = { version = "0.7.0", default-features = false, features = ["alloc"] }
 ```
 
 Serde support:
 
 ```toml
 [dependencies]
-qtty = { version = "0.6.1", features = ["serde"] }
+qtty = { version = "0.7.0", features = ["serde"] }
 ```
 
 ---
@@ -146,7 +146,10 @@ The facade crate re-exports the built-in unit modules from `qtty-core` at the cr
 - **Length**: meters, kilometers, astronomical units, light-years, parsecs, nautical miles, and more
 - **Mass**: gram-family units, kilograms, tonnes, solar mass
 - **Power**: watts, metric/electric horsepower, solar luminosity
-- **Area / Volume**: square and cubic derived units plus liter-family and land units
+- **Area / Volume / Solid Angle**: square and cubic derived units plus liter-family, land, and steradian-based units
+- **Pressure / Temperature**: pascal/bar and absolute thermodynamic temperature units
+- **Radiometry / Photometry**: radiance families, `S10`, SI photometric units, and Rust-side logarithmic helpers behind feature gates
+- **Frequency / Chemistry / Electrical / Density**: hertz, mole, electrical/magnetic, and density unit families behind feature gates
 - **Velocity / Angular Rate**: generic `Per`-based derived quantities
 - **Dimensionless**: ratios and simplified same-unit division results
 
