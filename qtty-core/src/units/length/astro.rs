@@ -21,11 +21,9 @@ pub type AstronomicalUnits = Quantity<Au>;
 pub const AU: AstronomicalUnits = AstronomicalUnits::new(1.0);
 
 // Exact speed of light and Julian year, used to derive the light‑year ratio.
-const SPEED_OF_LIGHT_M_PER_S: f64 = 299_792_458.0;
-const SECONDS_PER_DAY: f64 = 86_400.0;
 const DAYS_PER_JULIAN_YEAR: f64 = 36525.0 / 100.0; // 365.25 d
-const SECONDS_PER_JULIAN_YEAR: f64 = SECONDS_PER_DAY * DAYS_PER_JULIAN_YEAR;
-const METERS_PER_LIGHT_YEAR: f64 = SPEED_OF_LIGHT_M_PER_S * SECONDS_PER_JULIAN_YEAR;
+const SECONDS_PER_JULIAN_YEAR: f64 = crate::time::SECONDS_PER_DAY * DAYS_PER_JULIAN_YEAR;
+const METERS_PER_LIGHT_YEAR: f64 = crate::velocity::C.value() * SECONDS_PER_JULIAN_YEAR;
 
 /// Light-year (ly): distance light travels in one Julian year (`365.25 d`) at `c = 299_792_458 m/s`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]

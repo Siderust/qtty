@@ -150,6 +150,8 @@ pub enum DimensionId {
     MagneticFluxDensity = 31,
     /// Density dimension (e.g., kg/m^3).
     Density = 32,
+    /// Dimensionless ratios and fractions.
+    Dimensionless = 33,
 }
 
 // =============================================================================

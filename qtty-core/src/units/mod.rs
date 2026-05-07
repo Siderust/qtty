@@ -25,11 +25,13 @@
 //! - [`temperature`]: thermodynamic temperature units (kelvin is canonical scaling unit).
 //! - [`angular_rate`]: angular-rate aliases (`Angular / Time`) built from [`angular`] and [`time`].
 //!   This is **not** SI Hertz-style inverse-time frequency (`T⁻¹`); see the module docs.
+//! - [`dimensionless`]: named dimensionless ratios such as optical depth and airmass.
 
 pub mod acceleration;
 pub mod angular;
 pub mod angular_rate;
 pub mod area;
+pub mod dimensionless;
 pub mod energy;
 pub mod force;
 pub mod length;

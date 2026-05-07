@@ -146,6 +146,10 @@ mod tests {
         assert_eq!(meta(UnitId::Day).unwrap().dim, DimensionId::Time);
         assert_eq!(meta(UnitId::Radian).unwrap().dim, DimensionId::Angle);
         assert_eq!(meta(UnitId::Degree).unwrap().dim, DimensionId::Angle);
+        assert_eq!(
+            meta(UnitId::OpticalDepth).unwrap().dim,
+            DimensionId::Dimensionless
+        );
     }
 
     #[test]
@@ -153,6 +157,7 @@ mod tests {
         assert!(compatible(UnitId::Meter, UnitId::Kilometer));
         assert!(compatible(UnitId::Second, UnitId::Hour));
         assert!(compatible(UnitId::Radian, UnitId::Degree));
+        assert!(compatible(UnitId::OpticalDepth, UnitId::Airmass));
     }
 
     #[test]

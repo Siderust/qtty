@@ -385,3 +385,11 @@
 320001,GramPerCubicCentimeter
 320002,GramPerMilliliter
 321000,PoundPerCubicFoot
+
+# ─── Named dimensionless units ───────────────────────────────────────────────
+330000,OpticalDepth
+330001,Airmass
+330002,Transmittance
+330003,Albedo
+330004,IlluminationFraction
+330005,Refractivity
