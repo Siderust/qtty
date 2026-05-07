@@ -449,8 +449,8 @@ pub mod unit {
     pub use qtty_core::units::area::{SquareFoot, SquareInch, SquareMile, SquareYard};
 
     pub use qtty_core::units::dimensionless::{
-        Airmass, Albedo, DimensionlessUnit, IlluminationFraction, OpticalDepth, Refractivity,
-        Transmittance,
+        Airmass, Albedo, DimensionlessUnit, IlluminationFraction, OpticalDepth, Ratio, Ratios,
+        Refractivity, Transmittance,
     };
 
     #[cfg(feature = "astro")]
@@ -605,9 +605,9 @@ pub use unit as units;
 
 /// Velocity quantities represented as one unit divided by another.
 pub mod velocity {
-    pub use qtty_core::units::velocity::{Velocity, VelocityUnit};
     #[cfg(feature = "astro")]
     pub use qtty_core::units::velocity::AU_PER_DAY_C;
+    pub use qtty_core::units::velocity::{Velocity, VelocityUnit};
 }
 
 /// Angular-rate quantities represented as one unit divided by another (`Angular / Time`).

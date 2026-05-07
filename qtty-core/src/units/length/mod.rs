@@ -451,9 +451,9 @@ length_units!(crate::assert_units_are_builtin);
 #[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
-    use approx::{assert_abs_diff_eq, assert_relative_eq};
     #[cfg(feature = "astro")]
     use crate::units::length::astro::{ARCSECONDS_PER_RADIAN, AU_IN_METERS};
+    use approx::{assert_abs_diff_eq, assert_relative_eq};
     use proptest::prelude::*;
 
     // ─────────────────────────────────────────────────────────────────────────────

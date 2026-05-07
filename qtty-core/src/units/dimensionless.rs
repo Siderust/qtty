@@ -66,6 +66,16 @@ pub struct Refractivity;
 /// A quantity measured as refractivity.
 pub type Refractivities = Quantity<Refractivity>;
 
+/// A generic dimensionless ratio (e.g. `v/c`, efficiency, scale factor).
+///
+/// Use this when no more specific named dimensionless unit applies.
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
+#[unit(symbol = "", dimension = Dimensionless, ratio = 1.0)]
+pub struct Ratio;
+
+/// A quantity measured as a dimensionless ratio.
+pub type Ratios = Quantity<Ratio>;
+
 /// Canonical list of named dimensionless units.
 #[macro_export]
 #[doc(hidden)]
@@ -77,7 +87,8 @@ macro_rules! dimensionless_units {
             Transmittance,
             Albedo,
             IlluminationFraction,
-            Refractivity
+            Refractivity,
+            Ratio
         );
     };
 }
