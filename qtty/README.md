@@ -64,7 +64,9 @@ assert!((speed.value() - 10.0).abs() < 1e-12);
 - `alloc`: enables heap-backed helpers such as `qtty::qtty_vec!(vec ...)` in `no_std`
 - `serde`: enables serialization helpers for quantities
 - `astro`, `navigation`, `fundamental-physics`, `customary`, `land-area`,
-  `julian-time`: optional unit families forwarded to `qtty-core`.
+  `julian-time`: optional unit families forwarded to `qtty-core`. `astro`
+  includes the Julian astronomy time units; `julian-time` remains as a
+  compatibility alias.
 - `radiometry`: enables the `qtty::radiometry` module (radiance, photon
   radiance, S10, `erg_to_photon`). Implies `fundamental-physics`.
 - `all-units`: shorthand that turns on every unit-family feature.

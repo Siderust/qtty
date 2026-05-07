@@ -8,11 +8,14 @@
 
 use super::Velocity;
 use crate::units::length::{AstronomicalUnit, LightYear, Meter};
+
+/// Exact speed of light in vacuum in metres per second (BIPM / IAU).
+pub(crate) const SPEED_OF_LIGHT_M_PER_S: f64 = 299_792_458.0;
 use crate::units::time::{Day, JulianYear, Second};
 use crate::Unit;
 
 /// Exact speed of light in vacuum (`299_792_458 m/s`).
-pub const C: Velocity<Meter, Second> = Velocity::<Meter, Second>::new(299_792_458.0);
+pub const C: Velocity<Meter, Second> = Velocity::<Meter, Second>::new(SPEED_OF_LIGHT_M_PER_S);
 
 /// Speed of light in AU/day derived from the canonical `LightYear` and `AstronomicalUnit`
 /// definitions in this crate.

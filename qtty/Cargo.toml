@@ -19,7 +19,7 @@ cross-unit-ops = ["qtty-core/cross-unit-ops"]
 serde = ["qtty-core/serde"]
 
 # Unit-family feature gates (forwarded to qtty-core)
-astro = ["qtty-core/astro"]
+astro = ["qtty-core/astro", "julian-time"]
 navigation = ["qtty-core/navigation"]
 fundamental-physics = ["qtty-core/fundamental-physics"]
 customary = ["qtty-core/customary"]
@@ -31,7 +31,7 @@ frequency = ["qtty-core/frequency"]
 chemistry = ["qtty-core/chemistry"]
 electrical = ["qtty-core/electrical"]
 density = ["qtty-core/density"]
-all-units = ["astro", "navigation", "fundamental-physics", "customary", "land-area", "julian-time", "radiometry", "photometry", "frequency", "chemistry", "electrical", "density"]
+all-units = ["astro", "navigation", "fundamental-physics", "customary", "land-area", "radiometry", "photometry", "frequency", "chemistry", "electrical", "density"]
 
 # Scalar type support
 scalar-rational = ["qtty-core/scalar-rational"]
