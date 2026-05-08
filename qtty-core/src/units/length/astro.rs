@@ -2,8 +2,19 @@
 // Copyright (C) 2026 Vallés Puig, Ramon
 
 use super::*;
-use core::f64::consts::PI;
 use qtty_derive::Unit;
+
+use core::f64::consts::PI;
+
+use crate::units::time::{JulianYear, Second};
+use crate::units::velocity::astro::SPEED_OF_LIGHT_M_PER_S;
+
+/// Exact astronomical unit in metres (IAU 2012).
+pub(crate) const AU_IN_METERS: f64 = 149_597_870_700.0;
+
+/// Exact multiplicative factor relating astronomical units to parsecs:
+/// `pc = au * ARCSECONDS_PER_RADIAN`.
+pub(crate) const ARCSECONDS_PER_RADIAN: f64 = 648_000.0 / PI;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Astronomical distance units
@@ -11,7 +22,7 @@ use qtty_derive::Unit;
 
 /// Astronomical unit (au). Exact (IAU 2012): metres per au.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "au", dimension = Length, ratio = 149_597_870_700.0)]
+#[unit(symbol = "au", dimension = Length, ratio = AU_IN_METERS)]
 pub struct AstronomicalUnit;
 /// Type alias shorthand for [`AstronomicalUnit`].
 pub type Au = AstronomicalUnit;
@@ -20,14 +31,21 @@ pub type AstronomicalUnits = Quantity<Au>;
 /// One astronomical unit.
 pub const AU: AstronomicalUnits = AstronomicalUnits::new(1.0);
 
-// Exact speed of light and Julian year, used to derive the light‑year ratio.
-const SPEED_OF_LIGHT_M_PER_S: f64 = 299_792_458.0;
-const SECONDS_PER_DAY: f64 = 86_400.0;
-const DAYS_PER_JULIAN_YEAR: f64 = 36525.0 / 100.0; // 365.25 d
-const SECONDS_PER_JULIAN_YEAR: f64 = SECONDS_PER_DAY * DAYS_PER_JULIAN_YEAR;
+// ── Canonical constants used to compose astro ratios ──────────────────────
+// These constants are const-safe combinations of fundamental physical constants
+// and the IAU/SOFA standard astronomical definitions.
+
+/// Julian year in canonical seconds, derived from the canonical time definition.
+const SECONDS_PER_JULIAN_YEAR: f64 = JulianYear::RATIO / Second::RATIO;
+
+/// Light-year: distance light travels in one Julian year.
+/// Derived as: c (m/s) × seconds in Julian year.
 const METERS_PER_LIGHT_YEAR: f64 = SPEED_OF_LIGHT_M_PER_S * SECONDS_PER_JULIAN_YEAR;
 
-/// Light-year (ly): distance light travels in one Julian year (`365.25 d`) at `c = 299_792_458 m/s`.
+/// Parsec: au × 648000 / π (exact, given the IAU 2012 au definition).
+const PARSEC_RATIO: f64 = AU_IN_METERS * ARCSECONDS_PER_RADIAN;
+
+/// Light-year (ly): distance light travels in one Julian year (`365.25 d`) at `c`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
 #[unit(symbol = "ly", dimension = Length, ratio = METERS_PER_LIGHT_YEAR)]
 pub struct LightYear;
@@ -40,7 +58,7 @@ pub const LY: LightYears = LightYears::new(1.0);
 
 /// Parsec (pc): `pc = au * 648000 / π` (exact given au).
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "pc", dimension = Length, ratio = 149_597_870_700.0 * (648_000.0 / PI))]
+#[unit(symbol = "pc", dimension = Length, ratio = PARSEC_RATIO)]
 pub struct Parsec;
 /// Type alias shorthand for [`Parsec`].
 pub type Pc = Parsec;
@@ -51,7 +69,7 @@ pub const PC: Parsecs = Parsecs::new(1.0);
 
 /// Kiloparsec (kpc): `1e3 pc`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "kpc", dimension = Length, ratio = 1_000.0 * 149_597_870_700.0 * (648_000.0 / PI))]
+#[unit(symbol = "kpc", dimension = Length, ratio = 1_000.0 * PARSEC_RATIO)]
 pub struct Kiloparsec;
 /// A quantity measured in kiloparsecs.
 pub type Kiloparsecs = Quantity<Kiloparsec>;
@@ -60,7 +78,7 @@ pub const KPC: Kiloparsecs = Kiloparsecs::new(1.0);
 
 /// Megaparsec (Mpc): `1e6 pc`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Mpc", dimension = Length, ratio = 1_000_000.0 * 149_597_870_700.0 * (648_000.0 / PI))]
+#[unit(symbol = "Mpc", dimension = Length, ratio = 1_000_000.0 * PARSEC_RATIO)]
 pub struct Megaparsec;
 /// A quantity measured in megaparsecs.
 pub type Megaparsecs = Quantity<Megaparsec>;
@@ -69,7 +87,7 @@ pub const MPC: Megaparsecs = Megaparsecs::new(1.0);
 
 /// Gigaparsec (Gpc): `1e9 pc`.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Unit)]
-#[unit(symbol = "Gpc", dimension = Length, ratio = 1_000_000_000.0 * 149_597_870_700.0 * (648_000.0 / PI))]
+#[unit(symbol = "Gpc", dimension = Length, ratio = 1_000_000_000.0 * PARSEC_RATIO)]
 pub struct Gigaparsec;
 /// A quantity measured in gigaparsecs.
 pub type Gigaparsecs = Quantity<Gigaparsec>;
@@ -257,6 +275,7 @@ macro_rules! length_astro_units {
 #[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
+    use crate::units::time::{JulianYears, Second};
     use approx::{assert_abs_diff_eq, assert_relative_eq};
     use proptest::prelude::*;
 
@@ -264,14 +283,22 @@ mod tests {
     fn astronomical_unit_to_meters() {
         let au = AstronomicalUnits::new(1.0);
         let meters: Meters = au.to();
-        assert_abs_diff_eq!(meters.value(), 149_597_870_700.0, epsilon = 1e-3);
+        assert_abs_diff_eq!(meters.value(), AU_IN_METERS, epsilon = 1e-3);
     }
 
     #[test]
     fn parsec_to_au() {
         let parsec = Parsecs::new(1.0);
         let au: AstronomicalUnits = parsec.to();
-        assert_relative_eq!(au.value(), 648_000.0 / PI, max_relative = 1e-15);
+        assert_relative_eq!(au.value(), ARCSECONDS_PER_RADIAN, max_relative = 1e-15);
+    }
+
+    #[test]
+    fn light_year_matches_c_times_julian_year() {
+        let julian_year_seconds = JulianYears::new(1.0).to::<Second>();
+        let expected_meters = SPEED_OF_LIGHT_M_PER_S * julian_year_seconds.value();
+        let meters: Meters = LightYears::new(1.0).to();
+        assert_relative_eq!(meters.value(), expected_meters, max_relative = 1e-15);
     }
 
     #[test]

@@ -173,9 +173,10 @@
 extern crate alloc;
 
 pub use qtty_core::{
-    impl_unit_arithmetic_pairs, impl_unit_arithmetic_pairs_between, impl_unit_cross_unit_ops,
-    impl_unit_cross_unit_ops_between, impl_unit_division_pairs, impl_unit_division_pairs_between,
-    impl_unit_from_conversions, impl_unit_from_conversions_between, impl_unit_multiplication_pairs,
+    dimensionless_units, impl_unit_arithmetic_pairs, impl_unit_arithmetic_pairs_between,
+    impl_unit_cross_unit_ops, impl_unit_cross_unit_ops_between, impl_unit_division_pairs,
+    impl_unit_division_pairs_between, impl_unit_from_conversions,
+    impl_unit_from_conversions_between, impl_unit_multiplication_pairs,
     impl_unit_multiplication_pairs_between,
 };
 pub use qtty_core::{
@@ -394,6 +395,7 @@ pub mod i8;
 pub use qtty_core::units::acceleration;
 pub use qtty_core::units::angular;
 pub use qtty_core::units::area;
+pub use qtty_core::units::dimensionless;
 pub use qtty_core::units::energy;
 pub use qtty_core::units::force;
 pub use qtty_core::units::length;
@@ -445,6 +447,11 @@ pub mod unit {
     };
     #[cfg(feature = "customary")]
     pub use qtty_core::units::area::{SquareFoot, SquareInch, SquareMile, SquareYard};
+
+    pub use qtty_core::units::dimensionless::{
+        Airmass, Albedo, DimensionlessUnit, IlluminationFraction, OpticalDepth, Ratio, Ratios,
+        Refractivity, Transmittance,
+    };
 
     #[cfg(feature = "astro")]
     pub use qtty_core::units::length::nominal::{
@@ -598,6 +605,8 @@ pub use unit as units;
 
 /// Velocity quantities represented as one unit divided by another.
 pub mod velocity {
+    #[cfg(feature = "astro")]
+    pub use qtty_core::units::velocity::AU_PER_DAY_C;
     pub use qtty_core::units::velocity::{Velocity, VelocityUnit};
 }
 
@@ -629,6 +638,19 @@ macro_rules! _root_alias {
 }
 __qtty_invoke_all_inventories!(_root_alias);
 __qtty_invoke_optional_inventories!(_root_alias);
+
+/// Optical depth quantity.
+pub type OpticalDepth<S = f64> = Quantity<unit::OpticalDepth, S>;
+/// Airmass quantity.
+pub type Airmass<S = f64> = Quantity<unit::Airmass, S>;
+/// Transmittance quantity.
+pub type Transmittance<S = f64> = Quantity<unit::Transmittance, S>;
+/// Albedo quantity.
+pub type Albedo<S = f64> = Quantity<unit::Albedo, S>;
+/// Illuminated fraction quantity.
+pub type IlluminationFraction<S = f64> = Quantity<unit::IlluminationFraction, S>;
+/// Refractivity quantity.
+pub type Refractivity<S = f64> = Quantity<unit::Refractivity, S>;
 
 pub use qtty_core::units::angular::{DEG, RAD};
 #[cfg(feature = "astro")]

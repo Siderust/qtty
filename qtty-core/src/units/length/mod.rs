@@ -451,9 +451,9 @@ length_units!(crate::assert_units_are_builtin);
 #[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
-    use approx::{assert_abs_diff_eq, assert_relative_eq};
     #[cfg(feature = "astro")]
-    use core::f64::consts::PI;
+    use crate::units::length::astro::{ARCSECONDS_PER_RADIAN, AU_IN_METERS};
+    use approx::{assert_abs_diff_eq, assert_relative_eq};
     use proptest::prelude::*;
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -480,7 +480,7 @@ mod tests {
         let au = AstronomicalUnits::new(1.0);
         let m = au.to::<Meter>();
         // 1 AU = 149,597,870,700 meters (exact, IAU 2012).
-        assert_abs_diff_eq!(m.value(), 149_597_870_700.0, epsilon = 1e-6);
+        assert_abs_diff_eq!(m.value(), AU_IN_METERS, epsilon = 1e-6);
     }
 
     #[test]
@@ -558,7 +558,7 @@ mod tests {
         let pc = Parsecs::new(1.0);
         let ly = pc.to::<LightYear>();
         // 1 pc expressed in light-years, using the exact AU-based definition.
-        let expected = (AstronomicalUnit::RATIO * (648_000.0 / PI)) / LightYear::RATIO;
+        let expected = (AstronomicalUnit::RATIO * ARCSECONDS_PER_RADIAN) / LightYear::RATIO;
         assert_relative_eq!(ly.value(), expected, max_relative = 1e-15);
     }
 
@@ -577,7 +577,7 @@ mod tests {
     fn parsec_ratio_sanity() {
         // Parsec is defined from AU: pc = au * 648000 / π
         let lhs = Parsec::RATIO / AstronomicalUnit::RATIO;
-        let rhs = 648_000.0 / PI;
+        let rhs = ARCSECONDS_PER_RADIAN;
         assert_relative_eq!(lhs, rhs, max_relative = 1e-12);
     }
 

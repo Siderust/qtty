@@ -18,7 +18,7 @@ cross-unit-ops = []
 serde = ["dep:serde"]
 
 # Unit-family features (opt-in for rare/domain-specific units)
-astro = []
+astro = ["julian-time"]
 navigation = []
 fundamental-physics = []
 customary = []
@@ -30,7 +30,7 @@ frequency = []
 chemistry = []
 electrical = []
 density = []
-all-units = ["astro", "navigation", "fundamental-physics", "customary", "land-area", "julian-time", "radiometry", "photometry", "frequency", "chemistry", "electrical", "density"]
+all-units = ["astro", "navigation", "fundamental-physics", "customary", "land-area", "radiometry", "photometry", "frequency", "chemistry", "electrical", "density"]
 
 # Optional support
 scalar-rational = ["num-rational"]

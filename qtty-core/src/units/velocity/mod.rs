@@ -61,14 +61,17 @@ impl<T: Unit<Dim = crate::Velocity>> VelocityUnit for T {}
 /// ```
 pub type Velocity<N, D> = Quantity<Per<N, D>>;
 
+#[cfg(feature = "astro")]
+pub mod astro;
+#[cfg(feature = "astro")]
+pub use astro::AU_PER_DAY_C;
+#[cfg(feature = "astro")]
+pub use astro::*;
+
 #[cfg(all(test, feature = "std"))]
 mod tests {
     use super::*;
-    #[cfg(feature = "astro")]
-    use crate::units::length::Au;
     use crate::units::length::{Kilometer, Kilometers, Meter};
-    #[cfg(feature = "astro")]
-    use crate::units::time::Day;
     use crate::units::time::{Hour, Second, Seconds};
     use crate::Per;
     use approx::{assert_abs_diff_eq, assert_relative_eq};
@@ -106,15 +109,6 @@ mod tests {
         let v_kps: Velocity<Kilometer, Second> = v.to();
         // 3600 km/h = 1 km/s
         assert_abs_diff_eq!(v_kps.value(), 1.0, epsilon = 1e-12);
-    }
-
-    #[test]
-    #[cfg(feature = "astro")]
-    fn au_per_day_to_km_per_s() {
-        let v: Velocity<Au, Day> = Velocity::new(1.0);
-        let v_kps: Velocity<Kilometer, Second> = v.to();
-        // 1 AU/day = 149,597,870.7 km / 86400 s ≈ 1731.5 km/s
-        assert_relative_eq!(v_kps.value(), 1731.5, max_relative = 1e-3);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────

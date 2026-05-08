@@ -199,6 +199,7 @@ pub use units::acceleration;
 pub use units::angular;
 pub use units::angular_rate;
 pub use units::area;
+pub use units::dimensionless;
 pub use units::energy;
 pub use units::force;
 pub use units::length;

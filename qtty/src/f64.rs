@@ -26,3 +26,4 @@ macro_rules! _alias {
 
 crate::__qtty_invoke_all_inventories!(_alias);
 crate::__qtty_invoke_optional_inventories!(_alias);
+crate::dimensionless_units!(_alias);

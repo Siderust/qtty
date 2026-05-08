@@ -147,6 +147,7 @@ fn dimension_from_discriminant(discriminant: u32) -> &'static str {
         300_000..=309_999 => "MagneticFlux",
         310_000..=319_999 => "MagneticFluxDensity",
         320_000..=329_999 => "Density",
+        330_000..=339_999 => "Dimensionless",
         _ => panic!("Unknown discriminant range for {discriminant}"),
     }
 }
