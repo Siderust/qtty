@@ -822,6 +822,11 @@ enum DimensionId
    Density dimension (e.g., kg/m^3).
    */
   DIMENSION_ID_DENSITY = 32,
+  /*
+   Dimensionless dimension (named dimensionless ratios such as optical depth,
+   airmass, transmittance, albedo, illumination fraction, and refractivity).
+   */
+  DIMENSION_ID_DIMENSIONLESS = 33,
 };
 #ifndef __cplusplus
 typedef uint32_t DimensionId;
@@ -1962,6 +1967,30 @@ enum UnitId
    PoundPerCubicFoot (Density dimension)
    */
   UNIT_ID_POUND_PER_CUBIC_FOOT = 321000,
+  /*
+   OpticalDepth (Dimensionless dimension)
+   */
+  UNIT_ID_OPTICAL_DEPTH = 330000,
+  /*
+   Airmass (Dimensionless dimension)
+   */
+  UNIT_ID_AIRMASS = 330001,
+  /*
+   Transmittance (Dimensionless dimension)
+   */
+  UNIT_ID_TRANSMITTANCE = 330002,
+  /*
+   Albedo (Dimensionless dimension)
+   */
+  UNIT_ID_ALBEDO = 330003,
+  /*
+   IlluminationFraction (Dimensionless dimension)
+   */
+  UNIT_ID_ILLUMINATION_FRACTION = 330004,
+  /*
+   Refractivity (Dimensionless dimension)
+   */
+  UNIT_ID_REFRACTIVITY = 330005,
 };
 #ifndef __cplusplus
 typedef uint32_t UnitId;
