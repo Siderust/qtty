@@ -7,6 +7,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-05-08
+
+### Added
+
+- **`qtty-ffi` unitless quantity coverage** — the stable FFI registry now
+  exposes `DimensionId::Dimensionless` (33) plus named unit IDs for
+  `OpticalDepth`, `Airmass`, `Transmittance`, `Albedo`,
+  `IlluminationFraction`, and `Refractivity` in the `330000`–`330005` range.
+
+### Changed
+
+- **`qtty-ffi` release line** — ABI version now reports `701`
+  (`qtty_ffi_version() == 701`) for the `0.7.1` release.
+
 ## [0.7.0] - 2026-05-04
 
 ### Added
