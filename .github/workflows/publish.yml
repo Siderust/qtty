@@ -1,0 +1,48 @@
+name: Publish to crates.io
+
+on:
+  push:
+    tags:
+      - "v[0-9]*"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: cargo publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      # Publish in dependency order: qtty-derive → qtty-core → qtty → qtty-ffi
+      - name: Publish qtty-derive
+        run: cargo publish -p qtty-derive --no-verify
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+      - name: Wait for crates.io to index qtty-derive
+        run: sleep 30
+
+      - name: Publish qtty-core
+        run: cargo publish -p qtty-core --no-verify
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+      - name: Wait for crates.io to index qtty-core
+        run: sleep 30
+
+      - name: Publish qtty
+        run: cargo publish -p qtty --no-verify
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+      - name: Wait for crates.io to index qtty
+        run: sleep 30
+
+      - name: Publish qtty-ffi
+        run: cargo publish -p qtty-ffi --no-verify
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
