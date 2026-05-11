@@ -1032,3 +1032,79 @@ where
         Quantity::new(self.0.atan())
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Transcendental helpers on dimensionless quantities (Real suffices)
+// ─────────────────────────────────────────────────────────────────────────────
+
+impl<U, S> Quantity<U, S>
+where
+    U: Unit<Dim = crate::dimension::Dimensionless>,
+    S: Real,
+{
+    /// Returns e^self as a typed dimensionless [`Ratio`](crate::units::dimensionless::Ratio).
+    ///
+    /// Useful for density-scale-height models, population factors, and any
+    /// expression of the form `exp(-h / H)` where the argument is dimensionless.
+    #[inline]
+    pub fn exp(self) -> Quantity<crate::units::dimensionless::Ratio, S> {
+        Quantity::new(self.0.exp())
+    }
+
+    /// Returns the natural logarithm ln(self) as a typed dimensionless [`Ratio`].
+    ///
+    /// The result is dimensionless regardless of which dimensionless unit `U` is used.
+    #[inline]
+    pub fn ln(self) -> Quantity<crate::units::dimensionless::Ratio, S> {
+        Quantity::new(self.0.ln())
+    }
+
+    /// Returns self raised to the integer power `n` as a typed dimensionless [`Ratio`].
+    ///
+    /// Dimensionless^n is still dimensionless for any integer `n`.
+    #[inline]
+    pub fn powi(self, n: i32) -> Quantity<crate::units::dimensionless::Ratio, S> {
+        Quantity::new(self.0.powi(n))
+    }
+
+    /// Returns self raised to the dimensionless power `exp` as a typed dimensionless [`Ratio`].
+    ///
+    /// The exponent must itself be a dimensionless [`Ratio`] so the intent is explicit.
+    #[inline]
+    pub fn powf(
+        self,
+        exp: Quantity<crate::units::dimensionless::Ratio, S>,
+    ) -> Quantity<crate::units::dimensionless::Ratio, S> {
+        Quantity::new(self.0.powf(exp.0))
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ratio_to: same-dimension division returning a typed Ratio
+// ─────────────────────────────────────────────────────────────────────────────
+
+impl<U: Unit, S: Real> Quantity<U, S> {
+    /// Divides `self` by `other` (same unit), returning a typed dimensionless
+    /// [`Ratio`](crate::units::dimensionless::Ratio) instead of a raw scalar.
+    ///
+    /// This is an opt-in alternative to the standard `Quantity / Quantity`
+    /// operator, which returns the raw scalar `S` for same-unit division.
+    /// Use `ratio_to` whenever you want the result wrapped in a `Quantity`
+    /// for downstream typed APIs.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use qtty_core::length::Meters;
+    /// use qtty_core::units::dimensionless::Ratios;
+    ///
+    /// let a = Meters::new(10.0);
+    /// let b = Meters::new(4.0);
+    /// let r: Ratios = a.ratio_to(b);
+    /// assert!((r.value() - 2.5).abs() < 1e-12);
+    /// ```
+    #[inline]
+    pub fn ratio_to(self, other: Self) -> Quantity<crate::units::dimensionless::Ratio, S> {
+        Quantity::new(self.0 / other.0)
+    }
+}

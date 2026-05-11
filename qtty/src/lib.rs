@@ -188,6 +188,17 @@ pub use qtty_core::{
     Transcendental, Unit, Velocity, Voltage, Volume,
 };
 
+pub use dynamics::{
+    AreaToMass, AreaToMassUnit, DragCoefficient, GravitationalParameter,
+    GravitationalParameterUnit, InverseSecond, InverseSeconds, J2Coefficient, KmPerSecond,
+    KmPerSecondSquared, KmPerSeconds, KmPerSecondsSquared, SrpCoefficient, StokesCoefficient,
+    GM_EARTH, GM_MOON, GM_SUN,
+};
+
+pub use tolerances::{
+    AbsoluteTolerancePosition, AbsoluteToleranceVelocity, IntegratorTolerances, RelativeTolerance,
+};
+
 // `UnitDiv`, `UnitMul`, and the dimension-level traits are needed by the
 // `impl_unit_*` macros when they expand in downstream crates.  They are
 // also useful for writing generic code, but their associated types expose
@@ -379,6 +390,9 @@ macro_rules! __qtty_invoke_optional_inventories {
 // ─────────────────────────────────────────────────────────────────────────────
 // Scalar-specific modules
 // ─────────────────────────────────────────────────────────────────────────────
+
+pub mod dynamics;
+pub mod tolerances;
 
 pub mod f32;
 pub mod f64;
@@ -607,6 +621,8 @@ pub use unit as units;
 pub mod velocity {
     #[cfg(feature = "astro")]
     pub use qtty_core::units::velocity::AU_PER_DAY_C;
+    #[cfg(feature = "astro")]
+    pub use qtty_core::units::velocity::C;
     pub use qtty_core::units::velocity::{Velocity, VelocityUnit};
 }
 
