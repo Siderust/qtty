@@ -441,8 +441,17 @@ impl<U: Unit, S: Exact> Quantity<U, S> {
     /// - **Saturation at integer bounds** when the converted value exceeds the
     ///   target type's range (e.g. `1 km → 127 m` for `i8`).
     ///
-    /// Use [`checked_to_lossy`](Self::checked_to_lossy) if you need to detect
-    /// range overflow.
+    /// # When to use which variant
+    ///
+    /// | Situation | Recommended API |
+    /// |-----------|-----------------|
+    /// | Overflow is impossible by domain invariant | `to_lossy` |
+    /// | Overflow is possible / value is untrusted | [`checked_to_lossy`](Self::checked_to_lossy) |
+    ///
+    /// Prefer [`checked_to_lossy`](Self::checked_to_lossy) whenever the input
+    /// value comes from external data or a computation that might produce a
+    /// value outside the target type's range.  Silent saturation is an easy
+    /// source of subtle bugs in integer-heavy code.
     ///
     /// # Example
     ///

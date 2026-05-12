@@ -107,6 +107,9 @@
 //! - `alloc`: enables heap-backed helpers (like `qtty_vec!(vec ...)`) in `no_std` builds.
 //! - `serde`: enables `serde` support for `Quantity<U, S>`; serialization is the raw scalar value.
 //! - `scalar-rational`: enables `num_rational::Rational64` as a scalar type.
+//! - `satellite`: enables spacecraft astrodynamics unit aliases, gravitational parameter constants,
+//!   dimensionless force-model coefficient newtypes (`DragCoefficient`, `SrpCoefficient`, …), and
+//!   ODE propagator tolerance newtypes.  Disabled by default to keep `qtty` domain-agnostic.
 //!
 //! # Custom Units
 //!
@@ -188,6 +191,7 @@ pub use qtty_core::{
     Transcendental, Unit, Velocity, Voltage, Volume,
 };
 
+#[cfg(feature = "satellite")]
 pub use dynamics::{
     AreaToMass, AreaToMassUnit, DragCoefficient, GravitationalParameter,
     GravitationalParameterUnit, InverseSecond, InverseSeconds, J2Coefficient, KmPerSecond,
@@ -195,6 +199,7 @@ pub use dynamics::{
     GM_EARTH, GM_MOON, GM_SUN,
 };
 
+#[cfg(feature = "satellite")]
 pub use tolerances::{
     AbsoluteTolerancePosition, AbsoluteToleranceVelocity, IntegratorTolerances, RelativeTolerance,
 };
@@ -391,7 +396,9 @@ macro_rules! __qtty_invoke_optional_inventories {
 // Scalar-specific modules
 // ─────────────────────────────────────────────────────────────────────────────
 
+#[cfg(feature = "satellite")]
 pub mod dynamics;
+#[cfg(feature = "satellite")]
 pub mod tolerances;
 
 pub mod f32;
