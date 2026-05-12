@@ -760,7 +760,7 @@ fn cross_unit_nan_comparison() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TODO-1 tests: Ratio arithmetic, exp/ln roundtrip, powi/powf, ratio_to
+// tests: Ratio arithmetic, exp/ln roundtrip, powi/powf, ratio_to
 // ─────────────────────────────────────────────────────────────────────────────
 
 #[test]
