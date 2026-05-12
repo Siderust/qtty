@@ -2293,9 +2293,9 @@ const char *qtty_unit_name(uint32_t unit_id);
 /*
  Returns the FFI ABI version (major*10000 + minor*100 + patch).
 
- Current version: 0.7.1 → 701
+ Current version: 0.8.0 → 800
 
- The 0.7.x ABI extends the FFI unit catalog to cover the full `qtty`
+ The 0.8.x ABI extends the FFI unit catalog to cover the full `qtty`
  linear-unit inventory while continuing to use raw `u32` unit identifiers in
  `QttyQuantity` and `QttyDerivedQuantity` so C callers cannot construct
  invalid Rust enum discriminants across the FFI boundary.
