@@ -110,6 +110,11 @@ pub const GM_SUN: GravitationalParameter = GravitationalParameter::new(1.327_124
 /// μ_☾ = 4.902 800 066 × 10³ km³/s²
 pub const GM_MOON: GravitationalParameter = GravitationalParameter::new(4.902_800_066e3);
 
+/// Speed of light in vacuum (km/s).
+///
+/// c = 299 792.458 km/s (exact by SI definition).
+pub const SPEED_OF_LIGHT_KM_S: KmPerSeconds = KmPerSeconds::new(299_792.458);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Semantic dimensionless coefficient newtypes
 // ─────────────────────────────────────────────────────────────────────────────
