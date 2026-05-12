@@ -107,6 +107,9 @@
 //! - `alloc`: enables heap-backed helpers (like `qtty_vec!(vec ...)`) in `no_std` builds.
 //! - `serde`: enables `serde` support for `Quantity<U, S>`; serialization is the raw scalar value.
 //! - `scalar-rational`: enables `num_rational::Rational64` as a scalar type.
+//! - `satellite`: enables spacecraft astrodynamics unit aliases, gravitational parameter constants,
+//!   dimensionless force-model coefficient newtypes (`DragCoefficient`, `SrpCoefficient`, …), and
+//!   ODE propagator tolerance newtypes.  Disabled by default to keep `qtty` domain-agnostic.
 //!
 //! # Custom Units
 //!
@@ -186,6 +189,19 @@ pub use qtty_core::{
     Mass, Per, Power, Pressure, Prod, Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16,
     QuantityI32, QuantityI64, QuantityI8, Real, Resistance, Scalar, Temperature, Time,
     Transcendental, Unit, Velocity, Voltage, Volume,
+};
+
+#[cfg(feature = "satellite")]
+pub use dynamics::{
+    AreaToMass, AreaToMassUnit, DragCoefficient, GravitationalParameter,
+    GravitationalParameterUnit, InverseSecond, InverseSeconds, J2Coefficient, KmPerSecond,
+    KmPerSecondSquared, KmPerSeconds, KmPerSecondsSquared, SrpCoefficient, StokesCoefficient,
+    GM_EARTH, GM_MOON, GM_SUN,
+};
+
+#[cfg(feature = "satellite")]
+pub use tolerances::{
+    AbsoluteTolerancePosition, AbsoluteToleranceVelocity, IntegratorTolerances, RelativeTolerance,
 };
 
 // `UnitDiv`, `UnitMul`, and the dimension-level traits are needed by the
@@ -379,6 +395,11 @@ macro_rules! __qtty_invoke_optional_inventories {
 // ─────────────────────────────────────────────────────────────────────────────
 // Scalar-specific modules
 // ─────────────────────────────────────────────────────────────────────────────
+
+#[cfg(feature = "satellite")]
+pub mod dynamics;
+#[cfg(feature = "satellite")]
+pub mod tolerances;
 
 pub mod f32;
 pub mod f64;
@@ -607,6 +628,8 @@ pub use unit as units;
 pub mod velocity {
     #[cfg(feature = "astro")]
     pub use qtty_core::units::velocity::AU_PER_DAY_C;
+    #[cfg(feature = "astro")]
+    pub use qtty_core::units::velocity::C;
     pub use qtty_core::units::velocity::{Velocity, VelocityUnit};
 }
 

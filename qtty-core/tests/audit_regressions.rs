@@ -7,6 +7,7 @@
 //! - QTTY-002: Integer `abs()` at signed minimum
 //! - QTTY-003: `to_lossy()` / `checked_to_lossy()` overflow detection
 
+#[cfg(feature = "cross-unit-ops")]
 use core::cmp::Ordering;
 use qtty_core::length::{Kilometer, Meter};
 use qtty_core::Quantity;

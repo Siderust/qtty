@@ -7,6 +7,54 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ## [Unreleased]
 
+### Added
+
+- **`satellite` feature** (`qtty`) — spacecraft astrodynamics helpers are now
+  gated behind the opt-in `satellite` feature (disabled by default).
+  - `qtty::dynamics`: typed unit aliases (`KmPerSecond`, `KmPerSecondSquared`,
+    `InverseSecond`, `AreaToMassUnit`, `GravitationalParameterUnit`), typed
+    quantity aliases (`KmPerSeconds`, `KmPerSecondsSquared`, `InverseSeconds`,
+    `AreaToMass`, `GravitationalParameter`), gravitational parameter constants
+    (`GM_EARTH`, `GM_SUN`, `GM_MOON`, `SPEED_OF_LIGHT_KM_S`), and
+    dimensionless coefficient newtypes (`DragCoefficient`, `SrpCoefficient`,
+    `J2Coefficient`, `StokesCoefficient`).
+  - `qtty::tolerances`: typed ODE integrator tolerance newtypes
+    (`RelativeTolerance`, `AbsoluteTolerancePosition`,
+    `AbsoluteToleranceVelocity`, `IntegratorTolerances`) for propagator
+    configuration.
+
+- **Dimensionless transcendental helpers** on `Quantity<U, S>` where
+  `U: AngularUnit<Dim = Dimensionless>` (`qtty-core`):
+  - `exp(self) -> Quantity<Ratio, S>` — computes `e^self`.
+  - `ln(self)  -> Quantity<Ratio, S>` — computes the natural logarithm.
+  - `powi(self, n: i32) -> Quantity<Ratio, S>` — integer exponentiation.
+  - `powf(self, exp: Quantity<Ratio, S>) -> Quantity<Ratio, S>` — floating-point
+    exponentiation with a typed exponent.
+
+- **`ratio_to` helper** on `Quantity<U, S>` — divides two same-unit quantities
+  and returns the dimensionless `Quantity<Ratio, S>`, replacing the previous
+  pattern of converting to raw scalars before dividing.
+
+### Fixed
+
+- **Architecture boundary** (`qtty`) — `dynamics` and `tolerances` modules are
+  no longer publicly re-exported by default; enabling `satellite` is required.
+  This keeps `qtty` domain-agnostic for users who do not need astrodynamics
+  primitives.
+
+- **FFI consistency coverage** (`qtty-ffi`) — exhaustive inventory checks now
+  cover all exposed dimension families (previously only 7 of ~30 were checked).
+  Every `UnitId` discriminant range is verified against the corresponding Rust
+  unit's reported dimension.
+
+- **`to_lossy` documentation** (`qtty-core`) — the doc comment now includes an
+  explicit silent-saturation warning and a decision table guiding callers toward
+  `checked_to_lossy` when values may be out of range.
+
+- **Unused import warning under `--no-default-features`** (`qtty-core`) — the
+  `use core::cmp::Ordering` import in `audit_regressions.rs` is now correctly
+  gated on `#[cfg(feature = "cross-unit-ops")]`.
+
 ## [0.7.1] - 2026-05-08
 
 ### Added

@@ -33,6 +33,9 @@ electrical = ["qtty-core/electrical"]
 density = ["qtty-core/density"]
 all-units = ["astro", "navigation", "fundamental-physics", "customary", "land-area", "radiometry", "photometry", "frequency", "chemistry", "electrical", "density"]
 
+# Domain-specific extensions (disabled by default to keep qtty domain-agnostic)
+satellite = []
+
 # Scalar type support
 scalar-rational = ["qtty-core/scalar-rational"]
 pyo3 = ["qtty-core/pyo3", "dep:pyo3"]

@@ -758,3 +758,68 @@ fn cross_unit_nan_comparison() {
     assert!(!(km_nan == m));
     assert!(km_nan.partial_cmp(&m).is_none());
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// tests: Ratio arithmetic, exp/ln roundtrip, powi/powf, ratio_to
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn ratio_basic_arithmetic() {
+    use qtty_core::units::dimensionless::Ratios;
+
+    let a = Ratios::new(3.0);
+    let b = Ratios::new(2.0);
+
+    assert_eq!((a + b).value(), 5.0);
+    assert_eq!((a - b).value(), 1.0);
+    // scalar multiplication
+    assert_eq!((a * 2.0).value(), 6.0);
+    // same-unit division returns raw scalar
+    let raw: f64 = a / b;
+    assert!((raw - 1.5).abs() < 1e-12);
+}
+
+#[test]
+#[cfg(feature = "std")]
+fn ratio_exp_ln_roundtrip() {
+    use qtty_core::units::dimensionless::Ratios;
+
+    let x = Ratios::new(1.5);
+    let roundtrip = x.exp().ln();
+    assert!((roundtrip.value() - 1.5).abs() < 1e-12);
+}
+
+#[test]
+#[cfg(feature = "std")]
+fn ratio_powi() {
+    use qtty_core::units::dimensionless::Ratios;
+
+    let x = Ratios::new(2.0);
+    let result = x.powi(3);
+    assert!((result.value() - 8.0).abs() < 1e-12);
+}
+
+#[test]
+#[cfg(feature = "std")]
+fn ratio_powf() {
+    use qtty_core::units::dimensionless::{Ratio, Ratios};
+    use qtty_core::Quantity;
+
+    let base = Ratios::new(4.0);
+    let exp = Quantity::<Ratio>::new(0.5);
+    let result = base.powf(exp);
+    // 4^0.5 == 2
+    assert!((result.value() - 2.0).abs() < 1e-12);
+}
+
+#[test]
+#[cfg(feature = "std")]
+fn ratio_to_same_unit_division() {
+    use qtty_core::units::dimensionless::Ratios;
+    use qtty_core::units::length::Meters;
+
+    let a = Meters::new(10.0);
+    let b = Meters::new(4.0);
+    let r: Ratios = a.ratio_to(b);
+    assert!((r.value() - 2.5).abs() < 1e-12);
+}
