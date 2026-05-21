@@ -25,6 +25,14 @@
 //! | [`GM_EARTH`] | 398 600.441 8 | EGM2008 / WGS-84 |
 //! | [`GM_SUN`] | 1.327 124 400 18 × 10¹¹ | IAU 2012 |
 //! | [`GM_MOON`] | 4.902 800 066 × 10³ | DE430 |
+//! | [`GM_MERCURY`] | 2.203 187 832 8 × 10⁴ | DE430 |
+//! | [`GM_VENUS`] | 3.248 585 920 0 × 10⁵ | DE430 |
+//! | [`GM_MARS`] | 4.282 837 581 6 × 10⁴ | DE430 |
+//! | [`GM_JUPITER`] | 1.267 127 648 0 × 10⁸ | DE430 |
+//! | [`GM_SATURN`] | 3.794 058 520 0 × 10⁷ | DE430 |
+//! | [`GM_URANUS`] | 5.794 548 600 0 × 10⁶ | DE430 |
+//! | [`GM_NEPTUNE`] | 6.836 527 100 5 × 10⁶ | DE430 |
+//! | [`GM_PLUTO`] | 9.770 × 10² | DE430 |
 //!
 //! ## Semantic coefficient newtypes
 //!
@@ -33,7 +41,7 @@
 //! accidental mixing of aerodynamic, solar-radiation-pressure, gravitational
 //! zonal, and tesseral/sectorial harmonic coefficients in force-model APIs.
 
-use qtty_core::units::area::SquareMeter;
+use qtty_core::units::area::{SquareKilometer, SquareMeter};
 use qtty_core::units::dimensionless::Ratio;
 use qtty_core::units::length::Kilometer;
 use qtty_core::units::mass::Kilogram;
@@ -60,6 +68,18 @@ pub type KmPerSecondSquared = Per<Per<Kilometer, Second>, Second>;
 
 /// Quantity alias: an acceleration in km/s².
 pub type KmPerSecondsSquared = Quantity<KmPerSecondSquared>;
+
+/// Unit marker for km²/s — specific angular momentum.
+pub type KmSquaredPerSecond = Per<SquareKilometer, Second>;
+
+/// Quantity alias: specific angular momentum in km²/s.
+pub type SpecificAngularMomentum = Quantity<KmSquaredPerSecond>;
+
+/// Unit marker for km²/s² — specific orbital energy.
+pub type KmSquaredPerSecondSquared = Per<SquareKilometer, Prod<Second, Second>>;
+
+/// Quantity alias: specific orbital energy in km²/s².
+pub type SpecificOrbitalEnergy = Quantity<KmSquaredPerSecondSquared>;
 
 /// Unit marker for inverse-second (1/s).
 ///
@@ -109,6 +129,46 @@ pub const GM_SUN: GravitationalParameter = GravitationalParameter::new(1.327_124
 ///
 /// μ_☾ = 4.902 800 066 × 10³ km³/s²
 pub const GM_MOON: GravitationalParameter = GravitationalParameter::new(4.902_800_066e3);
+
+/// Mercury standard gravitational parameter (DE430 value).
+///
+/// μ = 2.203 187 832 8 × 10⁴ km³/s²
+pub const GM_MERCURY: GravitationalParameter = GravitationalParameter::new(2.203_187_832_8e4);
+
+/// Venus standard gravitational parameter (DE430 value).
+///
+/// μ = 3.248 585 920 0 × 10⁵ km³/s²
+pub const GM_VENUS: GravitationalParameter = GravitationalParameter::new(3.248_585_920_0e5);
+
+/// Mars system standard gravitational parameter (DE430 value, Mars + Phobos + Deimos).
+///
+/// μ = 4.282 837 581 6 × 10⁴ km³/s²
+pub const GM_MARS: GravitationalParameter = GravitationalParameter::new(4.282_837_581_6e4);
+
+/// Jupiter system standard gravitational parameter (DE430 value, Jupiter + all moons).
+///
+/// μ = 1.267 127 648 0 × 10⁸ km³/s²
+pub const GM_JUPITER: GravitationalParameter = GravitationalParameter::new(1.267_127_648_0e8);
+
+/// Saturn system standard gravitational parameter (DE430 value, Saturn + all moons).
+///
+/// μ = 3.794 058 520 0 × 10⁷ km³/s²
+pub const GM_SATURN: GravitationalParameter = GravitationalParameter::new(3.794_058_520_0e7);
+
+/// Uranus system standard gravitational parameter (DE430 value, Uranus + all moons).
+///
+/// μ = 5.794 548 600 0 × 10⁶ km³/s²
+pub const GM_URANUS: GravitationalParameter = GravitationalParameter::new(5.794_548_600_0e6);
+
+/// Neptune system standard gravitational parameter (DE430 value, Neptune + all moons).
+///
+/// μ = 6.836 527 100 5 × 10⁶ km³/s²
+pub const GM_NEPTUNE: GravitationalParameter = GravitationalParameter::new(6.836_527_100_5e6);
+
+/// Pluto system standard gravitational parameter (DE430 value, Pluto + Charon).
+///
+/// μ = 9.770 × 10² km³/s²
+pub const GM_PLUTO: GravitationalParameter = GravitationalParameter::new(9.770e2);
 
 /// Speed of light in vacuum (km/s).
 ///
