@@ -2293,7 +2293,7 @@ const char *qtty_unit_name(uint32_t unit_id);
 /*
  Returns the FFI ABI version (major*10000 + minor*100 + patch).
 
- Current version: 0.8.0 → 800
+ Current version: 0.8.1 → 801
 
  The 0.8.x ABI extends the FFI unit catalog to cover the full `qtty`
  linear-unit inventory while continuing to use raw `u32` unit identifiers in

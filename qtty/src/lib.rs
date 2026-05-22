@@ -195,8 +195,10 @@ pub use qtty_core::{
 pub use dynamics::{
     AreaToMass, AreaToMassUnit, DragCoefficient, GravitationalParameter,
     GravitationalParameterUnit, InverseSecond, InverseSeconds, J2Coefficient, KmPerSecond,
-    KmPerSecondSquared, KmPerSeconds, KmPerSecondsSquared, SrpCoefficient, StokesCoefficient,
-    GM_EARTH, GM_MOON, GM_SUN,
+    KmPerSecondSquared, KmPerSeconds, KmPerSecondsSquared, KmSquaredPerSecond,
+    KmSquaredPerSecondSquared, SpecificAngularMomentum, SpecificOrbitalEnergy, SrpCoefficient,
+    StokesCoefficient, GM_EARTH, GM_JUPITER, GM_MARS, GM_MERCURY, GM_MOON, GM_NEPTUNE, GM_PLUTO,
+    GM_SATURN, GM_SUN, GM_URANUS, GM_VENUS,
 };
 
 #[cfg(feature = "satellite")]
