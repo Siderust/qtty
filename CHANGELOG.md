@@ -6,7 +6,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [0.8.1] - 22-05-2026
+## [0.8.2] - 22-05-2026
 
 ### Added
 
