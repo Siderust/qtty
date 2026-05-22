@@ -16,14 +16,14 @@ Install:
 
 ```toml
 [dependencies]
-qtty-core = "0.8.1"
+qtty-core = "0.8.2"
 ```
 
 Minimal `no_std`:
 
 ```toml
 [dependencies]
-qtty-core = { version = "0.8.1", default-features = false }
+qtty-core = { version = "0.8.2", default-features = false }
 ```
 
 Repository docs:

@@ -14,7 +14,7 @@ documentation = "https://docs.rs/qtty-ffi"
 [lib]
 crate-type = ["cdylib", "staticlib", "rlib"]
 [dependencies]
-qtty = { version = "0.8.1", path = "../qtty", features = ["all-units"] }
+qtty = { version = "0.8.2", path = "../qtty", features = ["all-units"] }
 serde = { version = "1.0", features = ["derive"] }
 pyo3 = { version = "0.28.2", optional = true }
 
