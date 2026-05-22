@@ -5,6 +5,14 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.8.1] - 22-05-2026
+
+### Added
+
+- GM_ for all planets
+- KmSquaredPerSecond, SpecificAngularMomentum, KmSquaredPerSecondSquared, SpecificOrbitalEnergy
+
 ## [0.8.0] - 12-05-2026
 
 ### Added

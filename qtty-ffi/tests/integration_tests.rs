@@ -389,8 +389,8 @@ fn test_unit_name_invalid_id_returns_null() {
 
 #[test]
 fn test_ffi_version() {
-    // 0.8.0 → 800
-    assert_eq!(qtty_ffi_version(), 800);
+    // 0.8.1 → 801
+    assert_eq!(qtty_ffi_version(), 801);
 }
 
 // =============================================================================
