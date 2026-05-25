@@ -54,6 +54,71 @@ fi
 
 # ── Map changed paths to workspace packages ─────────────────────────────────
 MANIFEST_JSON=$(cargo metadata --no-deps --format-version 1)
+ORDERED_PACKAGES=$(CHANGED_FILES="$CHANGED_FILES" MANIFEST_JSON="$MANIFEST_JSON" python3 - <<'PY'
+import json
+import os
+from pathlib import Path
+
+data = json.loads(os.environ["MANIFEST_JSON"])
+changed_files = set(os.environ["CHANGED_FILES"].splitlines())
+workspace_root = Path.cwd().resolve()
+root_manifest_changed = "Cargo.toml" in changed_files
+
+packages = data["packages"]
+by_name = {pkg["name"]: pkg for pkg in packages}
+workspace_names = set(by_name)
+
+deps = {pkg["name"]: set() for pkg in packages}
+for pkg in packages:
+    for dep in pkg.get("dependencies", []):
+        # Publishing only needs normal/build workspace dependencies ordered
+        # first. Dev-dependencies are excluded to avoid false cycles in crates
+        # that test against another workspace member.
+        if dep.get("kind") == "dev":
+            continue
+        if dep.get("path") and dep["name"] in workspace_names:
+            deps[pkg["name"]].add(dep["name"])
+
+ordered = []
+state = {}
+
+
+def visit(name):
+    status = state.get(name)
+    if status == "visiting":
+        raise SystemExit(f"workspace dependency cycle involving {name}")
+    if status == "visited":
+        return
+    state[name] = "visiting"
+    for dep_name in sorted(deps[name]):
+        visit(dep_name)
+    state[name] = "visited"
+    ordered.append(name)
+
+
+for pkg in packages:
+    visit(pkg["name"])
+
+for name in ordered:
+    pkg = by_name[name]
+    manifest = Path(pkg["manifest_path"]).resolve()
+    pkg_dir = manifest.parent
+    pkg_rel = str(pkg_dir.relative_to(workspace_root))
+    changed = root_manifest_changed or any(
+        path == pkg_rel or path.startswith(pkg_rel + "/") for path in changed_files
+    )
+    print(
+        json.dumps(
+            {
+                "name": pkg["name"],
+                "manifest_path": pkg["manifest_path"],
+                "publish": pkg.get("publish"),
+                "changed": changed,
+            }
+        )
+    )
+PY
+)
 
 is_ffi_crate() {
     local name="$1" manifest="$2"
@@ -83,6 +148,7 @@ p = d.get('publish')
 # publish: null means publishable; publish: [] means publish=false
 print('false' if p is not None and len(p) == 0 else 'true')
 ")
+    changed=$(echo "$pkg_json" | python3 -c "import sys,json; d=json.load(sys.stdin); print('true' if d['changed'] else 'false')")
 
     # Skip non-publishable crates
     if [[ "$publish" == "false" ]]; then
@@ -91,10 +157,10 @@ print('false' if p is not None and len(p) == 0 else 'true')
         continue
     fi
 
-    # Check if any source file under this package changed
-    pkg_dir=$(dirname "$manifest")
-    pkg_rel=$(realpath --relative-to="$(pwd)" "$pkg_dir")
-    if ! echo "$CHANGED_FILES" | grep -q "^${pkg_rel}/"; then
+    # Check if the package changed. Root Cargo.toml changes count for every
+    # package because workspace-inherited fields such as package version can
+    # change without touching the package directory.
+    if [[ "$changed" != "true" ]]; then
         echo "SKIP (unchanged): $name"
         ((SKIPPED++)) || true
         continue
@@ -122,12 +188,7 @@ print('false' if p is not None and len(p) == 0 else 'true')
     fi
     ((PUBLISHED++)) || true
 
-done < <(echo "$MANIFEST_JSON" | python3 -c "
-import sys, json
-data = json.load(sys.stdin)
-for pkg in data['packages']:
-    print(json.dumps({'name': pkg['name'], 'manifest_path': pkg['manifest_path'], 'publish': pkg.get('publish')}))
-")
+done < <(echo "$ORDERED_PACKAGES")
 
 echo ""
 echo "Done. Published: ${PUBLISHED}, Skipped: ${SKIPPED}."
