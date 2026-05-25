@@ -13,6 +13,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 - `qtty-ffi`: marked `publish = false` in `Cargo.toml`. FFI crates are not
   published by default; publish only when C API/ABI changes are intentional.
   See `qtty-ffi/README.md` for the manual publish procedure.
+- `qtty-ffi`: replaced publishing-blocking unsafe-block TODO markers with
+  explicit `SAFETY` rationales for caller-provided output pointers.
 
 
 ## [0.8.2] - 22-05-2026

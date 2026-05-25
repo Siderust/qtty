@@ -89,7 +89,8 @@ pub unsafe extern "C" fn qtty_quantity_make(
             Err(err) => return err,
         };
 
-        // TODO: justify soundness — add doc comment before publishing
+        // SAFETY: `out_ptr` rejected null and the function safety contract
+        // requires `out` to point to writable `QttyQuantity` storage.
         unsafe { *out.as_mut() = QttyQuantity::new(value, unit) };
         QttyStatus::Ok
     })
@@ -135,7 +136,9 @@ pub unsafe extern "C" fn qtty_quantity_convert(
 
         match registry::convert_value(src.value, src_unit, dst_unit) {
             Ok(value) => {
-                // TODO: justify soundness — add doc comment before publishing
+                // SAFETY: `out_ptr` rejected null and the function safety
+                // contract requires `out` to point to writable
+                // `QttyQuantity` storage.
                 unsafe { *out.as_mut() = QttyQuantity::new(value, dst_unit) };
                 QttyStatus::Ok
             }
@@ -186,7 +189,9 @@ pub unsafe extern "C" fn qtty_quantity_convert_value(
 
         match registry::convert_value(value, src_unit, dst_unit) {
             Ok(converted) => {
-                // TODO: justify soundness — add doc comment before publishing
+                // SAFETY: `out_ptr` rejected null and the function safety
+                // contract requires `out_value` to point to writable `f64`
+                // storage.
                 unsafe { *out_value.as_mut() = converted };
                 QttyStatus::Ok
             }
@@ -249,7 +254,10 @@ pub unsafe extern "C" fn qtty_quantity_format(
             return QttyStatus::BufferTooSmall;
         }
 
-        // TODO: justify soundness — add doc comment before publishing
+        // SAFETY: `out_ptr` rejected null, `buf_len` has been checked to hold
+        // the formatted bytes plus the trailing NUL, and the function safety
+        // contract requires `buf` to point to a writable allocation of at
+        // least `buf_len` bytes.
         unsafe {
             core::ptr::copy_nonoverlapping(
                 bytes.as_ptr() as *const c_char,
