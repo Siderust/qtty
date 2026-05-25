@@ -19,7 +19,7 @@ registry without reimplementing conversion logic.
 
 ```toml
 [dependencies]
-qtty-ffi = "0.8.2"
+qtty-ffi = "0.8.3"
 ```
 
 ## C example
@@ -45,6 +45,21 @@ use qtty_ffi::{QttyQuantity, UnitId};
 let qty: QttyQuantity = Meter::new(12.5).into();
 assert_eq!(qty.unit, UnitId::Meter as u32);
 ```
+
+## Publishing Policy
+
+This crate is not published by default; publish only when C API/ABI changes.
+
+**Manual publish procedure:**
+
+1. Flip `publish = false` to `publish = true` in `Cargo.toml`.
+2. Ensure every `unsafe` block in `src/` carries a `// SAFETY:` rationale comment.
+3. Run `cargo test -p qtty-ffi --all-features` and `cargo clippy -p qtty-ffi -- -D warnings`.
+4. Run `cargo publish --manifest-path qtty/qtty-ffi/Cargo.toml`.
+5. Revert `publish` back to `false`.
+
+Alternatively, use `scripts/publish-changed.sh --confirm-ffi` from the repo root, which
+enforces the soundness check and skips `publish = false` crates automatically.
 
 ## Related crates
 
