@@ -38,6 +38,7 @@ pub unsafe extern "C" fn qtty_derived_make(
             Err(err) => return err,
         };
 
+        // TODO: justify soundness — add doc comment before publishing
         unsafe { *out.as_mut() = QttyDerivedQuantity::new(value, numerator, denominator) };
         QttyStatus::Ok
     })
@@ -81,6 +82,7 @@ pub unsafe extern "C" fn qtty_derived_convert(
 
         match src.convert_to(target_num, target_den) {
             Some(converted) => {
+                // TODO: justify soundness — add doc comment before publishing
                 unsafe { *out.as_mut() = converted };
                 QttyStatus::Ok
             }

@@ -14,35 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so publish-changed.sh can resolve base tag
 
       - uses: dtolnay/rust-toolchain@stable
 
-      # Publish in dependency order: qtty-derive → qtty-core → qtty → qtty-ffi
-      - name: Publish qtty-derive
-        run: cargo publish -p qtty-derive --no-verify
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-
-      - name: Wait for crates.io to index qtty-derive
-        run: sleep 30
-
-      - name: Publish qtty-core
-        run: cargo publish -p qtty-core --no-verify
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-
-      - name: Wait for crates.io to index qtty-core
-        run: sleep 30
-
-      - name: Publish qtty
-        run: cargo publish -p qtty --no-verify
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-
-      - name: Wait for crates.io to index qtty
-        run: sleep 30
-
-      - name: Publish qtty-ffi
-        run: cargo publish -p qtty-ffi --no-verify
+      # Publish changed publishable packages in dependency order.
+      # FFI crates (publish = false) are skipped automatically.
+      # Pass --confirm-ffi and protect behind a manual environment for FFI releases.
+      - name: Publish changed packages
+        run: bash scripts/publish-changed.sh
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

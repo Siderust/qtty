@@ -52,6 +52,7 @@ pub unsafe extern "C" fn qtty_unit_dimension(unit_id: u32, out: *mut DimensionId
 
         match registry::dimension(unit) {
             Some(dim) => {
+                // TODO: justify soundness — add doc comment before publishing
                 unsafe { *out.as_mut() = dim };
                 QttyStatus::Ok
             }
@@ -93,6 +94,7 @@ pub unsafe extern "C" fn qtty_units_compatible(a_id: u32, b_id: u32, out: *mut b
             Err(err) => return err,
         };
 
+        // TODO: justify soundness — add doc comment before publishing
         unsafe { *out.as_mut() = registry::compatible(a, b) };
         QttyStatus::Ok
     })

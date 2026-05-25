@@ -89,6 +89,7 @@ pub unsafe extern "C" fn qtty_quantity_make(
             Err(err) => return err,
         };
 
+        // TODO: justify soundness — add doc comment before publishing
         unsafe { *out.as_mut() = QttyQuantity::new(value, unit) };
         QttyStatus::Ok
     })
@@ -134,6 +135,7 @@ pub unsafe extern "C" fn qtty_quantity_convert(
 
         match registry::convert_value(src.value, src_unit, dst_unit) {
             Ok(value) => {
+                // TODO: justify soundness — add doc comment before publishing
                 unsafe { *out.as_mut() = QttyQuantity::new(value, dst_unit) };
                 QttyStatus::Ok
             }
@@ -184,6 +186,7 @@ pub unsafe extern "C" fn qtty_quantity_convert_value(
 
         match registry::convert_value(value, src_unit, dst_unit) {
             Ok(converted) => {
+                // TODO: justify soundness — add doc comment before publishing
                 unsafe { *out_value.as_mut() = converted };
                 QttyStatus::Ok
             }
@@ -246,6 +249,7 @@ pub unsafe extern "C" fn qtty_quantity_format(
             return QttyStatus::BufferTooSmall;
         }
 
+        // TODO: justify soundness — add doc comment before publishing
         unsafe {
             core::ptr::copy_nonoverlapping(
                 bytes.as_ptr() as *const c_char,
