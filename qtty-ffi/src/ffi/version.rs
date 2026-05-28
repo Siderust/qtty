@@ -3,7 +3,7 @@
 
 /// Returns the FFI ABI version (major*10000 + minor*100 + patch).
 ///
-/// Current version: 0.8.3 -> 803
+/// Current version: 0.8.4 -> 804
 ///
 /// The 0.8.x ABI extends the FFI unit catalog to cover the full `qtty`
 /// linear-unit inventory while continuing to use raw `u32` unit identifiers in
@@ -12,7 +12,7 @@
 #[allow(clippy::erasing_op, clippy::identity_op)]
 #[no_mangle]
 pub extern "C" fn qtty_ffi_version() -> u32 {
-    0 * 10000 + 8 * 100 + 3
+    0 * 10000 + 8 * 100 + 4
 }
 
 #[cfg(test)]
@@ -21,6 +21,6 @@ mod tests {
 
     #[test]
     fn test_version() {
-        assert_eq!(qtty_ffi_version(), 803);
+        assert_eq!(qtty_ffi_version(), 804);
     }
 }
