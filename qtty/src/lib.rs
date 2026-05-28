@@ -187,7 +187,7 @@ pub use qtty_core::{
     Density, Dimension, Dimensionless, Energy, Exact, Force, Frequency, Illuminance, Inductance,
     IntegerScalar, Length, LuminousFlux, LuminousIntensity, MagneticFlux, MagneticFluxDensity,
     Mass, Per, Power, Pressure, Prod, Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16,
-    QuantityI32, QuantityI64, QuantityI8, Real, Resistance, Scalar, Temperature, Time,
+    QuantityI32, QuantityI64, QuantityI8, QuantityU32, Real, Resistance, Scalar, Temperature, Time,
     Transcendental, Unit, Velocity, Voltage, Volume,
 };
 
@@ -410,6 +410,7 @@ pub mod i16;
 pub mod i32;
 pub mod i64;
 pub mod i8;
+pub mod u32;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Dimension modules (re-exported from qtty-core)

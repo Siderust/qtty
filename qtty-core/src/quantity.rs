@@ -77,6 +77,9 @@ pub type QuantityI64<U> = Quantity<U, i64>;
 /// A quantity backed by `i128`.
 pub type QuantityI128<U> = Quantity<U, i128>;
 
+/// A quantity backed by `u32`.
+pub type QuantityU32<U> = Quantity<U, u32>;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Core implementation for all Scalar types
 // ─────────────────────────────────────────────────────────────────────────────
@@ -640,7 +643,7 @@ impl<U: Unit + Copy> Quantity<U, f32> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Const methods for signed integer types
+// Const methods for integer types
 // ─────────────────────────────────────────────────────────────────────────────
 
 macro_rules! impl_const_for_int {
@@ -693,7 +696,7 @@ macro_rules! impl_const_for_int {
     )* };
 }
 
-impl_const_for_int!(i8, i16, i32, i64, i128);
+impl_const_for_int!(i8, i16, i32, i64, i128, u32);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Operator implementations
@@ -791,7 +794,7 @@ impl<U: Unit, S: Scalar> DivAssign<S> for Quantity<U, S> {
     }
 }
 
-impl<U: Unit, S: Scalar> Neg for Quantity<U, S> {
+impl<U: Unit, S: Scalar + Neg<Output = S>> Neg for Quantity<U, S> {
     type Output = Self;
     #[inline]
     fn neg(self) -> Self {
@@ -850,7 +853,7 @@ macro_rules! impl_int_commutative_mul {
     )* };
 }
 
-impl_int_commutative_mul!(i8, i16, i32, i64, i128);
+impl_int_commutative_mul!(i8, i16, i32, i64, i128, u32);
 
 // Rem for types that implement Rem (floats and integers)
 impl<U: Unit, S: Scalar + Rem<Output = S>> Rem<S> for Quantity<U, S> {

@@ -44,7 +44,7 @@
 //! ```
 
 use core::fmt::{Debug, Display};
-use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
+use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, Sub, SubAssign};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sealed trait pattern
@@ -60,6 +60,7 @@ mod private {
     impl Sealed for i32 {}
     impl Sealed for i64 {}
     impl Sealed for i128 {}
+    impl Sealed for u32 {}
 
     #[cfg(feature = "scalar-rational")]
     impl Sealed for num_rational::Rational64 {}
@@ -78,6 +79,10 @@ mod private {
 /// as the underlying storage for quantities: basic arithmetic operations,
 /// copy semantics, and partial ordering.
 ///
+/// Negation (`-qty`) is available for signed scalars only; the `Neg` bound is
+/// on the `impl Neg for Quantity` block rather than on this trait, so unsigned
+/// scalars such as `u32` satisfy `Scalar` without implementing `Neg`.
+///
 /// This trait is sealed and cannot be implemented outside this crate.
 pub trait Scalar:
     private::Sealed
@@ -94,7 +99,6 @@ pub trait Scalar:
     + SubAssign
     + MulAssign
     + DivAssign
-    + Neg<Output = Self>
     + Sized
     + 'static
 {
@@ -1509,6 +1513,70 @@ macro_rules! impl_scalar_for_signed_int {
 
 impl_scalar_for_signed_int!(i8, i16, i32, i64, i128);
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Unsigned integer implementations
+// ─────────────────────────────────────────────────────────────────────────────
+
+macro_rules! impl_scalar_for_unsigned_int {
+    ($($t:ty),*) => { $(
+        impl Scalar for $t {
+            const ZERO: Self = 0;
+            const ONE: Self = 1;
+
+            #[inline]
+            fn abs(self) -> Self {
+                self
+            }
+
+            #[inline]
+            fn min(self, other: Self) -> Self {
+                Ord::min(self, other)
+            }
+
+            #[inline]
+            fn max(self, other: Self) -> Self {
+                Ord::max(self, other)
+            }
+
+            #[inline]
+            fn rem_euclid(self, rhs: Self) -> Self {
+                self % rhs
+            }
+        }
+
+        impl Exact for $t {
+            #[inline]
+            fn to_f64_approx(self) -> f64 {
+                self as f64
+            }
+
+            #[inline]
+            fn from_f64_approx(value: f64) -> Self {
+                value as Self
+            }
+
+            #[inline]
+            fn checked_from_f64(value: f64) -> Option<Self> {
+                if !value.is_finite() {
+                    return None;
+                }
+                // Use [0.0, MAX+1.0) as exclusive upper bound so that
+                // truncating casts like (MAX as f64 + 0.9) -> MAX are accepted.
+                const F_MIN: f64 = 0.0_f64;
+                const F_MAX_EXCL: f64 = <$t>::MAX as f64 + 1.0;
+                if !(F_MIN..F_MAX_EXCL).contains(&value) {
+                    return None;
+                }
+                Some(value as Self)
+            }
+        }
+
+        impl IntegerScalar for $t {}
+    )* };
+}
+
+impl_scalar_for_unsigned_int!(u32);
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1662,5 +1730,30 @@ mod tests {
 
         // MIN is exactly representable.
         assert_eq!(i64::checked_from_f64(i64::MIN as f64), Some(i64::MIN));
+    }
+
+    // ── u32 unsigned scalar tests ────────────────────────────────────────────
+
+    #[test]
+    fn test_u32_scalar_basic() {
+        assert_eq!(u32::ZERO, 0);
+        assert_eq!(u32::ONE, 1);
+        assert_eq!((42_u32).abs(), 42);
+        assert_eq!(Scalar::min(3_u32, 5), 3);
+        assert_eq!(Scalar::max(3_u32, 5), 5);
+        assert_eq!(7_u32.rem_euclid(4), 3);
+    }
+
+    #[test]
+    fn checked_from_f64_u32_boundaries() {
+        assert_eq!(u32::checked_from_f64(0.0), Some(0));
+        assert_eq!(u32::checked_from_f64(-0.0), Some(0));
+        assert_eq!(u32::checked_from_f64(4294967295.0), Some(u32::MAX));
+        assert_eq!(u32::checked_from_f64(4294967295.9), Some(u32::MAX)); // truncated, in range
+        assert_eq!(u32::checked_from_f64(4294967296.0), None); // u32::MAX + 1
+        assert_eq!(u32::checked_from_f64(-0.1), None);
+        assert_eq!(u32::checked_from_f64(-1.0), None);
+        assert_eq!(u32::checked_from_f64(f64::INFINITY), None);
+        assert_eq!(u32::checked_from_f64(f64::NAN), None);
     }
 }

@@ -6,6 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.8.4] - 28-05-2026
+
+### Added
+
+- `qtty-core`: added support for `u32`-backed quantities and scalar
+  operations.
+
+
 ## [0.8.3] - 25-05-2026
 
 ### Changed

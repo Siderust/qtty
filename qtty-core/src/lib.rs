@@ -170,7 +170,7 @@ pub use dimension::{
 pub use dimension::{Dim, DimDiv, DimMul};
 pub use quantity::{
     Quantity, Quantity32, Quantity64, QuantityI128, QuantityI16, QuantityI32, QuantityI64,
-    QuantityI8,
+    QuantityI8, QuantityU32,
 };
 pub use scalar::{Exact, IntegerScalar, Real, Scalar, Transcendental};
 pub use unit::{Per, Prod, Unit};
