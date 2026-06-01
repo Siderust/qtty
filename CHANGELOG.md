@@ -6,6 +6,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.8.5] - 01-06-2026
+
+### Fixed
+
+- **`qtty-ffi` dimensionless registry** — added `Ratio` to the stable
+  discriminant map and updated the public C header so the dimensionless family
+  now covers ratios and fractions alongside the existing named units.
+
+
 ## [0.8.4] - 28-05-2026
 
 ### Added

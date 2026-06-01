@@ -615,6 +615,20 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
  Format flag: default decimal notation (e.g. `"1234.57 m"`).
  */
@@ -823,8 +837,7 @@ enum DimensionId
    */
   DIMENSION_ID_DENSITY = 32,
   /*
-   Dimensionless dimension (named dimensionless ratios such as optical depth,
-   airmass, transmittance, albedo, illumination fraction, and refractivity).
+   Dimensionless ratios and fractions.
    */
   DIMENSION_ID_DIMENSIONLESS = 33,
 };
@@ -1991,6 +2004,10 @@ enum UnitId
    Refractivity (Dimensionless dimension)
    */
   UNIT_ID_REFRACTIVITY = 330005,
+  /*
+   Ratio (Dimensionless dimension)
+   */
+  UNIT_ID_RATIO = 330006,
 };
 #ifndef __cplusplus
 typedef uint32_t UnitId;
