@@ -19,7 +19,7 @@ registry without reimplementing conversion logic.
 
 ```toml
 [dependencies]
-qtty-ffi = "0.8.4"
+qtty-ffi = "0.8.5"
 ```
 
 ## C example
