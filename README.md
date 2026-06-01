@@ -2,6 +2,8 @@
 
 [![Crates.io](https://img.shields.io/crates/v/qtty.svg)](https://crates.io/crates/qtty)
 [![Docs.rs](https://docs.rs/qtty/badge.svg)](https://docs.rs/qtty)
+[![CI](https://github.com/Siderust/qtty/actions/workflows/ci.yml/badge.svg)](https://github.com/Siderust/optica/actions/workflows/ci.yml)
+[![License: AGPL-3.0-only](https://img.shields.io/badge/license-AGPL--3.0--only-blue)](LICENSE)
 
 > **Strongly typed physical quantities for Rust, with astronomy-friendly units and zero-cost dimensional safety.**
 
