@@ -21,6 +21,6 @@ mod tests {
 
     #[test]
     fn test_version() {
-        assert_eq!(qtty_ffi_version(), 805);
+        assert_eq!(qtty_ffi_version(), 806);
     }
 }
