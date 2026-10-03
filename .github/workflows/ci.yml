@@ -56,6 +56,21 @@ jobs:
       - run: cargo test --all-targets
       - run: cargo test --doc
 
+  pyo3-compat:
+    name: PyO3 0.29 Compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test qtty-core PyO3 integration
+        run: cargo test -p qtty-core --features pyo3
+      - name: Check qtty Python integration example
+        run: cargo check -p qtty --example python_integration --features pyo3
+      - name: Check qtty-ffi PyO3 integration
+        run: cargo check -p qtty-ffi --features pyo3
+      - name: Check downstream PyO3 0.29 composition
+        run: cargo check --manifest-path tests/downstream-pyo3-smoke/Cargo.toml
+
   feature-matrix:
     name: Feature Matrix
     runs-on: ubuntu-latest
