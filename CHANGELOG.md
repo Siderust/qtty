@@ -6,6 +6,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.8.6] - 03-10-2026
+
+### Added
+
+- Added dedicated PyO3 0.29 compatibility CI coverage, including an isolated
+  downstream consumer smoke test that combines `pyo3 = "0.29"` with
+  `qtty-ffi`'s `pyo3` feature and constructs `UnitId` as a PyO3 class.
+
+### Changed
+
+- Aligned the optional PyO3 integration in `qtty`, `qtty-core`, and
+  `qtty-ffi` on the 0.29.x series so downstream Python extension crates can
+  share one compatible `pyo3` / `pyo3-ffi` dependency.
+- Documented PyO3 0.29.x as the supported compatibility baseline for downstream
+  bindings.
+
+
 ## [0.8.5] - 01-06-2026
 
 ### Fixed

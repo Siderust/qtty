@@ -19,7 +19,23 @@ registry without reimplementing conversion logic.
 
 ```toml
 [dependencies]
-qtty-ffi = "0.8.5"
+qtty-ffi = "0.8.6"
+```
+
+## PyO3 compatibility
+
+PyO3 support is optional. The currently supported compatibility baseline for
+Rust/Python bindings is **PyO3 0.29.x**.
+
+Downstream extension crates that enable `qtty-ffi`'s `pyo3` feature should
+use a compatible PyO3 0.29.x release as well. Keeping both sides on the same
+minor series lets Cargo unify `pyo3` / `pyo3-ffi` and avoids native
+`links = "python"` conflicts.
+
+```toml
+[dependencies]
+pyo3 = "0.29"
+qtty-ffi = { version = "0.8.6", features = ["pyo3"] }
 ```
 
 ## C example
