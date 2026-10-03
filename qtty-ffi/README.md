@@ -19,7 +19,7 @@ registry without reimplementing conversion logic.
 
 ```toml
 [dependencies]
-qtty-ffi = "0.8.5"
+qtty-ffi = "0.8.6"
 ```
 
 ## PyO3 compatibility
@@ -35,7 +35,7 @@ minor series lets Cargo unify `pyo3` / `pyo3-ffi` and avoids native
 ```toml
 [dependencies]
 pyo3 = "0.29"
-qtty-ffi = { version = "0.8.5", features = ["pyo3"] }
+qtty-ffi = { version = "0.8.6", features = ["pyo3"] }
 ```
 
 ## C example

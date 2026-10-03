@@ -676,7 +676,7 @@ dependencies = [
 
 [[package]]
 name = "qtty"
-version = "0.8.5"
+version = "0.8.6"
 dependencies = [
  "approx",
  "proptest",
@@ -689,7 +689,7 @@ dependencies = [
 
 [[package]]
 name = "qtty-core"
-version = "0.8.5"
+version = "0.8.6"
 dependencies = [
  "approx",
  "diesel",
@@ -707,7 +707,7 @@ dependencies = [
 
 [[package]]
 name = "qtty-derive"
-version = "0.8.5"
+version = "0.8.6"
 dependencies = [
  "proc-macro2",
  "qtty-core",
@@ -717,7 +717,7 @@ dependencies = [
 
 [[package]]
 name = "qtty-ffi"
-version = "0.8.5"
+version = "0.8.6"
 dependencies = [
  "approx",
  "cbindgen",
